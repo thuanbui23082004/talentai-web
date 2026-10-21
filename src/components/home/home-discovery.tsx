@@ -50,10 +50,10 @@ export function HomeCompanies({ companies }: { companies: HomeContent["companies
                 <h2 className="text-2xl font-bold">Các Công Ty Hàng Đầu</h2>
                 <p className="mt-2 text-xs text-white/75">Khám phá môi trường làm việc và cơ hội nghề nghiệp mới.</p>
             </div>
-            <Link href="/jobs" className="inline-flex min-h-11 items-center gap-2 text-xs font-medium">Xem tất cả việc làm<ArrowRight className="size-3.5" />
+            <Link href="/companies" className="inline-flex min-h-11 items-center gap-2 text-xs font-medium">Xem tất cả công ty<ArrowRight className="size-3.5" />
             </Link>
         </div>
-        <div className="mt-7 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">{companies.map((company, index) => <CompanyCard key={company.name} name={company.name} wordmark={company.wordmark} logo={company.logo} count={company.count} href={`/jobs?q=${encodeURIComponent(company.query)}`} tone={index} />)}</div>
+        <div className="mt-7 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">{companies.map((company, index) => <CompanyCard key={company.id} name={company.name} wordmark={company.wordmark} logo={company.logo} count={company.count} href={`/companies/${company.id}`} tone={index} />)}</div>
     </section>;
 }
 

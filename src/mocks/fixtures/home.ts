@@ -16,14 +16,14 @@ export const homeContent: HomeContent = {
         { name: "Nhân sự", query: "Tuyển dụng", count: 346, icon: "people" },
     ],
     companies: [
-        { name: "Sao Việt Group", wordmark: "SAO VIỆT", query: "Sao Việt", count: 436 },
-        { name: "An Bình Holdings", wordmark: "AN BÌNH", query: "An Bình", count: 542 },
-        { name: "TechNova", wordmark: "technova", query: "TechNova", count: 211 },
-        { name: "Mây Việt", wordmark: "MÂY VIỆT", query: "Mây Việt", count: 346 },
-        { name: "Bình Minh Media", wordmark: "BÌNH MINH", query: "Bình Minh", count: 436 },
-        { name: "GreenSoft", wordmark: "greensoft", query: "GreenSoft", count: 542 },
-        { name: "Horizon Studio", wordmark: "HORIZON", query: "Horizon", count: 211 },
-        { name: "FutureWorks", wordmark: "FutureWorks", query: "FutureWorks", count: 346 },
+        { id: "20000000-0000-4000-8000-000000000001", name: "Sao Việt", wordmark: "SAO VIỆT", count: 1 },
+        { id: "20000000-0000-4000-8000-000000000002", name: "An Bình", wordmark: "AN BÌNH", count: 1 },
+        { id: "20000000-0000-4000-8000-000000000004", name: "TechNova", wordmark: "technova", count: 1 },
+        { id: "20000000-0000-4000-8000-000000000005", name: "Mây Việt", wordmark: "MÂY VIỆT", count: 1 },
+        { id: "20000000-0000-4000-8000-000000000003", name: "Bình Minh", wordmark: "BÌNH MINH", count: 1 },
+        { id: "20000000-0000-4000-8000-000000000006", name: "GreenSoft", wordmark: "greensoft", count: 1 },
+        { id: "20000000-0000-4000-8000-000000000007", name: "Hòa Phát", wordmark: "HÒA PHÁT", count: 1 },
+        { id: "20000000-0000-4000-8000-000000000008", name: "Minh Anh", wordmark: "MINH ANH", count: 1 },
     ],
     articles: [
         { id: "cv-ro-rang", title: "Một chiếc CV rõ ràng giúp bạn kể câu chuyện nghề nghiệp như thế nào?", eyebrow: "CẨM NANG ỨNG VIÊN", coverTitle: "CV ẤN TƯỢNG\nCƠ HỘI RỘNG MỞ", date: "2026-10-20", paragraphs: [
