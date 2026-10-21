@@ -1,9 +1,10 @@
 "use client";
 
 import type { ReactElement } from "react";
+import Link from "next/link";
 import { PreviewCard } from "@base-ui/react/preview-card";
 import { BriefcaseBusiness, CalendarClock, GraduationCap, MapPin } from "lucide-react";
-import { Badge, Button, ModalTrigger } from "@/components/ui";
+import { Badge, Button } from "@/components/ui";
 import { formatDate, formatDeadline, formatSalaryRange } from "@/lib/utils";
 import { JOB_LEVEL_LABELS, WORK_TYPE_LABELS } from "../labels";
 import type { Job } from "../types";
@@ -25,7 +26,7 @@ export function JobHoverPreview({ job, children }: { job: Job; children: ReactEl
                     </div>
                     <p className="mt-4 text-sm font-medium text-primary">{formatDeadline(job.applicationDeadline)}</p>
                     <div className="mt-4 flex flex-wrap gap-3">
-                        <ModalTrigger render={<Button />}>Xem chi tiết</ModalTrigger>
+                        <Button nativeButton={false} role="link" render={<Link href={`/jobs/${job.id}`} />}>Xem chi tiết</Button>
                         <Button variant="outline" disabled>Ứng tuyển · Sắp ra mắt</Button>
                     </div>
                     <div className="mt-5 space-y-4 border-t border-border pt-5 text-sm leading-relaxed">

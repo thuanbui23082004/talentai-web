@@ -14,8 +14,9 @@ test("job preview opens on hover, stays interactive and opens details", async ({
     const bounds = await preview.boundingBox();
     expect(bounds!.x).toBeGreaterThanOrEqual(0);
     expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
-    await preview.getByRole("button", { name: "Xem chi tiết" }).click();
-    await expect(page.getByRole("dialog")).toBeVisible();
+    await preview.getByRole("link", { name: "Xem chi tiết" }).click();
+    await expect(page).toHaveURL(/\/jobs\/[0-9a-f-]{36}$/);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
 
 test("job preview supports focus and mobile title still opens details", async ({ page }) => {
@@ -27,7 +28,8 @@ test("job preview supports focus and mobile title still opens details", async ({
     await page.keyboard.press("Escape");
     await expect(page.getByRole("region", { name: "Xem nhanh công việc" })).toBeHidden();
     await page.setViewportSize({ width: 375, height: 812 });
-    await page.locator("article").first().getByRole("button").first().click();
-    await expect(page.getByRole("dialog")).toBeVisible();
+    await page.locator("article").first().getByRole("link").first().click();
+    await expect(page).toHaveURL(/\/jobs\/[0-9a-f-]{36}$/);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

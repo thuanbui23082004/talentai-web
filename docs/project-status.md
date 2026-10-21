@@ -15,7 +15,9 @@ không phụ thuộc vào backend chạy local. Không coi tên thư mục, page
 | GET `/jobs` | 18 tin mẫu; tìm từ khóa, tỉnh/thành, phường/xã, lương, kinh nghiệm, cấp bậc, loại hình, phân trang và sắp xếp |
 | GET `/health` | Mock trả `status: ok` |
 | `/jobs` | Tìm kiếm qua URL; 12 card/trang; bộ lọc sticky tự cập nhật; loading, empty, error, thử lại |
-| Thẻ việc làm | Popup xem nhanh khi hover/focus, tự điều chỉnh theo viewport; chạm tiêu đề mở modal. Hiển thị JobSummary; mô tả chi tiết chưa có, ứng tuyển/lưu việc vẫn chưa triển khai |
+| `/jobs/[jobId]` | Trang chi tiết SSR và metadata; tái sử dụng JobSearch, JobCard, header/footer; mô tả, yêu cầu, quyền lợi, sidebar, chia sẻ, tin cùng địa điểm; loading/error/404 |
+| GET `/jobs/{jobId}` | Mock chi tiết cho 18 tin công khai; trả 404 cho tin không có; kịch bản empty/error/slow. Real proxy chưa mở endpoint chi tiết |
+| Thẻ việc làm | Popup xem nhanh khi hover/focus; chạm tiêu đề hoặc “Xem chi tiết” mở `/jobs/[jobId]`; ứng tuyển/lưu việc vẫn chưa triển khai |
 | Backend proxy | Chỉ mở GET `/jobs`, GET `/health`; chưa xác minh với backend thật |
 | Auth/session | Mock đăng ký/đăng nhập/refresh/CSRF/me/logout; cookie và guard server; xem `docs/auth-flow.md` |
 | `/login`, `/register`, `/logout` | Form hai role; khung/ảnh/logo cố định, chỉ content cuộn; ảnh từ `public/images/auth`; logout có xác nhận |

@@ -1,0 +1,36 @@
+{
+    "id":  "10000000-0000-4000-8000-000000000004",
+    "title":  "Full Stack JavaScript Developer",
+    "company":  {
+                    "id":  "20000000-0000-4000-8000-000000000004",
+                    "name":  "Công ty mẫu TechNova"
+                },
+    "location":  {
+                     "city":  "TP.HCM",
+                     "provinceCode":  "79",
+                     "wardCode":  "25747",
+                     "ward":  "Phường Thủ Dầu Một"
+                 },
+    "workType":  "full_time",
+    "level":  "senior",
+    "status":  "open",
+    "minExperienceYears":  4,
+    "salary":  {
+                   "min":  25000000,
+                   "max":  40000000,
+                   "currency":  "VND",
+                   "period":  "month",
+                   "negotiable":  false
+               },
+    "skills":  [
+                   "JavaScript",
+                   "Node.js"
+               ],
+    "postedAt":  "2026-10-04T00:00:00Z",
+    "applicationDeadline":  "2026-12-25",
+    "description":  "Phát triển ứng dụng web fullstack với JavaScript và Node.js.\nXây dựng REST API, tối ưu hiệu suất và bảo mật hệ thống.",
+    "requirements":  "Có từ 4 năm kinh nghiệm với JavaScript và Node.js.",
+    "benefits":  "Lương thỏa thuận theo năng lực, bảo hiểm và nghỉ phép theo quy định.",
+    "educationLevel":  "bachelor",
+    "headcount":  2
+}
