@@ -14,7 +14,7 @@ Nội dung mô tả được render dưới dạng văn bản, không chèn HTML
 
 Ứng tuyển và lưu việc mở thông báo trạng thái chưa triển khai; không gửi hồ sơ hoặc giả vờ lưu thành công.
 Khối AI chỉ hiển thị kỹ năng của tin và trạng thái chưa phân tích CV, không tạo điểm phù hợp giả.
-Form liên hệ trong thiết kế đang khóa và chưa gửi dữ liệu. Bản đồ mở tìm kiếm địa điểm trên Google Maps, không hiển thị tọa độ chưa có trong contract.
+Form liên hệ trong thiết kế đang khóa và chưa gửi dữ liệu. Bản đồ Google Maps được nhúng bằng iframe qua component `LocationMap`, tải lazy theo địa chỉ có trong tin; giữ liên kết mở bản đồ để xem đường đi. Khi tin chỉ có phường/thành phố, bản đồ hiển thị khu vực đó, không khẳng định vị trí chính xác của doanh nghiệp.
 Chia sẻ dùng Web Share API hoặc sao chép URL, có phản hồi khi clipboard không khả dụng.
 
 Có loading skeleton, error boundary với nút thử lại và trang 404 cho ID không tồn tại/không hợp lệ.

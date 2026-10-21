@@ -8,8 +8,8 @@ export function formatSalaryRange(salary?: { min?: number; max?: number; negotia
     if (!salary || salary.negotiable || (salary.min === undefined && salary.max === undefined)) return "Thỏa thuận";
     if (compact && (!salary.currency || salary.currency === "VND")) {
         const millions = (value: number) => new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 }).format(value / 1_000_000);
-        if (salary.min !== undefined && salary.max !== undefined) return `${millions(salary.min)}–${millions(salary.max)}tr`;
-        return salary.min !== undefined ? `Từ ${millions(salary.min)}tr` : `Đến ${millions(salary.max!)}tr`;
+        if (salary.min !== undefined && salary.max !== undefined) return `${millions(salary.min)} – ${millions(salary.max)} triệu`;
+        return salary.min !== undefined ? `Từ ${millions(salary.min)} triệu` : `Đến ${millions(salary.max!)} triệu`;
     }
     const format = (value: number) => salary.currency && salary.currency !== "VND" ? `${new Intl.NumberFormat("en-US").format(value)} ${salary.currency}` : formatVND(value);
     if (salary.min !== undefined && salary.max !== undefined) return `${format(salary.min)} – ${format(salary.max)}`;

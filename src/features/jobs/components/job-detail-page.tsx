@@ -1,3 +1,4 @@
+import { LocationMap } from "@/components/shared/location-map";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -170,21 +171,14 @@ export function JobDetailPage({
                     >
                         {job.title}
                     </h1>
-                    <Link
-                        href={companyJobs}
-                        className="mt-2 inline-block font-medium text-primary hover:underline"
-                    >
-                        {job.company.name}
-                    </Link>
+                    <p className="mt-2 text-xl leading-snug font-bold text-primary" aria-label="Mức lương">
+                        {formatSalaryRange(job.salary, true)}
+                    </p>
                     <div className="mt-4 flex flex-wrap gap-x-5 gap-y-3 text-sm text-muted-foreground">
                         {[
                             {
                                 Icon: Clock3,
                                 text: WORK_TYPE_LABELS[job.workType],
-                            },
-                            {
-                                Icon: Wallet,
-                                text: formatSalaryRange(job.salary, true),
                             },
                             {
                                 Icon: MapPin,
@@ -385,16 +379,7 @@ export function JobDetailPage({
                                 {address}
                             </p>
                         </div>
-                        <a
-                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-5 flex min-h-28 items-center justify-center gap-2 rounded-xl border border-primary/10 bg-secondary/50 p-5 text-center font-medium text-primary hover:bg-secondary"
-                        >
-                            <MapPin className="size-5" />
-                            Xem địa điểm trên bản đồ
-                            <ArrowRight className="size-4" />
-                        </a>
+                        <LocationMap address={address} />
                     </section>
                     <section className={surface}>
                         <h2 className="text-base font-bold">
