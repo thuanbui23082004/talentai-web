@@ -21,10 +21,11 @@ const roleLabels = {
     admin: "Quản trị viên",
 };
 
-export function DashboardWelcome({ user }: { user: AuthUser }) {
+export function DashboardWelcome({ user, embedded = false }: { user: AuthUser; embedded?: boolean }) {
+    const Container = embedded ? "div" : "main";
     return (
-        <main className="min-h-svh bg-background">
-            <header className="border-b border-border bg-card">
+        <Container className={embedded ? "" : "min-h-svh bg-background"}>
+            {!embedded && <header className="border-b border-border bg-card">
                 <div className="ui-container flex min-h-20 flex-wrap items-center justify-between gap-4 py-4">
                     <Link
                         href="/jobs"
@@ -47,8 +48,8 @@ export function DashboardWelcome({ user }: { user: AuthUser }) {
                         </Button>
                     </div>
                 </div>
-            </header>
-            <div className="ui-container max-w-4xl! space-y-6 py-12">
+            </header>}
+            <div className={embedded ? "mx-auto w-full max-w-4xl space-y-6" : "ui-container max-w-4xl! space-y-6 py-12"}>
                 <Badge>
                     <ShieldCheck />
                     {roleLabels[user.role]}
@@ -108,6 +109,6 @@ export function DashboardWelcome({ user }: { user: AuthUser }) {
                     </CardContent>
                 </Card>
             </div>
-        </main>
+        </Container>
     );
 }

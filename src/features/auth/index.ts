@@ -6,3 +6,4 @@ export { LogoutPanel } from "./components/logout-panel";
 export { AuthSessionProvider, useSession } from "./hooks/use-session";
 export { DashboardWelcome } from "./components/dashboard-welcome";
 export { AccountLinks } from "./components/account-links";
+export type { AuthUser } from "./types";
