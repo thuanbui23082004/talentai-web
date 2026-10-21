@@ -1,13 +1,11 @@
-import { LocationMap } from "@/components/shared/location-map";
+import { JobDetailHeader } from "./job-detail-header";
+import { JobCompanyCard } from "./job-company-card";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
     ArrowRight,
-    Bookmark,
     BriefcaseBusiness,
-    Building2,
-    CalendarDays,
     Check,
     CircleHelp,
     Clock3,
@@ -18,8 +16,7 @@ import {
     Wallet,
 } from "lucide-react";
 import { Badge, Input } from "@/components/ui";
-import { AvailabilityButton } from "@/components/shared/availability-button";
-import { formatDate, formatDeadline, formatSalaryRange } from "@/lib/utils";
+import { formatDate, formatSalaryRange } from "@/lib/utils";
 import { JobSearch } from "./job-search";
 import { JobCard } from "./job-card";
 import { JobShare } from "./job-share";
@@ -88,13 +85,9 @@ export function JobDetailPage({
     job: JobDetail;
     related: Job[];
 }) {
-    const companyName = job.company.name.replace("Công ty mẫu ", "");
     const address = [job.location.address, job.location.ward, job.location.city]
         .filter(Boolean)
         .join(", ");
-    const companyJobs = `/jobs?${new URLSearchParams({ q: job.company.name })}`;
-    const unavailable =
-        "Tính năng này đang được hoàn thiện. Hiện chưa gửi hồ sơ hoặc lưu công việc từ trang này.";
     const overview = [
         {
             Icon: BriefcaseBusiness,
@@ -146,85 +139,10 @@ export function JobDetailPage({
                 </span>
             </nav>
             <JobSearch />
-            <section
-                aria-labelledby="job-title"
-                className={`${surface} flex flex-col gap-5 sm:flex-row sm:items-center`}
-            >
-                <div
-                    aria-hidden="true"
-                    className="flex size-24 shrink-0 items-center justify-center rounded-xl border border-border/50 bg-secondary/15 p-3 text-center text-lg font-extrabold text-primary sm:size-28"
-                >
-                    {companyName}
-                </div>
-                <div className="min-w-0 flex-1">
-                    <div className="mb-2 flex flex-wrap items-center gap-2">
-                        <Badge variant="outline">Đang tuyển</Badge>
-                        {job.postedAt && (
-                            <span className="text-xs text-muted-foreground">
-                                Đăng ngày {formatDate(job.postedAt)}
-                            </span>
-                        )}
-                    </div>
-                    <h1
-                        id="job-title"
-                        className="text-xl leading-snug font-bold sm:text-2xl"
-                    >
-                        {job.title}
-                    </h1>
-                    <p className="mt-2 text-xl leading-snug font-bold text-primary" aria-label="Mức lương">
-                        {formatSalaryRange(job.salary, true)}
-                    </p>
-                    <div className="mt-4 flex flex-wrap gap-x-5 gap-y-3 text-sm text-muted-foreground">
-                        {[
-                            {
-                                Icon: Clock3,
-                                text: WORK_TYPE_LABELS[job.workType],
-                            },
-                            {
-                                Icon: MapPin,
-                                text: [job.location.ward, job.location.city]
-                                    .filter(Boolean)
-                                    .join(", "),
-                            },
-                            {
-                                Icon: CalendarDays,
-                                text: formatDeadline(job.applicationDeadline),
-                            },
-                        ].map(({ Icon, text }) => (
-                            <span
-                                key={text}
-                                className="inline-flex items-center gap-2"
-                            >
-                                <Icon
-                                    aria-hidden="true"
-                                    className="size-4 shrink-0 text-primary"
-                                />
-                                {text}
-                            </span>
-                        ))}
-                    </div>
-                </div>
-                <div className="flex shrink-0 flex-col gap-3 sm:w-44">
-                    <AvailabilityButton
-                        title="Lưu công việc"
-                        description={unavailable}
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-muted px-4 py-3 font-medium hover:bg-secondary"
-                    >
-                        <Bookmark className="size-4" />
-                        Lưu công việc
-                    </AvailabilityButton>
-                    <AvailabilityButton
-                        title="Ứng tuyển công việc"
-                        description={unavailable}
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 font-semibold text-white shadow-button hover:bg-brand-deep"
-                    >
-                        Ứng tuyển ngay
-                        <ArrowRight className="size-4" />
-                    </AvailabilityButton>
-                </div>
-            </section>
+
             <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
                 <div className="min-w-0 space-y-6">
+                    <JobDetailHeader job={job} />
                     <section
                         className="rounded-2xl border border-primary/10 bg-gradient-to-br from-secondary to-card p-5 shadow-card sm:p-6"
                         aria-labelledby="match-title"
@@ -347,40 +265,7 @@ export function JobDetailPage({
                     aria-label="Thông tin tuyển dụng"
                     className="min-w-0 space-y-6"
                 >
-                    <section className={surface}>
-                        <h2 className="text-base font-bold">Về công ty</h2>
-                        <div className="mt-5 flex items-center gap-3">
-                            <span
-                                aria-hidden="true"
-                                className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-secondary p-2 text-center text-xs font-bold text-primary"
-                            >
-                                {companyName}
-                            </span>
-                            <div className="min-w-0">
-                                <h3 className="font-semibold">
-                                    {job.company.name}
-                                </h3>
-                                <Link
-                                    href={companyJobs}
-                                    className="mt-1 inline-block text-xs font-medium text-primary hover:underline"
-                                >
-                                    Xem việc làm tại công ty →
-                                </Link>
-                            </div>
-                        </div>
-                        <div className="mt-5 space-y-3 text-sm leading-6 text-muted-foreground">
-                            <p className="flex items-start gap-2">
-                                <Building2 className="mt-1 size-4 shrink-0" />
-                                {job.industry?.name ??
-                                    "Thông tin ngành nghề chưa cập nhật"}
-                            </p>
-                            <p className="flex items-start gap-2">
-                                <MapPin className="mt-1 size-4 shrink-0" />
-                                {address}
-                            </p>
-                        </div>
-                        <LocationMap address={address} />
-                    </section>
+                    <JobCompanyCard job={job} />
                     <section className={surface}>
                         <h2 className="text-base font-bold">
                             Tổng quan công việc
