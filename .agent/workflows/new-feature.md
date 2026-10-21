@@ -9,4 +9,7 @@
    - `types.ts`
    - `index.ts` (export public API)
 3. Cập nhật route tương ứng trong `src/app/` nếu có UI page.
-4. Đảm bảo chạy `npm run typecheck` và `npm run lint`.
+4. Chốt endpoint/schema và tiêu chí nghiệm thu của task; không tự suy đoán SRS chưa có trong repo.
+5. Làm mock có kiểu và hành vi trước UI, kèm loading/empty/error và test.
+6. Cập nhật `docs/project-status.md`; không đánh dấu feature đã xong khi mới có khung.
+7. Chạy `npm run typecheck`, `npm run lint`, `npm run test`, `npm run build`.

@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "gen:api": "openapi-typescript contracts/openapi.yaml -o src/lib/api/generated/schema.d.ts"
+    "contract:lint": "redocly lint contracts/openapi.yaml",
+    "gen:api": "openapi-typescript contracts/openapi.yaml -o src/lib/api/generated/schema.d.ts",
+    "mock": "prism mock contracts/openapi.yaml -p 4010 --dynamic"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -41,7 +43,7 @@
     "@redocly/cli": "^2.62.1",
     "@stoplight/prism-cli": "^5.16.0",
     "@tailwindcss/turbopack": "^4",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.1.2",
@@ -50,11 +52,10 @@
     "eslint-plugin-boundaries": "^7.2.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
-    "msw": "^3.0.3",
     "openapi-typescript": "^7.13.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^5.0.4"
   },
-  "packageManager": "pnpm@12.11.2"
+  "packageManager": "npm@10.9.0"
 }

@@ -1,5 +1,2 @@
-export type MatchResult = {
-  jobId: string;
-  candidateId: string;
-  matchScore: number;
-};
+import type { components } from "@/lib/api/generated/schema";
+export type MatchResult = components["schemas"]["MatchingResult"];

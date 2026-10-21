@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
+import { Providers } from "@/providers";
+
+const inter = localFont({ src: "../assets/fonts/inter-variable.ttf", variable: "--font-inter", display: "swap", weight: "100 900", fallback: ["system-ui", "sans-serif"] });
 
 export const metadata: Metadata = {
   title: "TalentAI",
@@ -12,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="vi" className={inter.variable}>
+      <body><Providers>{children}</Providers></body>
     </html>
   );
 }

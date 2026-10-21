@@ -4,13 +4,13 @@ import * as React from "react";
 import { QueryProvider } from "./query-provider";
 import { ThemeProvider } from "./theme-provider";
 import { SessionProvider } from "./session-provider";
+import { ToastProvider } from "@/components/ui/toast";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <SessionProvider>
-        <QueryProvider>{children}</QueryProvider>
-      </SessionProvider>
+      <QueryProvider><SessionProvider><TooltipProvider delay={300}><ToastProvider>{children}</ToastProvider></TooltipProvider></SessionProvider></QueryProvider>
     </ThemeProvider>
   );
 }

@@ -1,4 +1,5 @@
-export type UserRole = "candidate" | "recruiter" | "admin";
+import type { components } from "@/lib/api/generated/schema";
+export type UserRole = components["schemas"]["Role"];
 
 export const ROLES = {
   CANDIDATE: "candidate",

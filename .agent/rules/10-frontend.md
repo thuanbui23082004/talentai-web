@@ -6,22 +6,26 @@ globs: src/**/*.{ts,tsx}
 
 # Quy ước Frontend (áp dụng cho file .ts/.tsx trong src/)
 
-Các con số dưới đây lấy từ yêu cầu phi chức năng của SRS. Đừng tự đổi.
+Đặc tả thiết kế hiện tại theo yêu cầu người dùng và ảnh tham chiếu; chi tiết tại `docs/ui-spec.md`.
+SRS gốc chưa có trong repo: không gán các lựa chọn thiết kế bên dưới thành yêu cầu SRS đã xác nhận.
 
 ## 1. Giao diện và định dạng dữ liệu
 
-- Font **Inter** (nạp bằng `next/font`, có fallback `system-ui, sans-serif`).
-- Nội dung chính cỡ 14 (SRS ghi 14pt, dùng 14px = `text-sm`). Tiêu đề in đậm, cỡ 16–20.
-- Màu chữ `#1A1A1A` (hoặc `#000000`) trên nền `#FFFFFF`. Màu khai báo thành token (CSS variables), không hard-code trong component.
+- Phong cách hiện đại, chuyên nghiệp, sạch, dành cho nền tảng tuyển dụng. Tím đậm/tím sáng/trắng; xanh nhạt, xám sáng và cam nhấn hỗ trợ.
+- Font **Inter**, self-host bằng `next/font/local`, fallback `system-ui, sans-serif`; giấy phép kèm trong `src/assets/fonts/`.
+- Nội dung mặc định **14px** (`text-sm`), nội dung phụ 12–13px; heading nội dung 16–24px, hero 28–44px tùy màn hình. Không đồng nhất pt và px: 14pt xấp xỉ 18.67px.
+- Màu sắc, radius 8–20px và shadow lấy từ token trong `src/app/globals.css`, không hard-code trong component. Badge gọn có thể 6–8px; avatar/pill dùng hình tròn.
+- Dùng component trong `src/components/ui/`, trạng thái chung trong `src/components/shared/`; kiểm tra các biến thể tại `/ui` trước khi tự tạo mẫu mới.
+- Icon line thống nhất từ Lucide React; icon-only button có tên truy cập. Button/input mặc định cao 44px; phiên bản gọn cho vùng dữ liệu dày, không dùng cho hành động chính trên mobile.
 - Tiền: dấu phân cách hàng nghìn, ví dụ `10,000,000 VNĐ`. Chỉ dùng helper `formatVND()` trong `lib/utils.ts`, không format tay.
 - Khoảng lương, ngày giờ, phần trăm cũng đi qua helper chung để thống nhất.
-- SRS định nghĩa nền trắng. Dark mode chỉ làm khi nhóm xác nhận; nếu làm thì phải đạt độ tương phản WCAG AA.
+- Nền trang xám rất nhạt, card/input trắng; header tím đậm, vùng hero có sắc tím nhẹ. Light mode là phạm vi hiện tại; dark mode chỉ làm khi có yêu cầu.
 
 ## 2. Responsive và trình duyệt
 
 - Thiết kế mobile-first. Hỗ trợ từ **375px** (di động) đến **1920px** (máy tính, trọng tâm 1024–1920).
 - Bảng dữ liệu rộng: đặt trong container `overflow-x-auto` hoặc đổi thành danh sách thẻ trên mobile. Không để trang cuộn ngang.
-- Phải chạy đủ tính năng trên Chrome/Edge/Firefox 110+ và Safari 16+. Trước khi dùng CSS/JS API mới, kiểm tra tương thích Safari 16 và Chrome 110.
+- Mục tiêu trình duyệt phải khớp phiên bản Next.js, Tailwind và Base UI đã khóa. Không tuyên bố hỗ trợ Chrome 110/Safari 16 khi chưa có kiểm chứng hoặc fallback cho CSS mới. Hiện E2E kiểm tra Chromium; Firefox/WebKit cần nghiệm thu bổ sung trước khi cam kết.
 
 ## 3. Luồng người dùng và form
 

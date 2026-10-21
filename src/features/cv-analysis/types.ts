@@ -1,5 +1,2 @@
-export type CvAnalysis = {
-  id: string;
-  cvId: string;
-  score: number;
-};
+import type { components } from "@/lib/api/generated/schema";
+export type CvAnalysis = components["schemas"]["CvAnalysisResult"];

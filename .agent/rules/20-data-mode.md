@@ -24,7 +24,7 @@ Component → hook → service → lib/api/client → /api/bff/* → server/bff 
 
 ## 3. Biến môi trường
 
-- `DATA_MODE=mock|real` (mặc định `mock`), `BACKEND_URL=...`. Validate bằng zod trong `lib/env.ts`.
+- `DATA_MODE=mock|real` (mặc định `mock`), `BACKEND_API_URL=...` (bắt buộc khi real). Validate bằng zod trong `lib/env.ts`.
 - Cả hai là biến **server-only**, không đặt tiền tố `NEXT_PUBLIC_`. Client không được biết chế độ dữ liệu.
 - `.env.example` luôn đồng bộ với `lib/env.ts`.
 
@@ -93,7 +93,7 @@ Phân tích CV, phân tích JD và đối sánh là tác vụ chạy lâu.
 ## 9. Lỗi chuẩn hóa
 
 `lib/api/errors.ts` chuyển mọi lỗi về một dạng `ApiError { status, code, message, fieldErrors? }`.
-Định dạng body lỗi do contract quy định (TODO: chốt với BE). Các mã lỗi nghiệp vụ cần có trong contract:
+Định dạng body lỗi do contract quy định (`ApiError`). Các mã lỗi nghiệp vụ trong contract:
 
 `EMAIL_ALREADY_EXISTS`, `INVALID_CREDENTIALS`, `ACCOUNT_LOCKED`, `SESSION_EXPIRED`, `VALIDATION_FAILED`,
 `JOB_CLOSED`, `ALREADY_APPLIED`, `CV_INVALID_FORMAT`, `CV_UNREADABLE`, `JD_INSUFFICIENT`, `AI_ANALYSIS_FAILED`.
@@ -107,7 +107,16 @@ Không tự retry `POST`/`PATCH`/`DELETE` (tránh nộp hồ sơ hay tạo tin h
 
 ## 11. Chuyển từ mock sang real
 
-1. Đặt `DATA_MODE=real` và `BACKEND_URL` trong môi trường.
+1. Đặt `DATA_MODE=real` và `BACKEND_API_URL` trong môi trường; khởi động lại server.
 2. Chạy `npm run gen:api` với contract mới nhất của BE.
 3. Chạy lại test E2E ở chế độ real với tài khoản test.
 4. Khác biệt giữa mock và real được coi là **bug của mock** (hoặc của contract), sửa ở mock/contract, không vá ở FE.
+
+## 12. Phạm vi hiện tại
+
+Các mục trên là tiêu chuẩn khi xây dựng feature, không phải tuyên bố tất cả đã triển khai.
+Xem `docs/project-status.md` để biết endpoint, bộ lọc và mock nào đã chạy.
+Mock tích hợp chạy cùng `npm run dev`; Prism là công cụ tùy chọn để khám phá contract.
+Backend chưa sẵn sàng không chặn việc hoàn thành feature mock; tích hợp real được nghiệm thu riêng.
+Server Component cần dữ liệu lần đầu dùng service chỉ dành cho server gọi BFF nội bộ hoặc prefetch;
+không dùng client có base URL tương đối để fetch trong môi trường Node.

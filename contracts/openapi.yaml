@@ -7224,13 +7224,7 @@ components:
         >= 10); FE không băm hay mã hóa mật khẩu.
     RegisterRequest:
       type: object
-      required:
-      - fullName
-      - email
-      - password
-      - confirmPassword
-      - role
-      - acceptedPrivacyPolicy
+      required: [fullName, email, phone, password, confirmPassword, role, acceptedPrivacyPolicy]
       properties:
         fullName:
           type: string
@@ -7240,20 +7234,21 @@ components:
           type: string
           format: email
           maxLength: 254
+        phone:
+          type: string
+          pattern: '^\+?[0-9]{9,15}$'
+          description: 9-15 digits, optionally prefixed with +.
         password:
           $ref: '#/components/schemas/PasswordRules'
         confirmPassword:
           type: string
-          description: Phải trùng với password.
+          description: Must match password.
         role:
           type: string
-          enum:
-          - candidate
-          - recruiter
+          enum: [candidate, recruiter]
         acceptedPrivacyPolicy:
           type: boolean
-          description: Người dùng đồng ý điều khoản và chính sách xử lý dữ liệu cá nhân (Nghị định 13/2023/NĐ-CP). Phải là
-            true.
+          description: Must be true to accept the terms and privacy policy.
     RegisterResponse:
       type: object
       required:

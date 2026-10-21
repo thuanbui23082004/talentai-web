@@ -1,98 +1,40 @@
-# talentAI Web
+# TalentAI Web - Hướng dẫn cho AI agent
 
-Nền tảng tuyển dụng tích hợp AI phân tích CV và đối sánh CV với JD.
-Frontend: Next.js (App Router) + TypeScript + Tailwind + shadcn/ui.
-Backend (microservice) do team khác làm, FE chỉ giao tiếp qua hợp đồng API.
-Hiện chưa có backend thật: FE chạy bằng mock.
+## Đọc trước khi làm việc
+
+- Quy tắc dự án: đọc `.agent/rules/00-project.md` trước tiên.
+- Làm UI/frontend: đọc thêm `.agent/rules/10-frontend.md`.
+- Làm schema/dữ liệu: đọc thêm `.agent/rules/20-data-mode.md`.
+- Làm auth, token, upload file: đọc thêm `.agent/rules/30-security.md`.
+- API: `contracts/openapi.yaml` là nguồn sự thật. Chỉ đọc phần `paths` và `schemas` liên quan.
+
+## Workflow (làm theo file tương ứng khi gặp loại việc này)
+
+- Thêm feature mới: `.agent/workflows/new-feature.md`
+- Thêm endpoint: `.agent/workflows/add-endpoint.md`
+- Contract thay đổi: `.agent/workflows/sync-contract.md`
+- Trước khi commit: `.agent/workflows/pre-commit-check.md`
 
 ## Lệnh
-- `pnpm dev`: chạy dev server
-- `pnpm typecheck` · `pnpm lint` · `pnpm test`
-- `pnpm api:gen`: sinh type từ `contracts/openapi.yaml`
-- `pnpm api:mock`: chạy mock server (Prism)
-- `pnpm e2e`: test Playwright
 
-## Cấu trúc
-- `src/app/`: route, chia nhóm `(public)` `(auth)` `(candidate)` `(recruiter)` `(admin)`
-- `src/features/<tên>/`: logic theo tính năng (jobs, cv, cv-analysis, matching...)
-- `src/lib/api/`: client API. `schema.d.ts` là file TỰ SINH
-- `src/components/ui/`: shadcn. `components/shared/`: component dùng chung
-- `contracts/`: hợp đồng API giao cho backend
-- Code mới của một tính năng đặt trong `src/features/<tên>/`, không đặt rải rác.
+- Dùng `npm run <script>`: `dev`, `mock`, `gen:api`, `typecheck`, `lint`, `test`.
+- Không sửa tay `src/lib/api/generated/schema.d.ts`.
+- Chỉ báo hoàn thành khi `npm run typecheck` và `npm run lint` pass.
 
-## Quy tắc cứng
+## Giai đoạn hiện tại
 
-### API
-- `contracts/openapi.yaml` là nguồn sự thật. KHÔNG tự đoán endpoint hay field.
-- KHÔNG sửa tay `src/lib/api/schema.d.ts`. Đổi spec rồi chạy `pnpm api:gen`.
-- Muốn đổi API: sửa spec TRƯỚC, ghi `contracts/CHANGELOG.md`, rồi mới viết code.
-- Không dùng `fetch` trực tiếp, gọi qua `@/lib/api`.
+- Backend đang phát triển: mặc định `DATA_MODE=mock`, chạy `npm run dev` là đủ.
+- Đọc `docs/project-status.md` để biết endpoint nào đã có mock và phần nào còn là khung.
+- Không tự bịa yêu cầu SRS; yêu cầu chưa có trong repo phải được ghi rõ trong task.
+- Mỗi feature mới cần mock theo contract, test hành vi và trạng thái loading/empty/error.
+- Trên Windows PowerShell nếu `npm.ps1` bị chặn, dùng `npm.cmd run <script>`.
 
-### Code
-- Server Component mặc định, chỉ thêm "use client" khi cần state hoặc event.
-- Không dùng `any`. Dữ liệu từ stream hoặc bên ngoài phải qua Zod.
-- Chữ hiển thị đi qua next-intl (mặc định tiếng Việt), không hardcode.
-- Dùng component shadcn có sẵn, không tự viết lại Button, Input, Dialog.
-- Không hardcode màu, dùng token trong `globals.css`.
+<!-- BEGIN:nextjs-agent-rules -->
 
-### Nghiệp vụ AI
-- Tác vụ AI chạy bất đồng bộ. Luôn xử lý đủ trạng thái:
-  queued, parsing, analyzing, completed, failed.
-- Kết quả AI luôn hiển thị kèm `explanation` và dòng "chỉ mang tính tham khảo".
-- AI chỉ hỗ trợ: KHÔNG tự động loại ứng viên, nhà tuyển dụng là người quyết định.
-- Điểm là số nguyên 0-100.
+## This is NOT the Next.js you know
 
-### Bảo mật và dữ liệu cá nhân
-- KHÔNG log, không đưa nội dung CV, email, SĐT vào console, URL hay analytics.
-- KHÔNG commit `.env`, API key, hoặc CV thật. Dữ liệu mẫu phải là dữ liệu giả.
-- Token nằm trong cookie httpOnly do BFF quản lý, không đụng vào bằng JavaScript.
-- Kiểm tra quyền ở `middleware.ts` chỉ là lớp tiện lợi, backend mới là nơi kiểm quyền thật.
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
-## Cách làm việc
-- Việc lớn hoặc đụng nhiều file: lập kế hoạch ngắn và chờ xác nhận trước khi sửa.
-- Thay đổi trong `contracts/` luôn cần được duyệt trước khi áp dụng.
-- Một lần chỉ làm một tính năng nhỏ, không tiện tay refactor phần không liên quan.
-- Xong việc phải chạy `pnpm typecheck && pnpm lint` và báo kết quả thật.
-- KHÔNG tự chạy `git push`, `git reset --hard`, xóa file hàng loạt.
-- Không chắc thì hỏi, không đoán.
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
-## Tham chiếu
-- Hướng dẫn chi tiết từng loại việc: `docs/ai/*.md`
-- Quy trình nhiều bước: `.agent/workflows/` (`/new-feature`, `/add-endpoint`,
-  `/sync-contract`, `/pre-commit-check`)
-- Luồng người dùng: `docs/product/user-flows.md`
-- Quyết định kiến trúc: `docs/adr/`
-
-## Môi trường
-- `AGENT_API_MODE=mock|real`. Hiện tại luôn là `mock`.
-- Biến môi trường khai báo trong `.env.example` và kiểm tra bằng Zod ở `src/lib/env.ts`.
-  Thêm biến mới phải cập nhật cả hai.
-- Khi thêm endpoint: phải có mock tương ứng, nếu không FE không chạy được.
-
-## Không tự ý sửa (phải hỏi trước)
-- `contracts/openapi.yaml`, `src/middleware.ts`, `.github/workflows/`
-- `pnpm-lock.yaml` (không sửa tay), `.env*`
-- `src/components/ui/` (file shadcn sinh ra, trừ khi được yêu cầu)
-
-## State
-- Dữ liệu từ server: TanStack Query. Không lưu vào Zustand.
-- Zustand chỉ cho state UI thuần client (bộ lọc, panel đang mở).
-- Form: react-hook-form + Zod resolver.
-- Progress phân tích CV: dùng `useAnalysisProgress` (SSE), có polling dự phòng.
-
-## Giao diện
-- Mọi màn hình lấy dữ liệu phải có đủ 4 trạng thái: loading (skeleton), rỗng, lỗi, thành công.
-- Lỗi API theo RFC 7807. Map mã nghiệp vụ (`CV_UNREADABLE`, `CV_TOO_LARGE`...)
-  sang thông báo tiếng Việt ở `features/<tên>/errors.ts`, không hiện lỗi thô.
-- Responsive từ 360px. Không truyền đạt thông tin chỉ bằng màu (điểm phải kèm chữ).
-
-## Quy ước
-- Thư mục và file: kebab-case. Component: PascalCase. Hook: `use-xxx.ts`.
-- Import dùng alias `@/`, không dùng đường dẫn tương đối nhiều cấp.
-- Commit theo Conventional Commits (`feat:`, `fix:`, `chore:`). Nhánh `feat/ten-tinh-nang`.
-- Không thêm thư viện mới khi chưa hỏi. Chỉ dùng pnpm, không dùng npm hay yarn.
-
-## Test
-- Logic thuần (parser SSE, reducer, hàm tính toán): bắt buộc có Vitest.
-- Luồng chính (upload CV, xem điểm, recruiter xem xếp hạng): Playwright chạy với mock.
-- Dữ liệu mẫu phải là dữ liệu giả, đặt trong `src/mocks/fixtures/`.
+<!-- END:nextjs-agent-rules -->

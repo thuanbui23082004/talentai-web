@@ -1,5 +1,2 @@
-export type Cv = {
-  id: string;
-  candidateId: string;
-  content: string;
-};
+import type { components } from "@/lib/api/generated/schema";
+export type Cv = components["schemas"]["Cv"];
