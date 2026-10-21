@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "id": "20000000-0000-4000-8000-000000000001",
+      "name": "Sao Việt",
+      "city": "Đà Nẵng",
+      "address": "Phường Hải Vân, Đà Nẵng",
+      "isVerified": true,
+      "size": "11-50",
+      "industries": [{ "id": "30000000-0000-4000-8000-000000000001", "name": "Công nghệ thông tin" }],
+      "description": "Sao Việt xây dựng môi trường làm việc cởi mở, tạo điều kiện phát triển chuyên môn và kết nối những người có cùng đam mê.",
+      "openJobsCount": 1
+    }
+  ],
+  "meta": { "page": 1, "pageSize": 1, "totalItems": 18, "totalPages": 18 }
+}

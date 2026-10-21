@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Banknote, BriefcaseBusiness, ChartNoAxesCombined, Code2, Megaphone, Monitor, PencilRuler, ShieldCheck, Sparkles, Store, Tag, UsersRound } from "lucide-react";
 import type { HomeContent } from "@/lib/home-content";
 import { AvailabilityButton } from "@/components/shared/availability-button";
+import { CompanyCard } from "@/components/shared/company-card";
 
 const categoryIcons = { design: PencilRuler, sales: ChartNoAxesCombined, marketing: Megaphone, finance: Banknote, technology: Monitor, engineering: Code2, business: BriefcaseBusiness, people: UsersRound };
 
@@ -52,12 +53,7 @@ export function HomeCompanies({ companies }: { companies: HomeContent["companies
             <Link href="/jobs" className="inline-flex min-h-11 items-center gap-2 text-xs font-medium">Xem tất cả việc làm<ArrowRight className="size-3.5" />
             </Link>
         </div>
-        <div className="mt-7 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">{companies.map((company, index) => <Link key={company.name} href={`/jobs?q=${encodeURIComponent(company.query)}`} className="group flex min-w-0 flex-col border border-border bg-card p-4 text-foreground transition hover:-translate-y-1 hover:shadow-float sm:p-6">
-            <div className="flex h-24 items-center justify-center border-b border-border/40 sm:h-28">{company.logo ? <Image src={company.logo} width={180} height={100} alt={company.name} className="max-h-24 w-full object-contain" /> : <span className={`break-words text-center text-lg leading-tight font-extrabold tracking-tight sm:text-2xl ${index % 3 === 0 ? "text-primary" : index % 3 === 1 ? "text-info-foreground" : "text-success-foreground"}`}>{company.wordmark}</span>}</div>
-            <h3 className="mt-5 truncate text-base font-semibold sm:text-lg" title={company.name}>{company.name}</h3>
-            <p className="mt-2 flex flex-wrap items-center justify-between gap-1 text-xs text-muted-foreground sm:text-sm">{company.count} cơ hội mẫu<ArrowRight className="size-4 group-hover:text-primary" />
-            </p>
-        </Link>)}</div>
+        <div className="mt-7 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">{companies.map((company, index) => <CompanyCard key={company.name} name={company.name} wordmark={company.wordmark} logo={company.logo} count={company.count} href={`/jobs?q=${encodeURIComponent(company.query)}`} tone={index} />)}</div>
     </section>;
 }
 

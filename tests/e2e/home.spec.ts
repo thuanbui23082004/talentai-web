@@ -31,7 +31,7 @@ test("home search sends supported filters to jobs and URL Back restores controls
     await expect(page.getByRole("combobox", { name: "Tất cả cấp bậc" })).toContainText("Chuyên viên cao cấp");
     await page.getByRole("button", { name: "Xóa lọc", exact: true }).click();
     await expect(page).toHaveURL(/\/jobs$/);
-    await expect(page.getByText("Tìm thấy 6 việc làm")).toBeVisible();
+    await expect(page.getByText("Tìm thấy 18 việc làm")).toBeVisible();
     await page.goBack();
     await expect(page.getByRole("searchbox", { name: "Từ khóa" })).toHaveValue("JavaScript");
     await expect(page.getByRole("combobox", { name: "Tất cả cấp bậc" })).toContainText("Chuyên viên cao cấp");
@@ -43,9 +43,12 @@ test("home dialogs explain unavailable actions and display article content", asy
     await expect(page.getByRole("dialog", { name: "TalentAI trên điện thoại" })).toBeVisible();
     await page.keyboard.press("Escape");
     const featured = page.getByRole("region", { name: "Việc làm nổi bật", exact: true });
-    await featured.locator("article").first().getByRole("heading").getByRole("button").click();
-    await expect(page.getByRole("button", { name: "Ứng tuyển · Sắp ra mắt" })).toBeDisabled();
+    await featured.locator("article").first().getByRole("heading").getByRole("link").click();
+    await expect(page).toHaveURL(/\/jobs\/[0-9a-f-]{36}$/);
+    await page.getByRole("button", { name: "Ứng tuyển ngay", exact: true }).click();
+    await expect(page.getByRole("dialog", { name: "Ứng tuyển công việc", exact: true })).toBeVisible();
     await page.keyboard.press("Escape");
+    await page.goBack();
     await page.getByRole("button", { name: "Đọc thêm", exact: true }).first().click();
     await expect(page.getByRole("dialog")).toContainText("Một bản CV tốt giúp nhà tuyển dụng");
     await page.keyboard.press("Escape");

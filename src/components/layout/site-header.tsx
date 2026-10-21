@@ -28,6 +28,7 @@ export function SiteHeader() {
                         </summary>
                         <div className="absolute top-full left-0 w-56 rounded-xl border border-border bg-card p-2 text-foreground shadow-float">{item.links.map((link) => <Link key={link.href} href={link.href} className="block rounded-lg px-3 py-3 hover:bg-secondary hover:text-primary">{link.label}</Link>)}</div>
                     </NavigationDetails>)}
+                    <Link href="/companies" className="py-3 hover:text-white/80">Công ty</Link>
                     <Link href="/#news" className="py-3 hover:text-white/80">Cẩm nang nghề nghiệp</Link>
                     <Link href="/#companies" className="py-3 hover:text-white/80">HR Nexus</Link>
                 </nav>
@@ -57,6 +58,7 @@ export function SiteHeader() {
                     </summary>
                     <nav aria-label="Điều hướng di động" className="absolute top-full right-0 left-0 max-h-[75dvh] overflow-y-auto border-t border-white/15 bg-brand-deep p-5 shadow-float">
                         {navigation.flatMap((item) => item.links).map((link) => <Link key={link.href} href={link.href} className="block rounded-lg px-3 py-3 hover:bg-white/10">{link.label}</Link>)}
+                        <Link href="/companies" className="block px-3 py-3">Công ty</Link>
                         <Link href="/#news" className="block px-3 py-3">Cẩm nang nghề nghiệp</Link>
                         <Link href="/login?role=recruiter" className="block px-3 py-3">Dành cho nhà tuyển dụng</Link>
                         <div className="border-t border-white/20 px-3 py-4">

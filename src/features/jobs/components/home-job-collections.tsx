@@ -44,7 +44,7 @@ function Collection({ id, title, jobs }: { id: string; title: string; jobs: Job[
 }
 
 export function HomeJobCollections({ featuredIds, urgentIds, initialJobs }: { featuredIds: string[]; urgentIds: string[]; initialJobs?: JobSearchResponse }) {
-    const { data, isPending, isError, refetch } = useJobs({ pageSize: 6 }, initialJobs);
+    const { data, isPending, isError, refetch } = useJobs({ pageSize: 20 }, initialJobs);
     if(isPending) return <div role="status" aria-label="Đang tải việc làm" className="grid gap-3 md:grid-cols-3">{Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="h-40" />)}</div>;
     if(isError) return <Alert variant="error" title="Chưa thể tải việc làm">
         <Button className="mt-3" variant="outline" onClick={() => void refetch()}>Thử lại</Button>

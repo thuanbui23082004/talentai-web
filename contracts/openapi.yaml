@@ -2303,6 +2303,18 @@ paths:
       description: '**Quyền:** công khai (không cần đăng nhập).'
       security: []
       parameters:
+      - name: size
+        in: query
+        schema:
+          $ref: '#/components/schemas/CompanySize'
+      - name: isVerified
+        in: query
+        schema:
+          type: boolean
+      - name: hiringOnly
+        in: query
+        schema:
+          type: boolean
       - name: q
         in: query
         schema:

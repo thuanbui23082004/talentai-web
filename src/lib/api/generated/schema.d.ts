@@ -6302,6 +6302,9 @@ export interface operations {
     searchCompanies: {
         parameters: {
             query?: {
+                size?: components["schemas"]["CompanySize"];
+                isVerified?: boolean;
+                hiringOnly?: boolean;
                 q?: string;
                 industryId?: string;
                 city?: string;
