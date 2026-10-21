@@ -2,6 +2,7 @@ import Image from "next/image";
 import { BriefcaseBusiness, Building2, UsersRound } from "lucide-react";
 import { JobSearch } from "@/features/jobs";
 import type { HomeContent } from "@/lib/home-content";
+import { AnimatedStatistic } from "./animated-statistic";
 
 export function HomeHero({ statistics }: { statistics: HomeContent["statistics"] }) {
     return <section className="home-hero relative isolate overflow-hidden bg-card pt-12 pb-12 sm:pt-16 lg:pb-16">
@@ -13,13 +14,13 @@ export function HomeHero({ statistics }: { statistics: HomeContent["statistics"]
             <div className="mx-auto mt-8 max-w-[1200px]">
                 <JobSearch />
             </div>
-            <dl className="mx-auto mt-8 flex max-w-2xl flex-wrap justify-center gap-x-7 gap-y-5 text-primary sm:gap-x-12">
+            <dl className="mx-auto mt-10 flex max-w-3xl flex-wrap justify-center gap-x-10 gap-y-6 text-primary sm:gap-x-20 lg:gap-x-24">
                 {[{ label: "Công việc", value: statistics.jobs, Icon: BriefcaseBusiness }, { label: "Ứng viên", value: statistics.candidates, Icon: UsersRound }, { label: "Công ty", value: statistics.companies, Icon: Building2 }].map(({ label, value, Icon }) => <div key={label} className="flex items-center gap-3">
                     <span className="flex size-11 items-center justify-center rounded-full bg-brand-deep text-white sm:size-13">
                         <Icon className="size-6" strokeWidth={1.6} />
                     </span>
                     <div>
-                        <dd className="text-lg font-bold">{value}</dd>
+                        <dd className="text-lg font-bold"><AnimatedStatistic value={value} /></dd>
                         <dt className="text-xs sm:text-sm">{label}</dt>
                     </div>
                 </div>)}

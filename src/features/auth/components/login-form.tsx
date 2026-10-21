@@ -37,7 +37,7 @@ export function LoginForm({
             <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground">
                 {role === "candidate"
                     ? "Vui lòng điền thông tin của bạn để đăng nhập."
-                    : "Cùng tạo dựng lợi thế cho doanh nghiệp bằng trải nghiệm tuyển dụng thông minh."}
+                    : "Lợi thế cho doanh nghiệp bằng trải nghiệm tuyển dụng thông minh."}
             </p>
             <div className="mt-6">
                 <AuthRoleSwitch

@@ -43,7 +43,7 @@ test("home dialogs explain unavailable actions and display article content", asy
     await expect(page.getByRole("dialog", { name: "TalentAI trên điện thoại" })).toBeVisible();
     await page.keyboard.press("Escape");
     const featured = page.getByRole("region", { name: "Việc làm nổi bật", exact: true });
-    await featured.getByRole("button", { name: "Ứng tuyển", exact: true }).first().click();
+    await featured.locator("article").first().getByRole("heading").getByRole("button").click();
     await expect(page.getByRole("button", { name: "Ứng tuyển · Sắp ra mắt" })).toBeDisabled();
     await page.keyboard.press("Escape");
     await page.getByRole("button", { name: "Đọc thêm", exact: true }).first().click();
