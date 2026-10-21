@@ -3188,6 +3188,10 @@ export interface components {
             negotiable: boolean;
         };
         JobLocation: {
+            provinceCode?: string;
+            wardCode?: string;
+            /** @description Tên phường/xã/đặc khu hiện hành. */
+            ward?: string;
             locationId?: components["schemas"]["Id"];
             /** @example Đà Nẵng */
             city: string;
@@ -6228,6 +6232,10 @@ export interface operations {
                 /** @description Tên tỉnh/thành */
                 city?: string;
                 locationId?: string;
+                /** @description Mã tỉnh/thành hiện hành sau 07/2025, gồm 2 chữ số. */
+                provinceCode?: string;
+                /** @description Mã phường/xã/đặc khu hiện hành, gồm 5 chữ số. Phải đi cùng provinceCode và thuộc tỉnh đã chọn. */
+                wardCode?: string;
                 salaryMin?: number;
                 salaryMax?: number;
                 /** @description Số năm kinh nghiệm tối thiểu của tin */

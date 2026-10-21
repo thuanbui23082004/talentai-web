@@ -12,9 +12,9 @@ không phụ thuộc vào backend chạy local. Không coi tên thư mục, page
 | Header/footer public | Nav tím, dropdown, menu mobile tự đóng, tài khoản theo session; footer 4 cột, app/social có modal trạng thái |
 | Bộ UI dùng chung | Có 18 nhóm component, token tím/trắng, Inter local; đặc tả tại `docs/ui-spec.md` |
 | `/ui` | Trang xem thử biến thể, trạng thái và tương tác; dữ liệu tuyển dụng ở đây chỉ để minh họa |
-| GET `/jobs` | 6 tin mẫu; tìm từ khóa, thành phố, lương, kinh nghiệm, cấp bậc, loại hình, phân trang và sắp xếp |
+| GET `/jobs` | 18 tin mẫu; tìm từ khóa, tỉnh/thành, phường/xã, lương, kinh nghiệm, cấp bậc, loại hình, phân trang và sắp xếp |
 | GET `/health` | Mock trả `status: ok` |
-| `/jobs` | Tìm kiếm qua URL; loading, empty, error, thử lại |
+| `/jobs` | Tìm kiếm qua URL; 12 card/trang; bộ lọc sticky tự cập nhật; loading, empty, error, thử lại |
 | Thẻ việc làm | Popup xem nhanh khi hover/focus, tự điều chỉnh theo viewport; chạm tiêu đề mở modal. Hiển thị JobSummary; mô tả chi tiết chưa có, ứng tuyển/lưu việc vẫn chưa triển khai |
 | Backend proxy | Chỉ mở GET `/jobs`, GET `/health`; chưa xác minh với backend thật |
 | Auth/session | Mock đăng ký/đăng nhập/refresh/CSRF/me/logout; cookie và guard server; xem `docs/auth-flow.md` |
@@ -23,9 +23,12 @@ không phụ thuộc vào backend chạy local. Không coi tên thư mục, page
 | CV, phân tích AI, matching, ứng tuyển, recruiter, admin | Chỉ có khung; chưa có mock hoạt động |
 
 Mock `/jobs` chỉ trả tin `open`. `sort=match_score` cần auth nên trả 401.
+Bộ địa điểm hiện hành: snapshot Province Open API v2 gồm 34 tỉnh/thành và 3.321 phường/xã/đặc khu tại `src/lib/locations/`.
+Chọn tỉnh rồi chọn phường/xã tùy ý; hỗ trợ tìm tên không dấu. `provinceCode` (2 chữ số) và `wardCode` (5 chữ số) được kiểm tra quan hệ trước khi lọc/phân trang.
+`city` vẫn hỗ trợ URL cũ. Các mã mới đã cập nhật contract và mock; backend thật cần triển khai cùng tham số, chưa xác nhận tích hợp real.
 Bộ lọc đã hỗ trợ thêm: `salaryMin`, `salaryMax` (giao khoảng), `minExperience`, `maxExperience`, `level`, `workType`. Bộ lọc khác chưa triển khai trả 422.
 `relevance` hiện giữ thứ tự mới nhất, chưa có thuật toán xếp hạng từ khóa.
-Tìm kiếm thực hiện khi gửi form. Home đã có SSR jobs; `/jobs` hiện dùng client Query. Debounce tự tìm, chi tiết đầy đủ, ứng tuyển và lưu việc chưa triển khai.
+Từ khóa tìm kiếm thực hiện khi gửi form; tại `/jobs`, các bộ lọc và lựa chọn địa điểm tự cập nhật kết quả. Home đã có SSR jobs; `/jobs` hiện dùng client Query. Debounce từ khóa, chi tiết đầy đủ, ứng tuyển và lưu việc chưa triển khai.
 
 ## Thử các kịch bản mock
 

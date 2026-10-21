@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { HomeBannerCarousel } from "./home-banner-carousel";
 import Link from "next/link";
 import { ArrowRight, Banknote, BriefcaseBusiness, ChartNoAxesCombined, Code2, Megaphone, Monitor, PencilRuler, ShieldCheck, Sparkles, Store, Tag, UsersRound } from "lucide-react";
 import type { HomeContent } from "@/lib/home-content";
@@ -10,27 +11,12 @@ export function HomeOpportunityBanner() {
     return <section aria-label="Khám phá cơ hội" className="grid gap-5 lg:grid-cols-[0.85fr_2fr]">
         <div className="rounded-xl border border-border/50 bg-card p-5 shadow-card">
             <ul className="space-y-1">{[{ label: "Bán sỉ - Bán lẻ - Quản lý cửa hàng", query: "Bán hàng", Icon: Store }, { label: "Bán hàng - Kinh doanh", query: "Kinh doanh", Icon: Tag }, { label: "Marketing", query: "Marketing", Icon: Megaphone }, { label: "Khoa học - Kỹ thuật", query: "Kỹ thuật", Icon: UsersRound }].map(({ label, query, Icon }) => <li key={label}>
-                <Link href={`/jobs?q=${encodeURIComponent(query)}`} className="flex min-h-11 items-center gap-3 text-xs font-semibold hover:text-primary">
+                <Link href={`/jobs?q=${encodeURIComponent(query)}`} className="flex min-h-11 items-center gap-3 text-sm font-semibold hover:text-primary">
                     <Icon className="size-4 shrink-0 text-primary" />{label}</Link>
             </li>)}</ul>
-            <Link href="#industries" className="mt-3 block border-t border-border pt-4 text-center text-sm font-medium text-primary">Tất cả các ngành</Link>
+            <Link href="#industries" className="mt-3 block border-t border-border pt-4 text-center text-base font-medium text-primary">Tất cả các ngành</Link>
         </div>
-        <div className="relative isolate flex min-h-64 overflow-hidden rounded-xl bg-secondary p-6 sm:p-8">
-            <div className="relative z-10 max-w-md">
-                <p className="text-sm font-medium text-primary">Cơ hội luôn ở phía trước</p>
-                <h2 className="mt-2 text-2xl leading-tight font-bold text-brand-deep sm:text-3xl">Khám phá công việc mới.<br />
-                    <span className="text-primary">Mở thêm cánh cửa tương lai.</span>
-                </h2>
-                <div className="mt-4 flex flex-wrap gap-2 text-[11px] text-primary">
-                    <span className="rounded-full bg-card px-3 py-2">Thời gian linh hoạt</span>
-                    <span className="rounded-full bg-card px-3 py-2">Kết nối trực tiếp</span>
-                    <span className="rounded-full bg-card px-3 py-2">Thông tin rõ ràng</span>
-                </div>
-                <Link href="/jobs" className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand-bright px-5 text-sm font-semibold text-white hover:bg-primary">Khám phá ngay<ArrowRight className="size-4" />
-                </Link>
-            </div>
-            <Image src="/images/image 16.png" width={578} height={728} alt="" className="absolute -right-7 -bottom-12 hidden w-56 opacity-40 xl:block" />
-        </div>
+        <HomeBannerCarousel />
     </section>;
 }
 

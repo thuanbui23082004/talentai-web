@@ -1,8 +1,9 @@
 import type { JobSearchFilter } from "@/components/shared/job-search-bar";
+import { provinces, provinceCity } from "@/lib/locations/vietnam";
 
 export const JOB_LOCATIONS = [
     { value: "", label: "Tất cả các địa điểm" },
-    ...["TP.HCM", "Hà Nội", "Đà Nẵng", "An Giang", "Bà Rịa - Vũng Tàu", "Bạc Liêu", "Bến Tre"].map((city) => ({ value: city, label: city })),
+    ...provinces.map((province) => ({ value: provinceCity(province.name), label: provinceCity(province.name) })),
 ];
 
 export const JOB_SEARCH_FILTERS: JobSearchFilter[] = [

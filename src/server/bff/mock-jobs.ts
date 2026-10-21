@@ -3,7 +3,7 @@ import type { components } from "@/lib/api/generated/schema";
 import { mockJobs } from "@/mocks/fixtures/jobs";
 import { apiError } from "./responses";
 
-const supported = new Set(["q", "city", "page", "pageSize", "sort", "salaryMin", "salaryMax", "minExperience", "maxExperience", "level", "workType"]);
+const supported = new Set(["q", "city", "provinceCode", "wardCode", "page", "pageSize", "sort", "salaryMin", "salaryMax", "minExperience", "maxExperience", "level", "workType"]);
 
 export function searchMockJobs(params: URLSearchParams, empty = false): Response {
   // Explicitly reject filters not implemented yet instead of silently ignoring them.
@@ -12,12 +12,14 @@ export function searchMockJobs(params: URLSearchParams, empty = false): Response
   }
   const parsed = parseJobSearchParams(params);
   if (!parsed.success) return apiError(422, "VALIDATION_FAILED", "Bộ lọc hoặc phân trang không hợp lệ.");
-  const { q, city, page, pageSize, sort, salaryMin, salaryMax, minExperience, maxExperience, level, workType } = parsed.data;
+  const { q, city, provinceCode, wardCode, page, pageSize, sort, salaryMin, salaryMax, minExperience, maxExperience, level, workType } = parsed.data;
   if (sort === "match_score") return apiError(401, "UNAUTHENTICATED", "Vui lòng đăng nhập để sử dụng tính năng này.");
   const normalize = (text: string) => text.toLocaleLowerCase("vi").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
   const items = empty ? [] : mockJobs.filter((job) => job.status === "open"
     && (!q || normalize([job.title, job.company.name, ...(job.skills ?? [])].join(" ")).includes(normalize(q)))
     && (!city || normalize(job.location.city).includes(normalize(city)))
+    && (!provinceCode || job.location.provinceCode === provinceCode)
+    && (!wardCode || job.location.wardCode === wardCode)
     && (salaryMin === undefined || (job.salary?.max ?? -1) >= salaryMin)
     && (salaryMax === undefined || (job.salary?.min ?? Infinity) <= salaryMax)
     && (minExperience === undefined || job.minExperienceYears >= minExperience)

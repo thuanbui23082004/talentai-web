@@ -2171,6 +2171,18 @@ paths:
         schema:
           type: string
           format: uuid
+      - name: provinceCode
+        in: query
+        description: Mã tỉnh/thành hiện hành sau 07/2025, gồm 2 chữ số.
+        schema:
+          type: string
+          pattern: '^[0-9]{2}$'
+      - name: wardCode
+        in: query
+        description: Mã phường/xã/đặc khu hiện hành, gồm 5 chữ số. Phải đi cùng provinceCode và thuộc tỉnh đã chọn.
+        schema:
+          type: string
+          pattern: '^[0-9]{5}$'
       - name: salaryMin
         in: query
         schema:
@@ -7131,6 +7143,15 @@ components:
       required:
       - city
       properties:
+        provinceCode:
+          type: string
+          pattern: '^[0-9]{2}$'
+        wardCode:
+          type: string
+          pattern: '^[0-9]{5}$'
+        ward:
+          type: string
+          description: Tên phường/xã/đặc khu hiện hành.
         locationId:
           $ref: '#/components/schemas/Id'
         city:

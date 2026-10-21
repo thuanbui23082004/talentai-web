@@ -23,7 +23,7 @@ export function JobCard({ job }: { job: Job }) {
                 <div className="mt-1.5 flex items-center gap-x-2 text-[13px] leading-5 font-medium text-primary">
                     <span className="shrink-0" title={formatSalaryRange(job.salary)}>{formatSalaryRange(job.salary, true)}</span>
                     <span aria-hidden="true" className="h-3 shrink-0 border-l border-border" />
-                    <span className="min-w-0 truncate" title={job.location.city}>{job.location.city}</span>
+                    <span className="min-w-0 truncate" title={[job.location.ward, job.location.city].filter(Boolean).join(", ")}>{job.location.city}{job.location.ward ? ` · ${job.location.ward}` : ""}</span>
                 </div>
             </div>
             </div>

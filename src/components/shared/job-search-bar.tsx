@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, type SelectOption } from "@/components/ui/select";
 import { SearchBar } from "./search-bar";
+import type { SearchLocationRenderer } from "./search-bar";
 
 /** Presentation values. The consuming feature maps supported keys to its API contract. */
 export type JobSearchValues = {
@@ -22,6 +24,9 @@ export type JobSearchFilter = {
 };
 
 export type JobSearchBarProps = {
+    renderLocation?: SearchLocationRenderer;
+    stickyFilters?: boolean;
+    heading?: ReactNode;
     locations: SelectOption[];
     filters?: JobSearchFilter[];
     initialValues?: Partial<JobSearchValues>;
@@ -41,18 +46,32 @@ export function JobSearchBar({
     showQuickRecruitment = false,
     quickRecruitmentDisabled = false,
     queryLabel,
+    stickyFilters,
+    heading,
+    renderLocation,
 }: JobSearchBarProps) {
     const [selected, setSelected] = useState(initialValues?.filters ?? {});
-    const [quickRecruitment, setQuickRecruitment] = useState(initialValues?.quickRecruitment ?? false);
+    const [searchValues, setSearchValues] = useState({ query: initialValues?.query ?? "", location: initialValues?.location ?? "" });
+    const [quickRecruitment, setQuickRecruitment] = useState(
+        initialValues?.quickRecruitment ?? false,
+    );
 
     return (
         <SearchBar
+            renderLocation={renderLocation}
+            onLocationChange={(values) => { if (stickyFilters) onSearch({ ...values, quickRecruitment, filters: selected }); }}
+            onValuesChange={setSearchValues}
+            stickyFilters={stickyFilters}
+            heading={heading}
             locations={locations}
             defaultQuery={initialValues?.query}
             defaultLocation={initialValues?.location}
             queryLabel={queryLabel}
-            onSearch={(values) => onSearch({ ...values, quickRecruitment, filters: selected })}
+            onSearch={(values) =>
+                onSearch({ ...values, quickRecruitment, filters: selected })
+            }
             onReset={() => {
+                setSearchValues({ query: "", location: "" });
                 setSelected({});
                 setQuickRecruitment(false);
                 onReset?.();
@@ -64,8 +83,14 @@ export function JobSearchBar({
                             variant={quickRecruitment ? "secondary" : "outline"}
                             aria-pressed={quickRecruitment}
                             disabled={quickRecruitmentDisabled}
-                            title={quickRecruitmentDisabled ? "Tìm theo tuyển nhanh: sắp ra mắt" : undefined}
-                            onClick={() => setQuickRecruitment(!quickRecruitment)}
+                            title={
+                                quickRecruitmentDisabled
+                                    ? "Tìm theo tuyển nhanh: sắp ra mắt"
+                                    : undefined
+                            }
+                            onClick={() =>
+                                setQuickRecruitment(!quickRecruitment)
+                            }
                             className="gap-2 px-3 text-sm font-semibold"
                         >
                             <Zap className="text-primary" />
@@ -79,8 +104,17 @@ export function JobSearchBar({
                             placeholder={filter.label}
                             value={selected[filter.key] ?? ""}
                             disabled={filter.disabled}
-                            options={[{ value: "", label: filter.label }, ...filter.options.filter((option) => option.value !== "")]}
-                            onValueChange={(value) => setSelected((previous) => ({ ...previous, [filter.key]: value ?? "" }))}
+                            options={[
+                                { value: "", label: filter.label },
+                                ...filter.options.filter(
+                                    (option) => option.value !== "",
+                                ),
+                            ]}
+                            onValueChange={(value) => {
+                                const next = { ...selected, [filter.key]: value ?? "" };
+                                setSelected(next);
+                                if (stickyFilters) onSearch({ ...searchValues, quickRecruitment, filters: next });
+                            }}
                             className="w-full text-sm font-medium sm:w-auto sm:min-w-36"
                         />
                     ))}
