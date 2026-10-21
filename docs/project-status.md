@@ -11,6 +11,8 @@ không phụ thuộc vào backend chạy local. Không coi tên thư mục, page
 | `/` trang chủ | Đã dựng theo ảnh: hero, tìm việc, hai bộ sưu tập, ngành nghề, công ty, tin tức và CV; SSR jobs/cache client. Nội dung trình bày mẫu, xem `docs/home-page.md` |
 | Header/footer public | Nav tím, dropdown, menu mobile tự đóng, tài khoản theo session; footer 4 cột, app/social có modal trạng thái |
 | `/companies` | Hero dùng banner_company.png, số đếm một lần mỗi phiên; tìm tên/địa điểm/ngành/quy mô/xác minh, tải thêm 12 công ty mỗi lần; dùng chung CompanyCard với trang chủ |
+| `/companies/[companyId]` | Hồ sơ SSR + SEO; giới thiệu xem thêm, thông tin/liên hệ/bản đồ/chia sẻ, việc đang tuyển phân trang và công ty cùng lĩnh vực. Theo dõi/đánh giá chưa triển khai |
+| GET `/companies/{companyId}` và `/companies/{companyId}/jobs` | Mock hồ sơ và việc open của đúng company ID, 404/empty/error/slow; chưa xác minh với backend thật |
 | GET `/companies` | Mock 18 doanh nghiệp minh họa; lọc trước phân trang; hỗ trợ empty/slow/error. Contract thêm size/isVerified/hiringOnly; chưa tích hợp backend thật |
 | Bộ UI dùng chung | Có 18 nhóm component, token tím/trắng, Inter local; đặc tả tại `docs/ui-spec.md` |
 | `/ui` | Trang xem thử biến thể, trạng thái và tương tác; dữ liệu tuyển dụng ở đây chỉ để minh họa |

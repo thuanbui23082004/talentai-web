@@ -13,7 +13,7 @@ export function JobCompanyCard({ job }: { job: JobDetail }) {
             <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/50 bg-card p-2 text-center text-xs font-bold text-primary">
                 {job.company.logoUrl ? <Image src={job.company.logoUrl} alt={job.company.name} fill unoptimized className="object-contain p-2" /> : <span>{name}</span>}
             </div>
-            <div className="min-w-0"><h3 className="text-base font-semibold leading-snug">{job.company.name}</h3><Link href={`/jobs?${new URLSearchParams({ q: job.company.name })}`} className="mt-1 inline-block text-xs font-medium text-primary hover:underline">Xem việc làm tại công ty →</Link></div>
+            <div className="min-w-0"><h3 className="text-base font-semibold leading-snug">{job.company.name}</h3><Link href={`/companies/${job.company.id}`} className="mt-1 inline-block text-xs font-medium text-primary hover:underline">Xem thông tin công ty →</Link></div>
         </div>
         <div className="mt-5 space-y-3 text-sm leading-6 text-muted-foreground">
             <p className="flex items-start gap-2"><Building2 aria-hidden="true" className="mt-1 size-4 shrink-0" />{job.industry?.name ?? "Thông tin ngành nghề chưa cập nhật"}</p>

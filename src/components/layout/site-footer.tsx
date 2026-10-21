@@ -8,8 +8,8 @@ const appDescription = "Ứng dụng đang được hoàn thiện. Bạn có th�
 
 export function SiteFooter() {
     return <footer className="bg-footer text-white">
-        <div className="ui-container pt-12 pb-5">
-            <div className="grid gap-9 text-xs leading-7 sm:grid-cols-2 lg:grid-cols-[1.35fr_1fr_1fr_1.15fr] lg:gap-8">
+        <div className="mx-auto w-full max-w-[1180px] px-5 pt-10 pb-5 sm:px-8 sm:pt-12">
+            <div className="grid gap-x-8 gap-y-9 text-xs leading-7 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(220px,1.1fr)] lg:gap-x-6 xl:gap-x-8 [&>div]:min-w-0">
                 <div>
                     <h2 className="mb-4 text-sm font-bold">Về chúng tôi</h2>
                     <p className="font-semibold">TalentAI – Kết nối nhân tài với cơ hội</p>
@@ -69,7 +69,7 @@ export function SiteFooter() {
                 </div>
             </div>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-2 border-t border-white/15 pt-4 text-center text-xs text-white/65">
-                <span className="scale-75">
+                <span className="relative h-7 w-24 shrink-0 [&>span]:origin-top-left [&>span]:scale-75">
                     <BrandLogo light />
                 </span>
                 <p>© {new Date().getFullYear()} TalentAI. Kết nối nhân tài, kiến tạo tương lai.</p>

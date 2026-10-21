@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test("loads companies, loads more, searches and resets filters", async ({ page }) => {
     await page.goto("/companies");
-    const cards = page.locator('a[href^="/jobs?"]').filter({ has: page.locator("h3") });
+    const cards = page.locator('a[href^="/companies/"]').filter({ has: page.locator("h3") });
     await expect(cards).toHaveCount(12);
     await page.getByRole("button", { name: "Xem thêm công ty nổi bật", exact: true }).click();
     await expect(cards).toHaveCount(18);
@@ -40,7 +40,7 @@ test("fits desktop and mobile and only animates once per session", async ({ page
         await expect(page.getByRole("heading", { name: "Sao Việt", exact: true })).toBeVisible();
         await expect.poll(() => page.evaluate(() => sessionStorage.getItem("companies-hero-count"))).toBe("1");
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-        const cards = page.locator('a[href^="/jobs?"]').filter({ has: page.locator("h3") });
+        const cards = page.locator('a[href^="/companies/"]').filter({ has: page.locator("h3") });
         const boxes = await cards.evaluateAll((elements) => elements.map((element) => { const { y, height } = element.getBoundingClientRect(); return { y, height }; }));
         const columns = width >= 1024 ? 4 : width >= 768 ? 3 : 2;
         expect(boxes.filter((box) => Math.abs(box.y - boxes[0].y) < 1)).toHaveLength(columns);

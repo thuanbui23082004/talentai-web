@@ -79,6 +79,7 @@
 }
 
 @layer base {
+  html { scroll-padding-top: 4rem; }
   * { @apply border-border; }
   body { @apply bg-background font-sans text-sm text-foreground antialiased; }
   button, input, select, textarea { font: inherit; }

@@ -54,11 +54,11 @@ test("keeps filters at the top while scrolling results and paginates", async ({ 
   await expect(page.getByRole("button", { name: "Trang 2", exact: true })).toHaveAttribute("aria-current", "page");
   await page.evaluate(() => window.scrollTo(0, 650));
   const bar = page.getByRole("button", { name: "Xóa lọc", exact: true }).locator("..");
-  await expect.poll(async () => Math.round((await bar.boundingBox())?.y ?? -1)).toBe(0);
+  await expect.poll(async () => Math.round((await bar.boundingBox())?.y ?? -1)).toBe(64);
   await expect(page.getByLabel("Tất cả kinh nghiệm")).toBeVisible();
   await page.setViewportSize({ width: 375, height: 800 });
   await page.evaluate(() => window.scrollTo(0, 650));
-  await expect.poll(async () => Math.round((await bar.boundingBox())?.y ?? -1)).toBe(0);
+  await expect.poll(async () => Math.round((await bar.boundingBox())?.y ?? -1)).toBe(64);
   expect((await bar.boundingBox())?.height).toBeLessThan(120);
 });
 

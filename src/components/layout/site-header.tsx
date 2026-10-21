@@ -11,12 +11,13 @@ const navigation = [
 ];
 
 export function SiteHeader() {
-    return <header className="relative z-30">
+    return <>
         <div className="flex min-h-12 flex-wrap items-center justify-center gap-x-5 gap-y-2 bg-card px-5 py-2 text-center text-xs sm:text-sm">
             <p>Ứng tuyển một chạm – Mọi lúc, mọi nơi cùng <strong className="text-primary">TalentAI</strong>
             </p>
             <AvailabilityButton title="TalentAI trên điện thoại" description="Ứng dụng TalentAI đang được hoàn thiện. Trong thời gian chờ, bạn có thể tìm việc và quản lý tài khoản ngay trên website bằng điện thoại." className="rounded-lg bg-brand-deep px-4 py-2.5 text-xs font-semibold text-white hover:bg-primary">Tải app ngay</AvailabilityButton>
         </div>
+        <header className="sticky top-0 z-[45] bg-brand-deep shadow-card">
         <div className="bg-brand-deep text-white">
             <div className="ui-container flex h-16 items-center gap-6 xl:gap-8">
                 <Link href="/" aria-label="TalentAI — Trang chủ">
@@ -68,5 +69,5 @@ export function SiteHeader() {
                 </NavigationDetails>
             </div>
         </div>
-    </header>;
+    </header></>;
 }

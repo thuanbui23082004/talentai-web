@@ -110,7 +110,7 @@ export function SearchBar({
             {filters && expanded && (
                 <div
                     id={filtersId}
-                    className={`flex flex-nowrap items-center gap-2.5 overflow-x-auto bg-card p-4 [&>button]:w-auto [&>button]:shrink-0 sm:flex-wrap sm:overflow-visible sm:px-5 ${stickyFilters ? "sticky top-0 z-40 rounded-b-2xl border border-primary/10 shadow-card" : ""}`}
+                    className={`flex flex-nowrap items-center gap-2.5 overflow-x-auto bg-card p-4 [&>button]:w-auto [&>button]:shrink-0 sm:flex-wrap sm:overflow-visible sm:px-5 ${stickyFilters ? "sticky top-16 z-30 rounded-b-2xl border border-primary/10 shadow-card" : ""}`}
                 >
                     {filters}
                     <Button
