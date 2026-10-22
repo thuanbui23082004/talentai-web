@@ -1,16 +1,19 @@
 "use client";
 
+import { CandidatePageTitle } from "@/components/layout/candidate/candidate-page-title";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, BriefcaseBusiness, CalendarDays, CalendarPlus, CheckCheck, ChevronRight, CircleCheck, Home, Search, SlidersHorizontal } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, CalendarDays, CalendarPlus, CheckCheck, CircleCheck, Search, SlidersHorizontal } from "lucide-react";
 import { Alert, Button, Input, Modal, ModalContent, Pagination, Select, Skeleton, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
 import { useApplications, useInterviews } from "../hooks/use-applications";
 import { APPLICATION_LABELS } from "../labels";
-import { downloadInterviewCalendar, formatInterviewTime, scheduledInterview } from "../presentation";
+import { downloadInterviewCalendar, scheduledInterview } from "../presentation";
 import type { Application } from "../types";
 import { ApplicationCard, InterviewActions, InterviewSchedule } from "./application-card";
+import { NextInterviewCharacter } from "./next-interview-character";
 
 const FILTERS = [
     { value: "all", label: "Tất cả", statuses: undefined },
@@ -54,19 +57,12 @@ export function ApplicationsPage() {
     const nextInterview = upcoming[0];
     const selectedInterview = selected && scheduledInterview(interviews.data ?? [], selected.id);
     return <div className="candidate-page space-y-6">
-        <nav aria-label="Đường dẫn" className="flex items-center gap-2 text-xs text-muted-foreground"><Link href="/candidate/dashboard" className="flex items-center gap-1 hover:text-primary"><Home className="size-3.5" />Tổng quan</Link><ChevronRight className="size-3" /><span className="text-primary">Quản lý ứng tuyển</span></nav>
-        <section className="relative overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-secondary/80 via-card to-secondary/30 p-5 sm:p-7">
-            <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-16 size-64 rounded-full border-[32px] border-primary/5" />
-            <div className="relative grid items-center gap-6 xl:grid-cols-[1fr_340px]">
-                <div><span className="text-xs font-semibold tracking-wider text-primary uppercase">Mỗi bước tiến, một cơ hội mới</span><h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Việc làm đã ứng tuyển</h1><p className="mt-2 max-w-lg text-sm leading-6 text-muted-foreground">Theo dõi hồ sơ, đón nhận phản hồi và sẵn sàng cho buổi phỏng vấn tiếp theo.</p><div className="mt-5 flex flex-wrap gap-3 text-xs"><span className="flex items-center gap-2 rounded-full border border-border/60 bg-card px-3 py-2"><BriefcaseBusiness className="size-4 text-primary" /><strong>{overview.data?.meta.totalItems ?? "—"}</strong> hồ sơ đã gửi</span><span className="flex items-center gap-2 rounded-full border border-border/60 bg-card px-3 py-2"><CalendarDays className="size-4 text-primary" /><strong>{interviews.isSuccess ? upcoming.length : "—"}</strong> lịch phỏng vấn sắp tới</span></div></div>
-                {nextInterview && <div className="rounded-xl border border-primary/15 bg-card p-4 shadow-card">
-                    <div className="mb-3 flex items-center justify-between gap-2"><p className="flex items-center gap-2 text-xs font-semibold text-primary"><span className="size-2 rounded-full bg-primary" />LỊCH HẸN GẦN NHẤT</p><CalendarDays className="size-4 text-primary" /></div>
-                    <p className="truncate text-sm font-semibold" title={nextInterview.jobTitle}>{nextInterview.jobTitle}</p>
-                    <p className="mt-1 truncate text-xs text-muted-foreground">{nextInterview.company?.name}</p>
-                    <p className="mt-3 text-sm font-semibold">{formatDate(nextInterview.startTime)} <span className="mx-1 text-border">/</span> {formatInterviewTime(nextInterview.startTime)} <span className="text-xs font-normal text-muted-foreground">GMT+7</span></p>
-                    <Button variant="secondary" className="mt-3 w-full" onClick={() => update({ tab: "interview", q: "", page: "" })}>Xem lịch phỏng vấn<ArrowRight /></Button>
-                </div>}
+        <section className="relative rounded-2xl border border-primary/10 bg-gradient-to-br from-secondary/80 via-card to-secondary/30" data-applications-hero>
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"><div className="absolute -top-24 -right-16 size-64 rounded-full border-[32px] border-primary/5" /></div>
+            <div className={`relative p-5 sm:p-7 ${nextInterview ? "xl:mr-[540px] 2xl:mr-[600px]" : ""}`} data-applications-hero-copy>
+                <div><span className="text-xs font-semibold tracking-wider text-primary uppercase">Mỗi bước tiến, một cơ hội mới</span><CandidatePageTitle className="mt-2">Việc làm đã ứng tuyển</CandidatePageTitle><p className="mt-2 max-w-lg text-sm leading-6 text-muted-foreground">Theo dõi hồ sơ, đón nhận phản hồi và sẵn sàng cho buổi phỏng vấn tiếp theo.</p><div className="mt-5 flex flex-wrap gap-3 text-xs"><span className="flex items-center gap-2 rounded-full border border-border/60 bg-card px-3 py-2"><BriefcaseBusiness className="size-4 text-primary" /><strong className="text-base leading-5 font-bold tabular-nums">{overview.data?.meta.totalItems ?? "—"}</strong> hồ sơ đã gửi</span><span className="flex items-center gap-2 rounded-full border border-border/60 bg-card px-3 py-2"><CalendarDays className="size-4 text-primary" /><strong className="text-base leading-5 font-bold tabular-nums">{interviews.isSuccess ? upcoming.length : "—"}</strong> lịch phỏng vấn sắp tới</span></div></div>
             </div>
+            {nextInterview && <NextInterviewCharacter interview={nextInterview} onOpen={() => update({ tab: "interview", q: "", page: "" })} />}
         </section>
         <Tabs value={tab.value} onValueChange={(value) => { if (typeof value === "string") update({ tab: value, page: "" }); }}>
             <TabsList className="w-full justify-start gap-1 rounded-none border-0 border-b border-border bg-transparent p-0">{FILTERS.map((filter) => <TabsTrigger key={filter.value} value={filter.value} className="min-h-11 rounded-none border-b-2 border-transparent px-3 text-xs data-active:border-primary data-active:bg-transparent data-active:shadow-none sm:px-4 sm:text-sm">{filter.label}</TabsTrigger>)}</TabsList>
@@ -78,9 +74,9 @@ export function ApplicationsPage() {
                 </div>
             </div>
             {interviews.isError && <Alert className="mt-4" variant="warning" title="Chưa tải được lịch phỏng vấn"><div className="flex flex-wrap items-center gap-3">Thông tin hồ sơ vẫn được hiển thị.<Button variant="outline" onClick={() => interviews.refetch()}>Thử tải lại lịch</Button></div></Alert>}
-            {FILTERS.map((filter) => <TabsContent key={filter.value} value={filter.value}>
+            <TabsContent key={tab.value} value={tab.value}>
                 {query.isPending ? <div role="status" aria-label="Đang tải hồ sơ ứng tuyển" className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">{Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="h-72 rounded-xl" />)}</div> : query.isError ? <Alert variant="error" title="Không thể tải hồ sơ ứng tuyển"><p>Vui lòng thử lại để xem các cập nhật mới nhất.</p><Button variant="outline" className="mt-3" onClick={() => query.refetch()}>Thử lại</Button></Alert> : query.data.items.length === 0 ? <div className="rounded-2xl border border-dashed border-border bg-card px-5 py-14 text-center"><span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-secondary text-primary"><BriefcaseBusiness className="size-6" /></span><h2 className="mt-4 text-lg font-semibold">{q ? "Không tìm thấy hồ sơ phù hợp" : page > 1 ? "Trang này chưa có hồ sơ" : "Chưa có hồ sơ trong mục này"}</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">{q ? "Thử một tên vị trí hoặc công ty khác, hoặc xóa từ khóa để xem lại danh sách." : "Mỗi cơ hội đều bắt đầu từ một bước nhỏ. Khám phá vị trí phù hợp và theo dõi hành trình tại đây."}</p><div className="mt-5 flex flex-wrap justify-center gap-3">{(q || page > 1) && <Button variant="outline" onClick={() => update({ q: "", page: "" })}>Xóa bộ lọc</Button>}<Link href="/jobs" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground">Khám phá việc làm<ArrowRight className="size-4" /></Link></div></div> : <><div aria-busy={query.isFetching} className={`grid items-start gap-4 md:grid-cols-2 2xl:grid-cols-3 ${query.isPlaceholderData ? "opacity-60" : ""}`}>{query.data.items.map((application) => <ApplicationCard key={application.id} application={application} interview={scheduledInterview(interviews.data ?? [], application.id)} interviewState={interviews.isPending ? "loading" : interviews.isError ? "error" : "ready"} onDetails={() => setSelected(application)} />)}</div><div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border/60 bg-card px-4 py-3"><p aria-live="polite" className="text-xs text-muted-foreground">Hiển thị <strong className="text-foreground">{(page - 1) * 6 + 1}–{Math.min(page * 6, query.data.meta.totalItems)}</strong> trong {query.data.meta.totalItems} hồ sơ</p><Pagination page={page} totalPages={query.data.meta.totalPages} disabled={query.isPlaceholderData} onPageChange={(value) => update({ page: String(value) })} /></div></>}
-            </TabsContent>)}
+            </TabsContent>
         </Tabs>
         <p className="flex items-start justify-center gap-2 text-center text-xs leading-5 text-muted-foreground"><CheckCheck className="mt-0.5 size-3.5 shrink-0" />Theo dõi thông báo để không bỏ lỡ phản hồi từ nhà tuyển dụng.</p>
         <Modal open={!!selected} onOpenChange={(open) => { if (!open) setSelected(null); }}><ModalContent title="Chi tiết ứng tuyển" description={selected ? `${selected.job.title} · ${selected.job.company.name}` : undefined}>

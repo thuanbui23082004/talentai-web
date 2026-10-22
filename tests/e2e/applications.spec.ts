@@ -1,5 +1,21 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { randomUUID } from "node:crypto";
+
+async function expectAlignedCards(page: Page) {
+    const cards = await page.locator("main article").evaluateAll((elements) => elements.map((element) => {
+        const card = element.getBoundingClientRect();
+        const panel = element.querySelector('section[aria-label="Hồ sơ ứng tuyển"]')!;
+        const footer = panel.lastElementChild!.getBoundingClientRect();
+        return { top: Math.round(card.top), height: card.height, panelTop: panel.getBoundingClientRect().top, footerTop: footer.top };
+    }));
+    expect(cards.length).toBeGreaterThan(1);
+    const rows = Map.groupBy(cards, (card) => card.top);
+    for (const row of rows.values()) {
+        for (const key of ["height", "panelTop", "footerTop"] as const) {
+            expect(Math.max(...row.map((card) => card[key])) - Math.min(...row.map((card) => card[key]))).toBeLessThan(1);
+        }
+    }
+}
 
 test("candidate tracks applications, confirms an interview and downloads calendar", async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 1440, height: 1000 });
@@ -9,7 +25,36 @@ test("candidate tracks applications, confirms an interview and downloads calenda
     await page.goto("/candidate/applications");
     await expect(page.getByRole("heading", { name: "Việc làm đã ứng tuyển" })).toBeVisible();
     await expect(page.getByText("Hiển thị", { exact: false })).toContainText("1–6 trong 12 hồ sơ");
+    await expectAlignedCards(page);
+    const character = page.locator("[data-interview-character]");
+    await expect(character).toBeVisible();
+    await expect(character.locator("img")).toHaveJSProperty("complete", true);
+    expect(await character.locator("img").evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
     await page.screenshot({ path: testInfo.outputPath("applications-desktop.png"), fullPage: true });
+    for (const width of [375, 640, 768, 1024, 1280, 1440, 1920]) {
+        await page.setViewportSize({ width, height: 1000 });
+        const content = page.locator("[data-interview-character-content]");
+        expect(await content.evaluate((element) => {
+            const box = element.getBoundingClientRect();
+            return box.height >= 44 && element.scrollHeight <= element.clientHeight + 1 &&
+                [...element.children].filter((child) => child.getBoundingClientRect().height > 0).every((child) => {
+                    const rect = child.getBoundingClientRect();
+                    return rect.left >= box.left - 1 && rect.right <= box.right + 1 && rect.top >= box.top - 1 && rect.bottom <= box.bottom + 1;
+                });
+        })).toBe(true);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+        if (width >= 1280) {
+            const heroHeight = await page.locator("[data-applications-hero]").evaluate((element) => element.getBoundingClientRect().height);
+            const copyHeight = await page.locator("[data-applications-hero-copy]").evaluate((element) => element.getBoundingClientRect().height);
+            expect(Math.abs(heroHeight - copyHeight - 2)).toBeLessThan(1);
+        }
+        await character.screenshot({ path: testInfo.outputPath(`interview-character-${width}.png`) });
+    }
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.getByRole("button", { name: "Xem lịch phỏng vấn", exact: true }).click();
+    await expect(page.getByRole("tab", { name: "Phỏng vấn", exact: true })).toHaveAttribute("aria-selected", "true");
+    await page.getByRole("tab", { name: "Tất cả", exact: true }).click();
+    await expect(page.getByText("Hiển thị", { exact: false })).toContainText("1–6 trong 12 hồ sơ");
     await page.getByRole("button", { name: "Trang 2", exact: true }).click();
     await expect(page.getByText("Hiển thị", { exact: false })).toContainText("7–12 trong 12 hồ sơ");
     await page.getByRole("tab", { name: "Phỏng vấn", exact: true }).click();
@@ -22,6 +67,7 @@ test("candidate tracks applications, confirms an interview and downloads calenda
     await dialog.getByRole("button", { name: "Thêm vào lịch cá nhân", exact: true }).click();
     expect((await download).suggestedFilename()).toMatch(/\.ics$/);
     await page.keyboard.press("Escape");
+    await expectAlignedCards(page);
     await page.screenshot({ path: testInfo.outputPath("applications-interviews.png"), fullPage: true });
     await page.getByRole("tab", { name: "Tất cả", exact: true }).click();
     await page.getByRole("textbox", { name: "Tìm vị trí hoặc công ty" }).fill("khong-co-cong-ty-nay");

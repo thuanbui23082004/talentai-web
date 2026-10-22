@@ -1,0 +1,17 @@
+{
+  "items": [
+    {
+      "job": {
+        "id": "10000000-0000-4000-8000-000000000001",
+        "title": "Lập trình viên Frontend React",
+        "company": { "id": "20000000-0000-4000-8000-000000000001", "name": "Công ty mẫu Sao Việt" },
+        "location": { "city": "Đà Nẵng", "provinceCode": "48", "wardCode": "20194", "ward": "Phường Hải Vân" },
+        "workType": "full_time", "level": "junior", "status": "open", "minExperienceYears": 1,
+        "salary": { "min": 15000000, "max": 25000000, "currency": "VND", "period": "month", "negotiable": false },
+        "skills": ["React", "TypeScript"], "postedAt": "2026-10-01T00:00:00Z", "applicationDeadline": "2026-12-31"
+      },
+      "savedAt": "2026-10-21T07:30:00Z"
+    }
+  ],
+  "meta": { "page": 1, "pageSize": 1, "totalItems": 9, "totalPages": 9 }
+}

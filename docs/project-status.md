@@ -21,7 +21,9 @@ không phụ thuộc vào backend chạy local. Không coi tên thư mục, page
 | `/jobs` | Tìm kiếm qua URL; 12 card/trang; bộ lọc sticky tự cập nhật; loading, empty, error, thử lại |
 | `/jobs/[jobId]` | Trang chi tiết SSR và metadata; tái sử dụng JobSearch, JobCard, header/footer; mô tả, yêu cầu, quyền lợi, sidebar, chia sẻ, tin cùng địa điểm; loading/error/404 |
 | GET `/jobs/{jobId}` | Mock chi tiết cho 18 tin công khai; trả 404 cho tin không có; kịch bản empty/error/slow. Real proxy chưa mở endpoint chi tiết |
-| Thẻ việc làm | Popup xem nhanh khi hover/focus; chạm tiêu đề hoặc “Xem chi tiết” mở `/jobs/[jobId]`; ứng tuyển/lưu việc vẫn chưa triển khai |
+| Thẻ việc làm | Popup xem nhanh khi hover/focus; chạm tiêu đề hoặc “Xem chi tiết” mở `/jobs/[jobId]`. Nút trái tim lưu/bỏ lưu hoạt động qua BFF cho ứng viên, đồng bộ với trang đã lưu; khách mở trang đăng nhập. Ứng tuyển chưa triển khai |
+| `/candidate/saved-jobs` | Trang Việc làm đã lưu tái sử dụng JobCard: thống kê tổng/còn tuyển/hết hạn trong 7 ngày; tìm vị trí/công ty không dấu, lọc địa điểm/trạng thái, sắp xếp và phân trang 6 thẻ; bộ lọc qua URL. Tin ngừng tuyển không mở chi tiết/ứng tuyển. Bỏ lưu trực tiếp và hoàn tác; loading/empty/error/retry, desktop/mobile. Đã nối sidebar |
+| API việc làm đã lưu | GET `/candidate/saved-jobs`, PUT/DELETE `/candidate/saved-jobs/{jobId}` theo contract hiện có. 9 tin minh họa (gồm 1 tin lưu trữ đã đóng), trạng thái riêng mỗi tài khoản trong bộ nhớ server, kiểm tra session/role/CSRF/Origin; PUT idempotent. Contract chỉ phân trang: client tải hết các trang rồi tìm kiếm/lọc/sắp xếp cục bộ, không thêm tham số API. Khởi động lại server sẽ reset; chưa xác minh backend thật, real proxy vẫn đóng |
 | Backend proxy | Chỉ mở GET `/jobs`, GET `/health`; chưa xác minh với backend thật |
 | Auth/session | Mock đăng ký/đăng nhập/refresh/CSRF/me/logout; cookie và guard server; xem `docs/auth-flow.md` |
 | `/login`, `/register`, `/logout` | Form hai role; khung/ảnh/logo cố định, chỉ content cuộn; ảnh từ `public/images/auth`; logout có xác nhận |
@@ -40,7 +42,7 @@ Chọn tỉnh rồi chọn phường/xã tùy ý; hỗ trợ tìm tên không d�
 `city` vẫn hỗ trợ URL cũ. Các mã mới đã cập nhật contract và mock; backend thật cần triển khai cùng tham số, chưa xác nhận tích hợp real.
 Bộ lọc đã hỗ trợ thêm: `salaryMin`, `salaryMax` (giao khoảng), `minExperience`, `maxExperience`, `level`, `workType`. Bộ lọc khác chưa triển khai trả 422.
 `relevance` hiện giữ thứ tự mới nhất, chưa có thuật toán xếp hạng từ khóa.
-Từ khóa tìm kiếm thực hiện khi gửi form; tại `/jobs`, các bộ lọc và lựa chọn địa điểm tự cập nhật kết quả. Home đã có SSR jobs; `/jobs` hiện dùng client Query. Debounce từ khóa, chi tiết đầy đủ, ứng tuyển và lưu việc chưa triển khai.
+Từ khóa tìm kiếm thực hiện khi gửi form; tại `/jobs`, các bộ lọc và lựa chọn địa điểm tự cập nhật kết quả. Home đã có SSR jobs; `/jobs` hiện dùng client Query. Debounce từ khóa trên trang tìm việc và nộp hồ sơ ứng tuyển chưa triển khai. Lưu/bỏ lưu qua JobCard và trang `/candidate/saved-jobs` đã có mock hoạt động.
 
 Trang `/candidate/job-preferences` là giao diện tiêu chí tìm việc theo ảnh tham chiếu, mở từ nhóm **Hồ sơ việc làm → Tiêu chí tìm việc**. Form có tối đa 3 ngành, 5 địa điểm, 5 cấp bậc và 5 hình thức; khoảng lương hoặc thỏa thuận; ba lựa chọn phúc lợi; phần nâng cao thu gọn/mở rộng; Zod validation và Lưu/Hủy bản xem trước trong bộ nhớ trang. Địa điểm dùng snapshot 34 tỉnh/thành hiện hành (Đà Nẵng thay cho tên Quảng Nam cũ trong ảnh). Dữ liệu mặc định chỉ minh họa; tải lại trang sẽ reset. Chưa gọi GET/PUT `/candidate/job-preferences`: contract hiện có một `desiredLevel`, chưa có kinh nghiệm, nhiều cấp bậc và các phúc lợi như UI. Cần thống nhất contract trước khi tích hợp đầy đủ backend; không gửi các trường trình bày vào API.
 

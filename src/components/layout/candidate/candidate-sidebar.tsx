@@ -13,7 +13,6 @@ const menuClass = "flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.
 export function CandidateSidebar({ onNavigate, collapsed = false, onToggleCollapse }: { onNavigate?: () => void; collapsed?: boolean; onToggleCollapse?: () => void }) {
     const pathname = usePathname();
     const [profileOpen, setProfileOpen] = useState(candidateProfileNavigation.some((item) => pathname === item.href));
-    const SavedIcon = candidateSavedJobs.Icon;
     const itemClass = `${menuClass} ${collapsed ? "justify-center" : ""}`;
     const labelClass = collapsed ? "sr-only" : "";
     const link = ({ href, label, Icon }: typeof candidateNavigation[number]) => {
@@ -26,7 +25,7 @@ export function CandidateSidebar({ onNavigate, collapsed = false, onToggleCollap
             {link(candidateNavigation[0])}
             {collapsed ? <button type="button" title="Hồ sơ việc làm" aria-label="Hồ sơ việc làm" onClick={() => { setProfileOpen(true); onToggleCollapse?.(); }} className={itemClass}><ContactRound aria-hidden="true" className="size-4 shrink-0" /></button> : <NavigationDetails closeOnNavigate={false} open={profileOpen} onToggle={(event) => setProfileOpen(event.currentTarget.open)} className="group"><summary className={`${menuClass} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}><ContactRound aria-hidden="true" className="size-4 shrink-0" /><span className="flex-1">Hồ sơ việc làm</span><ChevronDown className="size-3.5 text-muted-foreground group-open:rotate-180" /></summary><div className="mt-1 space-y-1 border-l border-border pl-2 ml-5">{candidateProfileNavigation.map((item) => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? "page" : undefined} onClick={onNavigate} className={`flex min-h-10 w-full items-center rounded-lg px-3 text-left text-xs hover:bg-secondary hover:text-primary ${pathname === item.href ? "bg-secondary/80 font-medium text-primary" : "text-muted-foreground"}`}>{item.label}</Link>)}</div></NavigationDetails>}
             {candidateNavigation.slice(1).map(link)}
-            <AvailabilityButton title={candidateSavedJobs.label} description="Trang việc làm đã lưu đang được hoàn thiện." className={itemClass}><span title={collapsed ? candidateSavedJobs.label : undefined}><SavedIcon aria-hidden="true" className="size-4 shrink-0" /></span><span className={labelClass}>{candidateSavedJobs.label}</span></AvailabilityButton>
+            {link(candidateSavedJobs)}
             <div className="space-y-1 border-t border-border/50 pt-3 mt-4 lg:hidden"><Link href="/jobs" onClick={onNavigate} className={menuClass}>Tìm việc làm</Link><Link href="/companies" onClick={onNavigate} className={menuClass}>Khám phá công ty</Link></div>
         </nav>
         <div className="shrink-0 space-y-1 border-t border-border/50 p-3">

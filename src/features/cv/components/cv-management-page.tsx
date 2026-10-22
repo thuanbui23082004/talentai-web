@@ -1,5 +1,7 @@
 "use client";
 
+import { CandidatePageTitle } from "@/components/layout/candidate/candidate-page-title";
+
 import "./cv-presentation.css";
 
 import { useRef, useState } from "react";
@@ -52,7 +54,7 @@ export function CvManagementPage() {
 
     return <div className="candidate-page space-y-7">
         <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-            <div><h1 className="text-2xl font-bold tracking-tight">Quản lý CV & Mẫu CV</h1><p className="mt-1.5 text-xs leading-5 text-muted-foreground sm:text-sm">Tối ưu hồ sơ năng lực, thu hút nhà tuyển dụng hàng đầu với AI</p></div>
+            <div><CandidatePageTitle>Quản lý CV & Mẫu CV</CandidatePageTitle><p className="mt-1.5 text-xs leading-5 text-muted-foreground sm:text-sm">Tối ưu hồ sơ năng lực, thu hút nhà tuyển dụng hàng đầu với AI</p></div>
             <div aria-label="Thống kê CV minh họa" className="flex w-fit shrink-0 divide-x divide-border rounded-xl border border-border bg-card py-3 shadow-card"><div className="px-4 text-center"><p className="text-[10px] text-muted-foreground">Tổng CV</p><p className="mt-1 text-sm font-semibold">{cvs.length} / {PREVIEW_LIMIT}</p></div><div className="px-4 text-center"><p className="text-[10px] text-muted-foreground">Lượt xem hồ sơ</p><p className="mt-1 text-sm font-semibold text-primary">148</p></div><div className="px-4 text-center"><p className="text-[10px] text-muted-foreground">Cơ hội tìm việc</p><span className="mt-1 inline-block rounded-md bg-secondary px-2 py-0.5 text-[10px] font-medium text-primary">Đang mở</span></div></div>
         </header>
 

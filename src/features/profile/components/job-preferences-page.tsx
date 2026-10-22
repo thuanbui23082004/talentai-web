@@ -1,5 +1,7 @@
 "use client";
 
+import { CandidatePageTitle } from "@/components/layout/candidate/candidate-page-title";
+
 import { useState, type ReactNode } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +23,7 @@ export function JobPreferencesPage() {
     const multi = (name: "industries" | "locations" | "levels" | "workTypes", label: string, options: { value: string; label: string }[], max: number, placeholder: string, required = false) => <FormField label={<FieldLabel hint={`Tối đa ${max} ${name === "industries" ? "ngành nghề" : name === "locations" ? "địa điểm" : name === "levels" ? "cấp bậc" : "hình thức"}`} required={required}>{label}</FieldLabel>} error={errors[name]?.message}>{(field) => <Controller name={name} control={control} render={({ field: selected }) => <MultiSelect id={field.id} label={label} value={selected.value} onValueChange={(value) => { selected.onChange(value); setNotice(""); }} options={options} maxSelections={max} placeholder={placeholder} aria-describedby={field["aria-describedby"]} aria-invalid={field["aria-invalid"]} />} />}</FormField>;
     const salaryInput = (name: "salaryMin" | "salaryMax", label: string) => <FormField label={label} error={errors[name]?.message} className="[&>label]:sr-only">{(field) => <Controller name={name} control={control} render={({ field: amount }) => <Input {...field} {...amount} type="text" inputMode="decimal" autoComplete="off" disabled={negotiable} placeholder={name === "salaryMin" ? "Từ" : "Đến"} trailingIcon={<span className="flex h-9 items-center rounded-lg bg-muted px-3 text-xs text-muted-foreground">Triệu</span>} className="[&_input]:pr-19" />} />}</FormField>;
     return <div className="candidate-page">
-        <header className="mb-5"><h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Tiêu chí tìm việc</h1><p className="mt-2 text-sm text-muted-foreground">Tối ưu hồ sơ năng lực, thu hút nhà tuyển dụng hàng đầu với AI</p></header>
+        <header className="mb-5"><CandidatePageTitle>Tiêu chí tìm việc</CandidatePageTitle><p className="mt-2 text-sm text-muted-foreground">Tối ưu hồ sơ năng lực, thu hút nhà tuyển dụng hàng đầu với AI</p></header>
         <form noValidate onSubmit={handleSubmit((values) => { setSaved(values); reset(values); setNotice("Đã lưu tiêu chí vào bản xem trước."); })} className="space-y-7 rounded-2xl border border-border/30 bg-card p-5 sm:p-8 lg:p-10">
             <div className="grid items-start gap-x-10 gap-y-7 md:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
                 {multi("industries", "Ngành nghề làm việc", PREFERENCE_INDUSTRIES, 3, "Chọn ngành nghề", true)}

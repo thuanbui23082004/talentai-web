@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { CandidatePageTitle } from "@/components/layout/candidate/candidate-page-title";
 import Link from "next/link";
 import { ArrowRight, AudioLines, Bookmark, Send, Sparkles, Users, Zap } from "lucide-react";
 import { AvailabilityButton } from "@/components/shared/availability-button";
@@ -44,9 +45,10 @@ function MiniChart({ line = false }: { line?: boolean }) {
 
 export function CandidateDashboard({ user }: { user: AuthUser }) {
     return <div className="candidate-page candidate-dashboard space-y-5">
+        <CandidatePageTitle>Tổng quan</CandidatePageTitle>
         <section aria-labelledby="dashboard-greeting" className="relative isolate overflow-hidden rounded-2xl bg-[linear-gradient(110deg,#853de0,#6250ef_55%,#8278fa)] px-6 py-7 text-primary-foreground shadow-button sm:px-10 sm:py-8">
             <div className="relative z-10 max-w-xl sm:pr-32 lg:pr-16 xl:pr-0">
-                <h1 id="dashboard-greeting" className="text-2xl font-semibold tracking-tight sm:text-3xl">Chào buổi sáng, {user.fullName}!</h1>
+                <h2 id="dashboard-greeting" className="text-2xl font-semibold tracking-tight sm:text-3xl">Chào buổi sáng, {user.fullName}!</h2>
                 <p className="mt-3 max-w-lg text-xs leading-6 text-white/90 sm:text-sm">Hôm nay đã tìm thấy <span className="font-semibold text-white">18 cơ hội việc làm mới</span> phù hợp 90%+ với hồ sơ Digital Marketing của bạn.</p>
                 <Button nativeButton={false} render={<Link href="/jobs" />} variant="secondary" className="mt-5 border-0 bg-card px-6 font-medium hover:bg-secondary">Khám phá việc làm ngay</Button>
             </div>
