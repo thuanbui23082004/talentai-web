@@ -16,16 +16,18 @@ export function ModalContent({
     children,
     footer,
     className,
+    forceBackdrop = false,
 }: {
     title: string;
     description?: string;
     children?: ReactNode;
     footer?: ReactNode;
     className?: string;
+    forceBackdrop?: boolean;
 }) {
     return (
         <Dialog.Portal>
-            <Dialog.Backdrop className="fixed inset-0 z-50 bg-foreground/35 backdrop-blur-[3px] transition-opacity data-ending:opacity-0 data-starting:opacity-0" />
+            <Dialog.Backdrop forceRender={forceBackdrop} className="fixed inset-0 z-50 bg-foreground/35 backdrop-blur-[3px] transition-opacity data-ending:opacity-0 data-starting:opacity-0" />
             <Dialog.Popup
                 className={cn(
                     "fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-float outline-none transition-[opacity,scale] data-ending:scale-95 data-ending:opacity-0 data-starting:scale-95 data-starting:opacity-0",

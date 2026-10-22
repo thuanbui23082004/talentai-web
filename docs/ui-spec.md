@@ -46,6 +46,7 @@ Import trực tiếp từ `@/components/ui/<name>` hoặc public barrel `@/compo
 |---|---|
 | Button | `variant`: primary, secondary, outline, ghost, destructive, link; default alias primary. `size`, `loading`, `disabled`; mặc định type=button |
 | Input | HTML input props; text/email/password/search; `leadingIcon`, `trailingIcon`; password có nút hiện/ẩn |
+| DatePicker | `precision`: date/month/year; giá trị ISO dạng YYYY-MM-DD/YYYY-MM/YYYY, popup lịch tiếng Việt, lưới tháng/năm, chọn nhanh ngày/tháng/năm hiện tại, xóa lựa chọn; điều hướng bằng phím mũi tên và Escape; `max` chặn ngày tương lai cho ngày sinh |
 | FormField | `label`, `description`, `error`, `required`; render prop nối id/required/aria-describedby/aria-invalid tới control |
 | Select | `options`, `value`/`defaultValue`, `onValueChange`; Base UI quản lý bàn phím, focus, đóng/mở |
 | MultiSelect | Controlled `value: string[]`, `onValueChange`; chọn nhiều và bỏ từng chip; name tham gia form |

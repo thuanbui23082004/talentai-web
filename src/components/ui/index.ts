@@ -1,6 +1,7 @@
 export { Button, buttonVariants } from "./button";
 export type { ButtonProps } from "./button";
 export { Input } from "./input";
+export { DatePicker } from "./date-picker";
 export type { InputProps } from "./input";
 export { FormField } from "./form-field";
 export { Select } from "./select";

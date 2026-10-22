@@ -20,6 +20,12 @@ export function formatDate(value: string) {
     return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Asia/Ho_Chi_Minh" }).format(new Date(value));
 }
 
+export function formatMonthYear(value: string) {
+    if (/^\d{4}$/.test(value)) return value;
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) return "";
+    return `${value.slice(5)}/${value.slice(0, 4)}`;
+}
+
 export function formatDeadline(value?: string, now = new Date()) {
     if (!value) return "Chưa có hạn nộp";
     const deadline = Date.parse(`${value}T00:00:00Z`);
