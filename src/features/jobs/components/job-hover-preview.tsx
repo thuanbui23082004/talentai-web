@@ -13,8 +13,21 @@ export function JobHoverPreview({ job, children }: { job: Job; children: ReactEl
     return <PreviewCard.Root>
         <PreviewCard.Trigger render={children} delay={350} closeDelay={200} tabIndex={0} aria-label={`Xem nhanh: ${job.title}`} />
         <PreviewCard.Portal>
-            <PreviewCard.Positioner side="right" align="start" sideOffset={12} collisionPadding={16} className="z-40 max-w-[calc(100vw-2rem)]">
-                <PreviewCard.Popup aria-label="Xem nhanh công việc" role="region" className="max-h-[min(640px,calc(100dvh-2rem))] w-[min(600px,calc(100vw-2rem))] overflow-y-auto overscroll-contain rounded-2xl border border-border bg-card p-5 text-card-foreground shadow-float outline-none sm:p-6">
+            <PreviewCard.Positioner
+                side="right"
+                align="center"
+                sideOffset={8}
+                positionMethod="fixed"
+                arrowPadding={20}
+                collisionPadding={{ top: 80, right: 16, bottom: 16, left: 16 }}
+                collisionAvoidance={{ side: "flip", align: "shift", fallbackAxisSide: "end" }}
+                className="z-40 max-w-[calc(100vw-2rem)]"
+            >
+                <PreviewCard.Arrow
+                    data-job-preview-arrow
+                    className="z-10 size-3 rotate-45 border-border bg-card data-[side=right]:-left-1.5 data-[side=right]:border-b data-[side=right]:border-l data-[side=left]:-right-1.5 data-[side=left]:border-t data-[side=left]:border-r data-[side=bottom]:-top-1.5 data-[side=bottom]:border-t data-[side=bottom]:border-l data-[side=top]:-bottom-1.5 data-[side=top]:border-r data-[side=top]:border-b"
+                />
+                <PreviewCard.Popup aria-label="Xem nhanh công việc" role="region" className="max-h-[min(640px,calc(100dvh-6rem),var(--available-height))] w-[min(600px,calc(100vw-2rem),var(--available-width))] overflow-y-auto overscroll-contain rounded-2xl border border-border bg-card p-5 text-card-foreground shadow-float outline-none sm:p-6">
                     <h2 className="text-xl leading-snug font-bold">{job.title}</h2>
                     <p className="mt-2 text-sm text-muted-foreground">{job.company.name}</p>
                     <p className="mt-5 text-xl font-bold text-primary">{formatSalaryRange(job.salary, true)}</p>
