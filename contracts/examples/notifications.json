@@ -1,0 +1,10 @@
+{
+  "items": [
+    { "id": "90000000-0000-4000-8000-000000000001", "type": "interview_invited", "title": "Bạn có lời mời phỏng vấn mới", "body": "Công ty mẫu Sao Việt mời bạn trao đổi về vị trí Frontend React. Hãy kiểm tra lời mời và chuẩn bị CV trước buổi phỏng vấn. Đây là thông báo minh họa.", "isRead": false, "createdAt": "2026-10-22T02:30:00Z" },
+    { "id": "90000000-0000-4000-8000-000000000002", "type": "application_status_changed", "title": "Hồ sơ của bạn đang được xem xét", "body": "Nhà tuyển dụng đã tiếp nhận hồ sơ ứng tuyển của bạn. Bạn sẽ nhận được thông báo khi có cập nhật tiếp theo. Đây là thông báo minh họa.", "isRead": false, "createdAt": "2026-10-22T01:15:00Z" },
+    { "id": "90000000-0000-4000-8000-000000000003", "type": "job_recommended", "title": "Khám phá cơ hội việc làm mới", "body": "Có các vị trí mới trên TalentAI. Truy cập mục tìm việc để xem yêu cầu, mức lương và lựa chọn cơ hội phù hợp với bạn. Đây là thông báo minh họa, chưa phải kết quả đối sánh AI.", "isRead": false, "createdAt": "2026-10-21T08:00:00Z" },
+    { "id": "90000000-0000-4000-8000-000000000004", "type": "system", "title": "Chào mừng bạn đến với TalentAI", "body": "Hoàn thiện hồ sơ và cập nhật CV để sẵn sàng cho hành trình tìm việc. Chúc bạn tìm được cơ hội phù hợp! Đây là thông báo minh họa.", "isRead": true, "createdAt": "2026-10-20T03:00:00Z" }
+  ],
+  "meta": { "page": 1, "pageSize": 20, "totalItems": 4, "totalPages": 1 },
+  "unreadCount": 3
+}

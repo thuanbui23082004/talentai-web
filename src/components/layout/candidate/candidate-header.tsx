@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { BellRing, ChevronDown, Menu, MessagesSquare } from "lucide-react";
+import { ChevronDown, Menu, MessagesSquare } from "lucide-react";
 import { ModalTrigger } from "@/components/ui";
 import { BrandLogo } from "@/components/shared/brand-logo";
 import { NavigationDetails } from "@/components/shared/navigation-details";
 import { AvailabilityButton } from "@/components/shared/availability-button";
 import { CandidateAccountMenu } from "./candidate-account-menu";
 import type { AuthUser } from "@/features/auth";
+import { NotificationPopover } from "@/features/notifications";
 
 export function CandidateHeader({ user }: { user: AuthUser }) {
     return <header className="sticky top-0 z-[45] h-16 bg-brand-deep text-white shadow-card">
@@ -29,17 +30,9 @@ export function CandidateHeader({ user }: { user: AuthUser }) {
                         <span aria-hidden="true" className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-warning ring-2 ring-brand-deep group-hover:ring-white" />
                     </AvailabilityButton>
                     <span aria-hidden="true" className="h-5 w-px bg-white/15" />
-                    <AvailabilityButton title="Thông báo" description="Khu vực thông báo đang được hoàn thiện." className="group relative flex size-9 items-center justify-center rounded-full text-white/85 transition-[background-color,color,transform,box-shadow] hover:scale-105 hover:bg-white hover:text-primary hover:shadow-lg active:scale-95">
-                        <BellRing aria-hidden="true" className="size-[18px] stroke-[1.8] transition-transform group-hover:rotate-6" />
-                        <span className="sr-only">Thông báo</span>
-                        <span aria-hidden="true" className="absolute top-1 right-1 flex size-3.5 items-center justify-center rounded-full bg-warning text-[8px] font-bold leading-none text-white ring-2 ring-brand-deep group-hover:ring-white">3</span>
-                    </AvailabilityButton>
+                    <NotificationPopover />
                 </div>
-                <AvailabilityButton title="Thông báo" description="Khu vực thông báo đang được hoàn thiện." className="group relative flex size-10 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.12)] backdrop-blur-sm transition-[background-color,transform] hover:scale-105 hover:bg-white/20 active:scale-95 sm:hidden">
-                    <BellRing aria-hidden="true" className="size-[18px] stroke-[1.8]" />
-                    <span className="sr-only">Thông báo</span>
-                    <span aria-hidden="true" className="absolute top-1 right-1 flex size-3.5 items-center justify-center rounded-full bg-warning text-[8px] font-bold leading-none text-white ring-2 ring-brand-deep">3</span>
-                </AvailabilityButton>
+                <NotificationPopover mobile />
                 <CandidateAccountMenu user={user} />
             </div>
         </div>
