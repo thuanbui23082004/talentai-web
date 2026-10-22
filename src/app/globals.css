@@ -2,6 +2,20 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Tokens scoped to the recruiter preview; other role layouts are unaffected. */
+.recruiter-app {
+  --recruiter-bg: #f8f7fd;
+  --recruiter-surface: #ffffff;
+  --recruiter-text: #192137;
+  --recruiter-muted: #8490aa;
+  --recruiter-border: #eeedf5;
+  --recruiter-primary: #5817ba;
+  --recruiter-accent: #793fff;
+  --recruiter-soft: #f3ebff;
+  --recruiter-danger: #f05b7d;
+  --recruiter-shadow: #25204a0a;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

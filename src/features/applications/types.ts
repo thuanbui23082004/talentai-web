@@ -1,6 +1,3 @@
-export type Application = {
-  id: string;
-  jobId: string;
-  candidateId: string;
-  status: "applied" | "reviewing" | "rejected" | "accepted";
-};
+import type { components } from '@/lib/api/generated/schema';
+export type Application = components['schemas']['Application'];
+export type RecruiterApplication = components['schemas']['RecruiterApplicationSummary'];

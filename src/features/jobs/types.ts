@@ -1,5 +1,4 @@
-export type Job = {
-  id: string;
-  title: string;
-  description: string;
-};
+import type { components } from '@/lib/api/generated/schema';
+export type Job = components['schemas']['JobDetail'];
+export type JobInput = components['schemas']['JobInput'];
+export type RecruiterJob = components['schemas']['RecruiterJob'];

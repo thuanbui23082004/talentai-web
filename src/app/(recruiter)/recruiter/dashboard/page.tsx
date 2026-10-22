@@ -1,3 +1,5 @@
+import { RecruiterDashboard } from '@/features/recruiter';
+
 export default function RecruiterDashboardPage() {
-  return <div>Recruiter Dashboard</div>;
+  return <RecruiterDashboard />;
 }
