@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, ChevronDown, Menu, MessageCircle } from "lucide-react";
+import { BellRing, ChevronDown, Menu, MessagesSquare } from "lucide-react";
 import { ModalTrigger } from "@/components/ui";
 import { BrandLogo } from "@/components/shared/brand-logo";
 import { NavigationDetails } from "@/components/shared/navigation-details";
@@ -22,8 +22,24 @@ export function CandidateHeader({ user }: { user: AuthUser }) {
                 <Link href="/#companies" className="hidden min-h-11 items-center hover:text-white/80 xl:flex">HR Nexus</Link>
             </nav>
             <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
-                <AvailabilityButton title="Tin nhắn" description="Khu vực tin nhắn đang được hoàn thiện." className="hidden size-9 items-center justify-center rounded-full bg-card text-primary hover:bg-secondary sm:flex"><MessageCircle aria-label="Tin nhắn" className="size-4" /></AvailabilityButton>
-                <AvailabilityButton title="Thông báo" description="Khu vực thông báo đang được hoàn thiện." className="flex size-9 items-center justify-center rounded-full bg-card text-primary hover:bg-secondary"><Bell aria-label="Thông báo" className="size-4" /></AvailabilityButton>
+                <div className="hidden items-center gap-1.5 rounded-full border border-white/15 bg-white/10 p-1 shadow-[inset_0_1px_0_rgb(255_255_255/0.12)] backdrop-blur-sm sm:flex">
+                    <AvailabilityButton title="Tin nhắn" description="Khu vực tin nhắn đang được hoàn thiện." className="group relative flex size-9 items-center justify-center rounded-full text-white/85 transition-[background-color,color,transform,box-shadow] hover:scale-105 hover:bg-white hover:text-primary hover:shadow-lg active:scale-95">
+                        <MessagesSquare aria-hidden="true" className="size-[18px] stroke-[1.8] transition-transform group-hover:-rotate-3" />
+                        <span className="sr-only">Tin nhắn</span>
+                        <span aria-hidden="true" className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-warning ring-2 ring-brand-deep group-hover:ring-white" />
+                    </AvailabilityButton>
+                    <span aria-hidden="true" className="h-5 w-px bg-white/15" />
+                    <AvailabilityButton title="Thông báo" description="Khu vực thông báo đang được hoàn thiện." className="group relative flex size-9 items-center justify-center rounded-full text-white/85 transition-[background-color,color,transform,box-shadow] hover:scale-105 hover:bg-white hover:text-primary hover:shadow-lg active:scale-95">
+                        <BellRing aria-hidden="true" className="size-[18px] stroke-[1.8] transition-transform group-hover:rotate-6" />
+                        <span className="sr-only">Thông báo</span>
+                        <span aria-hidden="true" className="absolute top-1 right-1 flex size-3.5 items-center justify-center rounded-full bg-warning text-[8px] font-bold leading-none text-white ring-2 ring-brand-deep group-hover:ring-white">3</span>
+                    </AvailabilityButton>
+                </div>
+                <AvailabilityButton title="Thông báo" description="Khu vực thông báo đang được hoàn thiện." className="group relative flex size-10 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.12)] backdrop-blur-sm transition-[background-color,transform] hover:scale-105 hover:bg-white/20 active:scale-95 sm:hidden">
+                    <BellRing aria-hidden="true" className="size-[18px] stroke-[1.8]" />
+                    <span className="sr-only">Thông báo</span>
+                    <span aria-hidden="true" className="absolute top-1 right-1 flex size-3.5 items-center justify-center rounded-full bg-warning text-[8px] font-bold leading-none text-white ring-2 ring-brand-deep">3</span>
+                </AvailabilityButton>
                 <CandidateAccountMenu user={user} />
             </div>
         </div>

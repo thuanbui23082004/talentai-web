@@ -1,2 +1,2 @@
 // Public API của feature
-export {};
+export { CandidateDashboard } from "./components/candidate-dashboard";

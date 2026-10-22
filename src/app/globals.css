@@ -112,4 +112,16 @@
   .home-cv-surface { background: linear-gradient(110deg, var(--brand-deep), var(--primary), #9876cb); }
 }
 
+/* Candidate dashboard presentation tokens. */
+:root {
+  --candidate-hero-start: #853de0;
+  --candidate-hero-middle: #6250ef;
+  --candidate-hero-end: #8278fa;
+}
+
+@layer components {
+  .candidate-dashboard-hero { background: linear-gradient(110deg, var(--candidate-hero-start), var(--candidate-hero-middle) 55%, var(--candidate-hero-end)); }
+  .candidate-dashboard-icon { background: linear-gradient(135deg, var(--candidate-hero-end), var(--primary)); }
+}
+
 /* Home page presentation tokens. */

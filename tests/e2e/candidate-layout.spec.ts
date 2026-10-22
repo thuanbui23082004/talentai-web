@@ -11,6 +11,15 @@ async function loginCandidate(page: Page) {
 test("candidate layout shares its header/sidebar and tracks the active page", async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await loginCandidate(page);
+    await expect(page.getByRole("heading", { name: "Chào buổi sáng, Nguyễn Minh Anh!", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Việc làm phù hợp với bạn", exact: true })).toBeVisible();
+    await expect(page.getByRole("article")).toHaveCount(2);
+    await page.getByText("Gợi ý từ AI · Vì sao phù hợp?", { exact: true }).first().click();
+    await expect(page.getByText(/Phù hợp với kinh nghiệm Digital Marketing/)).toBeVisible();
+    await page.getByRole("button", { name: "Ứng tuyển nhanh", exact: true }).first().click();
+    await expect(page.getByRole("dialog", { name: "Ứng tuyển Senior Performance Marketing Specialist", exact: true })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await page.screenshot({ path: testInfo.outputPath("candidate-dashboard-desktop.png"), fullPage: true });
     await expect(page.getByRole("banner")).toHaveCount(1);
     await expect(page.getByRole("banner").getByText("Nguyễn Minh Anh", { exact: true }).first()).toBeVisible();
     await expect(page.getByRole("link", { name: "Đăng ký / Đăng nhập", exact: true })).toHaveCount(0);
@@ -28,9 +37,35 @@ test("candidate layout shares its header/sidebar and tracks the active page", as
     await page.screenshot({ path: testInfo.outputPath("candidate-desktop.png"), fullPage: true });
 });
 
+test("desktop sidebar collapses, preserves navigation and expands profile submenu", async ({ page }, testInfo) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await loginCandidate(page);
+    const sidebar = page.getByRole("complementary", { name: "Thanh bên ứng viên", exact: true });
+    await sidebar.getByRole("button", { name: "Thu gọn sidebar", exact: true }).click();
+    await expect(sidebar.getByRole("button", { name: "Mở rộng sidebar", exact: true })).toHaveAttribute("aria-expanded", "false");
+    await expect(sidebar).toHaveCSS("width", "80px");
+    await sidebar.getByRole("link", { name: "CV của tôi", exact: true }).click();
+    await expect(page).toHaveURL(/\/candidate\/cv$/);
+    await expect(sidebar.getByRole("link", { name: "CV của tôi", exact: true })).toHaveAttribute("aria-current", "page");
+    await expect(sidebar).toHaveCSS("width", "80px");
+    await page.screenshot({ path: testInfo.outputPath("sidebar-collapsed.png"), fullPage: true });
+    await sidebar.getByRole("button", { name: "Hồ sơ việc làm", exact: true }).click();
+    await expect(sidebar).toHaveCSS("width", "240px");
+    await expect(sidebar.getByRole("button", { name: "Hồ sơ cá nhân", exact: true })).toBeVisible();
+    await sidebar.locator("summary").filter({ hasText: "Hồ sơ việc làm" }).click();
+    await expect(sidebar.getByRole("button", { name: "Hồ sơ cá nhân", exact: true })).toBeHidden();
+    await sidebar.getByRole("button", { name: "Thu gọn sidebar", exact: true }).click();
+    await sidebar.getByRole("button", { name: "Mở rộng sidebar", exact: true }).click();
+    await expect(sidebar).toHaveCSS("width", "240px");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
 test("mobile sidebar opens, navigates and closes with Escape", async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 375, height: 900 });
     await loginCandidate(page);
+    await expect(page.getByRole("heading", { name: "Việc làm phù hợp với bạn", exact: true })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: testInfo.outputPath("candidate-dashboard-mobile.png"), fullPage: true });
     for (const width of [375, 768]) {
         await page.setViewportSize({ width, height: 900 });
         await page.getByRole("button", { name: "Mở menu ứng viên", exact: true }).click();

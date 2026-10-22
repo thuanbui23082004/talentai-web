@@ -84,6 +84,12 @@ Nội dung form nghiệp vụ vẫn cần Zod trong feature; component UI không
 - E2E kiểm tra hành vi và responsive trên Chromium; không coi đó là chứng nhận mọi trình duyệt hay toàn bộ WCAG.
 - Header/sidebar riêng cho từng role, form nghiệp vụ và chức năng tuyển dụng triển khai sau nền UI này.
 
+## Dashboard ứng viên
+
+Trang `/candidate/dashboard` dùng lại `CandidateShell`, header và sidebar hiện có. Nội dung theo ảnh tham chiếu: banner gradient với mascot `image 16.png`, ba thẻ thống kê và hai thẻ việc làm gợi ý, xếp dọc trên mobile. Tên chào lấy từ session.
+
+Số liệu 12/148/3, 18 gợi ý, công ty, kỹ năng và điểm phù hợp là dữ liệu trình bày từ mẫu, chưa kết nối API và được gắn nhãn minh họa trên trang. Không thêm endpoint hoặc giả lập lưu/ứng tuyển thành công. Nút lưu và ứng tuyển mở thông báo trạng thái phát triển; khám phá việc làm dẫn đến `/jobs`, xem thêm dẫn đến `/candidate/matching`. Mỗi thẻ có phần mở rộng giải thích gợi ý từ AI. Khi triển khai dữ liệu thật cần bổ sung service theo contract cùng loading/empty/error.
+
 ## Asset
 
 Mascot và logo dùng các file có sẵn trong `public/images/`, `public/logo/`.
