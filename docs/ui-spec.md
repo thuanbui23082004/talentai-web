@@ -49,7 +49,7 @@ Import trực tiếp từ `@/components/ui/<name>` hoặc public barrel `@/compo
 | DatePicker | `precision`: date/month/year; giá trị ISO dạng YYYY-MM-DD/YYYY-MM/YYYY, popup lịch tiếng Việt, lưới tháng/năm, chọn nhanh ngày/tháng/năm hiện tại, xóa lựa chọn; điều hướng bằng phím mũi tên và Escape; `max` chặn ngày tương lai cho ngày sinh |
 | FormField | `label`, `description`, `error`, `required`; render prop nối id/required/aria-describedby/aria-invalid tới control |
 | Select | `options`, `value`/`defaultValue`, `onValueChange`; Base UI quản lý bàn phím, focus, đóng/mở |
-| MultiSelect | Controlled `value: string[]`, `onValueChange`; chọn nhiều và bỏ từng chip; name tham gia form |
+| MultiSelect | Controlled `value: string[]`, `onValueChange`; chọn nhiều và bỏ từng chip; `maxSelections` vô hiệu hóa mục chưa chọn khi chạm giới hạn, vẫn cho bỏ mục đã chọn; `id` gắn trigger với label, name tham gia form |
 | Checkbox | Native checkbox props, `label`, `description`; disabled và checked/uncontrolled |
 | RadioGroup | `options`, `label`, `name`, `value`/`defaultValue`, `onValueChange`; fieldset/legend và radio native |
 | Badge | default/hot/new/remote/outline/neutral; chỉ biểu thị nhãn, không giả làm button |

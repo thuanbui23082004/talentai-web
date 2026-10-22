@@ -39,6 +39,8 @@ Bộ lọc đã hỗ trợ thêm: `salaryMin`, `salaryMax` (giao khoảng), `min
 `relevance` hiện giữ thứ tự mới nhất, chưa có thuật toán xếp hạng từ khóa.
 Từ khóa tìm kiếm thực hiện khi gửi form; tại `/jobs`, các bộ lọc và lựa chọn địa điểm tự cập nhật kết quả. Home đã có SSR jobs; `/jobs` hiện dùng client Query. Debounce từ khóa, chi tiết đầy đủ, ứng tuyển và lưu việc chưa triển khai.
 
+Trang `/candidate/job-preferences` là giao diện tiêu chí tìm việc theo ảnh tham chiếu, mở từ nhóm **Hồ sơ việc làm → Tiêu chí tìm việc**. Form có tối đa 3 ngành, 5 địa điểm, 5 cấp bậc và 5 hình thức; khoảng lương hoặc thỏa thuận; ba lựa chọn phúc lợi; phần nâng cao thu gọn/mở rộng; Zod validation và Lưu/Hủy bản xem trước trong bộ nhớ trang. Địa điểm dùng snapshot 34 tỉnh/thành hiện hành (Đà Nẵng thay cho tên Quảng Nam cũ trong ảnh). Dữ liệu mặc định chỉ minh họa; tải lại trang sẽ reset. Chưa gọi GET/PUT `/candidate/job-preferences`: contract hiện có một `desiredLevel`, chưa có kinh nghiệm, nhiều cấp bậc và các phúc lợi như UI. Cần thống nhất contract trước khi tích hợp đầy đủ backend; không gửi các trường trình bày vào API.
+
 ## Thử các kịch bản mock
 
 Gọi GET `/api/bff/jobs` với header `x-mock-scenario`:

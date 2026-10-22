@@ -13,6 +13,7 @@ export type MultiSelectProps = {
     placeholder?: string;
     name?: string;
     disabled?: boolean;
+    maxSelections?: number;
     id?: string;
     className?: string;
     "aria-describedby"?: string;
@@ -25,6 +26,8 @@ export function MultiSelect({
     label,
     placeholder = "Chọn một hoặc nhiều giá trị",
     className,
+    id,
+    maxSelections,
     "aria-describedby": describedBy,
     "aria-invalid": invalid,
     ...props
@@ -36,9 +39,10 @@ export function MultiSelect({
                 multiple
                 items={options}
                 value={value}
-                onValueChange={onValueChange}
+                onValueChange={(next) => { if (!maxSelections || next.length <= maxSelections) onValueChange(next); }}
             >
                 <Primitive.Trigger
+                    id={id}
                     aria-label={label}
                     aria-describedby={describedBy}
                     aria-invalid={invalid}
@@ -68,7 +72,7 @@ export function MultiSelect({
                                     <Primitive.Item
                                         value={option.value}
                                         key={option.value}
-                                        disabled={option.disabled}
+                                        disabled={option.disabled || (!!maxSelections && value.length >= maxSelections && !value.includes(option.value))}
                                         className="ui-option"
                                     >
                                         <Primitive.ItemText>
