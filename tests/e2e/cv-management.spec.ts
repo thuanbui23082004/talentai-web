@@ -18,7 +18,7 @@ test("CV page previews, edits, toggles and confirms deletion of local design sam
     const created = page.getByRole("region", { name: "CV đã tạo trên TalentAI", exact: true });
     await expect(created.getByRole("article")).toHaveCount(2);
     await expect(created.locator(".cv-paper").first()).toHaveCSS("display", "grid");
-    await expect(page.locator(".cv-library-hero")).not.toHaveCSS("background-image", "none");
+    await expect(page.locator(".cv-library-hero:visible")).not.toHaveCSS("background-image", "none");
     await page.screenshot({ path: testInfo.outputPath("cv-management-desktop.png"), fullPage: true, animations: "disabled" });
     const first = created.getByRole("article").first();
     await expect(first.getByRole("switch")).toBeChecked();

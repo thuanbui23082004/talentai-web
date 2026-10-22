@@ -16,7 +16,10 @@ export function ModalContent({
     children,
     footer,
     className,
-    forceBackdrop = false,
+    forceBackdrop = true,
+    headerClassName,
+    bodyClassName,
+    finalFocus,
 }: {
     title: string;
     description?: string;
@@ -24,17 +27,21 @@ export function ModalContent({
     footer?: ReactNode;
     className?: string;
     forceBackdrop?: boolean;
+    headerClassName?: string;
+    bodyClassName?: string;
+    finalFocus?: Dialog.Popup.Props["finalFocus"];
 }) {
     return (
         <Dialog.Portal>
-            <Dialog.Backdrop forceRender={forceBackdrop} className="fixed inset-0 z-50 bg-foreground/35 backdrop-blur-[3px] transition-opacity data-ending:opacity-0 data-starting:opacity-0" />
+            <Dialog.Backdrop data-modal-backdrop forceRender={forceBackdrop} className="fixed inset-0 z-50 bg-foreground/45 backdrop-blur-[2px] transition-opacity data-ending:opacity-0 data-starting:opacity-0" />
             <Dialog.Popup
+                finalFocus={finalFocus}
                 className={cn(
                     "fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-float outline-none transition-[opacity,scale] data-ending:scale-95 data-ending:opacity-0 data-starting:scale-95 data-starting:opacity-0",
                     className,
                 )}
             >
-                <div className="pr-9">
+                <div className={cn("pr-9", headerClassName)}>
                     <Dialog.Title className="text-xl font-bold tracking-tight">
                         {title}
                     </Dialog.Title>
@@ -56,7 +63,7 @@ export function ModalContent({
                 >
                     <X />
                 </Dialog.Close>
-                {children && <div className="mt-6">{children}</div>}
+                {children && <div className={cn("mt-6", bodyClassName)}>{children}</div>}
                 {footer && (
                     <div className="mt-6 flex flex-wrap justify-end gap-3 border-t border-border pt-5">
                         {footer}

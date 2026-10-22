@@ -8,6 +8,7 @@ import { ApiError } from "@/lib/api/errors";
 import { Button, Alert, Select, Pagination } from "@/components/ui";
 import { LoadingState } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FeedbackState } from "@/components/shared/feedback-state";
 import { parseJobSearchParams } from "../schemas/search";
 import { JobSearch } from "./job-search";
 import { JobCard } from "./job-card";
@@ -48,7 +49,7 @@ export function JobList() {
                         <Select aria-label="Sắp xếp việc làm" value={filters.sort ?? "relevance"} options={[{ value: "relevance", label: "Phù hợp nhất" }, { value: "newest", label: "Mới nhất" }, { value: "salary_desc", label: "Lương cao đến thấp" }, { value: "salary_asc", label: "Lương thấp đến cao" }, { value: "deadline", label: "Sắp hết hạn" }]} onValueChange={(value) => { if (value) updateQuery("sort", value); }} className="w-full text-xs sm:w-52" />
                     </div>
                     {parsed.success && isPending && <LoadingState title="Đang tải việc làm" description="Những cơ hội tiếp theo trên hành trình của bạn đang được chuẩn bị." />}
-                    {isError && <Alert variant="error" title={error instanceof ApiError ? error.message : "Không thể tải việc làm. Vui lòng thử lại."}><Button variant="outline" size="sm" className="mt-3" onClick={() => void refetch()}>Thử lại</Button></Alert>}
+                    {isError && <FeedbackState kind="error" title={error instanceof ApiError ? error.message : "Không thể tải việc làm. Vui lòng thử lại."} description="Kết nối có thể đang bị gián đoạn. Hãy thử lại để tiếp tục tìm cơ hội phù hợp." action={<Button variant="outline" onClick={() => void refetch()}>Thử lại</Button>} />}
                     {!isError && data && <>
                         {data.items.length === 0 ? <EmptyState title="Không tìm thấy việc làm." description="Hãy thử từ khóa khác hoặc mở rộng địa điểm tìm kiếm." action={<Button variant="outline" onClick={() => router.push("/jobs")}>Xóa bộ lọc</Button>} /> : <ul className="grid gap-3 md:grid-cols-2">{data.items.map((job) => <li key={job.id} className="min-w-0"><JobCard job={job} /></li>)}</ul>}
                         {data.items.length > 0 && <div className="space-y-3 rounded-xl border border-border/60 bg-card px-4 py-4"><p className="text-center text-xs text-muted-foreground">Hiển thị {(page - 1) * data.meta.pageSize + 1}–{Math.min(page * data.meta.pageSize, data.meta.totalItems)} trong {data.meta.totalItems} việc làm</p><Pagination page={page} totalPages={totalPages} disabled={isFetching} onPageChange={changePage} /></div>}

@@ -91,7 +91,7 @@ Trang `/candidate/dashboard` dùng lại `CandidateShell`, header và sidebar hi
 
 Trang `/candidate/cv` mở từ **Hồ sơ việc làm → Quản lý CV**, dùng chung shell hiện có. Nội dung gồm thống kê minh họa, toolkit AI, hai thẻ tải lên/tạo từ mẫu, danh sách bản xem trước CV và thư viện sáu mẫu với lọc danh mục/sắp xếp. Thẻ CV hiển thị giấy A4 dựng bằng HTML/CSS; typography dùng container units để tỷ lệ đồng nhất giữa thumbnail và popup. Bố cục danh sách 2 cột desktop/1 cột mobile, mẫu 3/2/1 cột; popup dùng Modal chung, có backdrop và xác nhận xóa. Các thao tác cập nhật bản xem trước cục bộ và có nhãn rõ phạm vi; upload thật, xuất PDF và AI chưa nối backend.
 
-Số liệu 12/148/3, 18 gợi ý, công ty, kỹ năng và điểm phù hợp là dữ liệu trình bày từ mẫu, chưa kết nối API và được gắn nhãn minh họa trên trang. Không thêm endpoint hoặc giả lập lưu/ứng tuyển thành công. Nút lưu và ứng tuyển mở thông báo trạng thái phát triển; khám phá việc làm dẫn đến `/jobs`, xem thêm dẫn đến `/candidate/matching`. Mỗi thẻ có phần mở rộng giải thích gợi ý từ AI. Khi triển khai dữ liệu thật cần bổ sung service theo contract cùng loading/empty/error.
+Số liệu 12/148/3, 18 gợi ý, công ty, kỹ năng và điểm phù hợp là dữ liệu trình bày từ mẫu, chưa kết nối API và được gắn nhãn minh họa trên trang. Không thêm endpoint hoặc giả lập lưu/ứng tuyển thành công. Nút lưu mở thông báo trạng thái phát triển; nút ứng tuyển mở popup chọn CV/thêm tệp cục bộ, địa điểm và thư giới thiệu (chỉ giao diện, chưa gửi hồ sơ). Khám phá việc làm dẫn đến `/jobs`, xem thêm dẫn đến `/candidate/matching`. Mỗi thẻ có phần mở rộng giải thích gợi ý từ AI. Khi triển khai dữ liệu thật cần bổ sung service theo contract cùng loading/empty/error.
 
 ## Asset
 

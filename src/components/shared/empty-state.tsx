@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-import { SearchX } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { FeedbackState, type FeedbackStateProps } from "./feedback-state";
 
 export function EmptyState({
     title = "Chưa có kết quả phù hợp",
@@ -8,28 +7,20 @@ export function EmptyState({
     icon,
     action,
     className,
+    compact = false,
+    illustration = "empty",
+    headingAs = "h3",
 }: {
     title?: string;
     description?: string;
     icon?: ReactNode;
     action?: ReactNode;
     className?: string;
+    compact?: boolean;
+    illustration?: FeedbackStateProps["kind"];
+    headingAs?: FeedbackStateProps["headingAs"];
 }) {
     return (
-        <div
-            className={cn(
-                "flex flex-col items-center rounded-2xl border border-dashed border-border bg-card px-6 py-10 text-center",
-                className,
-            )}
-        >
-            <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-secondary text-primary [&_svg]:size-6">
-                {icon ?? <SearchX aria-hidden="true" />}
-            </div>
-            <h3 className="font-semibold">{title}</h3>
-            <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
-                {description}
-            </p>
-            {action && <div className="mt-5">{action}</div>}
-        </div>
+        <FeedbackState kind={illustration} title={title} description={description} icon={icon} action={action} className={className} variant={compact ? "compact" : "section"} headingAs={headingAs} />
     );
 }

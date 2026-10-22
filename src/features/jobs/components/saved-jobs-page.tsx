@@ -10,13 +10,11 @@ import {
     Bookmark,
     BriefcaseBusiness,
     CalendarClock,
-    Heart,
     MapPin,
     Search,
     Undo2,
 } from "lucide-react";
 import {
-    Alert,
     Button,
     Input,
     Pagination,
@@ -29,6 +27,8 @@ import {
 } from "@/components/ui";
 import { todayCalendarValue } from "@/lib/calendar";
 import { LoadingState } from "@/components/shared/loading-state";
+import { EmptyState } from "@/components/shared/empty-state";
+import { FeedbackState } from "@/components/shared/feedback-state";
 import { useSavedJobActions, useSavedJobs } from "../hooks/use-saved-jobs";
 import {
     filterSavedJobs,
@@ -283,44 +283,32 @@ export function SavedJobsPage() {
                     {query.isPending ? (
                         <LoadingState title="Đang tải việc làm đã lưu" description="TalentAI đang mở lại những cơ hội bạn đã quan tâm." />
                     ) : query.isError ? (
-                        <Alert
-                            variant="error"
+                        <FeedbackState
+                            kind="error"
                             title="Không thể tải việc làm đã lưu"
-                        >
-                            <p>
-                                Danh sách của bạn vẫn được giữ lại. Vui lòng thử
-                                tải lại.
-                            </p>
-                            <Button
+                            description="Danh sách của bạn vẫn được giữ lại. Vui lòng thử tải lại."
+                            action={<Button
                                 variant="outline"
-                                className="mt-3"
                                 onClick={() => query.refetch()}
                             >
                                 Thử lại
-                            </Button>
-                        </Alert>
+                            </Button>}
+                        />
                     ) : !visible.length ? (
-                        <div className="rounded-2xl border border-dashed border-border bg-card px-5 py-14 text-center">
-                            <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-secondary text-primary">
-                                <Heart aria-hidden="true" className="size-6" />
-                            </span>
-                            <h2 className="mt-4 text-lg font-semibold">
-                                {!items.length
+                        <EmptyState headingAs="h2"
+                            title={!items.length
                                     ? "Chưa có việc làm đã lưu"
                                     : q || city
                                       ? "Không tìm thấy việc làm phù hợp"
                                       : tab === "expiring"
                                         ? "Chưa có việc làm sắp hết hạn"
                                         : "Chưa có việc làm trong mục này"}
-                            </h2>
-                            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-foreground/80">
-                                {!items.length
+                            description={!items.length
                                     ? "Nhấn trái tim trên thẻ việc làm để lưu những vị trí bạn yêu thích và xem lại tại đây."
                                     : q || city
                                       ? "Thử từ khóa khác hoặc xóa bộ lọc để xem lại các việc làm đã lưu."
                                       : "Bạn có thể xem tất cả việc đã lưu hoặc khám phá thêm các cơ hội mới."}
-                            </p>
-                            <div className="mt-5 flex flex-wrap justify-center gap-3">
+                            action={<>
                                 {!!items.length && (
                                     <Button
                                         variant="outline"
@@ -343,8 +331,8 @@ export function SavedJobsPage() {
                                     Khám phá việc làm
                                     <ArrowRight />
                                 </Button>
-                            </div>
-                        </div>
+                            </>}
+                        />
                     ) : (
                         <>
                             <div className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">

@@ -3,6 +3,7 @@ import { CandidatePageTitle } from "@/components/layout/candidate/candidate-page
 import Link from "next/link";
 import { ArrowRight, AudioLines, Bookmark, Send, Sparkles, Users, Zap } from "lucide-react";
 import { AvailabilityButton } from "@/components/shared/availability-button";
+import { ApplicationButton } from "@/features/applications";
 import { Button, Card } from "@/components/ui";
 import type { AuthUser } from "@/features/auth";
 import { formatSalaryRange } from "@/lib/utils";
@@ -96,7 +97,7 @@ export function CandidateDashboard({ user }: { user: AuthUser }) {
                         <ul className="flex flex-wrap gap-1.5" aria-label="Kỹ năng phù hợp">{job.skills.map((skill) => <li key={skill} className="rounded-md bg-secondary px-2.5 py-1 text-xs">{skill}</li>)}</ul>
                         <div className="flex items-center gap-2 max-sm:w-full max-sm:justify-end">
                             <AvailabilityButton title="Lưu việc làm" description="Việc làm này là dữ liệu minh họa. Chức năng lưu việc sẽ được kết nối khi có API hỗ trợ." className="flex size-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-primary"><Bookmark className="size-4" /><span className="sr-only">Lưu {job.title}</span></AvailabilityButton>
-                            <AvailabilityButton title={`Ứng tuyển ${job.title}`} description="Đây là việc làm minh họa cho giao diện. Bạn có thể khám phá các tin tuyển dụng hiện có; chức năng nộp hồ sơ đang được phát triển." className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-medium text-white transition-colors hover:bg-primary-hover sm:min-h-9"><Send className="size-3.5" aria-hidden="true" />Ứng tuyển nhanh</AvailabilityButton>
+                            <ApplicationButton job={{ title: job.title, company: { name: job.company }, location: { city: "TP.HCM", address: job.location.replace(", TP.HCM", "") }, status: "open" }} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-medium text-white transition-colors hover:bg-primary-hover sm:min-h-9"><Send className="size-3.5" aria-hidden="true" />Ứng tuyển nhanh</ApplicationButton>
                         </div>
                     </div>
                     <details className="mt-2 text-xs text-muted-foreground"><summary className="w-fit cursor-pointer py-2 text-primary">Gợi ý từ AI · Vì sao phù hợp?</summary><p className="max-w-2xl pb-2 leading-5">{job.reason} Điểm số chỉ mang tính minh họa, hỗ trợ bạn tham khảo.</p></details>

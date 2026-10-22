@@ -9,7 +9,7 @@ test("opens a detail page from a card and reuses search and related cards", asyn
     await expect(page.getByRole("heading", { name: "Mô tả công việc", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Việc làm liên quan", exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Ứng tuyển ngay", exact: true }).click();
-    await expect(page.getByRole("dialog")).toContainText("Hiện chưa gửi hồ sơ");
+    await expect(page.getByRole("dialog")).toContainText("Chọn CV để ứng tuyển");
     await page.getByRole("button", { name: "Đóng hộp thoại" }).click();
     await page.getByLabel("Tên công việc, chức danh", { exact: true }).fill("React");
     await page.getByRole("button", { name: "Tìm kiếm", exact: true }).click();

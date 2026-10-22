@@ -3,9 +3,10 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight, Flame, ListFilter } from "lucide-react";
-import { Alert, Button, Select } from "@/components/ui";
+import { Button, Select } from "@/components/ui";
 import { LoadingState } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FeedbackState } from "@/components/shared/feedback-state";
 import { useJobs } from "../hooks/use-jobs";
 import { JOB_LOCATIONS } from "../search-options";
 import type { Job, JobSearchResponse } from "../types";
@@ -47,9 +48,7 @@ function Collection({ id, title, jobs }: { id: string; title: string; jobs: Job[
 export function HomeJobCollections({ featuredIds, urgentIds, initialJobs }: { featuredIds: string[]; urgentIds: string[]; initialJobs?: JobSearchResponse }) {
     const { data, isPending, isError, refetch } = useJobs({ pageSize: 20 }, initialJobs);
     if(isPending) return <LoadingState title="Đang tải việc làm" description="Các vị trí nổi bật và cơ hội tuyển dụng mới sẽ xuất hiện tại đây." />;
-    if(isError) return <Alert variant="error" title="Chưa thể tải việc làm">
-        <Button className="mt-3" variant="outline" onClick={() => void refetch()}>Thử lại</Button>
-    </Alert>;
+    if(isError) return <FeedbackState kind="error" title="Chưa thể tải việc làm" description="TalentAI đang gặp một chút gián đoạn. Bạn có thể thử tải lại các cơ hội mới." action={<Button variant="outline" onClick={() => void refetch()}>Thử lại</Button>} />;
     const select = (ids: string[]) => ids.map((id) => data?.items.find((job) => job.id === id)).filter((job): job is Job => !!job);
     // Unknown IDs from a real backend fall back to its current open jobs.
     const featured = select(featuredIds);

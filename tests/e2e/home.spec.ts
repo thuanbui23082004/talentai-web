@@ -65,7 +65,7 @@ test("home dialogs explain unavailable actions and display article content", asy
     await featured.locator("article").first().getByRole("heading").getByRole("link").click();
     await expect(page).toHaveURL(/\/jobs\/[0-9a-f-]{36}$/);
     await page.getByRole("button", { name: "Ứng tuyển ngay", exact: true }).click();
-    await expect(page.getByRole("dialog", { name: "Ứng tuyển công việc", exact: true })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "Ứng tuyển", exact: true })).toBeVisible();
     await page.keyboard.press("Escape");
     await page.goBack();
     await page.getByRole("button", { name: "Đọc thêm", exact: true }).first().click();

@@ -1,5 +1,6 @@
 import { Bookmark, CalendarDays, Clock3, MapPin, Send } from "lucide-react";
 import { AvailabilityButton } from "@/components/shared/availability-button";
+import { ApplicationButton } from "@/features/applications";
 import { formatDate, formatSalaryRange } from "@/lib/utils";
 import type { JobDetail } from "../types";
 
@@ -67,14 +68,13 @@ export function JobDetailHeader({ job }: { job: JobDetail }) {
                     ))}
                 </dl>
                 <div className="mt-auto flex gap-2.5">
-                    <AvailabilityButton
-                        title="Ứng tuyển công việc"
-                        description={unavailable}
+                    <ApplicationButton
+                        job={job}
                         className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-deep"
                     >
                         <Send className="size-4" />
-                        Ứng tuyển ngay
-                    </AvailabilityButton>
+                        {job.hasApplied ? "Đã ứng tuyển" : "Ứng tuyển ngay"}
+                    </ApplicationButton>
                     <AvailabilityButton
                         title="Lưu công việc"
                         description={unavailable}

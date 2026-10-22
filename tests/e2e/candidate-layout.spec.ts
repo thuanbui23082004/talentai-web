@@ -15,9 +15,9 @@ test("candidate layout shares its header/sidebar and tracks the active page", as
     await expect(page.getByRole("heading", { name: "Việc làm phù hợp với bạn", exact: true })).toBeVisible();
     await expect(page.getByRole("article")).toHaveCount(2);
     await page.getByText("Gợi ý từ AI · Vì sao phù hợp?", { exact: true }).first().click();
-    await expect(page.getByText(/Phù hợp với kinh nghiệm Digital Marketing/)).toBeVisible();
+    await expect(page.getByRole("article").first().getByText(/Phù hợp với kinh nghiệm Digital Marketing/)).toBeVisible();
     await page.getByRole("button", { name: "Ứng tuyển nhanh", exact: true }).first().click();
-    await expect(page.getByRole("dialog", { name: "Ứng tuyển Senior Performance Marketing Specialist", exact: true })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "Ứng tuyển", exact: true })).toBeVisible();
     await page.keyboard.press("Escape");
     await page.screenshot({ path: testInfo.outputPath("candidate-dashboard-desktop.png"), fullPage: true });
     await expect(page.getByRole("banner")).toHaveCount(1);

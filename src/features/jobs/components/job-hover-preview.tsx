@@ -1,18 +1,23 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { useRef, useState, type ReactElement } from "react";
 import Link from "next/link";
 import { PreviewCard } from "@base-ui/react/preview-card";
 import { BriefcaseBusiness, CalendarClock, GraduationCap, MapPin } from "lucide-react";
 import { Badge, Button } from "@/components/ui";
+import { ApplicationDialog } from "@/features/applications";
 import { formatDate, formatDeadline, formatSalaryRange } from "@/lib/utils";
 import { JOB_LEVEL_LABELS, WORK_TYPE_LABELS } from "../labels";
 import type { Job } from "../types";
 
 export function JobHoverPreview({ job, children }: { job: Job; children: ReactElement }) {
-    return <PreviewCard.Root>
-        <PreviewCard.Trigger render={children} delay={350} closeDelay={200} tabIndex={0} aria-label={`Xem nhanh: ${job.title}`} />
+    const [applying, setApplying] = useState(false);
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const triggerRef = useRef<HTMLAnchorElement>(null);
+    return <><PreviewCard.Root open={previewOpen && !applying} onOpenChange={setPreviewOpen}>
+        <PreviewCard.Trigger ref={triggerRef} render={children} delay={350} closeDelay={200} tabIndex={0} aria-label={`Xem nhanh: ${job.title}`} />
         <PreviewCard.Portal>
+            <div aria-hidden="true" data-preview-backdrop className="pointer-events-none fixed inset-0 z-30 bg-foreground/35" />
             <PreviewCard.Positioner
                 side="right"
                 align="center"
@@ -40,7 +45,7 @@ export function JobHoverPreview({ job, children }: { job: Job; children: ReactEl
                     <p className="mt-4 text-sm font-medium text-primary">{formatDeadline(job.applicationDeadline)}</p>
                     <div className="mt-4 flex flex-wrap gap-3">
                         <Button nativeButton={false} role="link" render={<Link href={`/jobs/${job.id}`} />}>Xem chi tiết</Button>
-                        <Button variant="outline" disabled>Ứng tuyển · Sắp ra mắt</Button>
+                        <Button variant="outline" disabled={job.status !== "open" || job.hasApplied} onClick={() => { setPreviewOpen(false); setApplying(true); }}>{job.hasApplied ? "Đã ứng tuyển" : job.status !== "open" ? "Đã ngừng tuyển" : "Ứng tuyển"}</Button>
                     </div>
                     <div className="mt-5 space-y-4 border-t border-border pt-5 text-sm leading-relaxed">
                         <section>
@@ -60,5 +65,5 @@ export function JobHoverPreview({ job, children }: { job: Job; children: ReactEl
                 </PreviewCard.Popup>
             </PreviewCard.Positioner>
         </PreviewCard.Portal>
-    </PreviewCard.Root>;
+    </PreviewCard.Root><ApplicationDialog job={job} open={applying} onOpenChange={setApplying} finalFocus={triggerRef} /></>;
 }

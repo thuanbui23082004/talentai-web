@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import "@/components/ui/scrollbar.css";
+import "@/components/shared/feedback-state.css";
 import "@/components/shared/loading-state.css";
 import { Providers } from "@/providers";
 import favicon from "../../public/logo/favicon.png";

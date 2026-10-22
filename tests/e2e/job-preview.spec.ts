@@ -30,7 +30,7 @@ test("job preview opens on hover, stays interactive and opens details", async ({
     await expect(preview).toBeVisible();
     await preview.hover();
     await expect(preview.getByRole("heading", { name: "Thông tin công việc" })).toBeVisible();
-    await expect(preview.getByRole("button", { name: "Ứng tuyển · Sắp ra mắt" })).toBeDisabled();
+    await expect(preview.getByRole("button", { name: "Ứng tuyển", exact: true })).toBeEnabled();
     const bounds = await preview.boundingBox();
     expect(bounds!.x).toBeGreaterThanOrEqual(0);
     expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(page.viewportSize()!.width);

@@ -7,6 +7,7 @@ import { Button, Alert } from "@/components/ui";
 import { LoadingState } from "@/components/shared/loading-state";
 import { CompanyCard } from "@/components/shared/company-card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FeedbackState } from "@/components/shared/feedback-state";
 import { AnimatedStatistic } from "@/components/home/animated-statistic";
 import { CompanySearch } from "./company-search";
 import { parseCompanySearch } from "../schemas/search";
@@ -42,7 +43,7 @@ export function CompaniesExplorer() {
             <div className="mb-5 border-b border-border/60 pb-4 sm:mb-7"><span className="inline-block rounded bg-secondary px-2 py-1 text-[10px] font-bold tracking-wide text-primary sm:text-[11px]">ĐƯỢC NHIỀU ỨNG VIÊN QUAN TÂM</span><div className="mt-2 flex flex-wrap items-end justify-between gap-2"><h2 id="company-results-title" className="text-lg leading-snug font-extrabold tracking-tight sm:text-2xl">{active ? "KẾT QUẢ TÌM KIẾM CÔNG TY" : "DANH SÁCH CÁC CÔNG TY NỔI BẬT"}</h2>{active && data && <p role="status" className="text-sm text-muted-foreground">Tìm thấy {data.pages[0].meta.totalItems} công ty</p>}</div></div>
             {!parsed.success && <Alert variant="error" title="Bộ lọc công ty không hợp lệ."><Button variant="outline" className="mt-3" onClick={() => search({})}>Xóa bộ lọc</Button></Alert>}
             {parsed.success && isPending && <LoadingState title="Đang tải công ty" description="Khám phá môi trường làm việc tiếp theo của bạn chỉ trong giây lát." />}
-            {isError && !data && <Alert variant="error" title="Không thể tải danh sách công ty. Vui lòng thử lại."><Button variant="outline" className="mt-3" onClick={() => void refetch()}>Thử lại</Button></Alert>}
+            {isError && !data && <FeedbackState kind="error" title="Không thể tải danh sách công ty. Vui lòng thử lại." description="Hãy thử kết nối lại để tiếp tục khám phá môi trường làm việc phù hợp." action={<Button variant="outline" onClick={() => void refetch()}>Thử lại</Button>} />}
             {data && items.length === 0 && <EmptyState title="Không tìm thấy công ty" description="Thử tên khác hoặc mở rộng bộ lọc địa điểm, ngành nghề." action={<Button variant="outline" onClick={() => search({})}>Xóa bộ lọc</Button>} />}
             {items.length > 0 && <><div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">{items.map((company, index) => <CompanyCard key={company.id} name={company.name} logo={company.logoUrl} count={company.openJobsCount} href={`/companies/${company.id}`} tone={index} />)}</div>{hasNextPage && <div className="mt-7 flex flex-col items-center gap-3 sm:mt-9">{isFetchNextPageError && <p role="alert" className="text-sm text-destructive">Không tải được thêm công ty. Bạn có thể thử lại.</p>}<Button variant="outline" disabled={isFetchingNextPage} onClick={() => void fetchNextPage()} className="rounded-full border-primary px-6 text-xs font-semibold text-primary">{isFetchingNextPage ? "Đang tải…" : isFetchNextPageError ? "Thử tải thêm công ty" : "Xem thêm công ty nổi bật"}<ChevronDown className="size-4" /></Button></div>}</>}
         </section>

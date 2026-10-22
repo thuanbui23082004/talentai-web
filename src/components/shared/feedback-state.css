@@ -1,0 +1,8 @@
+.feedback-mascot { animation: feedback-float 6s ease-in-out infinite; }
+@keyframes feedback-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .feedback-mascot { animation: none !important; }
+}

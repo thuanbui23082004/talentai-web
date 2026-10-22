@@ -4,6 +4,18 @@
 
 Đã thêm animation nhân vật 8 khung hình từ `animationloading.png`, dùng sprite WebP nền trong suốt. Tích hợp fallback trang chủ/public/candidate và các vùng dữ liệu việc làm, công ty, ứng tuyển, đã lưu; không thêm thời gian chờ giả, có reduced-motion. Xem thử `/ui/loading`, hướng dẫn tại `docs/loading-animation.md`. Không thay đổi contract hoặc trạng thái tích hợp backend.
 
+## Minh họa 404, trống và lỗi tải
+
+Đã tạo ba tư thế mascot từ nhân vật gốc, dùng WebP nền trong suốt 640×640 (~47–50 KiB/ảnh) tại `public/images/states/`. `FeedbackState`/`EmptyState` dùng chung cho 404 toàn site, không tìm thấy job/công ty, lỗi trang, tìm kiếm việc làm/công ty, việc làm đã lưu, ứng tuyển, CV và thông báo (bản compact). Có CTA quay về/xóa lọc/thử lại, thông điệp lỗi an toàn và reduced-motion. Các lỗi validation/mutation nhỏ vẫn dùng Alert/inline, không thay đổi API, quyền hay dữ liệu. Error boundary dùng `retry()` của Next 16.4 để tải lại nội dung. Xem `/ui/states` và `docs/feedback-states.md`.
+
+## Popup ứng tuyển — chỉ giao diện
+
+Theo lựa chọn của người dùng, nút ứng tuyển ở chi tiết việc làm, popup xem nhanh và dashboard mở giao diện chọn CV/tệp cục bộ, thư giới thiệu, địa điểm và các ô xác nhận. CV mẫu tái sử dụng từ phần CV minh họa; không phải CV trong tài khoản. Chỉ chấp nhận PDF/DOCX không rỗng, tối đa tạm 5 MB, hỗ trợ kéo thả/thay/bỏ tệp; không upload, ghi nhận đồng ý, chạy AI hay tạo hồ sơ. Nút nộp báo rõ chưa gửi. Contract và mock không thay đổi.
+
+Một địa điểm được chọn mặc định. UI nhận được danh sách nhiều địa điểm qua prop riêng và yêu cầu chọn đúng danh sách; API JobSummary hiện chỉ có `location`, nên các job API vẫn chỉ có một địa điểm. Showcase `/ui/application` có ba trường hợp một/nhiều địa điểm và chưa có CV. Muốn nối backend phải thống nhất contract cho danh sách/địa điểm đã chọn, sự đồng ý và nội dung thỏa thuận của nhà tuyển dụng.
+
+Modal dùng chung luôn có backdrop tối, kể cả khi lồng dưới CandidateShell. Popup xem nhanh job có lớp phủ không chặn chuột; menu header, select, lịch và popup thông báo giữ tương tác riêng, không thêm backdrop tối.
+
 ## Nguyên tắc giai đoạn mock trước
 
 Backend đang phát triển. Hoàn thành feature frontend dựa trên contract và mock có hành vi,
