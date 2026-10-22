@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { Heart } from "lucide-react";
 import { formatDeadline, formatSalaryRange } from "@/lib/utils";
 import type { Job } from "../types";
 import { WORK_TYPE_LABELS } from "../labels";
 import { JobHoverPreview } from "./job-hover-preview";
 
-export function JobCard({ job }: { job: Job }) {
+export function JobCard({ job, variant = "default", header, footer }: { job: Job; variant?: "default" | "application"; header?: ReactNode; footer?: ReactNode }) {
     const wordmark = job.company.name.replace("Công ty mẫu ", "");
-    return <JobHoverPreview job={job}>
+    const card =
         <article className="group flex min-w-0 flex-col gap-3 rounded-xl border border-border/60 bg-card p-3.5 shadow-card transition hover:border-primary/30 hover:shadow-float">
+            {header}
             <div className="flex min-w-0 items-start gap-3">
             <span aria-hidden="true" className="flex size-16 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-secondary/15 px-1 text-center text-[13px] font-extrabold tracking-tight break-words text-primary sm:size-18">{wordmark}</span>
             <div className="min-w-0 flex-1">
@@ -29,12 +31,13 @@ export function JobCard({ job }: { job: Job }) {
                 <div className="flex min-w-0 flex-wrap gap-1.5 text-xs leading-4 text-muted-foreground">
                     <span className="rounded-lg bg-muted px-2 py-1">{WORK_TYPE_LABELS[job.workType]}</span>
                     <span className="rounded-lg bg-muted px-2 py-1">{job.minExperienceYears ? `${job.minExperienceYears} năm` : "Không yêu cầu KN"}</span>
-                    <span className="rounded-lg bg-muted px-2 py-1">{formatDeadline(job.applicationDeadline)}</span>
+                    {variant === "default" && <span className="rounded-lg bg-muted px-2 py-1">{formatDeadline(job.applicationDeadline)}</span>}
                 </div>
-            <button disabled type="button" title="Lưu việc: sắp ra mắt" aria-label={`Lưu ${job.title} (sắp ra mắt)`} className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground disabled:cursor-not-allowed">
+            {variant === "default" && <button disabled type="button" title="Lưu việc: sắp ra mắt" aria-label={`Lưu ${job.title} (sắp ra mắt)`} className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground disabled:cursor-not-allowed">
                 <Heart className="size-4" />
-            </button>
+            </button>}
             </div>
-        </article>
-        </JobHoverPreview>;
+            {footer}
+        </article>;
+    return variant === "application" ? card : <JobHoverPreview job={job}>{card}</JobHoverPreview>;
 }

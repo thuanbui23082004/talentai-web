@@ -1,2 +1,2 @@
 // Public API của feature
-export {};
+export { ApplicationsPage } from "./components/applications-page";

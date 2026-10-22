@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "id": "b0000000-0000-4000-8000-000000000001",
+      "applicationId": "a0000000-0000-4000-8000-000000000003",
+      "jobId": "10000000-0000-4000-8000-000000000003",
+      "jobTitle": "Thực tập sinh Marketing",
+      "company": { "id": "20000000-0000-4000-8000-000000000003", "name": "Công ty mẫu Bình Minh" },
+      "round": "Vòng chuyên môn",
+      "startTime": "2026-10-26T02:00:00Z",
+      "endTime": "2026-10-26T03:00:00Z",
+      "mode": "online",
+      "invitationStatus": "pending",
+      "status": "scheduled",
+      "message": "Bạn vui lòng chuẩn bị phần giới thiệu bản thân và các dự án đã thực hiện. Có mặt trước 10 phút để buổi trao đổi diễn ra thuận lợi."
+    }
+  ],
+  "meta": { "page": 1, "pageSize": 1, "totalItems": 2, "totalPages": 2 }
+}

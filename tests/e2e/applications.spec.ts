@@ -1,0 +1,56 @@
+import { test, expect } from "@playwright/test";
+import { randomUUID } from "node:crypto";
+
+test("candidate tracks applications, confirms an interview and downloads calendar", async ({ page }, testInfo) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    const email = `applications-${randomUUID()}@example.com`;
+    expect((await page.request.post("/api/bff/auth/register", { data: { email, password: "TalentAI123!", confirmPassword: "TalentAI123!", fullName: "Ứng viên ứng tuyển", phone: "0901234567", role: "candidate", acceptedPrivacyPolicy: true } })).status()).toBe(201);
+    expect((await page.request.post("/api/bff/auth/login", { data: { email, password: "TalentAI123!", role: "candidate" } })).status()).toBe(200);
+    await page.goto("/candidate/applications");
+    await expect(page.getByRole("heading", { name: "Việc làm đã ứng tuyển" })).toBeVisible();
+    await expect(page.getByText("Hiển thị", { exact: false })).toContainText("1–6 trong 12 hồ sơ");
+    await page.screenshot({ path: testInfo.outputPath("applications-desktop.png"), fullPage: true });
+    await page.getByRole("button", { name: "Trang 2", exact: true }).click();
+    await expect(page.getByText("Hiển thị", { exact: false })).toContainText("7–12 trong 12 hồ sơ");
+    await page.getByRole("tab", { name: "Phỏng vấn", exact: true }).click();
+    await expect(page.getByText("Phỏng vấn trực tuyến", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "Xem lời mời", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Chi tiết ứng tuyển" });
+    await dialog.getByRole("button", { name: "Xác nhận tham gia", exact: true }).click();
+    await expect(dialog.getByText("Đã xác nhận tham gia phỏng vấn.")).toBeVisible();
+    const download = page.waitForEvent("download");
+    await dialog.getByRole("button", { name: "Thêm vào lịch cá nhân", exact: true }).click();
+    expect((await download).suggestedFilename()).toMatch(/\.ics$/);
+    await page.keyboard.press("Escape");
+    await page.screenshot({ path: testInfo.outputPath("applications-interviews.png"), fullPage: true });
+    await page.getByRole("tab", { name: "Tất cả", exact: true }).click();
+    await page.getByRole("textbox", { name: "Tìm vị trí hoặc công ty" }).fill("khong-co-cong-ty-nay");
+    await expect(page.getByRole("heading", { name: "Không tìm thấy hồ sơ phù hợp" })).toBeVisible();
+    await page.getByRole("button", { name: "Xóa bộ lọc", exact: true }).click();
+    await expect(page.getByText("Hiển thị", { exact: false })).toContainText("12 hồ sơ");
+    await page.setViewportSize({ width: 375, height: 900 });
+    await page.screenshot({ path: testInfo.outputPath("applications-mobile.png"), fullPage: true });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.getByRole("tab", { name: "Phỏng vấn", exact: true }).click();
+    await expect(page.getByText("Phỏng vấn trực tuyến", { exact: true })).toBeVisible();
+    await page.screenshot({ path: testInfo.outputPath("applications-interviews-mobile.png"), fullPage: true });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.getByRole("tab", { name: "Đã trúng tuyển", exact: true }).click();
+    await expect(page.getByText("Chúc mừng bạn!", { exact: false })).toBeVisible();
+    await page.getByRole("tab", { name: "Tất cả", exact: true }).click();
+    await expect(page.getByRole("tab", { name: "Tất cả", exact: true })).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByText("Hiển thị", { exact: false })).toContainText("12 hồ sơ");
+    await page.route("**/api/bff/applications?**", (route) => route.fulfill({ status: 500, json: { error: { code: "INTERNAL_ERROR" } } }));
+    await page.reload();
+    await expect(page.getByText("Không thể tải hồ sơ ứng tuyển", { exact: true })).toBeVisible();
+    await page.unroute("**/api/bff/applications?**");
+    await page.getByRole("button", { name: "Thử lại", exact: true }).click();
+    await expect(page.getByText("Hiển thị", { exact: false })).toContainText("12 hồ sơ");
+});
+
+test("application management requires a candidate session", async ({ page }) => {
+    await page.goto("/candidate/applications");
+    await expect(page).toHaveURL(/\/login$/);
+    expect((await page.request.get("/api/bff/applications")).status()).toBe(401);
+    expect((await page.request.get("/api/bff/candidate/interviews")).status()).toBe(401);
+});

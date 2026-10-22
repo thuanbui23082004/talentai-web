@@ -1,0 +1,32 @@
+{
+  "items": [
+    {
+      "id": "a0000000-0000-4000-8000-000000000001",
+      "jobId": "10000000-0000-4000-8000-000000000001",
+      "job": {
+        "id": "10000000-0000-4000-8000-000000000001",
+        "title": "Lập trình viên Frontend React",
+        "company": { "id": "20000000-0000-4000-8000-000000000001", "name": "Công ty mẫu Sao Việt" },
+        "location": { "city": "Đà Nẵng", "provinceCode": "48", "wardCode": "20194", "ward": "Phường Hải Vân" },
+        "workType": "full_time",
+        "level": "junior",
+        "status": "open",
+        "minExperienceYears": 1,
+        "salary": { "min": 15000000, "max": 25000000, "currency": "VND", "period": "month", "negotiable": false },
+        "skills": ["React", "TypeScript"],
+        "postedAt": "2026-10-01T00:00:00Z",
+        "applicationDeadline": "2026-12-31"
+      },
+      "cvId": "c0000000-0000-4000-8000-000000000001",
+      "cvTitle": "CV ứng tuyển · Nguyễn Minh Anh",
+      "status": "reviewing",
+      "appliedAt": "2026-10-10T02:00:00Z",
+      "updatedAt": "2026-10-11T07:00:00Z",
+      "statusHistory": [
+        { "status": "submitted", "changedBy": "candidate", "changedAt": "2026-10-10T02:00:00Z" },
+        { "status": "reviewing", "changedBy": "recruiter", "changedAt": "2026-10-11T07:00:00Z" }
+      ]
+    }
+  ],
+  "meta": { "page": 1, "pageSize": 1, "totalItems": 12, "totalPages": 12 }
+}

@@ -6,6 +6,7 @@ import { createMockJobDetails } from "@/mocks/fixtures/job-details";
 import { mockJobs } from "@/mocks/fixtures/jobs";
 import { searchMockCompanies, getMockCompany, getMockCompanyJobs } from "./mock-companies";
 import { handleMockNotifications } from "./mock-notifications";
+import { handleMockApplications } from "./mock-applications";
 
 const mockJobDetails = createMockJobDetails(mockJobs);
 
@@ -14,6 +15,8 @@ export async function handleMockRequest(request: Request): Promise<Response> {
   if (auth) return auth;
   const notifications = await handleMockNotifications(request);
   if (notifications) return notifications;
+  const applications = await handleMockApplications(request);
+  if (applications) return applications;
   const path = new URL(request.url).pathname;
   const detailId = path.match(/^\/api\/bff\/jobs\/([0-9a-f-]{36})$/i)?.[1];
   const companyPath = path.match(/^\/api\/bff\/companies\/([0-9a-f-]{36})(\/jobs)?$/i);
