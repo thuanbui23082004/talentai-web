@@ -51,9 +51,9 @@ test("desktop sidebar collapses, preserves navigation and expands profile submen
     await page.screenshot({ path: testInfo.outputPath("sidebar-collapsed.png"), fullPage: true });
     await sidebar.getByRole("button", { name: "Hồ sơ việc làm", exact: true }).click();
     await expect(sidebar).toHaveCSS("width", "240px");
-    await expect(sidebar.getByRole("button", { name: "Hồ sơ cá nhân", exact: true })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Hồ sơ của tôi", exact: true })).toBeVisible();
     await sidebar.locator("summary").filter({ hasText: "Hồ sơ việc làm" }).click();
-    await expect(sidebar.getByRole("button", { name: "Hồ sơ cá nhân", exact: true })).toBeHidden();
+    await expect(sidebar.getByRole("link", { name: "Hồ sơ của tôi", exact: true })).toBeHidden();
     await sidebar.getByRole("button", { name: "Thu gọn sidebar", exact: true }).click();
     await sidebar.getByRole("button", { name: "Mở rộng sidebar", exact: true }).click();
     await expect(sidebar).toHaveCSS("width", "240px");

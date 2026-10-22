@@ -29,6 +29,7 @@ không phụ thuộc vào backend chạy local. Không coi tên thư mục, page
 | CV, phân tích AI, matching, ứng tuyển, recruiter, admin | Chỉ có khung; chưa có mock hoạt động |
 | Thông báo ứng viên | Popup ở chuông header và trang `/candidate/notifications`; lọc tất cả/chưa đọc, phân trang, mở thông báo và đánh dấu đã đọc/tất cả đã đọc; loading/empty/error/retry; badge lấy số chưa đọc thật từ BFF mock |
 | API thông báo | GET `/notifications`, GET `/notifications/unread-count`, PATCH `/notifications/{notificationId}/read`, POST `/notifications/read-all` theo contract. Mock minh họa lưu trạng thái riêng từng user trong bộ nhớ, kiểm tra session/CSRF và Origin; khởi động lại server sẽ reset. Real proxy vẫn đóng, chưa xác minh backend thật. Xóa/cài đặt thông báo chưa triển khai |
+| `/candidate/profile` | Giao diện hồ sơ ứng viên theo ảnh tham chiếu: thông tin tài khoản, chọn tệp CV, tổng quan và các mục giới thiệu/kinh nghiệm/học vấn/kỹ năng/dự án/chứng chỉ/ngoại ngữ. Sáu việc làm gợi ý là dữ liệu cố định theo yêu cầu, không phải kết quả AI/API. Các hộp thoại cập nhật mới là trạng thái trình bày; API hồ sơ và upload CV chưa kết nối |
 
 Mock `/jobs` chỉ trả tin `open`. `sort=match_score` cần auth nên trả 401.
 Bộ địa điểm hiện hành: snapshot Province Open API v2 gồm 34 tỉnh/thành và 3.321 phường/xã/đặc khu tại `src/lib/locations/`.
