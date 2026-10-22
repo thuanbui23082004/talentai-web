@@ -13,7 +13,7 @@ export function NotificationsPage({ selectedId }: { selectedId?: string }) {
     const query = useNotifications(filters);
     const count = useUnreadCount();
     const { readAll } = useNotificationActions();
-    return <div className="mx-auto max-w-5xl space-y-6 py-2">
+    return <div className="candidate-page space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-4"><div className="flex items-center gap-4"><span className="flex size-12 items-center justify-center rounded-2xl bg-secondary text-primary"><Bell className="size-6" aria-hidden="true" /></span><div><h1 className="text-2xl font-bold tracking-tight">Thông báo</h1><p className="mt-1 text-sm text-muted-foreground">Theo dõi những cập nhật mới trên hành trình tìm việc.</p></div></div><Button variant="outline" disabled={!count.data || readAll.isPending} loading={readAll.isPending} onClick={() => readAll.mutate()}><CheckCheck />Đánh dấu tất cả đã đọc</Button></div>
         {readAll.isError && <Alert variant="error" title="Chưa thể cập nhật thông báo">Vui lòng thử đánh dấu tất cả đã đọc một lần nữa.</Alert>}
         <section aria-label="Danh sách thông báo" className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">

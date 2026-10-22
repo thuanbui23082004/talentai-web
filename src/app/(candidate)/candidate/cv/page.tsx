@@ -1,3 +1,10 @@
-export default function CandidateCvPage() {
-  return <section><h1 className="text-2xl font-bold">CV của tôi</h1><p className="mt-3 text-sm text-muted-foreground">Khu vực quản lý CV đang được hoàn thiện.</p></section>;
+import type { Metadata } from "next";
+import { CvManagementPage } from "@/features/cv";
+import { requireRole } from "@/lib/auth/require-role";
+
+export const metadata: Metadata = { title: "Quản lý CV & Mẫu CV | TalentAI" };
+
+export default async function CandidateCvPage() {
+    await requireRole("candidate");
+    return <CvManagementPage />;
 }

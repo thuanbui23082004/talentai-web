@@ -89,6 +89,8 @@ Nội dung form nghiệp vụ vẫn cần Zod trong feature; component UI không
 
 Trang `/candidate/dashboard` dùng lại `CandidateShell`, header và sidebar hiện có. Nội dung theo ảnh tham chiếu: banner gradient với mascot `image 16.png`, ba thẻ thống kê và hai thẻ việc làm gợi ý, xếp dọc trên mobile. Tên chào lấy từ session.
 
+Trang `/candidate/cv` mở từ **Hồ sơ việc làm → Quản lý CV**, dùng chung shell hiện có. Nội dung gồm thống kê minh họa, toolkit AI, hai thẻ tải lên/tạo từ mẫu, danh sách bản xem trước CV và thư viện sáu mẫu với lọc danh mục/sắp xếp. Thẻ CV hiển thị giấy A4 dựng bằng HTML/CSS; typography dùng container units để tỷ lệ đồng nhất giữa thumbnail và popup. Bố cục danh sách 2 cột desktop/1 cột mobile, mẫu 3/2/1 cột; popup dùng Modal chung, có backdrop và xác nhận xóa. Các thao tác cập nhật bản xem trước cục bộ và có nhãn rõ phạm vi; upload thật, xuất PDF và AI chưa nối backend.
+
 Số liệu 12/148/3, 18 gợi ý, công ty, kỹ năng và điểm phù hợp là dữ liệu trình bày từ mẫu, chưa kết nối API và được gắn nhãn minh họa trên trang. Không thêm endpoint hoặc giả lập lưu/ứng tuyển thành công. Nút lưu và ứng tuyển mở thông báo trạng thái phát triển; khám phá việc làm dẫn đến `/jobs`, xem thêm dẫn đến `/candidate/matching`. Mỗi thẻ có phần mở rộng giải thích gợi ý từ AI. Khi triển khai dữ liệu thật cần bổ sung service theo contract cùng loading/empty/error.
 
 ## Asset

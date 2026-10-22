@@ -43,7 +43,7 @@ function MiniChart({ line = false }: { line?: boolean }) {
 }
 
 export function CandidateDashboard({ user }: { user: AuthUser }) {
-    return <div className="candidate-dashboard mx-auto w-full max-w-6xl space-y-5 lg:py-1">
+    return <div className="candidate-page candidate-dashboard space-y-5">
         <section aria-labelledby="dashboard-greeting" className="relative isolate overflow-hidden rounded-2xl bg-[linear-gradient(110deg,#853de0,#6250ef_55%,#8278fa)] px-6 py-7 text-primary-foreground shadow-button sm:px-10 sm:py-8">
             <div className="relative z-10 max-w-xl sm:pr-32 lg:pr-16 xl:pr-0">
                 <h1 id="dashboard-greeting" className="text-2xl font-semibold tracking-tight sm:text-3xl">Chào buổi sáng, {user.fullName}!</h1>

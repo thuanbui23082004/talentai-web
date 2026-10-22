@@ -47,12 +47,12 @@ test("criteria validates salaries and required fields and fits mobile", async ({
     await page.setViewportSize({ width: 375, height: 900 });
     await login(page);
     await page.goto("/candidate/job-preferences");
-    await page.getByRole("spinbutton", { name: "Lương tối thiểu", exact: true }).fill("30");
-    await expect(page.getByRole("spinbutton", { name: "Lương tối thiểu", exact: true })).toHaveValue("30");
+    await page.getByRole("textbox", { name: "Lương tối thiểu", exact: true }).fill("30");
+    await expect(page.getByRole("textbox", { name: "Lương tối thiểu", exact: true })).toHaveValue("30");
     await page.getByRole("button", { name: "Lưu thông tin", exact: true }).click();
     await expect(page.getByText("Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu.", { exact: true })).toBeVisible();
     await page.getByRole("checkbox", { name: "Lương thỏa thuận", exact: true }).check();
-    await expect(page.getByRole("spinbutton", { name: "Lương tối thiểu", exact: true })).toBeDisabled();
+    await expect(page.getByRole("textbox", { name: "Lương tối thiểu", exact: true })).toBeDisabled();
     await page.getByRole("button", { name: "Lưu thông tin", exact: true }).click();
     await expect(page.getByText("Đã lưu tiêu chí vào bản xem trước.", { exact: true })).toBeVisible();
     await page.getByRole("textbox", { name: /Vị trí mong muốn/ }).fill("");

@@ -1,2 +1,1 @@
-// Public API của feature
-export {};
+export { CvManagementPage } from "./components/cv-management-page";

@@ -29,7 +29,7 @@ export function CandidateProfilePage({ user }: { user: AuthUser }) {
 function CandidateProfileContent({ user }: { user: AuthUser }) {
     const [noExperience, setNoExperience] = useState(false);
     const [educationDegree, setEducationDegree] = useState("");
-    return <div className="mx-auto w-full max-w-[1180px]">
+    return <div className="candidate-page">
         <h1 className="mb-5 text-2xl font-bold tracking-tight">Hồ sơ của tôi</h1>
         <p role="status" className="mb-5 rounded-xl border border-info/20 bg-info-soft px-4 py-3 text-xs leading-5 text-info-foreground">Bạn đang chỉnh sửa bản xem trước. Thông tin được giữ trong trang hiện tại và sẽ mất khi tải lại; chưa lưu lên tài khoản.</p>
         <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
