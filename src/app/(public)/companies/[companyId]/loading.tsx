@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui";
+import { LoadingState } from "@/components/shared/loading-state";
 export default function CompanyLoading() {
-    return <main role="status" aria-label="Đang tải thông tin công ty" className="mx-auto max-w-[1180px] space-y-6 px-5 py-8 sm:px-8"><Skeleton className="h-80 rounded-2xl" /><div className="grid gap-5 lg:grid-cols-[2.1fr_1fr]"><Skeleton className="h-96 rounded-2xl" /><Skeleton className="h-80 rounded-2xl" /></div></main>;
+    return <LoadingState variant="page" title="Đang tải thông tin công ty" description="Cùng tìm hiểu doanh nghiệp và những cơ hội đang chờ bạn." />;
 }

@@ -1,18 +1,5 @@
-import { Skeleton } from "@/components/ui";
+import { LoadingState } from "@/components/shared/loading-state";
 
 export default function LoadingJobDetail() {
-    return (
-        <main
-            className="ui-container space-y-6 py-8"
-            role="status"
-            aria-label="Đang tải chi tiết việc làm"
-        >
-            <Skeleton className="h-36 rounded-2xl" />
-            <Skeleton className="h-44 rounded-2xl" />
-            <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-                <Skeleton className="h-96 rounded-2xl" />
-                <Skeleton className="h-80 rounded-2xl" />
-            </div>
-        </main>
-    );
+    return <LoadingState variant="page" title="Đang tải chi tiết việc làm" description="Thông tin vị trí, yêu cầu và quyền lợi đang được chuẩn bị cho bạn." />;
 }

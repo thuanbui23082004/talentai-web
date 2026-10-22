@@ -1,5 +1,9 @@
 # Trạng thái triển khai
 
+## Loading dùng chung
+
+Đã thêm animation nhân vật 8 khung hình từ `animationloading.png`, dùng sprite WebP nền trong suốt. Tích hợp fallback trang chủ/public/candidate và các vùng dữ liệu việc làm, công ty, ứng tuyển, đã lưu; không thêm thời gian chờ giả, có reduced-motion. Xem thử `/ui/loading`, hướng dẫn tại `docs/loading-animation.md`. Không thay đổi contract hoặc trạng thái tích hợp backend.
+
 ## Nguyên tắc giai đoạn mock trước
 
 Backend đang phát triển. Hoàn thành feature frontend dựa trên contract và mock có hành vi,

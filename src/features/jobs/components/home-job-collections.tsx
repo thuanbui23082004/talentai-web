@@ -3,7 +3,8 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight, Flame, ListFilter } from "lucide-react";
-import { Alert, Button, Select, Skeleton } from "@/components/ui";
+import { Alert, Button, Select } from "@/components/ui";
+import { LoadingState } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useJobs } from "../hooks/use-jobs";
 import { JOB_LOCATIONS } from "../search-options";
@@ -45,7 +46,7 @@ function Collection({ id, title, jobs }: { id: string; title: string; jobs: Job[
 
 export function HomeJobCollections({ featuredIds, urgentIds, initialJobs }: { featuredIds: string[]; urgentIds: string[]; initialJobs?: JobSearchResponse }) {
     const { data, isPending, isError, refetch } = useJobs({ pageSize: 20 }, initialJobs);
-    if(isPending) return <div role="status" aria-label="Đang tải việc làm" className="grid gap-3 md:grid-cols-3">{Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="h-40" />)}</div>;
+    if(isPending) return <LoadingState title="Đang tải việc làm" description="Các vị trí nổi bật và cơ hội tuyển dụng mới sẽ xuất hiện tại đây." />;
     if(isError) return <Alert variant="error" title="Chưa thể tải việc làm">
         <Button className="mt-3" variant="outline" onClick={() => void refetch()}>Thử lại</Button>
     </Alert>;

@@ -1,0 +1,111 @@
+.talent-loading-root {
+    display: grid;
+    place-items: center;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    color: var(--foreground);
+    text-align: center;
+    animation: talent-loading-reveal 300ms ease-out 120ms both;
+}
+
+.talent-loading-page {
+    min-height: calc(100svh - 4rem);
+    padding: 2.5rem 1.25rem;
+    background: radial-gradient(ellipse at 50% 45%, var(--secondary), transparent 65%), var(--background);
+}
+
+.talent-loading-section {
+    min-height: 15.5rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-2xl);
+    background: var(--card);
+}
+
+.talent-loading-content { width: 100%; max-width: 22rem; }
+.talent-loading-eyebrow { display: flex; align-items: center; justify-content: center; gap: .625rem; color: var(--primary); font-size: .6875rem; font-weight: 600; letter-spacing: .025em; }
+.talent-loading-eyebrow span { color: var(--border); }
+.talent-loading-scene { position: relative; width: min(100%, 11.5rem); height: 7.5rem; margin: .375rem auto .5rem; }
+.talent-loading-halo { position: absolute; inset: 12% 13% 2%; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent); background: radial-gradient(circle, var(--secondary) 0%, transparent 70%); }
+.talent-loading-mascot {
+    position: absolute;
+    inset: 0;
+    width: 5.625rem;
+    height: 7.5rem;
+    margin: auto;
+    background-repeat: no-repeat;
+    background-size: 400% 200%;
+    animation: talent-loading-run 880ms steps(1, end) infinite;
+}
+.talent-loading-ground { position: absolute; bottom: -.25rem; left: 27%; right: 27%; height: .6rem; border-radius: 50%; background: var(--primary); opacity: .1; filter: blur(4px); }
+.talent-loading-smoke { position: absolute; inset: 0; pointer-events: none; }
+.talent-loading-smoke i {
+    position: absolute;
+    left: 39%;
+    top: 79%;
+    width: 1.5rem;
+    height: .875rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--primary) 28%, var(--card));
+    opacity: 0;
+    filter: blur(.5px);
+    animation: talent-loading-smoke 1.4s ease-out infinite;
+}
+.talent-loading-smoke i::before, .talent-loading-smoke i::after { content: ""; position: absolute; border-radius: 50%; background: inherit; }
+.talent-loading-smoke i::before { width: .875rem; height: .875rem; left: .25rem; top: -.375rem; }
+.talent-loading-smoke i::after { width: .625rem; height: .625rem; right: .0625rem; top: -.1875rem; }
+.talent-loading-smoke i:nth-child(2) { animation-delay: -.467s; }
+.talent-loading-smoke i:nth-child(3) { animation-delay: -.934s; }
+.talent-loading-float-card { position: absolute; display: inline-flex; align-items: center; justify-content: center; gap: .5rem; z-index: 1; border: 1px solid var(--border); border-radius: var(--radius-xl); background: var(--card); color: var(--primary); box-shadow: var(--shadow-card); animation: talent-loading-float 3.6s ease-in-out infinite; }
+.talent-loading-float-card svg { width: .875rem; height: .875rem; }
+.talent-loading-spark { top: 17%; right: .5rem; width: 1.75rem; height: 1.75rem; animation-delay: -1.8s; }
+.talent-loading-copy { margin: 0 auto; max-width: 20rem; }
+.talent-loading-title { font-size: 1rem; font-weight: 700; line-height: 1.4; letter-spacing: -.025em; }
+.talent-loading-description { margin-top: .375rem; color: var(--muted-foreground); font-size: .75rem; line-height: 1.6; text-wrap: pretty; }
+.talent-loading-track { width: 5rem; height: .1875rem; margin: .75rem auto 0; overflow: hidden; border-radius: 999px; background: var(--secondary); }
+.talent-loading-track span { display: block; width: 45%; height: 100%; border-radius: inherit; background: var(--primary); animation: talent-loading-travel 1.6s ease-in-out infinite; }
+.talent-loading-wait { display: flex; justify-content: center; align-items: center; gap: .5rem; margin-top: .625rem; font-size: .6875rem; color: var(--muted-foreground); }
+.talent-loading-dots { display: inline-flex; gap: .2rem; }
+.talent-loading-dots i { width: .2rem; height: .2rem; border-radius: 50%; background: var(--primary); animation: talent-loading-dot 1.2s ease-in-out infinite; }
+.talent-loading-dots i:nth-child(2) { animation-delay: .15s; }
+.talent-loading-dots i:nth-child(3) { animation-delay: .3s; }
+.talent-loading-section .talent-loading-scene { width: 9rem; max-width: 100%; height: 5rem; margin-block: .375rem .5rem; }
+.talent-loading-section .talent-loading-mascot { width: 3.75rem; height: 5rem; }
+.talent-loading-section .talent-loading-title { font-size: .875rem; }
+.talent-loading-section .talent-loading-spark { right: 0; width: 1.5rem; height: 1.5rem; }
+.talent-loading-section .talent-loading-track { margin-top: .75rem; }
+
+@keyframes talent-loading-run {
+    0% { background-position: 0% 0%; }
+    12.5% { background-position: 33.333333% 0%; }
+    25% { background-position: 66.666667% 0%; }
+    37.5% { background-position: 100% 0%; }
+    50% { background-position: 0% 100%; }
+    62.5% { background-position: 33.333333% 100%; }
+    75% { background-position: 66.666667% 100%; }
+    87.5%, 100% { background-position: 100% 100%; }
+}
+@keyframes talent-loading-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -.5rem; } }
+@keyframes talent-loading-smoke {
+    0% { opacity: 0; transform: translate(0, 0) scale(.35); }
+    15% { opacity: .7; }
+    60% { opacity: .35; }
+    100% { opacity: 0; transform: translate(-3rem, -1.25rem) scale(1.4); }
+}
+@keyframes talent-loading-travel { 0% { transform: translateX(-110%); } 100% { transform: translateX(330%); } }
+@keyframes talent-loading-dot { 0%, 70%, 100% { opacity: .35; transform: translateY(0); } 35% { opacity: 1; transform: translateY(-.2rem); } }
+@keyframes talent-loading-reveal { from { opacity: 0; } to { opacity: 1; } }
+
+@media (max-width: 400px) {
+    .talent-loading-page .talent-loading-scene { width: 10.5rem; height: 7rem; }
+    .talent-loading-page .talent-loading-mascot { width: 5.25rem; height: 7rem; }
+    .talent-loading-spark { right: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .talent-loading-root, .talent-loading-root *, .talent-loading-root *::before, .talent-loading-root *::after { animation: none !important; }
+    .talent-loading-mascot { background-position: 0 0; }
+    .talent-loading-smoke { display: none; }
+    .talent-loading-track span { width: 100%; opacity: .5; }
+}

@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles } from "lucide-react";
 import { ApiError } from "@/lib/api/errors";
-import { Button, Skeleton, Alert, Select, Pagination } from "@/components/ui";
+import { Button, Alert, Select, Pagination } from "@/components/ui";
+import { LoadingState } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
 import { parseJobSearchParams } from "../schemas/search";
 import { JobSearch } from "./job-search";
@@ -46,7 +47,7 @@ export function JobList() {
                         <div><h2 className="text-lg font-bold">Cơ hội dành cho bạn</h2><p role="status" className="mt-1 text-sm text-muted-foreground">{isFetching ? "Đang cập nhật…" : data ? `Tìm thấy ${data.meta.totalItems} việc làm` : ""}</p></div>
                         <Select aria-label="Sắp xếp việc làm" value={filters.sort ?? "relevance"} options={[{ value: "relevance", label: "Phù hợp nhất" }, { value: "newest", label: "Mới nhất" }, { value: "salary_desc", label: "Lương cao đến thấp" }, { value: "salary_asc", label: "Lương thấp đến cao" }, { value: "deadline", label: "Sắp hết hạn" }]} onValueChange={(value) => { if (value) updateQuery("sort", value); }} className="w-full text-xs sm:w-52" />
                     </div>
-                    {parsed.success && isPending && <div role="status" aria-label="Đang tải việc làm" className="grid gap-3 md:grid-cols-2">{Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="h-44 rounded-xl" />)}</div>}
+                    {parsed.success && isPending && <LoadingState title="Đang tải việc làm" description="Những cơ hội tiếp theo trên hành trình của bạn đang được chuẩn bị." />}
                     {isError && <Alert variant="error" title={error instanceof ApiError ? error.message : "Không thể tải việc làm. Vui lòng thử lại."}><Button variant="outline" size="sm" className="mt-3" onClick={() => void refetch()}>Thử lại</Button></Alert>}
                     {!isError && data && <>
                         {data.items.length === 0 ? <EmptyState title="Không tìm thấy việc làm." description="Hãy thử từ khóa khác hoặc mở rộng địa điểm tìm kiếm." action={<Button variant="outline" onClick={() => router.push("/jobs")}>Xóa bộ lọc</Button>} /> : <ul className="grid gap-3 md:grid-cols-2">{data.items.map((job) => <li key={job.id} className="min-w-0"><JobCard job={job} /></li>)}</ul>}

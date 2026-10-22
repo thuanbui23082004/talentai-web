@@ -21,7 +21,6 @@ import {
     Input,
     Pagination,
     Select,
-    Skeleton,
     Tabs,
     TabsContent,
     TabsList,
@@ -29,6 +28,7 @@ import {
     useToast,
 } from "@/components/ui";
 import { todayCalendarValue } from "@/lib/calendar";
+import { LoadingState } from "@/components/shared/loading-state";
 import { useSavedJobActions, useSavedJobs } from "../hooks/use-saved-jobs";
 import {
     filterSavedJobs,
@@ -281,18 +281,7 @@ export function SavedJobsPage() {
                 </div>
                 <TabsContent key={tab} value={tab}>
                     {query.isPending ? (
-                        <div
-                            role="status"
-                            aria-label="Đang tải việc làm đã lưu"
-                            className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-                        >
-                            {Array.from({ length: 6 }, (_, index) => (
-                                <Skeleton
-                                    key={index}
-                                    className="h-44 rounded-xl"
-                                />
-                            ))}
-                        </div>
+                        <LoadingState title="Đang tải việc làm đã lưu" description="TalentAI đang mở lại những cơ hội bạn đã quan tâm." />
                     ) : query.isError ? (
                         <Alert
                             variant="error"
