@@ -19,12 +19,13 @@ import './recruiter-candidates.css';
 function CandidateSelect({ label, value, items, onChange }: { label: string; value: string; items: { value: string; label: string }[]; onChange: (value: string) => void }) {
   return <Select value={value} onValueChange={next => onChange(next ?? 'all')} items={items}><SelectTrigger aria-label={label}><SelectValue /></SelectTrigger><SelectContent>{items.map(item => <SelectItem value={item.value} key={item.value}>{item.label}</SelectItem>)}</SelectContent></Select>;
 }
-type Filters = { job: string; status: string; experience: string; sort: 'applied_desc' | 'applied_asc' | 'experience_desc'; page: number };
-const defaults: Filters = { job: 'all', status: 'all', experience: 'all', sort: 'applied_desc', page: 1 };
+type Filters = { job: string; status: string; experience: string; education: 'all' | NonNullable<RecruiterApplicationQuery['educationLevel']>; sort: 'applied_desc' | 'applied_asc' | 'experience_desc'; page: number };
+const defaults: Filters = { job: 'all', status: 'all', experience: 'all', education: 'all', sort: 'applied_desc', page: 1 };
 
 export function RecruiterCandidates() {
   const t = useTranslations('Candidates');
   const pipelineText = useTranslations('Pipeline');
+  const educationText = useTranslations('JobForm.educationLevels');
   const [view, setView] = useState<'cards' | 'list'>('cards');
   const [filters, setFilters] = useState<Filters>(defaults);
   const [showFilters, setShowFilters] = useState(true);
@@ -46,6 +47,7 @@ export function RecruiterCandidates() {
     jobId: filters.job === 'all' ? undefined : filters.job,
     status: filters.status === 'all' ? undefined : [filters.status as typeof applicationStatuses[number]],
     minExperienceYears: filters.experience === 'all' ? undefined : Number(filters.experience),
+    educationLevel: filters.education === 'all' ? undefined : filters.education,
     sort: filters.sort, page: filters.page, pageSize: 9,
   };
   const applications = useRecruiterApplications(query, valid);
@@ -61,7 +63,8 @@ export function RecruiterCandidates() {
   return <div className="candidates-page">
     <header className="candidates-page-heading"><div><h1>{t('heading')}</h1><p>{t('subtitle')}</p></div><div className="candidate-heading-actions"><Link className="candidate-pipeline-link" href="/recruiter/candidates/pipeline">{pipelineText('board')}</Link><div className="candidate-view-toggle"><Button size="sm" variant={view === 'list' ? 'default' : 'outline'} onClick={() => setView('list')} aria-pressed={view === 'list'}><List size={13} />{t('list')}</Button><Button size="sm" variant={view === 'cards' ? 'default' : 'outline'} onClick={() => setView('cards')} aria-pressed={view === 'cards'}><LayoutGrid size={13} />{t('cards')}</Button></div></div></header>
     <section className="candidates-toolbar" aria-label={t('filter')}><div className="candidates-toolbar-top"><strong>{t('total', { count: total })}</strong><div className="candidate-search"><Search size={14} /><Input value={search} maxLength={200} onChange={event => { setSearch(event.target.value); update('page', 1); }} placeholder={t('search')} aria-label={t('searchLabel')} aria-invalid={!rawSearch.success} aria-describedby={searchError ? 'candidate-search-error' : undefined} /></div><Button variant="outline" size="sm" aria-expanded={showFilters} onClick={() => setShowFilters(!showFilters)}><SlidersHorizontal size={13} />{t('filter')}</Button><CandidateSelect label={t('sort')} value={filters.sort} onChange={value => update('sort', value as Filters['sort'])} items={(['applied_desc', 'applied_asc', 'experience_desc'] as const).map(value => ({ value, label: t(`sorts.${value}`) }))} /></div>
-      {showFilters && <div className="candidates-filter-row"><CandidateSelect label={t('job')} value={filters.job} items={[{ value: 'all', label: t('allJobs') }, ...(jobs.data?.items ?? []).map(job => ({ value: job.id, label: job.title }))]} onChange={value => update('job', value)} /><CandidateSelect label={t('status')} value={filters.status} items={[{ value: 'all', label: t('allStatuses') }, ...applicationStatuses.map(value => ({ value, label: t(`statuses.${value}`) }))]} onChange={value => update('status', value)} /><Input value={skills} maxLength={200} aria-label={t('skills')} placeholder={t('skillsPlaceholder')} onChange={event => { setSkills(event.target.value); update('page', 1); }} aria-invalid={!rawSkills.success} /><CandidateSelect label={t('experience')} value={filters.experience} items={[{ value: 'all', label: t('allExperiences') }, ...[1, 2, 3, 5].map(count => ({ value: String(count), label: t('experienceYears', { count }) }))]} onChange={value => update('experience', value)} /><Button variant="ghost" size="sm" onClick={clear}><RotateCcw size={12} />{t('clear')}</Button></div>}
+      {showFilters && <div className="candidates-filter-row"><CandidateSelect label={t('job')} value={filters.job} items={[{ value: 'all', label: t('allJobs') }, ...(jobs.data?.items ?? []).map(job => ({ value: job.id, label: job.title }))]} onChange={value => update('job', value)} /><CandidateSelect label={t('status')} value={filters.status} items={[{ value: 'all', label: t('allStatuses') }, ...applicationStatuses.map(value => ({ value, label: t(`statuses.${value}`) }))]} onChange={value => update('status', value)} /><Input value={skills} maxLength={200} aria-label={t('skills')} placeholder={t('skillsPlaceholder')} onChange={event => { setSkills(event.target.value); update('page', 1); }} aria-invalid={!rawSkills.success} /><CandidateSelect label={t('experience')} value={filters.experience} items={[{ value: 'all', label: t('allExperiences') }, ...[1, 2, 3, 5].map(count => ({ value: String(count), label: t('experienceYears', { count }) }))]} onChange={value => update('experience', value)} /><CandidateSelect label={t('education')} value={filters.education} onChange={value => update('education', value as Filters['education'])} items={[{ value: 'all', label: t('allEducation') }, ...(['high_school', 'vocational', 'college', 'bachelor', 'master', 'doctorate', 'other'] as const).map(value => ({ value, label: educationText(value) }))]} /><Button variant="ghost" size="sm" onClick={clear}><RotateCcw size={12} />{t('clear')}</Button></div>}
+
       {searchError && <p role="alert" id="candidate-search-error" className="candidate-error">{t(search.length > 200 || skills.length > 200 ? 'searchTooLong' : 'privateSearch')}</p>}
       {jobs.isError && <p className="candidate-filter-error" role="alert">{t('errors.requestFailed')} <Button variant="ghost" size="sm" onClick={() => void jobs.refetch()}>{t('retry')}</Button></p>}
     </section>

@@ -11,8 +11,11 @@ import {
 import { Button } from '@/components/ui/button';
 import type { RecruiterJobView } from '@/features/jobs';
 import { RecruiterJobSearch } from '@/features/recruiter/components/recruiter-job-search';
+import { JobManagementActions } from '@/features/jobs/components/recruiter/job-management-actions';
+import { RecruiterScreening } from '@/features/matching/components/recruiter/recruiter-screening';
+import { useJobStatus } from '@/features/jobs/hooks/use-create-job';
+import { JobRequestError } from '@/features/jobs/errors';
 
-type PreviewStatus = RecruiterJobView['status'];
 type Action = 'pause' | 'close' | 'reopen';
 
 export function RecruiterJobDetail({ job }: { job: RecruiterJobView }) {
@@ -21,7 +24,10 @@ export function RecruiterJobDetail({ job }: { job: RecruiterJobView }) {
   const [query, setQuery] = useState('');
   const [location, setLocation] = useState('');
   const [filters, setFilters] = useState(false);
-  const [status, setStatus] = useState<PreviewStatus>(job.status);
+  const status = job.status;
+  const mutation = useJobStatus(job.id);
+  const formText = useTranslations('JobForm');
+  const [saved, setSaved] = useState(false);
   const [confirmation, setConfirmation] = useState<Action | null>(null);
   const [shareState, setShareState] = useState<'idle' | 'copied' | 'failed'>('idle');
 
@@ -34,11 +40,11 @@ export function RecruiterJobDetail({ job }: { job: RecruiterJobView }) {
     }
   }
 
-  function confirmAction() {
-    if (!confirmation) return;
-    setStatus(confirmation === 'pause' ? 'paused' : confirmation === 'close' ? 'closed' : 'open');
-    setConfirmation(null);
+  async function confirmAction() {
+    if (!confirmation || mutation.isPending) return;
+    try { await mutation.mutateAsync(confirmation); setConfirmation(null); setSaved(true); } catch {}
   }
+  function openConfirmation(action: Action) { mutation.reset(); setSaved(false); setConfirmation(action); }
 
   const facts = [
     { label: t('detailExperience'), value: t('detailYears', { count: job.experience }) },
@@ -73,17 +79,17 @@ export function RecruiterJobDetail({ job }: { job: RecruiterJobView }) {
         </Link>
         <div className="detail-actions">
           {status === 'open' && (
-            <Button variant="outline" onClick={() => setConfirmation('pause')}>
+            <Button variant="outline" disabled={mutation.isPending} onClick={() => openConfirmation('pause')}>
               <Pause size={14} />{t('pauseJob')}
             </Button>
           )}
           {(status === 'paused' || status === 'closed') && (
-            <Button variant="outline" onClick={() => setConfirmation('reopen')}>
+            <Button variant="outline" disabled={mutation.isPending} onClick={() => openConfirmation('reopen')}>
               <Play size={14} />{t('reopenJob')}
             </Button>
           )}
           {(status === 'open' || status === 'paused') && (
-            <Button variant="outline" onClick={() => setConfirmation('close')}>
+            <Button variant="outline" disabled={mutation.isPending} onClick={() => openConfirmation('close')}>
               <X size={14} />{t('closeJob')}
             </Button>
           )}
@@ -94,6 +100,9 @@ export function RecruiterJobDetail({ job }: { job: RecruiterJobView }) {
         </div>
       </div>
 
+      <JobManagementActions job={job} />
+      <RecruiterScreening jobId={job.id} />
+      {saved && <p role="status">{formText('statusSaved')}</p>}
       {shareState === 'copied' && <p role="status">{t('detailCopiedNotice')}</p>}
       {shareState === 'failed' && <p role="alert">{t('detailCopyFailed')}</p>}
 
@@ -101,11 +110,12 @@ export function RecruiterJobDetail({ job }: { job: RecruiterJobView }) {
         <section className="recruiter-panel detail-confirmation" aria-labelledby="detail-confirm-title">
           <h2 id="detail-confirm-title">{t('detailConfirmTitle')}</h2>
           <p>{t('detailConfirmDescription')}</p>
+          {mutation.error && <p className="field-error" role="alert">{formText(`errors.${mutation.error instanceof JobRequestError ? mutation.error.messageKey : 'requestFailed'}`)}</p>}
           <div className="detail-actions">
-            <Button className="recruiter-primary" onClick={confirmAction}>
-              {t('detailConfirm')}
+            <Button className="recruiter-primary" disabled={mutation.isPending} onClick={() => void confirmAction()}>
+              {mutation.isPending ? formText('saving') : t('detailConfirm')}
             </Button>
-            <Button variant="outline" onClick={() => setConfirmation(null)}>
+            <Button variant="outline" disabled={mutation.isPending} onClick={() => setConfirmation(null)}>
               {t('cancel')}
             </Button>
           </div>

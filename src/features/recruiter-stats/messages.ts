@@ -1,0 +1,16 @@
+export const recruiterStatsMessages = { RecruiterStats: {
+  weekdays: { '0': 'CN', '1': 'T2', '2': 'T3', '3': 'T4', '4': 'T5', '5': 'T6', '6': 'T7' },
+  applicationChart: 'Số lượng ứng tuyển', chartCount: '{count, number} lượt', sevenMonths: '7 tháng qua', customPeriod: 'Khoảng đã chọn', filters: 'Bộ lọc thống kê',
+  activeJobs: 'Vị trí đang tuyển', jobSort: 'Sắp xếp vị trí', popular: 'Phổ biến', newest: 'Mới nhất', candidateList: 'Danh sách ứng viên',
+  candidateTabs: { all: 'Tất cả ứng viên', reviewing: 'Đang lọc hồ sơ', potential: 'Đã chọn lọc', interview: 'Đang phỏng vấn', hired: 'Đã tuyển dụng' },
+  calendar: 'Lịch trình', previousMonth: 'Tháng trước', nextMonth: 'Tháng sau', noDayInterviews: 'Chưa có lịch phỏng vấn trong ngày này.',
+  startHiring: 'Bắt đầu tuyển dụng', findCandidates: 'Tìm ứng viên', hiringDescription: 'Tìm kiếm và lựa chọn ứng viên phù hợp từ các hồ sơ ứng tuyển của doanh nghiệp.', advanced: 'Thống kê tuyển dụng chi tiết',
+  heading: 'Tổng quan tuyển dụng', from: 'Từ ngày', to: 'Đến ngày', job: 'Tin tuyển dụng', allJobs: 'Tất cả tin tuyển dụng', clear: 'Xóa bộ lọc', refresh: 'Làm mới',
+  jobs: 'Tin tạo trong kỳ', applications: 'Hồ sơ ứng tuyển', hired: 'Đã tuyển dụng', hireRate: 'Tỷ lệ tuyển trên hồ sơ', upcoming: 'Phỏng vấn sắp tới', completed: 'Phỏng vấn hoàn thành', rejected: 'Đã từ chối', reviewing: 'Đang xem xét',
+  overview: 'Số liệu tổng quan', funnel: 'Tỷ lệ qua các vòng', stage: 'Giai đoạn', count: 'Số hồ sơ đã đến vòng', conversion: 'Tỷ lệ so với vòng trước', noRate: '—',
+  stages: { submitted: 'Đã nộp hồ sơ', reviewing: 'Xem xét hồ sơ', interview: 'Phỏng vấn', hired: 'Đã tuyển dụng' },
+  timeseries: 'Xu hướng tuyển dụng', metric: 'Chỉ số thống kê', interval: 'Nhóm thời gian', metrics: { jobs_posted: 'Tin tạo mới', applications: 'Hồ sơ nhận được', interviews: 'Buổi phỏng vấn', hires: 'Tuyển thành công' }, intervals: { day: 'Ngày', week: 'Tuần', month: 'Tháng' },
+  date: 'Thời gian', value: 'Số lượng', dataTable: 'Xem bảng dữ liệu', topJobs: 'Tin nhận nhiều hồ sơ', position: 'Vị trí tuyển dụng', recentCandidates: 'Hồ sơ gần đây', schedule: 'Lịch phỏng vấn sắp tới', viewAll: 'Xem tất cả', compose: 'Đăng tin tuyển dụng',
+  loading: 'Đang tải thống kê', retry: 'Thử lại', empty: 'Chưa có dữ liệu trong bộ lọc đã chọn.', noInterviews: 'Chưa có lịch phỏng vấn sắp tới.', dateOrder: 'Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.',
+  errors: { request: 'Không thể tải thống kê. Vui lòng thử lại.', session: 'Phiên làm việc không hợp lệ. Vui lòng tải lại trang.', forbidden: 'Bạn không có quyền xem dữ liệu thống kê này.', invalid: 'Bộ lọc thống kê chưa hợp lệ.' },
+} };

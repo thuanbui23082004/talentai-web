@@ -1,0 +1,11 @@
+import { z } from 'zod';
+import { interviewSchema, safeProfileUrlSchema } from '@/lib/api/candidate-detail-schemas';
+import { recruiterApplicationSchema } from '@/lib/api/application-schemas';
+import { pageMetaSchema } from '@/lib/api/job-schemas';
+export const managedInterviewSchema = interviewSchema.extend({ jobTitle: z.string().optional(), candidate: recruiterApplicationSchema.shape.candidate.optional(), cancelReason: z.string().optional() });
+export type ManagedInterview = z.infer<typeof managedInterviewSchema>;
+export const interviewPageSchema = z.object({ items: z.array(managedInterviewSchema), meta: pageMetaSchema });
+export const interviewQuerySchema = z.object({ jobId: z.uuid().optional(), applicationId: z.uuid().optional(), status: z.enum(['scheduled', 'cancelled', 'completed']).optional(), invitationStatus: z.enum(['draft', 'pending', 'accepted', 'declined']).optional(), from: z.iso.date().optional(), to: z.iso.date().optional(), page: z.number().int().min(1).default(1), pageSize: z.number().int().min(1).max(100).default(10) }).refine(value => !value.from || !value.to || value.from <= value.to);
+export type InterviewQuery = z.input<typeof interviewQuerySchema>;
+export const interviewUpdateSchema = z.object({ round: z.string().optional(), startTime: z.iso.datetime().optional(), endTime: z.iso.datetime().optional(), mode: z.enum(['online', 'offline']).optional(), location: z.string().optional(), meetingUrl: safeProfileUrlSchema.optional(), interviewers: z.array(z.string()).optional(), message: z.string().optional() }).strict();
+export const cancelInterviewSchema = z.object({ reason: z.string().trim().min(1).max(500) }).strict();

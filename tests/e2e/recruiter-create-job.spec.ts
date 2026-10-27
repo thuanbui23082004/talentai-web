@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { recruiterJobSchema } from '@/lib/api/job-schemas';
 
 async function fillRequired(page: Page, title: string) {
   await page.getByRole('textbox', { name: 'Tiêu đề tin', exact: true }).fill(title);
@@ -21,11 +22,15 @@ test('create a draft, open detail and find it in the list', async ({ page }, tes
   await expect(page.getByText('Tiêu đề cần từ 3 đến 200 ký tự.')).toBeVisible();
   const title = 'Chuyên viên giao diện kiểm thử';
   await fillRequired(page, title);
+  await page.getByRole('button', { name: 'Thêm vòng tuyển dụng', exact: true }).click();
+  await page.getByLabel('Vòng 1', { exact: true }).fill('Sơ tuyển hồ sơ');
   await expect(page.locator('.preview-job-title')).toContainText(title);
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: testInfo.outputPath('create-job-desktop.png'), fullPage: true });
   await page.getByRole('button', { name: 'Lưu & tiếp tục' }).click();
   await expect(page).toHaveURL(/\/recruiter\/jobs\/[0-9a-f-]{36}$/);
+  const id = page.url().split('/').at(-1);
+  expect(recruiterJobSchema.parse(await (await page.request.get(`/api/bff/recruiter/jobs/${id}`)).json()).hiringRounds).toEqual(['Sơ tuyển hồ sơ']);
   await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
   await expect(page.locator('.detail-info-card')).toContainText('Bản nháp');
   await page.locator('.detail-back').click();

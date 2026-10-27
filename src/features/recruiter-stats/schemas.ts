@@ -1,0 +1,10 @@
+import { z } from 'zod';
+const count = z.number().int().nonnegative();
+const rate = z.number().min(0).max(1);
+export const statsQuerySchema = z.object({ from: z.iso.date().optional(), to: z.iso.date().optional(), jobId: z.uuid().optional() }).refine(q => !q.from || !q.to || q.from <= q.to);
+export type StatsQuery = z.infer<typeof statsQuerySchema>;
+export const metrics = ['jobs_posted', 'applications', 'interviews', 'hires'] as const;
+export const seriesQuerySchema = z.object({ from: z.iso.date().optional(), to: z.iso.date().optional(), jobId: z.uuid().optional(), metric: z.enum(metrics), interval: z.enum(['day', 'week', 'month']).default('day') }).refine(q => !q.from || !q.to || q.from <= q.to);
+export const overviewSchema = z.object({ jobsByStatus: z.record(z.string(), count).optional(), totalApplications: count.optional(), applicationsByStatus: z.record(z.string(), count).optional(), upcomingInterviews: count.optional(), completedInterviews: count.optional(), hireRate: rate.optional(), averageMatchScore: z.number().min(0).max(100).optional(), topJobs: z.array(z.object({ jobId: z.uuid().optional(), title: z.string().optional(), applications: count.optional(), hired: count.optional() })).optional() });
+export const funnelSchema = z.object({ jobId: z.uuid().optional(), stages: z.array(z.object({ name: z.string(), count, conversionRate: rate.optional() })) });
+export const timeseriesSchema = z.object({ metric: z.string(), interval: z.enum(['day', 'week', 'month']), from: z.iso.date().optional(), to: z.iso.date().optional(), points: z.array(z.object({ date: z.iso.date(), value: z.number().nonnegative() })) });

@@ -9,6 +9,37 @@ async function restore(page: Page) {
   const response = await page.request.patch(`/api/bff/recruiter/applications/${first}/status`, { headers: { 'X-CSRF-Token': token }, data: { status: 'reviewing', round: 'Sơ tuyển HR', notifyCandidate: false } });
   expect(response.ok()).toBe(true);
 }
+
+async function dragCard(page: Page, stage: string) {
+  await expect(card(page).getByRole('button', { name: 'Kéo thẻ của Mai An', exact: true })).toBeEnabled();
+  const source = await card(page).locator('.pipeline-card-header').boundingBox();
+  const target = await page.locator(`[data-stage="${stage}"] .pipeline-column-heading`).boundingBox();
+  await page.mouse.move(source!.x + 8, source!.y + 8);
+  await page.mouse.down();
+  await page.mouse.move(source!.x + 20, source!.y + 8, { steps: 3 });
+  await page.mouse.move(target!.x + target!.width / 2, target!.y + 20, { steps: 20 });
+  await expect(page.locator(`[data-stage="${stage}"]`)).toHaveClass(/pipeline-column-over/);
+  await page.mouse.up();
+}
+
+test('a failed drop retains the card, supports retry, and a final drop still needs confirmation', async ({ page }) => {
+  await page.goto('/recruiter/candidates/pipeline');
+  await expect(card(page)).toBeVisible();
+  await page.route(`**/api/bff/recruiter/applications/${first}/status`, route => route.fulfill({ status: 503, contentType: 'application/problem+json', body: JSON.stringify({ error: { code: 'SERVICE_UNAVAILABLE' } }) }));
+  await dragCard(page, 'interview');
+  await expect(page.locator('.pipeline-drop-error')).toContainText('Hồ sơ được giữ ở cột cũ');
+  await expect(page.locator(`[data-stage="reviewing"] .pipeline-card[data-application-id="${first}"]`)).toBeVisible();
+  await page.unroute(`**/api/bff/recruiter/applications/${first}/status`);
+  try {
+    await page.locator('.pipeline-drop-error').getByRole('button', { name: 'Thử lại', exact: true }).click();
+    await expect(page.locator(`[data-stage="interview"] .pipeline-card[data-application-id="${first}"]`)).toBeVisible();
+    await dragCard(page, 'hired');
+    await expect(page.getByRole('heading', { name: 'Chuyển giai đoạn ứng viên', exact: true })).toBeVisible();
+    await expect(page.getByRole('checkbox', { name: 'Tôi xác nhận quyết định tuyển dụng này.' })).toBeVisible();
+    await page.getByRole('button', { name: 'Hủy', exact: true }).click();
+    await expect(page.locator(`[data-stage="interview"] .pipeline-card[data-application-id="${first}"]`)).toBeVisible();
+  } finally { await restore(page); }
+});
 test('board entry, real counts, per-column pagination, explanation and detail link', async ({ page }, info) => {
   await page.goto('/recruiter/candidates');
   await page.getByRole('link', { name: 'Bảng theo dõi', exact: true }).click();
@@ -32,9 +63,15 @@ test('dragging persists a manual stage change and synchronizes list and detail',
   await page.goto('/recruiter/candidates/pipeline');
   await expect(card(page)).toBeVisible({ timeout: 30000 });
   try {
-    await card(page).getByRole('button', { name: 'Kéo thẻ của Mai An', exact: true }).dragTo(page.locator('[data-stage="interview"] .pipeline-column-heading'));
-    await expect(page.getByRole('heading', { name: 'Chuyển giai đoạn ứng viên', exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'Xác nhận chuyển', exact: true }).click();
+    const source = await card(page).locator('.pipeline-card-header').boundingBox();
+    const target = await page.locator('[data-stage="interview"] .pipeline-column-heading').boundingBox();
+    await page.mouse.move(source!.x + 8, source!.y + 8);
+    await page.mouse.down();
+    await page.mouse.move(source!.x + 20, source!.y + 8, { steps: 3 });
+    await page.mouse.move(target!.x + target!.width / 2, target!.y + 20, { steps: 20 });
+    await expect(page.locator('[data-stage="interview"]')).toHaveClass(/pipeline-column-over/);
+    await page.mouse.up();
+    await expect(page.getByRole('heading', { name: 'Chuyển giai đoạn ứng viên', exact: true })).toHaveCount(0);
     await expect(page.locator('[data-stage="interview"] .pipeline-card').filter({ has: page.getByRole('link', { name: 'Mai An', exact: true }) })).toBeVisible();
     await expect(page.locator('[data-stage="reviewing"] .pipeline-card[data-application-id="' + first + '"]')).toHaveCount(0);
     await page.getByRole('link', { name: 'Danh sách ứng viên', exact: true }).click();

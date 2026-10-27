@@ -1,0 +1,46 @@
+/* All recruiter screens share the outer frame, while secondary columns stay readable. */
+.recruiter-app .recruiter-main { min-width: 0; padding: var(--recruiter-gutter); }
+
+@media (min-width: 1600px) {
+  .recruiter-app .recruiter-main .dashboard-figma-grid {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+  .recruiter-app .recruiter-main .detail-columns,
+  .recruiter-app .recruiter-main .create-job-grid {
+    grid-template-columns: minmax(0, 1fr) 400px;
+    gap: 24px;
+  }
+  .recruiter-app .recruiter-main .candidate-detail-grid,
+  .recruiter-app .recruiter-main .candidate-detail-skeleton {
+    grid-template-columns: 300px minmax(0, 1fr) 320px;
+    gap: 24px;
+  }
+  .recruiter-app .recruiter-main .inbox-workspace {
+    grid-template-columns: 184px minmax(340px, 380px) minmax(0, 1fr);
+  }
+  .recruiter-app .recruiter-main .help-guides {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .recruiter-app .recruiter-main .settings-account-grid {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 32px;
+  }
+  .recruiter-app .recruiter-main .settings-company-main {
+    max-width: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 32px;
+    align-items: start;
+  }
+  .recruiter-app .recruiter-main .settings-company-main .settings-field {
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .recruiter-app .recruiter-main .settings-company-main .settings-field:has(#company-industry),
+  .recruiter-app .recruiter-main .settings-company-main > .settings-form-buttons,
+  .recruiter-app .recruiter-main .settings-company-main > [role=alert],
+  .recruiter-app .recruiter-main .settings-company-main > [role=status],
+  .recruiter-app .recruiter-main .settings-company-main > .settings-catalog-error {
+    grid-column: 1 / -1;
+  }
+}

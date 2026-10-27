@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { matchingResultSchema } from '@/lib/api/analysis-schemas';
 import { applicationStatuses, recruiterApplicationSchema } from '@/lib/api/application-schemas';
 
 export const safeProfileUrlSchema = z.url().refine(value => {
@@ -28,11 +29,12 @@ export const interviewInputSchema = z.object({
   if (value.mode === 'online' && !value.meetingUrl) ctx.addIssue({ code: 'custom', path: ['meetingUrl'], message: 'required' });
   if (value.mode === 'offline' && !value.location?.trim()) ctx.addIssue({ code: 'custom', path: ['location'], message: 'required' });
 });
-export const interviewSchema = z.object({ id: z.uuid(), applicationId: z.uuid(), jobId: z.uuid().optional(), round: z.string().optional(), startTime: z.iso.datetime(), endTime: z.iso.datetime(), mode: z.enum(['online', 'offline']), location: z.string().optional(), meetingUrl: z.string().optional(), interviewers: z.array(z.string()).optional(), invitationStatus: z.enum(['draft', 'pending', 'accepted', 'declined']), status: z.enum(['scheduled', 'cancelled', 'completed']), message: z.string().optional() });
+export const interviewResultInputSchema = z.object({ result: z.enum(['passed', 'failed', 'need_more']), note: z.string().trim().max(2000).optional() }).strict();
+export const interviewSchema = z.object({ id: z.uuid(), applicationId: z.uuid(), jobId: z.uuid().optional(), round: z.string().optional(), startTime: z.iso.datetime(), endTime: z.iso.datetime(), mode: z.enum(['online', 'offline']), location: z.string().optional(), meetingUrl: z.string().optional(), interviewers: z.array(z.string()).optional(), invitationStatus: z.enum(['draft', 'pending', 'accepted', 'declined']), status: z.enum(['scheduled', 'cancelled', 'completed']), message: z.string().optional(), result: z.enum(['passed', 'failed', 'need_more']).optional(), resultNote: z.string().optional(), updatedAt: z.iso.datetime().optional() });
 export const candidateDetailSchema = recruiterApplicationSchema.extend({
   profile: profileSchema.optional(), cvAvailable: z.boolean().optional(),
   cv: z.object({ id: z.uuid(), title: z.string(), source: z.enum(['manual', 'uploaded']), isDefault: z.boolean(), versionCount: z.number().int(), createdAt: z.iso.datetime(), updatedAt: z.iso.datetime(), content: z.object({ languages: z.array(z.object({ name: z.string(), level: z.string().optional() })).optional() }).optional() }).optional(),
-  matching: z.object({ id: z.uuid(), cvId: z.uuid(), jobId: z.uuid(), score: z.number().int().min(0).max(100), explanation: z.string(), createdAt: z.iso.datetime(), breakdown: z.object({ skills: z.number().min(0).max(100).optional(), experience: z.number().min(0).max(100).optional(), education: z.number().min(0).max(100).optional(), other: z.number().min(0).max(100).optional() }).optional(), matchedSkills: z.array(z.object({ name: z.string() })).optional(), missingSkills: z.array(z.object({ name: z.string() })).optional() }).optional(),
+  matching: matchingResultSchema.optional(),
   interviews: z.array(interviewSchema).optional(), statusHistory: z.array(z.object({ status: z.enum(applicationStatuses), changedBy: z.enum(['candidate', 'recruiter', 'admin', 'system']), changedAt: z.iso.datetime(), round: z.string().optional(), note: z.string().optional() })).optional(),
 });
 export type CandidateDetail = z.infer<typeof candidateDetailSchema>;

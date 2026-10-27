@@ -1,5 +1,6 @@
 export const recruiterCandidateMessages = { Candidates: {
   heading: 'Ứng viên', subtitle: 'Quản lý và xem danh sách ứng viên', cards: 'Thẻ', list: 'Danh sách',
+  education: 'Trình độ học vấn', allEducation: 'Tất cả trình độ',
   actions: 'Thao tác', viewDetail: 'Xem chi tiết', viewDetailFor: 'Xem chi tiết ứng viên {name}',
   total: 'Tổng hồ sơ: {count, number} hồ sơ', search: 'Tìm theo tên, kỹ năng hoặc chức danh…', searchLabel: 'Tìm kiếm ứng viên', filter: 'Lọc', sort: 'Sắp xếp',
   job: 'Tin tuyển dụng', allJobs: 'Tất cả tin tuyển dụng', status: 'Trạng thái', allStatuses: 'Tất cả trạng thái', skills: 'Kỹ năng', skillsPlaceholder: 'VD: React, TypeScript', experience: 'Kinh nghiệm', allExperiences: 'Tất cả kinh nghiệm', experienceYears: 'Từ {count} năm',

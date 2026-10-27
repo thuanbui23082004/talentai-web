@@ -1,5 +1,13 @@
 import { RecruiterShell } from '@/features/recruiter';
 import { Suspense } from 'react';
+import { Inter } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin', 'vietnamese'],
+  display: 'swap',
+  variable: '--font-recruiter-inter',
+  fallback: ['system-ui', 'sans-serif'],
+});
 
 export default function RecruiterLayout({
   children,
@@ -7,8 +15,8 @@ export default function RecruiterLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Suspense fallback={<div aria-busy="true" className="recruiter-app recruiter-route-skeleton"><div /><div /><div /></div>}>
+    <div className={inter.variable}><Suspense fallback={<div aria-busy="true" className="recruiter-app recruiter-route-skeleton"><div /><div /><div /></div>}>
       <RecruiterShell>{children}</RecruiterShell>
-    </Suspense>
+    </Suspense></div>
   );
 }

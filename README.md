@@ -342,7 +342,7 @@ Update the variables according to your local development setup.
 ### 4. Start the Development Server
 
 ```bash
-pnpm dev
+
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.

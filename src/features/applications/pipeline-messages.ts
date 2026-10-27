@@ -1,5 +1,8 @@
 export const pipelineMessages = { Pipeline: {
   heading: 'Bảng theo dõi ứng viên',
+  dragRole: 'Thẻ có thể kéo',
+  dragInstructions: 'Nhấn Space để nhấc thẻ, dùng phím mũi tên để di chuyển, Space để thả hoặc Escape để hủy. Bạn cũng có thể dùng mục Chuyển giai đoạn trên thẻ.',
+  dragStarted: 'Đã nhấc thẻ.', dragOver: 'Thả vào cột {stage}.', dragOutside: 'Di chuyển thẻ vào cột đích.', dragEnded: 'Đã kết thúc kéo thẻ.', dragCancelled: 'Đã hủy kéo thẻ.',
   back: 'Danh sách ứng viên', board: 'Bảng theo dõi',
   stages: { submitted: 'Đã ứng tuyển', reviewing: 'Đang xét duyệt', interview: 'Phỏng vấn', hired: 'Đã tuyển dụng', rejected: 'Từ chối', withdrawn: 'Đã rút hồ sơ' },
   column: 'Giai đoạn {stage}', add: 'Chuyển hồ sơ vào {stage}',

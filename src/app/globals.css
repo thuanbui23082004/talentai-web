@@ -6,8 +6,12 @@
 .recruiter-app {
   --recruiter-bg: #f8f7fd;
   --recruiter-surface: #ffffff;
-  --recruiter-text: #192137;
-  --recruiter-muted: #8490aa;
+  --recruiter-text: #1a1a1a;
+  --recruiter-muted: #657084;
+  --recruiter-font-body: 14px;
+  --recruiter-font-title: 20px;
+  --recruiter-font-section: 18px;
+  --recruiter-font-subheading: 16px;
   --recruiter-border: #eeedf5;
   --recruiter-primary: #5817ba;
   --recruiter-accent: #793fff;

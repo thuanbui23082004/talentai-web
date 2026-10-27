@@ -5,6 +5,6 @@ import { JobDataState } from '@/features/jobs/components/recruiter/job-data-stat
 import { RecruiterJobDetail } from '@/features/recruiter';
 export function JobDetailLoader({ id }: { id: string }) {
   const query = useRecruiterJob(id);
-  if (!query.data) return <JobDataState loading={query.isPending} error={query.error} onRetry={() => void query.refetch()} />;
+  if (query.isError || !query.data) return <JobDataState loading={query.isPending} error={query.error} onRetry={() => void query.refetch()} />;
   return <RecruiterJobDetail key={id} job={toRecruiterJobView(query.data)} />;
 }

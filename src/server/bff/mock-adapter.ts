@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'node:crypto';
 import { jobInputSchema } from '@/lib/api/job-schemas';
-import { recruiterCompany } from '@/mocks/fixtures/recruiter-company';
+import { matchesLocationName } from '@/features/jobs/location-search';
+import { handleAccountCompany } from '@/server/bff/account-company-handler';
 import { recruiterIndustries, recruiterLocations } from '@/mocks/fixtures/recruiter-catalog';
-import { createMockJob, createMockRecruiterSession, getRecruiterMockStore } from '@/server/bff/recruiter-mock-store';
+import { createMockJob, createMockRecruiterSession, getDeletedJobIds, getRecruiterMockStore } from '@/server/bff/recruiter-mock-store';
+import { handleJobManagement } from '@/server/bff/job-management-handler';
+import { handleRecruiterAnalysis } from '@/server/bff/recruiter-analysis-handler';
 import { recruiterApplicationQuerySchema, recruiterApplicationSchema } from '@/lib/api/application-schemas';
 import { getRecruiterApplicationStore } from '@/server/bff/recruiter-application-store';
 import { selectRecruiterApplications } from '@/server/bff/recruiter-application-query';
 import { createSyntheticCvPdf } from '@/server/bff/recruiter-cv-document';
 import { handleCandidateDetailRequest } from '@/server/bff/candidate-detail-handler';
+import { handleInterviewManagement } from '@/server/bff/interview-management-handler';
+import { handleRecruiterStats } from '@/server/bff/recruiter-stats-handler';
 export function mockProblem(status: number, code: string) {
   return NextResponse.json({ error: { code, message: code, requestId: randomUUID() } }, { status });
 }
@@ -31,6 +36,16 @@ export async function handleMockRequest(request: NextRequest, path: string) {
   if (!session) return mockProblem(401, 'UNAUTHENTICATED');
   if (session.role !== 'recruiter') return mockProblem(403, 'FORBIDDEN');
   if (request.method !== 'GET' && request.headers.get('X-CSRF-Token') !== session.csrf) return mockProblem(403, 'CSRF_TOKEN_INVALID');
+  const accountResponse = await handleAccountCompany(request, path, session);
+  if (accountResponse) return accountResponse;
+  const analysisResponse = await handleRecruiterAnalysis(request, path, session);
+  if (analysisResponse) return analysisResponse;
+  const statsResponse = handleRecruiterStats(request, path, session.companyId);
+  if (statsResponse) return statsResponse;
+  const jobResponse = await handleJobManagement(request, path, session.companyId);
+  if (jobResponse) return jobResponse;
+  const interviewResponse = await handleInterviewManagement(request, path, session.companyId);
+  if (interviewResponse) return interviewResponse;
   const detailResponse = await handleCandidateDetailRequest(request, path, session.companyId);
   if (detailResponse) return detailResponse;
   if (path === 'recruiter/applications' && request.method === 'GET') {
@@ -62,11 +77,11 @@ export async function handleMockRequest(request: NextRequest, path: string) {
     const values = scenario === 'empty' ? [] : items;
     return NextResponse.json({ items: values.slice((page - 1) * pageSize, page * pageSize), meta: { page, pageSize, totalItems: values.length, totalPages: Math.ceil(values.length / pageSize) } });
   }
-  if (request.method === 'GET' && path === 'recruiter/company') return NextResponse.json(recruiterCompany);
   if (request.method === 'GET' && path.startsWith('catalog/')) {
     const catalog = path.split('/')[1];
     if (!['industries', 'locations', 'skills', 'positions'].includes(catalog)) return mockProblem(404, 'NOT_FOUND');
-    return paged(catalog === 'industries' ? recruiterIndustries : catalog === 'locations' ? recruiterLocations : []);
+    const items = catalog === 'industries' ? recruiterIndustries : catalog === 'locations' ? recruiterLocations : [];
+    return paged(items.filter(item => item.isActive && matchesLocationName(item.name, request.nextUrl.searchParams.get('q') ?? '')));
   }
   if (path === 'recruiter/jobs' && request.method === 'POST') {
     if (!session.companyId) return mockProblem(409, 'COMPANY_REQUIRED');
@@ -75,18 +90,18 @@ export async function handleMockRequest(request: NextRequest, path: string) {
     const result = jobInputSchema.safeParse(body);
     if (!result.success) return NextResponse.json({ error: { code: 'VALIDATION_FAILED', message: 'VALIDATION_FAILED', fieldErrors: result.error.issues.map(issue => ({ field: issue.path.join('.'), code: 'VALIDATION_FAILED', message: 'VALIDATION_FAILED' })), requestId: randomUUID() } }, { status: 422 });
     if (!recruiterIndustries.some(item => item.id === result.data.industryId)) return mockProblem(422, 'VALIDATION_FAILED');
-    return NextResponse.json(createMockJob(result.data), { status: 201 });
+    return NextResponse.json(createMockJob(result.data, session.companyId), { status: 201 });
   }
   if (path === 'recruiter/jobs' && request.method === 'GET') {
     const q = request.nextUrl.searchParams.get('q')?.toLocaleLowerCase('vi') ?? '';
     const statuses = request.nextUrl.searchParams.getAll('status');
-    const values = store.jobs.filter(job => job.company.id === session.companyId && job.title.toLocaleLowerCase('vi').includes(q) && (!statuses.length || statuses.includes(job.status)));
+    const values = store.jobs.filter(job => !getDeletedJobIds().has(job.id) && job.company.id === session.companyId && job.title.toLocaleLowerCase('vi').includes(q) && (!statuses.length || statuses.includes(job.status)));
     if (request.nextUrl.searchParams.get('sort') === 'title') values.sort((a, b) => a.title.localeCompare(b.title, 'vi'));
     return paged(values);
   }
   const match = /^recruiter\/jobs\/([^/]+)$/.exec(path);
   if (match && request.method === 'GET') {
-    const job = store.jobs.find(item => item.id === match[1] && item.company.id === session.companyId);
+    const job = store.jobs.find(item => item.id === match[1] && item.company.id === session.companyId && !getDeletedJobIds().has(item.id));
     return job ? NextResponse.json(job) : mockProblem(404, 'NOT_FOUND');
   }
   return mockProblem(404, 'NOT_FOUND');

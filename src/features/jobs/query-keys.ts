@@ -3,4 +3,5 @@ export const recruiterJobKeys = {
   lists: () => [...recruiterJobKeys.all, 'list'] as const,
   detail: (id: string) => [...recruiterJobKeys.all, 'detail', id] as const,
   options: () => [...recruiterJobKeys.all, 'options'] as const,
+  locations: () => [...recruiterJobKeys.all, 'locations'] as const,
 };

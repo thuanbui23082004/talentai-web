@@ -1,6 +1,7 @@
 export const recruiterMessages = {
   Recruiter: {
-    brand: 'TalentAI', home: 'Trang chủ', jobs: 'Tin đăng', candidates: 'Ứng viên', services: 'Dịch vụ', account: 'Tài khoản', help: 'Hỗ trợ',
+    searchResults: 'Kết quả tìm kiếm', closeSearch: 'Đóng kết quả tìm kiếm', searchLoading: 'Đang tìm kiếm', searchRetry: 'Thử lại', searchFailed: 'Không thể tải tin tuyển dụng. Vui lòng thử lại.', noCandidateResults: 'Không tìm thấy ứng viên phù hợp.', noJobResults: 'Không tìm thấy tin tuyển dụng phù hợp.',
+    brand: 'TalentAI', home: 'Trang chủ', jobs: 'Tin đăng', candidates: 'Ứng viên', interviews: 'Phỏng vấn', services: 'Dịch vụ', account: 'Tài khoản', help: 'Hỗ trợ',
     pricing: 'Bảng giá', promotion: 'Khuyến mãi', findCandidates: 'Tìm ứng viên', support: 'Trợ giúp', searchHeader: 'Tìm kiếm ứng viên, vị trí tuyển dụng…',
     user: 'Andrew Sebastian', role: 'Trưởng phòng Nhân sự', menu: 'Mở menu', notifications: 'Thông báo', copyright: '© 2026 - Bản quyền thuộc về SieuViet Group',
     about: 'Về chúng tôi', terms: 'Điều khoản sử dụng', privacy: 'Chính sách bảo mật',
