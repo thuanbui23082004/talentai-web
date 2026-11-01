@@ -1,5 +1,18 @@
 # Trạng thái triển khai
 
+## Tích hợp nhánh nhà tuyển dụng
+
+Đã ghép workspace nhà tuyển dụng với luồng đăng nhập hiện tại: dashboard thống kê,
+quản lý tin tuyển dụng, danh sách/chi tiết ứng viên, pipeline, lịch/kết quả phỏng vấn,
+sàng lọc AI, tài khoản và doanh nghiệp có BFF mock. Dữ liệu nhà tuyển dụng tách khỏi
+18 tin công khai để giữ nguyên tìm việc, hồ sơ ứng tuyển và việc đã lưu của ứng viên.
+Đăng nhập workspace mẫu theo `docs/auth-flow.md`; không tự tạo session khi truy cập.
+Hộp thư, bảng giá, khuyến mãi và trợ giúp là giao diện minh họa; chưa nối backend.
+Các endpoint riêng tư trong real proxy vẫn đóng; chưa xác nhận tích hợp backend thật.
+Các ghi chú recruiter còn là khung trong bảng cũ bên dưới được thay thế bởi mục này.
+Playwright chạy server riêng ở cổng 3100, dùng `.next-e2e` và một worker vì các
+kịch bản nhà tuyển dụng cùng sửa workspace mock trong bộ nhớ.
+
 ## Loading dùng chung
 
 Đã thêm animation nhân vật 8 khung hình từ `animationloading.png`, dùng sprite WebP nền trong suốt. Tích hợp fallback trang chủ/public/candidate và các vùng dữ liệu việc làm, công ty, ứng tuyển, đã lưu; không thêm thời gian chờ giả, có reduced-motion. Xem thử `/ui/loading`, hướng dẫn tại `docs/loading-animation.md`. Không thay đổi contract hoặc trạng thái tích hợp backend.

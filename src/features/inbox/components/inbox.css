@@ -1,0 +1,109 @@
+.inbox-page {
+  width: 100%;
+  max-width: var(--recruiter-content-width);
+  height: calc(100dvh - var(--recruiter-header-height) - 2 * var(--recruiter-gutter));
+  min-height: 480px;
+  margin-inline: auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: var(--recruiter-font-body);
+}
+.inbox-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-shrink: 0; }
+.inbox-heading h1 { font-size: var(--recruiter-font-title); }
+.inbox-heading p { color: var(--recruiter-muted); margin-top: 4px; }
+.inbox-heading > button { min-height: 40px; }
+.inbox-notice { flex-shrink: 0; padding: 10px 16px; border-radius: 8px; background: var(--recruiter-soft); color: var(--recruiter-primary); margin-bottom: 12px !important; }
+.inbox-workspace {
+  display: grid;
+  grid-template-columns: 176px minmax(300px, 340px) minmax(0, 1fr);
+  flex: 1;
+  min-height: 0;
+  background: var(--recruiter-surface);
+  border: 1px solid var(--recruiter-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.inbox-folders { min-height: 0; padding: 12px 10px; border-right: 1px solid var(--recruiter-border); background: var(--recruiter-bg); overflow-y: auto; overscroll-behavior: contain; }
+.inbox-folders nav, .inbox-labels { display: grid; gap: 4px; }
+.inbox-folders button { width: 100%; justify-content: flex-start; min-height: 40px; height: auto; white-space: normal; color: var(--recruiter-muted); gap: 9px; padding: 9px; border-radius: 8px; }
+.inbox-folders button b { margin-left: auto; font-size: inherit; }
+.inbox-folders .mail-folder-selected { background: var(--recruiter-soft); color: var(--recruiter-primary); font-weight: 600; }
+.inbox-folders .mail-label-selected { color: var(--recruiter-primary); font-weight: 600; }
+.inbox-labels { border-top: 1px solid var(--recruiter-border); margin-top: 16px; padding-top: 16px; }
+.inbox-labels h2 { font-size: var(--recruiter-font-body); color: var(--recruiter-muted); padding-inline: 9px; margin-bottom: 4px; }
+.inbox-list { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-right: 1px solid var(--recruiter-border); }
+.inbox-list-toolbar { flex-shrink: 0; display: flex; align-items: center; gap: 10px; min-height: 72px; padding: 14px 12px; border-bottom: 1px solid var(--recruiter-border); }
+.inbox-list-toolbar > span { color: var(--recruiter-muted); white-space: nowrap; }
+.inbox-search { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding-inline: 10px; border: 1px solid var(--recruiter-border); border-radius: 8px; background: var(--recruiter-bg); color: var(--recruiter-muted); }
+.inbox-search > svg { flex-shrink: 0; }
+.inbox-search input { border: 0; background: transparent; box-shadow: none; min-width: 0; height: 40px; padding-inline: 0; }
+.recruiter-app .inbox-search:focus-within { border-color: var(--recruiter-accent); }
+.recruiter-app .inbox-search input:focus-visible { outline: none; box-shadow: none; }
+.inbox-mail-list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.mail-row { position: relative; border-bottom: 1px solid var(--recruiter-border); }
+.mail-row-selected { background: color-mix(in srgb, var(--recruiter-soft) 65%, var(--recruiter-surface)); box-shadow: inset 3px 0 var(--recruiter-accent); }
+.mail-row-unread .mail-row-subject, .mail-row-unread .mail-row-top strong { font-weight: 700; }
+.mail-row .mail-row-main { height: auto; width: 100%; padding: 14px 34px 14px 14px; align-items: flex-start; justify-content: flex-start; white-space: normal; border-radius: 0; text-align: left; gap: 10px; color: var(--recruiter-text); font-weight: 400; }
+.mail-avatar { display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--recruiter-soft); color: var(--recruiter-primary); font-weight: 600; }
+.mail-row-text { min-width: 0; flex: 1; display: block; }
+.mail-row-top { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-bottom: 5px; }
+.mail-row-top strong { font-weight: 500; }
+.mail-row-top time { font-size: inherit; color: var(--recruiter-muted); margin-left: auto; white-space: nowrap; }
+.mail-label { display: inline-block; padding: 0 4px; border-radius: 4px; color: var(--recruiter-primary); background: var(--recruiter-soft); line-height: 1.5; }
+.mail-row-subject { display: block; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mail-preview { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6; color: var(--recruiter-muted); margin-top: 4px; }
+.mail-row-star { position: absolute; right: 2px; top: 12px; color: var(--recruiter-muted); }
+.mail-row-star[aria-pressed=true] { color: var(--recruiter-accent); }
+.inbox-reader { min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; background: var(--recruiter-surface); }
+.mail-reader-toolbar { flex-shrink: 0; display: flex; align-items: center; gap: 4px; min-height: 72px; padding: 14px 20px; border-bottom: 1px solid var(--recruiter-border); color: var(--recruiter-muted); }
+.mail-pagination { margin-left: auto; display: flex; align-items: center; gap: 2px; }
+.mail-pagination > span { margin-right: 6px; }
+.mail-pagination button[aria-pressed=true] { color: var(--recruiter-accent); }
+.mail-content { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 24px 28px; }
+.mail-content > header { flex-shrink: 0; display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+.mail-content > header > div { min-width: 0; overflow-wrap: anywhere; }
+.mail-content > header p { color: var(--recruiter-muted); }
+.mail-content time { margin-left: auto; color: var(--recruiter-muted); white-space: nowrap; }
+.mail-content h2 { flex-shrink: 0; font-size: var(--recruiter-font-subheading); margin-bottom: 20px; overflow-wrap: anywhere; }
+.mail-body { flex-shrink: 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.75; }
+.mail-content > footer { flex-shrink: 0; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--recruiter-border); }
+.mail-content > footer button:first-child { color: var(--recruiter-primary); background: var(--recruiter-soft); border-color: var(--recruiter-soft); }
+.inbox-empty { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; padding: 40px 20px; text-align: center; color: var(--recruiter-muted); }
+.inbox-empty svg { color: var(--recruiter-muted); }
+.inbox-empty h2 { font-size: var(--recruiter-font-subheading); color: var(--recruiter-text); }
+.inbox-reader-empty { flex: 1; }
+.mail-composer [role=alert] { color: var(--recruiter-danger); }
+@media (max-width: 1250px) {
+  .inbox-workspace { grid-template-columns: 164px minmax(270px, 310px) minmax(0, 1fr); }
+  .mail-row-main > .mail-avatar { display: none; }
+  .mail-content { padding: 20px; }
+}
+@media (max-width: 1050px) {
+  .inbox-workspace { grid-template-columns: 164px minmax(0, 1fr); }
+  .inbox-reader { display: none; }
+  .inbox-detail-open .inbox-reader { display: flex; }
+  .inbox-detail-open .inbox-list { display: none; }
+  .inbox-list { border-right: 0; }
+  .mail-row-main > .mail-avatar { display: grid; }
+}
+@media (max-width: 640px) {
+  .inbox-page { height: calc(100dvh - var(--recruiter-header-height) - 66px - 2 * var(--recruiter-gutter)); min-height: 420px; }
+  .inbox-heading { align-items: flex-start; }
+  .inbox-heading p { max-width: 210px; }
+  .inbox-heading > button { flex-shrink: 0; padding-inline: 10px; }
+  .inbox-workspace { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .inbox-folders { flex-shrink: 0; overflow: hidden; border-right: 0; border-bottom: 1px solid var(--recruiter-border); padding: 8px; min-width: 0; }
+  .inbox-folders nav { display: flex; overflow-x: auto; gap: 6px; padding-bottom: 4px; }
+  .inbox-folders nav button { flex-shrink: 0; width: auto; white-space: nowrap; }
+  .inbox-labels { display: flex; overflow: auto; border: 0; margin: 4px 0 0; padding: 0; gap: 4px; }
+  .inbox-labels h2 { display: none; }
+  .inbox-labels button { width: auto; flex-shrink: 0; min-height: 32px; white-space: nowrap; }
+  .inbox-detail-open { grid-template-rows: minmax(0, 1fr); }
+  .inbox-detail-open .inbox-folders { display: none; }
+  .mail-content { padding: 20px 16px; }
+  .mail-content time { margin-left: 44px; }
+  .mail-reader-toolbar { min-height: 56px; padding: 10px 12px; }
+  .mail-pagination button { width: 28px; }
+  .recruiter-app .header-message-icon { display: grid; width: 32px; height: 32px; }
+}

@@ -25,7 +25,7 @@ export const architectureRule = {
       if (importedFeature && importedFeature[1] !== currentFeature && !["", "/index", "/index.ts"].includes(importedFeature[2])) report(node, "Import feature khác qua public index.");
       const serverFacade = file === "lib/auth/session.ts";
       const serverPage = file.startsWith("app/") && !client;
-      if (/^(server\/|mocks\/|lib\/env(?:\.|$))/.test(target) && !file.startsWith("server/") && !serverPage && !serverFacade) report(node, "Server/env/fixture chỉ được truy cập bởi server, server page và session facade.");
+      if (/^(server\/|mocks\/|lib\/env(?:\.|$))/.test(target) && !file.startsWith("server/") && !(file.startsWith("mocks/") && target.startsWith("mocks/")) && !serverPage && !serverFacade) report(node, "Server/env/fixture chỉ được truy cập bởi server, server page và session facade.");
       if (client && /^(server\/|lib\/auth\/(session|require-role))/.test(target)) report(node, "Client Component không được import module session/server.");
     }
     return {

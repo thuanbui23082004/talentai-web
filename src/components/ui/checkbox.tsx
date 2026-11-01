@@ -5,12 +5,15 @@ import { cn } from "@/lib/utils";
 
 export function Checkbox({
     label,
+    onCheckedChange,
+    onChange,
     description,
     className,
     id: providedId,
     ...props
 }: Omit<ComponentProps<"input">, "type"> & {
-    label: ReactNode;
+    label?: ReactNode;
+    onCheckedChange?: (checked: boolean) => void;
     description?: string;
 }) {
     const generatedId = useId();
@@ -27,6 +30,7 @@ export function Checkbox({
                 {...props}
                 id={id}
                 type="checkbox"
+                onChange={(event) => { onChange?.(event); onCheckedChange?.(event.target.checked); }}
                 className="ui-choice mt-0.5 rounded"
             />
             <span>

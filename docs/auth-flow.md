@@ -1,5 +1,11 @@
 # Auth — luồng mock hiện hành
 
+Workspace nhà tuyển dụng đã có công ty và dữ liệu minh họa: đăng nhập bằng
+`recruiter@example.test` / `TalentAI2026!`. Tài khoản `recruiter@example.com`
+vẫn dùng `TalentAI123!` và giữ màn hình chờ hoàn thiện doanh nghiệp.
+Các route nhà tuyển dụng dùng cùng cookie `access_token`/`refresh_token` với
+ứng viên; gọi `/auth/csrf` khi chưa đăng nhập không tạo phiên mới.
+
 ## Màn hình
 
 - `/login`: chọn ngữ cảnh ứng viên/nhà tuyển dụng, nhập email và mật khẩu, validate rồi đăng nhập.

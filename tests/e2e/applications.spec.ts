@@ -18,6 +18,7 @@ async function expectAlignedCards(page: Page) {
 }
 
 test("candidate tracks applications, confirms an interview and downloads calendar", async ({ page }, testInfo) => {
+    await page.clock.setFixedTime(new Date('2026-10-23T02:00:00Z'));
     await page.setViewportSize({ width: 1440, height: 1000 });
     const email = `applications-${randomUUID()}@example.com`;
     expect((await page.request.post("/api/bff/auth/register", { data: { email, password: "TalentAI123!", confirmPassword: "TalentAI123!", fullName: "Ứng viên ứng tuyển", phone: "0901234567", role: "candidate", acceptedPrivacyPolicy: true } })).status()).toBe(201);

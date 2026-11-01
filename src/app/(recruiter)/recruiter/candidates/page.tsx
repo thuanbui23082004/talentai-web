@@ -1,3 +1,2 @@
-export default function RecruiterCandidatesPage() {
-  return <div>Recruiter Candidates</div>;
-}
+import { RecruiterCandidates } from '@/features/applications';
+export default function RecruiterCandidatesPage() { return <RecruiterCandidates />; }

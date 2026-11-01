@@ -40,7 +40,7 @@ Xem [docs/project-status.md](docs/project-status.md) trước khi giao việc ch
 Đã có nền BFF, mock `GET /jobs`, `GET /health`, trang `/jobs`, bộ kiểm tra và CI.
 Auth mock đã có đăng ký, đăng nhập, làm mới phiên và đăng xuất có CSRF. Xem [luồng auth và tài khoản demo](docs/auth-flow.md).
 Thử `candidate@example.com` hoặc `recruiter@example.com`, mật khẩu `TalentAI123!` tại `/login`.
-CV, ứng tuyển, matching và dashboard nghiệp vụ recruiter/admin còn là khung; trang riêng kiểm tra session và role phía server.
+Workspace nhà tuyển dụng đã có dashboard và các luồng quản lý qua BFF mock. Dùng `recruiter@example.test` / `TalentAI2026!` để xem dữ liệu mẫu; tài khoản `recruiter@example.com` vẫn ở trạng thái chờ hoàn thiện doanh nghiệp. Phạm vi từng chức năng và các phần chưa tích hợp backend được ghi tại [docs/project-status.md](docs/project-status.md).
 
 ## Các lệnh
 

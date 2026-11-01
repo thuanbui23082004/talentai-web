@@ -68,7 +68,7 @@ for (const role of ["candidate", "recruiter"] as const) {
     await page.getByLabel("Mật khẩu", { exact: true }).fill("TalentAI123!");
     await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/${role}/dashboard$`));
-    if (role === "recruiter") await expect(page.getByText("Doanh nghiệp đang chờ hoàn thiện và kiểm duyệt")).toBeVisible();
+    if (role === "recruiter") await expect(page.locator('p:visible').filter({ hasText: "Doanh nghiệp đang chờ hoàn thiện và kiểm duyệt" })).toBeVisible();
   });
 }
 

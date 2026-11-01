@@ -1,0 +1,37 @@
+import { expect, test } from './recruiter-fixture';
+
+test('dashboard keeps the Figma hierarchy with live data and compact statistics', async ({ page }, info) => {
+  await page.goto('/recruiter/dashboard');
+  await expect(page.locator('.stats-cards .stat-card')).toHaveCount(4);
+  await expect(page.locator('.dashboard-job-card')).toHaveCount(3);
+  await expect(page.locator('.dashboard-candidate-table tbody tr')).toHaveCount(2);
+  await expect(page.locator('.dashboard-line-chart')).toBeVisible();
+  await expect(page.locator('.stats-filters')).toBeHidden();
+  await expect(page.locator('.stats-funnel')).toHaveCount(0);
+  const firstCard = await page.locator('.stat-card').first().boundingBox();
+  const lastCard = await page.locator('.stat-card').last().boundingBox();
+  const calendar = await page.locator('.dashboard-calendar').boundingBox();
+  const chart = await page.locator('.dashboard-chart-panel').boundingBox();
+  expect(Math.abs(firstCard!.y - lastCard!.y)).toBeLessThan(2);
+  expect(Math.abs(firstCard!.y - calendar!.y)).toBeLessThan(2);
+  expect(calendar!.x).toBeGreaterThan(chart!.x + chart!.width);
+  await expect(page.locator('.dashboard-compose')).toHaveAttribute('href', '/recruiter/jobs/new');
+  await expect(page.locator('.dashboard-find-candidates')).toHaveAttribute('href', '/recruiter/candidates');
+  await page.screenshot({ path: info.outputPath('dashboard-figma-desktop.png'), fullPage: true });
+  await page.setViewportSize({ width: 1136, height: 900 });
+  await page.screenshot({ path: info.outputPath('dashboard-figma-reference-width.png'), fullPage: true });
+  await page.locator('.dashboard-cv-button').first().click();
+  await expect(page.locator('.candidate-cv-viewer iframe')).toHaveAttribute('src', /^blob:/);
+  await page.locator('.candidate-cv-viewer').getByRole('button', { name: 'Đóng', exact: true }).click();
+  await expect(page.locator('.candidate-cv-viewer')).toHaveCount(0);
+  const response = page.waitForResponse(response => response.url().includes('/api/bff/recruiter/applications?') && response.url().includes('interview'));
+  await page.getByRole('button', { name: 'Đang phỏng vấn', exact: true }).click();
+  expect((await response).status()).toBe(200);
+  await expect(page.locator('.dashboard-candidate-table tbody tr').first()).toContainText('Đang phỏng vấn');
+  await page.getByRole('button', { name: 'Tháng sau', exact: true }).click();
+  await expect(page.locator('.dashboard-calendar-days .chosen-day')).toHaveText('1');
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: info.outputPath('dashboard-figma-mobile.png'), fullPage: true });
+});

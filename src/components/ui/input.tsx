@@ -22,6 +22,9 @@ export function Input({
     const icon =
         leadingIcon ??
         (type === "search" ? <Search aria-hidden="true" /> : undefined);
+    if (!icon && !password && !trailingIcon) {
+        return <input {...props} data-slot="input" disabled={disabled} type={type} className={cn("ui-input", className)} />;
+    }
     return (
         <div
             className={cn("ui-input-wrap", disabled && "opacity-50", className)}
@@ -29,6 +32,7 @@ export function Input({
             {icon && <span className="ui-input-icon">{icon}</span>}
             <input
                 {...props}
+                data-slot="input"
                 disabled={disabled}
                 type={password && visible ? "text" : type}
                 className={cn(

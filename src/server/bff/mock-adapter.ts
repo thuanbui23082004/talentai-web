@@ -1,3 +1,6 @@
+import { NextRequest } from 'next/server';
+import { handleRecruiterRequest } from './recruiter-adapter';
+export { mockProblem } from './recruiter-adapter';
 import type { components } from "@/lib/api/generated/schema";
 import { searchMockJobs } from "./mock-jobs";
 import { apiError } from "./responses";
@@ -11,7 +14,12 @@ import { handleMockSavedJobs } from "./mock-saved-jobs";
 
 const mockJobDetails = createMockJobDetails(mockJobs);
 
-export async function handleMockRequest(request: Request): Promise<Response> {
+export async function handleMockRequest(request: Request, _targetPath?: string): Promise<Response> {
+  void _targetPath;
+  const targetPath = new URL(request.url).pathname.replace('/api/bff/', '');
+  if (/^(recruiter\/|catalog\/|analysis-tasks\/|me\/|auth\/change-password)/.test(targetPath) || (targetPath === 'me' && request.method !== 'GET')) {
+    return handleRecruiterRequest(new NextRequest(request), targetPath);
+  }
   const auth = await handleMockAuth(request);
   if (auth) return auth;
   const notifications = await handleMockNotifications(request);

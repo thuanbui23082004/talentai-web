@@ -1,0 +1,17 @@
+export const recruiterCandidateMessages = { Candidates: {
+  heading: 'Ứng viên', subtitle: 'Quản lý và xem danh sách ứng viên', cards: 'Thẻ', list: 'Danh sách',
+  education: 'Trình độ học vấn', allEducation: 'Tất cả trình độ',
+  actions: 'Thao tác', viewDetail: 'Xem chi tiết', viewDetailFor: 'Xem chi tiết ứng viên {name}',
+  total: 'Tổng hồ sơ: {count, number} hồ sơ', search: 'Tìm theo tên, kỹ năng hoặc chức danh…', searchLabel: 'Tìm kiếm ứng viên', filter: 'Lọc', sort: 'Sắp xếp',
+  job: 'Tin tuyển dụng', allJobs: 'Tất cả tin tuyển dụng', status: 'Trạng thái', allStatuses: 'Tất cả trạng thái', skills: 'Kỹ năng', skillsPlaceholder: 'VD: React, TypeScript', experience: 'Kinh nghiệm', allExperiences: 'Tất cả kinh nghiệm', experienceYears: 'Từ {count} năm',
+  city: 'Địa điểm', allCities: 'Tất cả địa điểm', clear: 'Xóa bộ lọc', retry: 'Thử lại', updating: 'Đang cập nhật…',
+  position: 'Vị trí ứng tuyển', reference: 'Mã hồ sơ', salary: 'Mức lương mong muốn', notProvided: 'Chưa cung cấp', appliedAt: 'Ngày nộp hồ sơ', attachedCv: 'CV đính kèm', viewCv: 'Xem CV', noCv: 'Không có CV',
+  candidate: 'Ứng viên', unknownPosition: 'Chưa cập nhật vị trí', noHeadline: 'Chưa cập nhật chức danh', noSkills: 'Chưa cập nhật kỹ năng',
+  empty: 'Không tìm thấy ứng viên', emptyHint: 'Thử thay đổi từ khóa hoặc nới rộng bộ lọc để xem thêm hồ sơ.',
+  range: 'Hiển thị {from} đến {to} trên {total, number} hồ sơ', previous: 'Trước', next: 'Sau', pagination: 'Phân trang ứng viên', page: 'Trang {page}',
+  cvTitle: 'Hồ sơ CV', cvLoading: 'Đang tải CV…', close: 'Đóng', download: 'Tải CV', cvFallback: 'Nếu trình duyệt chưa hiển thị tệp, bạn có thể tải CV để xem.',
+  privateSearch: 'Vui lòng tìm theo tên, kỹ năng hoặc chức danh; không nhập email hoặc số điện thoại.', searchTooLong: 'Từ khóa tối đa 200 ký tự.',
+  statuses: { submitted: 'Đã nộp', reviewing: 'Đang xem xét', interview: 'Đang phỏng vấn', rejected: 'Đã từ chối', hired: 'Đã tuyển dụng', withdrawn: 'Đã rút hồ sơ' },
+  sorts: { applied_desc: 'Ngày nộp mới nhất', applied_asc: 'Ngày nộp cũ nhất', experience_desc: 'Kinh nghiệm nhiều nhất' },
+  errors: { unauthenticated: 'Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.', forbidden: 'Bạn không có quyền xem hồ sơ này.', locked: 'Tài khoản đang bị khóa.', invalid: 'Bộ lọc chưa hợp lệ. Vui lòng kiểm tra lại.', requestFailed: 'Không thể tải dữ liệu. Vui lòng thử lại.', cvUnavailable: 'CV không còn khả dụng hoặc đã bị xóa.', cvInvalid: 'Không thể đọc tệp CV này. Vui lòng thử lại.' },
+} };
