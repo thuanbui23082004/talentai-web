@@ -5,7 +5,7 @@ import { ChevronDown, Check } from "lucide-react";
 import { Button, Input, Modal, ModalContent, ModalTrigger } from "@/components/ui";
 import { normalizeLocation, provinces, provinceCity, resolveLocation } from "@/lib/locations/vietnam";
 
-export function LocationPicker({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+export function LocationPicker({ value, onChange, provinceOnly = false, ariaLabel = "Địa điểm tìm việc" }: { value: string; onChange: (value: string) => void; provinceOnly?: boolean; ariaLabel?: string }) {
     const [open, setOpen] = useState(false);
     const [draft, setDraft] = useState(value);
     const [provinceQuery, setProvinceQuery] = useState("");
@@ -18,13 +18,13 @@ export function LocationPicker({ value, onChange }: { value: string; onChange: (
     const visibleWards = province?.wards.filter((item) => matches(item.name, wardQuery)) ?? [];
 
     return <Modal open={open} onOpenChange={(next) => { setOpen(next); if (next) { setDraft(value); setProvinceQuery(""); setWardQuery(""); } }}>
-        <ModalTrigger type="button" aria-label="Địa điểm tìm việc" title={label} className="flex min-h-11 w-full min-w-0 items-center justify-between gap-2 px-3 text-left text-sm font-medium text-primary"><span className="truncate">{label}</span><ChevronDown className="size-4 shrink-0" /></ModalTrigger>
-        <ModalContent title="Chọn địa điểm làm việc" description="Chọn tỉnh/thành, sau đó chọn phường/xã nếu muốn tìm chi tiết hơn." className="max-w-2xl p-4 sm:p-6" footer={<>
+        <ModalTrigger type="button" aria-label={ariaLabel} title={label} className="flex min-h-11 w-full min-w-0 items-center justify-between gap-2 px-3 text-left text-sm font-medium text-primary"><span className="truncate">{label}</span><ChevronDown className="size-4 shrink-0" /></ModalTrigger>
+        <ModalContent title={provinceOnly ? "Chọn địa điểm công ty" : "Chọn địa điểm làm việc"} description={provinceOnly ? "Chọn tỉnh/thành để tìm công ty." : "Chọn tỉnh/thành, sau đó chọn phường/xã nếu muốn tìm chi tiết hơn."} className="max-w-2xl p-4 sm:p-6" footer={<>
             <p className="mr-auto w-full text-sm text-muted-foreground sm:w-auto">{province ? [provinceCity(province.name), ward?.name].filter(Boolean).join(" · ") : "Tất cả địa điểm"}</p>
             <Button type="button" variant="outline" onClick={() => { setDraft(""); setWardQuery(""); }}>Bỏ chọn địa điểm</Button>
             <Button type="button" onClick={() => { onChange(draft); setOpen(false); }}>Chọn địa điểm</Button>
         </>}>
-            <div className="grid grid-cols-2 gap-3 sm:gap-5">
+            <div className={`grid gap-3 sm:gap-5 ${provinceOnly ? "grid-cols-1" : "grid-cols-2"}`}>
                 <div className="min-w-0">
                     <h3 className="mb-2 text-sm font-semibold">Tỉnh / Thành phố</h3>
                     <Input type="search" aria-label="Tìm tỉnh thành" placeholder="Tên tỉnh/thành..." value={provinceQuery} onChange={(event) => setProvinceQuery(event.target.value)} />
@@ -33,7 +33,7 @@ export function LocationPicker({ value, onChange }: { value: string; onChange: (
                         {!visibleProvinces.length && <p className="p-2 text-sm text-muted-foreground">Không tìm thấy tỉnh/thành.</p>}
                     </div>
                 </div>
-                <div className="min-w-0">
+                {!provinceOnly && <div className="min-w-0">
                     <h3 className="mb-2 text-sm font-semibold">Phường / Xã / Đặc khu</h3>
                     <Input type="search" aria-label="Tìm phường xã" placeholder="Tên phường/xã..." disabled={!province} value={wardQuery} onChange={(event) => setWardQuery(event.target.value)} />
                     <div aria-label="Danh sách phường xã" className="mt-2 h-64 space-y-1 overflow-y-auto overscroll-contain sm:h-80">
@@ -43,7 +43,7 @@ export function LocationPicker({ value, onChange }: { value: string; onChange: (
                             {!visibleWards.length && <p className="p-2 text-sm text-muted-foreground">Không tìm thấy phường/xã.</p>}
                         </> : <p className="p-3 text-sm leading-6 text-muted-foreground">Chọn tỉnh/thành để xem danh sách phường/xã.</p>}
                     </div>
-                </div>
+                </div>}
             </div>
         </ModalContent>
     </Modal>;

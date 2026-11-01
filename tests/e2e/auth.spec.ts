@@ -1,5 +1,30 @@
 import { test, expect, type Page } from "@playwright/test";
 
+test("logout notice expires after five seconds", async ({ page }) => {
+  await page.goto("/login?reason=logged-out");
+  const notice = page.getByText("Bạn đã đăng xuất", { exact: true });
+  await expect(notice).toBeVisible();
+  await expect(notice).toHaveCount(0, { timeout: 10_000 });
+});
+
+test("submitting login dismisses the previous notice even when validation fails", async ({ page }) => {
+  await page.goto("/login?reason=logged-out");
+  const notice = page.getByText("Bạn đã đăng xuất", { exact: true });
+  await expect(notice).toBeVisible();
+  await page.locator("label").filter({ hasText: /^Nhà tuyển dụng$/ }).click();
+  await expect(page.getByText("Lợi thế cho doanh nghiệp bằng trải nghiệm tuyển dụng thông minh.")).toBeVisible();
+  await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
+  await expect(notice).toHaveCount(0);
+  await page.getByRole("textbox", { name: "Email", exact: true }).fill("candidate@example.com");
+  await page.getByLabel("Mật khẩu", { exact: true }).fill("WrongPassword123!");
+  await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
+  await expect(page.getByText("Không thể đăng nhập", { exact: true })).toBeVisible();
+  await expect(notice).toHaveCount(0);
+  await page.locator("label").filter({ hasText: /^Ứng viên$/ }).click();
+  await expect(page.getByText("Không thể đăng nhập", { exact: true })).toHaveCount(0);
+  await expect(notice).toHaveCount(0);
+});
+
 async function login(page: Page, email = "candidate@example.com") {
   await page.goto("/login");
   await page.getByRole("textbox", { name: "Email", exact: true }).fill(email);

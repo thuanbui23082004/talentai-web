@@ -3,7 +3,8 @@
 import { useState, useId } from "react";
 import { ChevronDown, MapPin, RotateCcw, Search, ShieldCheck, BriefcaseBusiness } from "lucide-react";
 import { Button, Input, Select } from "@/components/ui";
-import { provinces, provinceCity } from "@/lib/locations/vietnam";
+import { LocationPicker } from "@/components/shared/location-picker";
+import { findProvinceByCity, provinceCity, resolveLocation } from "@/lib/locations/vietnam";
 import { COMPANY_INDUSTRIES, COMPANY_SIZES } from "@/lib/companies/search";
 import type { CompanyFilters } from "../types";
 
@@ -17,7 +18,18 @@ export function CompanySearch({ values, onSearch }: { values: CompanyFilters; on
         <form className="flex flex-col gap-3 bg-brand-deep p-3 sm:px-5 sm:py-4 md:flex-row" onSubmit={(event) => { event.preventDefault(); update({}); }}>
             <div className="flex min-w-0 flex-1 flex-col rounded-lg bg-card p-0.5 sm:flex-row">
                 <Input type="search" aria-label="Tên công ty" placeholder="Nhập tên công ty..." value={query} maxLength={200} onChange={(event) => setQuery(event.target.value)} className="min-w-0 flex-1 [&_input]:border-transparent [&_input]:shadow-none" />
-                <div className="flex min-w-0 items-center gap-1 border-t px-2 sm:w-52 sm:shrink-0 sm:border-t-0 sm:border-l"><MapPin className="size-4 shrink-0 text-primary" /><Select aria-label="Địa điểm công ty" placeholder="Tất cả các địa điểm" value={city} onValueChange={(value) => setCity(value ?? "")} options={[{ value: "", label: "Tất cả các địa điểm" }, ...provinces.map((province) => ({ value: provinceCity(province.name), label: provinceCity(province.name) }))]} className="min-w-0 border-transparent! px-2 text-sm text-primary! shadow-none! [&>span:first-child]:truncate" /></div>
+                <div className="flex min-w-0 items-center border-t px-1 sm:w-64 sm:shrink-0 sm:border-t-0 sm:border-l">
+                    <MapPin className="ml-2 size-4 shrink-0 text-primary" aria-hidden="true" />
+                    <LocationPicker
+                        ariaLabel="Địa điểm công ty"
+                        provinceOnly
+                        value={findProvinceByCity(city)?.code ?? city}
+                        onChange={(value) => {
+                            const { province } = resolveLocation(value);
+                            setCity(province ? provinceCity(province.name) : "");
+                        }}
+                    />
+                </div>
             </div>
             <div className="flex shrink-0 gap-3"><Button type="submit" variant="secondary" className="h-12 flex-1 rounded-lg bg-card! px-5 text-sm text-primary! hover:bg-secondary! lg:px-7"><Search className="size-4" />Tìm kiếm</Button><Button type="button" aria-expanded={expanded} aria-controls={filterId} variant="outline" onClick={() => setExpanded(!expanded)} className="h-12 rounded-lg border-white/20 bg-white/10 px-3 text-sm text-white hover:bg-white/20"><ChevronDown className={expanded ? "rotate-180" : ""} />Bộ lọc</Button></div>
         </form>

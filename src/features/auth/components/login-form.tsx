@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +11,8 @@ import { loginSchema } from "../schemas/auth";
 import { AuthRoleSwitch, type RegistrationRole } from "./auth-role-switch";
 import { SocialLogin } from "./social-login";
 
+const LOGOUT_NOTICE_DURATION_MS = 5_000;
+
 export function LoginForm({
     initialRole = "candidate",
     reason,
@@ -19,7 +21,15 @@ export function LoginForm({
     reason?: "expired" | "logged-out" | "registered";
 }) {
     const [role, setRole] = useState(initialRole);
+    const [noticeDismissed, setNoticeDismissed] = useState(false);
     const mutation = useLogin();
+    useEffect(() => {
+        if (reason !== "logged-out") return;
+        const timeout = window.setTimeout(() => {
+            setNoticeDismissed(true);
+        }, LOGOUT_NOTICE_DURATION_MS);
+        return () => window.clearTimeout(timeout);
+    }, [reason]);
     const {
         register,
         handleSubmit,
@@ -49,7 +59,7 @@ export function LoginForm({
                     }}
                 />
             </div>
-            {reason && (
+            {reason && !noticeDismissed && !mutation.isError && (
                 <div className="mt-5">
                     <Alert
                         title={
@@ -70,6 +80,7 @@ export function LoginForm({
             <form
                 noValidate
                 className="mt-6 space-y-5"
+                onSubmitCapture={() => setNoticeDismissed(true)}
                 onSubmit={handleSubmit(async (values) => {
                     await mutation.mutateAsync(values).catch(() => undefined);
                 })}
