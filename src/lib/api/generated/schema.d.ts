@@ -15,7 +15,7 @@ export interface paths {
         put?: never;
         /**
          * Đăng ký tài khoản
-         * @description Tạo tài khoản Ứng viên hoặc Nhà tuyển dụng. Kiểm tra định dạng email, độ mạnh mật khẩu, mật khẩu xác nhận và email trùng. Mật khẩu được băm Bcrypt. Không tự đăng nhập sau khi đăng ký. Nhà tuyển dụng có thể ở trạng thái chờ kiểm duyệt doanh nghiệp.
+         * @description Java tạo tài khoản và cấp token. BFF đặt token vào cookie HttpOnly để tự đăng nhập; frontend chuyển về trang chủ. Nhà tuyển dụng vẫn phải hoàn thiện hồ sơ doanh nghiệp theo quyền backend.
          *
          *     **Quyền:** công khai (không cần đăng nhập).
          *
@@ -40,15 +40,37 @@ export interface paths {
         put?: never;
         /**
          * Đăng nhập
-         * @description Xác thực email và mật khẩu, cấp phiên qua cookie httpOnly. Phản hồi gồm người dùng, `csrfToken` và `redirectTo` theo vai trò. Thông báo sai thông tin dùng chung, không tiết lộ email có tồn tại hay không.
+         * @description Java xác thực email/mật khẩu và cấp JWT. BFF đặt JWT vào cookie HttpOnly; JSON chỉ gồm user, expiresInSeconds, csrfToken và redirectTo. BFF không tạo phiên riêng.
          *
          *     **Quyền:** công khai (không cần đăng nhập).
          *
          *     **Lỗi nghiệp vụ:**
          *     - `401 INVALID_CREDENTIALS`: Email hoặc mật khẩu không đúng.
-         *     - `423 ACCOUNT_LOCKED`: Sai quá 5 lần trong 10 phút (khóa tạm 15 phút) hoặc bị admin khóa; details.lockedUntil.
+         *     - `423 ACCOUNT_LOCKED`: Java từ chối vì tài khoản bị khóa hoặc vô hiệu hóa.
          */
         post: operations["login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/social-login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Đăng nhập bằng Google hoặc Facebook
+         * @description Chuyển Google ID token hoặc Facebook access token tới Java để xác thực.
+         *     Java tạo tài khoản nếu cần; role chỉ là lựa chọn cho tài khoản mới.
+         *     BFF đặt JWT Java vào cookie HttpOnly, không trả JWT cho trình duyệt.
+         */
+        post: operations["socialLogin"];
         delete?: never;
         options?: never;
         head?: never;
@@ -66,7 +88,8 @@ export interface paths {
         put?: never;
         /**
          * Đăng xuất
-         * @description Hủy phiên và xóa cookie.
+         * @description Gửi refresh token cho Java thu hồi rồi xóa cookie của trình duyệt này.
+         *     Access JWT đã cấp vẫn có hiệu lực đến khi Java cho hết hạn; BFF không có danh sách thu hồi riêng.
          *
          *     **Quyền:** Ứng viên, Nhà tuyển dụng, Quản trị viên.
          */
@@ -90,7 +113,7 @@ export interface paths {
          * Làm mới phiên
          * @description Dùng cookie `refresh_token` để cấp lại `access_token`. Gọi khi nhận `401 SESSION_EXPIRED` trước khi chuyển người dùng về trang đăng nhập.
          *
-         *     **Quyền:** dùng cookie phiên làm mới (refresh_token).
+         *     **Quyền:** dùng JWT refresh trong cookie; Java quyết định tính hợp lệ.
          *
          *     **Lỗi nghiệp vụ:**
          *     - `401 SESSION_EXPIRED`: Refresh token hết hạn hoặc bị thu hồi.
@@ -111,9 +134,11 @@ export interface paths {
         };
         /**
          * Lấy CSRF token
-         * @description Cấp (hoặc xoay vòng) CSRF token cho phiên hiện tại.
+         * @description Trả CSRF token gắn với cookie JWT hiện tại, không lưu trạng thái phiên ở BFF.
+         *     Endpoint này chỉ bảo vệ request trình duyệt, không phải bằng chứng danh tính;
+         *     Java xác thực JWT khi gọi endpoint được bảo vệ.
          *
-         *     **Quyền:** Ứng viên, Nhà tuyển dụng, Quản trị viên.
+         *     **Quyền:** cần cookie JWT để tạo CSRF; Java quyết định quyền tại API đích.
          */
         get: operations["getCsrfToken"];
         put?: never;
@@ -135,7 +160,9 @@ export interface paths {
         put?: never;
         /**
          * Yêu cầu khôi phục mật khẩu
-         * @description Gửi liên kết khôi phục qua email. Luôn trả 202 dù email có tồn tại hay không (chống dò tài khoản).
+         * @description Chuyển yêu cầu tới Java POST /api/v1/auth/forgot-password. Backend hiện chưa gửi email.
+         *     Trả 200 dù email có tồn tại hay không. Khi chạy development, có thể trả resetToken
+         *     do Java cấp để thử reset-password; production luôn loại bỏ token khỏi response.
          *
          *     **Quyền:** công khai (không cần đăng nhập).
          */
@@ -157,7 +184,8 @@ export interface paths {
         put?: never;
         /**
          * Đặt lại mật khẩu bằng token
-         * @description Đặt mật khẩu mới từ token trong email. Token dùng một lần.
+         * @description Đặt mật khẩu mới từ token khôi phục do Java cấp. Token dùng một lần, hạn 15 phút.
+         *     Hiện Java trả token qua forgot-password để thử nghiệm, chưa gửi email.
          *
          *     **Quyền:** công khai (không cần đăng nhập).
          *
@@ -182,7 +210,8 @@ export interface paths {
         put?: never;
         /**
          * Đổi mật khẩu
-         * @description Đổi mật khẩu khi đã đăng nhập. Các phiên khác của người dùng bị thu hồi.
+         * @description Java kiểm tra và đổi mật khẩu, thu hồi refresh token theo chính sách của Java.
+         *     BFF chỉ xóa cookie của trình duyệt hiện tại, không thu hồi phiên cục bộ.
          *
          *     **Quyền:** Ứng viên, Nhà tuyển dụng, Quản trị viên.
          *
@@ -3228,8 +3257,11 @@ export interface components {
             status: components["schemas"]["AccountStatus"];
             companyId?: components["schemas"]["Id"];
             companyVerificationStatus?: components["schemas"]["CompanyVerificationStatus"];
-            /** Format: date-time */
-            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Có thể chưa có trong response auth lúc mới tạo tài khoản. BFF bỏ trường này khi Java trả null hoặc không gửi.
+             */
+            createdAt?: string;
             /** Format: date-time */
             lastLoginAt?: string;
         };
@@ -3239,8 +3271,8 @@ export interface components {
             fullName: string;
             /** Format: email */
             email: string;
-            /** @description 9-15 digits, optionally prefixed with +. */
-            phone: string;
+            /** @description Chỉ bắt buộc với nhà tuyển dụng; ứng viên không cần gửi. 9-15 chữ số, có thể bắt đầu bằng +. */
+            phone?: string;
             password: components["schemas"]["PasswordRules"];
             /** @description Must match password. */
             confirmPassword: string;
@@ -3248,12 +3280,15 @@ export interface components {
             role: "candidate" | "recruiter";
             /** @description Must be true to accept the terms and privacy policy. */
             acceptedPrivacyPolicy: boolean;
-        };
-        RegisterResponse: {
-            user: components["schemas"]["User"];
-            /** @example Đăng ký thành công. Vui lòng đăng nhập. */
-            message: string;
-        };
+        } & ({
+            /** @enum {unknown} */
+            role: "candidate";
+        } | {
+            /** @enum {unknown} */
+            role: "recruiter";
+        });
+        /** @description Tài khoản mới đã đăng nhập bằng token Java; redirectTo là trang chủ. */
+        RegisterResponse: components["schemas"]["AuthSessionResponse"];
         LoginRequest: {
             /** Format: email */
             email: string;
@@ -3262,15 +3297,10 @@ export interface components {
         AuthSessionResponse: {
             user: components["schemas"]["User"];
             /**
-             * Format: date-time
-             * @description Thời điểm phiên hết hạn tuyệt đối.
+             * @description Thời hạn access token do Java trả về; BFF không đặt chính sách phiên riêng.
+             * @example 900
              */
-            expiresAt: string;
-            /**
-             * @description Phiên hết hạn nếu không thao tác trong khoảng này (30 phút).
-             * @example 1800
-             */
-            idleTimeoutSeconds: number;
+            expiresInSeconds: number;
             /** @description Gửi lại trong header X-CSRF-Token cho mọi request POST/PUT/PATCH/DELETE. */
             csrfToken: string;
             /**
@@ -3279,6 +3309,12 @@ export interface components {
              */
             redirectTo?: string;
         };
+        AuthRefreshResponse: {
+            /** @example 900 */
+            expiresInSeconds: number;
+            /** @description CSRF của cookie refresh mới, dùng cho bảo vệ request trình duyệt. */
+            csrfToken: string;
+        };
         CsrfTokenResponse: {
             csrfToken: string;
         };
@@ -3286,10 +3322,27 @@ export interface components {
             /** Format: email */
             email: string;
         };
-        ResetPasswordRequest: {
-            /** @description Token trong liên kết khôi phục gửi qua email, dùng một lần, có thời hạn. */
+        SocialLoginRequest: {
+            /** @enum {string} */
+            provider: "GOOGLE" | "FACEBOOK";
+            /** @description Token của nhà cung cấp, không phải JWT TalentAI. */
             token: string;
-            newPassword: components["schemas"]["PasswordRules"];
+            /**
+             * @description BFF đổi sang uppercase cho Java; không quyết định quyền tài khoản đã có.
+             * @enum {string}
+             */
+            role: "candidate" | "recruiter";
+        };
+        ForgotPasswordResponse: {
+            message: string;
+            /** @description Chỉ trả trong development nếu Java cấp token. Dùng một lần, hạn 15 phút; không lưu vào storage. */
+            resetToken?: string;
+        };
+        ResetPasswordRequest: {
+            /** @description Token do Java forgot-password cấp, dùng một lần, hạn 15 phút. */
+            token: string;
+            /** @description Quy tắc reset-password của Java; không áp dụng PasswordRules đăng ký. */
+            newPassword: string;
             confirmPassword: string;
         };
         ChangePasswordRequest: {
@@ -4726,6 +4779,35 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
+    socialLogin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SocialLoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Đăng nhập thành công */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthSessionResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            422: components["responses"]["ValidationError"];
+            423: components["responses"]["Locked"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+        };
+    };
     logout: {
         parameters: {
             query?: never;
@@ -4764,7 +4846,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuthSessionResponse"];
+                    "application/json": components["schemas"]["AuthRefreshResponse"];
                 };
             };
             401: components["responses"]["Unauthorized"];
@@ -4809,15 +4891,16 @@ export interface operations {
         };
         responses: {
             /** @description Thành công */
-            202: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MessageResponse"];
+                    "application/json": components["schemas"]["ForgotPasswordResponse"];
                 };
             };
             422: components["responses"]["ValidationError"];
+            423: components["responses"]["Locked"];
             429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
         };

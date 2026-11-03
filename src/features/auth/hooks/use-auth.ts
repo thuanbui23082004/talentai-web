@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { login, logout, register } from "../services/auth";
+import { login, logout, register, socialLogin } from "../services/auth";
 import { authKeys } from "../query-keys";
 
 export function useLogin() {
@@ -19,7 +19,30 @@ export function useLogin() {
 }
 
 export function useRegister() {
-    return useMutation({ mutationFn: register });
+    const client = useQueryClient();
+    return useMutation({
+        mutationFn: register,
+        onSuccess: async (session) => {
+            await client.cancelQueries();
+            client.clear();
+            client.setQueryData(authKeys.me, session.user);
+            window.location.replace("/?registered=1");
+        },
+    });
+}
+
+export function useSocialLogin() {
+    const client = useQueryClient();
+    return useMutation({
+        mutationFn: socialLogin,
+        retry: false,
+        onSuccess: async (session) => {
+            await client.cancelQueries();
+            client.clear();
+            client.setQueryData(authKeys.me, session.user);
+            window.location.replace(`/${session.user.role}/dashboard`);
+        },
+    });
 }
 
 export function useLogout() {

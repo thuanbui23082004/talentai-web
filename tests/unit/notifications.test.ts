@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { handleBffRequest } from "@/server/bff/handler";
-import { getAuthStore, issueSession, resetMockAuth, type MockSession } from "@/server/bff/mock-auth-store";
-import { resetMockNotifications } from "@/server/bff/mock-notifications";
+import { getAuthStore, issueSession, resetMockAuth, type MockSession } from "../support/auth-fixtures";
+import { resetMockNotifications } from "@/server/bff/candidate/mock-notifications";
 import { mockNotifications } from "@/mocks/fixtures/notifications";
 import example from "../../contracts/examples/notifications.json";
 

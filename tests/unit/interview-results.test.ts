@@ -3,13 +3,14 @@ import { NextRequest } from 'next/server';
 import { interviewResultInputSchema, interviewSchema } from '@/lib/api/candidate-detail-schemas';
 import { mockCandidateDetails } from '@/mocks/fixtures/candidate-details';
 import { mockJobs } from '@/mocks/fixtures/recruiter-jobs';
-import { getRecruiterApplicationStore } from '@/server/bff/recruiter-application-store';
-import { createMockRecruiterSession, getRecruiterMockStore } from '@/server/bff/recruiter-mock-store';
+import { getRecruiterApplicationStore } from '@/server/bff/recruiter/application-store';
+import { createMockRecruiterSession } from '../support/auth-fixtures';
+import { getRecruiterMockStore } from '@/server/bff/recruiter/mock-store';
 import { handleMockRequest } from '@/server/bff/mock-adapter';
 
 beforeEach(() => {
   getRecruiterMockStore().jobs = structuredClone(mockJobs);
-  getRecruiterMockStore().sessions.clear();
+  getRecruiterMockStore().workspaces.clear();
   getRecruiterApplicationStore().splice(0, getRecruiterApplicationStore().length, ...structuredClone(mockCandidateDetails));
 });
 function setup() {

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { handleBffRequest } from "@/server/bff/handler";
-import { getAuthStore, issueSession, resetMockAuth, type MockSession } from "@/server/bff/mock-auth-store";
-import { resetMockSavedJobs } from "@/server/bff/mock-saved-jobs";
+import { getAuthStore, issueSession, resetMockAuth, type MockSession } from "../support/auth-fixtures";
+import { resetMockSavedJobs } from "@/server/bff/candidate/mock-saved-jobs";
 import { mockJobs } from "@/mocks/fixtures/jobs";
 import { createMockSavedJobs } from "@/mocks/fixtures/saved-jobs";
 import { filterSavedJobs, savedJobStatus } from "@/features/jobs/saved-jobs-presentation";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { searchMockCompanies } from "@/server/bff/mock-companies";
+import { searchMockCompanies } from "@/server/bff/public/mock-companies";
 import example from "../../contracts/examples/companies.json";
 
 describe("company search", () => {

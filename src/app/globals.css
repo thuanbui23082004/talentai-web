@@ -4,10 +4,10 @@
 
 /* Tokens scoped to the recruiter preview; other role layouts are unaffected. */
 .recruiter-app {
-  --recruiter-bg: #f8f7fd;
+  --recruiter-bg: #f7f8fc;
   --recruiter-surface: #ffffff;
-  --recruiter-text: #1a1a1a;
-  --recruiter-muted: #657084;
+  --recruiter-text: #252336;
+  --recruiter-muted: #697386;
   --recruiter-font-body: 14px;
   --recruiter-font-title: 20px;
   --recruiter-font-section: 18px;
@@ -18,6 +18,14 @@
   --recruiter-soft: #f3ebff;
   --recruiter-danger: #f05b7d;
   --recruiter-shadow: #25204a0a;
+  --recruiter-font-caption: 12px;
+  --recruiter-font-compact: 13px;
+  --recruiter-dashboard-width: 1360px;
+  --recruiter-panel-radius: 14px;
+  --recruiter-success: #187653;
+  --recruiter-calendar-bg: #faf5ff;
+  --recruiter-calendar-line: #b28aff;
+  --recruiter-sidebar-active: #f0f2ff;
 }
 
 .recruiter-app .ui-button {

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { handleBffRequest } from "@/server/bff/handler";
-import { getAuthStore, issueSession, resetMockAuth, type MockSession } from "@/server/bff/mock-auth-store";
-import { resetMockApplications } from "@/server/bff/mock-applications";
+import { getAuthStore, issueSession, resetMockAuth, type MockSession } from "../support/auth-fixtures";
+import { resetMockApplications } from "@/server/bff/candidate/mock-applications";
 import { createMockApplications, createMockApplicationInterviews } from "@/mocks/fixtures/applications";
 import { mockJobs } from "@/mocks/fixtures/jobs";
 import { interviewCalendar, scheduledInterview } from "@/features/applications/presentation";

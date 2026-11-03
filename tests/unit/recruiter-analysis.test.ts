@@ -3,15 +3,16 @@ import { NextRequest } from 'next/server';
 import { analysisTaskSchema, matchingResultSchema, recommendedCandidatesSchema } from '@/lib/api/analysis-schemas';
 import { recruiterApplicationPageSchema } from '@/lib/api/application-schemas';
 import { analysisPhase, isAnalysisFinished } from '@/features/cv-analysis/progress';
-import { getRecruiterAnalysisTasks, advanceRecruiterTask } from '@/server/bff/recruiter-analysis-handler';
-import { createMockRecruiterSession, getRecruiterMockStore, getDeletedJobIds } from '@/server/bff/recruiter-mock-store';
-import { getRecruiterApplicationStore } from '@/server/bff/recruiter-application-store';
+import { getRecruiterAnalysisTasks, advanceRecruiterTask } from '@/server/bff/recruiter/analysis-handler';
+import { createMockRecruiterSession } from '../support/auth-fixtures';
+import { getRecruiterMockStore, getDeletedJobIds } from '@/server/bff/recruiter/mock-store';
+import { getRecruiterApplicationStore } from '@/server/bff/recruiter/application-store';
 import { mockJobs } from '@/mocks/fixtures/recruiter-jobs';
 import { mockCandidateDetails } from '@/mocks/fixtures/candidate-details';
 import { handleMockRequest } from '@/server/bff/mock-adapter';
 
 beforeEach(() => {
-  getRecruiterMockStore().jobs = structuredClone(mockJobs); getRecruiterMockStore().sessions.clear(); getDeletedJobIds().clear(); getRecruiterAnalysisTasks().clear();
+  getRecruiterMockStore().jobs = structuredClone(mockJobs); getRecruiterMockStore().workspaces.clear(); getDeletedJobIds().clear(); getRecruiterAnalysisTasks().clear();
   getRecruiterApplicationStore().splice(0, getRecruiterApplicationStore().length, ...structuredClone(mockCandidateDetails));
 });
 function auth() { const created = createMockRecruiterSession(); return { ...created, headers: { cookie: `access_token=${created.id}`, 'X-CSRF-Token': created.session.csrf } }; }

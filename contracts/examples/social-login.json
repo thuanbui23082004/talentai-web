@@ -1,0 +1,6 @@
+{
+  "googleRequest": { "provider": "GOOGLE", "token": "replace-with-google-id-token", "role": "candidate" },
+  "facebookRequest": { "provider": "FACEBOOK", "token": "replace-with-facebook-access-token", "role": "recruiter" },
+  "javaRequest": { "provider": "GOOGLE", "token": "replace-with-google-id-token", "role": "CANDIDATE" },
+  "invalidProviderToken": { "error": { "code": "INVALID_CREDENTIALS", "message": "Thông tin xác thực không hợp lệ." } }
+}

@@ -96,7 +96,7 @@ test("candidate account menu uses the session and existing logout confirmation",
     await expect(page).toHaveURL(/\/logout$/);
     await expect(page.getByRole("heading", { name: "Đăng xuất tài khoản", exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
-    await expect(page).toHaveURL(/\/login\?reason=logged-out$/);
+    await expect(page).toHaveURL(/\/login$/);
     await page.goto("/candidate/cv");
     await expect(page).toHaveURL(/\/login$/);
 });

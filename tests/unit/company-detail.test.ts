@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { handleBffRequest } from "@/server/bff/handler";
-import { getMockCompany, getMockCompanyJobs } from "@/server/bff/mock-companies";
+import { getMockCompany, getMockCompanyJobs } from "@/server/bff/public/mock-companies";
 import { mockJobs } from "@/mocks/fixtures/jobs";
 import example from "../../contracts/examples/company-detail.json";
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { provinces, findProvinceByCity, normalizeLocation, resolveLocation } from "@/lib/locations/vietnam";
 import { parseJobSearchParams } from "@/lib/jobs/validation";
-import { searchMockJobs } from "@/server/bff/mock-jobs";
+import { searchMockJobs } from "@/server/bff/public/mock-jobs";
 import { mockJobs } from "@/mocks/fixtures/jobs";
 
 describe("current Vietnamese administrative locations", () => {

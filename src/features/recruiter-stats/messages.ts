@@ -1,4 +1,7 @@
 export const recruiterStatsMessages = { RecruiterStats: {
+  manageJob: 'Quản lý tin',
+  interviewEvent: 'Phỏng vấn',
+  workspace: 'Không gian tuyển dụng', description: 'Theo dõi hồ sơ, vị trí đang tuyển và lịch phỏng vấn của bạn.',
   weekdays: { '0': 'CN', '1': 'T2', '2': 'T3', '3': 'T4', '4': 'T5', '5': 'T6', '6': 'T7' },
   applicationChart: 'Số lượng ứng tuyển', chartCount: '{count, number} lượt', sevenMonths: '7 tháng qua', customPeriod: 'Khoảng đã chọn', filters: 'Bộ lọc thống kê',
   activeJobs: 'Vị trí đang tuyển', jobSort: 'Sắp xếp vị trí', popular: 'Phổ biến', newest: 'Mới nhất', candidateList: 'Danh sách ứng viên',

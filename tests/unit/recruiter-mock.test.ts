@@ -1,16 +1,17 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
 import { handleMockRequest } from '@/server/bff/mock-adapter';
-import { getRecruiterMockStore, createMockRecruiterSession } from '@/server/bff/recruiter-mock-store';
+import { createMockRecruiterSession } from '../support/auth-fixtures';
+import { getRecruiterMockStore } from '@/server/bff/recruiter/mock-store';
 import { mockJobs } from '@/mocks/fixtures/recruiter-jobs';
 import { recruiterJobPageSchema, recruiterJobSchema } from '@/lib/api/job-schemas';
 
 const body = { title: 'Tin tuyển dụng mới', industryId: '00000000-0000-4000-8000-000000000001', description: 'Mô tả.', requirements: 'Yêu cầu.', workType: 'full_time', level: 'junior', location: { city: 'Hà Nội' } };
 async function session() {
   const created = createMockRecruiterSession();
-  return { cookie: `access_token=${created.id}`, token: created.session.csrf, id: created.id };
+  return { cookie: `access_token=${created.id}`, token: created.session.csrf, id: created.id, session: created.session };
 }
-beforeEach(() => { const store = getRecruiterMockStore(); store.jobs = structuredClone(mockJobs); store.sessions.clear(); });
+beforeEach(() => { const store = getRecruiterMockStore(); store.jobs = structuredClone(mockJobs); store.workspaces.clear(); });
 describe('recruiter mock API', () => {
   it('creates a draft that list and detail read from the same store', async () => {
     const auth = await session();
@@ -28,7 +29,7 @@ describe('recruiter mock API', () => {
     expect((await handleMockRequest(request(), 'recruiter/jobs')).status).toBe(401);
     const auth = await session();
     expect((await handleMockRequest(new NextRequest('http://localhost/api/bff/recruiter/jobs', { method: 'POST', headers: { cookie: auth.cookie }, body: JSON.stringify(body) }), 'recruiter/jobs')).status).toBe(403);
-    const current = getRecruiterMockStore().sessions.get(auth.id);
+    const current = getRecruiterMockStore().workspaces.get(auth.session.userId!);
     if (current) current.role = 'candidate';
     expect((await handleMockRequest(new NextRequest('http://localhost/api/bff/recruiter/jobs', { headers: { cookie: auth.cookie } }), 'recruiter/jobs')).status).toBe(403);
     expect(getRecruiterMockStore().jobs).toHaveLength(mockJobs.length);

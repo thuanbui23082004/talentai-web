@@ -1,46 +1,437 @@
-/* All recruiter screens share the outer frame, while secondary columns stay readable. */
-.recruiter-app .recruiter-main { min-width: 0; padding: var(--recruiter-gutter); }
+/* Compact recruiter navigation with an expandable sidebar. */
+.recruiter-app {
+    --recruiter-header-height: 64px;
+    --recruiter-sidebar-width: 76px;
+}
+.recruiter-app[data-sidebar="collapsed"] {
+    --recruiter-sidebar-width: 76px;
+}
+.recruiter-app[data-sidebar="expanded"] {
+    --recruiter-sidebar-width: 208px;
+}
+.recruiter-app .recruiter-main {
+    min-width: 0;
+    padding: var(--recruiter-gutter);
+}
+.recruiter-app .recruiter-body,
+.recruiter-app .recruiter-footer {
+    margin-left: var(--recruiter-sidebar-width);
+}
+.recruiter-app .recruiter-body {
+    padding-top: 0;
+}
+.recruiter-app .recruiter-header {
+    display: flex;
+    align-items: center;
+    height: var(--recruiter-header-height);
+    padding-inline: 24px;
+    gap: 16px;
+    border-bottom: 1px solid var(--recruiter-border);
+    box-shadow: none;
+}
+.recruiter-app .recruiter-header > .recruiter-brand {
+    display: flex;
+    flex: 0 0 148px;
+    width: 148px;
+    margin-right: 45px;
+    transform: translateY(-2px);
+}
+.recruiter-app .recruiter-header-nav {
+    gap: 18px;
+    font-size: var(--recruiter-font-caption);
+    font-weight: 500;
+    color: var(--recruiter-muted);
+}
+.recruiter-app .recruiter-header-nav > a {
+    min-height: 40px;
+    gap: 6px;
+    transition: color 150ms ease;
+}
+.recruiter-app .recruiter-header-nav > a:hover {
+    color: var(--recruiter-primary);
+}
+.recruiter-app .header-nav-active {
+    color: var(--recruiter-primary);
+    border-bottom-width: 2px;
+}
+.recruiter-app .hot-badge {
+    font-size: 9px;
+    letter-spacing: 0.03em;
+    padding: 3px 4px;
+}
+.recruiter-app .header-search-wrap {
+    display: block;
+    flex: 0 1 260px;
+}
+.recruiter-app .header-search {
+    display: flex;
+    width: 100%;
+    height: 38px;
+    padding: 3px 6px;
+    border: 1px solid var(--recruiter-border);
+    border-radius: 9px;
+    background: var(--recruiter-bg);
+    gap: 2px;
+}
+.recruiter-app .header-search > .ui-button {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+}
+.recruiter-app .header-search input {
+    min-width: 0;
+    width: 100%;
+    height: 30px;
+    padding: 0 4px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    font-size: var(--recruiter-font-caption);
+}
+.recruiter-app .header-message-icon,
+.recruiter-app .notification-wrap > button {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 9px;
+    border: 1px solid var(--recruiter-border);
+    box-shadow: none;
+    background: var(--recruiter-surface);
+}
+.recruiter-app .notification-wrap {
+    margin-left: -8px;
+}
+.recruiter-app .notification-dot {
+    width: 5px;
+    height: 5px;
+    top: 5px;
+    right: 6px;
+}
+.recruiter-app .recruiter-user {
+    gap: 9px;
+    padding-left: 16px;
+    border-left: 1px solid var(--recruiter-border);
+}
+.recruiter-app .recruiter-user strong {
+    font-size: var(--recruiter-font-caption);
+    font-weight: 600;
+    line-height: 1.5;
+}
+.recruiter-app .recruiter-user small {
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--recruiter-muted);
+}
+.recruiter-app .user-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: var(--recruiter-font-caption);
+}
+
+.recruiter-app[data-sidebar] .recruiter-sidebar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: var(--recruiter-header-height);
+    bottom: 0;
+    left: 0;
+    width: var(--recruiter-sidebar-width);
+    height: auto;
+    padding: 16px 8px;
+    border-right: 1px solid var(--recruiter-border);
+    background: var(--recruiter-surface);
+    overflow-y: auto;
+    z-index: 30;
+}
+.recruiter-app .sidebar-section-label {
+    display: none;
+}
+.recruiter-app .recruiter-sidebar nav {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+}
+.recruiter-app .recruiter-sidebar .sidebar-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    min-height: 56px;
+    padding: 0;
+    font-size: 10px;
+    line-height: 1.5;
+    color: var(--recruiter-muted);
+    white-space: nowrap;
+}
+.recruiter-app .recruiter-sidebar .sidebar-link > span {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+}
+.recruiter-app .recruiter-sidebar .sidebar-link svg {
+    width: 18px;
+    height: 18px;
+}
+.recruiter-app .recruiter-sidebar .sidebar-link.active {
+    color: var(--recruiter-primary);
+    font-weight: 600;
+}
+.recruiter-app .recruiter-sidebar .sidebar-link.active > span {
+    background: var(--recruiter-accent);
+    color: var(--recruiter-surface);
+}
+.recruiter-app .recruiter-sidebar .sidebar-bottom {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+    margin-top: auto;
+    padding: 24px 0 0;
+}
+.recruiter-app[data-sidebar="expanded"] .recruiter-sidebar {
+    padding-inline: 14px;
+}
+.recruiter-app[data-sidebar="expanded"] .sidebar-section-label {
+    display: block;
+    margin-bottom: 16px;
+    color: var(--recruiter-muted);
+    font-size: 11px;
+}
+.recruiter-app[data-sidebar="expanded"] .recruiter-sidebar .sidebar-link {
+    flex-direction: row;
+    gap: 12px;
+    min-height: 42px;
+    padding: 4px 8px;
+    border-radius: 9px;
+    font-size: var(--recruiter-font-compact);
+}
+.recruiter-app[data-sidebar="expanded"]
+    .recruiter-sidebar
+    .sidebar-link.active {
+    background: var(--recruiter-soft);
+}
+.recruiter-app .sidebar-toggle {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    color: var(--recruiter-muted);
+}
+.recruiter-app .sidebar-toggle-desktop {
+    position: fixed;
+    top: calc(var(--recruiter-header-height) + 16px);
+    left: calc(var(--recruiter-sidebar-width) - 12px);
+    z-index: 45;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    border: 1px solid var(--recruiter-border);
+    border-radius: 50%;
+    background: var(--recruiter-surface);
+    box-shadow: 0 2px 6px var(--recruiter-shadow);
+}
+.recruiter-app .sidebar-toggle-desktop:hover {
+    color: var(--recruiter-primary);
+    background: var(--recruiter-soft);
+}
+.recruiter-app .sidebar-toggle-desktop svg {
+    width: 14px;
+    height: 14px;
+}
+.recruiter-app .sidebar-toggle-mobile {
+    display: none;
+}
+
+/* The same navigation is reused in the accessible phone drawer. */
+.recruiter-mobile-navigation {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100dvh - 120px);
+    background: var(--recruiter-surface);
+}
+.recruiter-mobile-navigation nav,
+.recruiter-mobile-navigation .sidebar-bottom {
+    display: grid;
+    gap: 6px;
+}
+.recruiter-mobile-navigation .sidebar-bottom {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--recruiter-border);
+}
+.recruiter-mobile-navigation .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 46px;
+    padding: 10px 14px;
+    border-radius: 9px;
+    font-size: var(--recruiter-font-compact);
+    color: var(--recruiter-muted);
+}
+.recruiter-mobile-navigation .sidebar-link > .sidebar-icon {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 0;
+    color: inherit;
+    background: transparent;
+}
+.recruiter-mobile-navigation .sidebar-link > .sidebar-label {
+    display: inline;
+    flex: 1;
+    width: auto;
+    height: auto;
+    color: inherit;
+    background: transparent;
+}
+.recruiter-mobile-navigation .sidebar-link > span {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    color: inherit;
+    background: transparent;
+}
+.recruiter-mobile-navigation .sidebar-link.active {
+    background: var(--recruiter-soft);
+    color: var(--recruiter-accent);
+    font-weight: 600;
+}
+.recruiter-app .recruiter-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--recruiter-border);
+    font-size: 11px;
+    color: var(--recruiter-muted);
+}
+.recruiter-app .recruiter-footer strong {
+    font-weight: 500;
+}
+.recruiter-app .recruiter-footer nav {
+    font-size: 11px;
+    gap: 16px;
+    color: var(--recruiter-muted);
+}
+@media (max-width: 1279px) {
+    .recruiter-app .recruiter-header {
+        gap: 14px;
+    }
+    .recruiter-app .recruiter-header-nav {
+        gap: 14px;
+    }
+    .recruiter-app .header-search-wrap {
+        flex-basis: 210px;
+    }
+    .recruiter-app .recruiter-user > span:not(.user-avatar) {
+        display: none;
+    }
+    .recruiter-app .recruiter-user {
+        padding-left: 12px;
+    }
+}
+@media (max-width: 1100px) {
+    .recruiter-app .header-search-wrap {
+        display: none;
+    }
+}
+@media (max-width: 760px) {
+    .recruiter-app .recruiter-header-nav {
+        display: none;
+    }
+}
+@media (max-width: 640px) {
+    .recruiter-app[data-sidebar] {
+        --recruiter-sidebar-width: 0px;
+    }
+    .recruiter-app[data-sidebar] .recruiter-sidebar {
+        display: none;
+    }
+    .recruiter-app .recruiter-header {
+        margin-left: 0;
+        padding-inline: 12px;
+        gap: 10px;
+    }
+    .recruiter-app .recruiter-header > .recruiter-brand {
+        display: flex;
+        flex-basis: 128px;
+        width: 128px;
+    }
+    .recruiter-app .sidebar-toggle-desktop {
+        display: none;
+    }
+    .recruiter-app .sidebar-toggle-mobile {
+        display: inline-flex;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        color: var(--recruiter-muted);
+    }
+    .recruiter-app .recruiter-user {
+        padding-left: 0;
+        border-left: 0;
+    }
+    .recruiter-app .header-message-icon {
+        display: none;
+    }
+    .recruiter-app .recruiter-footer {
+        padding: 20px 16px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .recruiter-app .recruiter-header-nav > a,
+    .recruiter-app .recruiter-sidebar .sidebar-link {
+        transition: none;
+    }
+}
 
 @media (min-width: 1600px) {
-  .recruiter-app .recruiter-main .dashboard-figma-grid {
-    grid-template-columns: minmax(0, 1fr) 320px;
-  }
-  .recruiter-app .recruiter-main .detail-columns,
-  .recruiter-app .recruiter-main .create-job-grid {
-    grid-template-columns: minmax(0, 1fr) 400px;
-    gap: 24px;
-  }
-  .recruiter-app .recruiter-main .candidate-detail-grid,
-  .recruiter-app .recruiter-main .candidate-detail-skeleton {
-    grid-template-columns: 300px minmax(0, 1fr) 320px;
-    gap: 24px;
-  }
-  .recruiter-app .recruiter-main .inbox-workspace {
-    grid-template-columns: 184px minmax(340px, 380px) minmax(0, 1fr);
-  }
-  .recruiter-app .recruiter-main .help-guides {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .recruiter-app .recruiter-main .settings-account-grid {
-    grid-template-columns: minmax(0, 1fr) 320px;
-    gap: 32px;
-  }
-  .recruiter-app .recruiter-main .settings-company-main {
-    max-width: none;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 32px;
-    align-items: start;
-  }
-  .recruiter-app .recruiter-main .settings-company-main .settings-field {
-    grid-template-columns: 160px minmax(0, 1fr);
-    gap: 16px;
-  }
-  .recruiter-app .recruiter-main .settings-company-main .settings-field:has(#company-industry),
-  .recruiter-app .recruiter-main .settings-company-main > .settings-form-buttons,
-  .recruiter-app .recruiter-main .settings-company-main > [role=alert],
-  .recruiter-app .recruiter-main .settings-company-main > [role=status],
-  .recruiter-app .recruiter-main .settings-company-main > .settings-catalog-error {
-    grid-column: 1 / -1;
-  }
+    .recruiter-app .recruiter-main .detail-columns,
+    .recruiter-app .recruiter-main .create-job-grid {
+        grid-template-columns: minmax(0, 1fr) 400px;
+        gap: 24px;
+    }
+    .recruiter-app .recruiter-main .candidate-detail-grid,
+    .recruiter-app .recruiter-main .candidate-detail-skeleton {
+        grid-template-columns: 300px minmax(0, 1fr) 320px;
+        gap: 24px;
+    }
+    .recruiter-app .recruiter-main .inbox-workspace {
+        grid-template-columns: 184px minmax(340px, 380px) minmax(0, 1fr);
+    }
+    .recruiter-app .recruiter-main .help-guides {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .recruiter-app .recruiter-main .settings-account-grid {
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 32px;
+    }
+    .recruiter-app .recruiter-main .settings-company-main {
+        max-width: none;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 32px;
+        align-items: start;
+    }
+    .recruiter-app .recruiter-main .settings-company-main .settings-field {
+        grid-template-columns: 160px minmax(0, 1fr);
+        gap: 16px;
+    }
+    .recruiter-app
+        .recruiter-main
+        .settings-company-main
+        .settings-field:has(#company-industry),
+    .recruiter-app
+        .recruiter-main
+        .settings-company-main
+        > .settings-form-buttons,
+    .recruiter-app .recruiter-main .settings-company-main > [role="alert"],
+    .recruiter-app .recruiter-main .settings-company-main > [role="status"],
+    .recruiter-app
+        .recruiter-main
+        .settings-company-main
+        > .settings-catalog-error {
+        grid-column: 1 / -1;
+    }
 }

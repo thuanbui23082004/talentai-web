@@ -10,8 +10,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { RecruiterJobView } from '@/features/jobs';
-import { RecruiterJobSearch } from '@/features/recruiter/components/recruiter-job-search';
-import { JobManagementActions } from '@/features/jobs';
+import { SearchBar } from '@/components/shared/search-bar';
+import { JobManagementActions, LocationPicker } from '@/features/jobs';
 import { RecruiterScreening } from '@/features/matching';
 import { useJobStatus } from '@/features/jobs';
 import { JobRequestError } from '@/features/jobs';
@@ -21,9 +21,6 @@ type Action = 'pause' | 'close' | 'reopen';
 export function RecruiterJobDetail({ job }: { job: RecruiterJobView }) {
   const t = useTranslations('Recruiter');
   const router = useRouter();
-  const [query, setQuery] = useState('');
-  const [location, setLocation] = useState('');
-  const [filters, setFilters] = useState(false);
   const status = job.status;
   const mutation = useJobStatus(job.id);
   const formText = useTranslations('JobForm');
@@ -55,22 +52,19 @@ export function RecruiterJobDetail({ job }: { job: RecruiterJobView }) {
 
   return (
     <div className="jobs-page recruiter-job-detail-page">
-      <section className="job-search-panel detail-search-panel">
-        <RecruiterJobSearch
-          query={query}
-          location={location}
-          filters={filters}
-          onQueryChange={setQuery}
-          onLocationChange={setLocation}
-          onToggleFilters={() => setFilters(!filters)}
-          onSearch={() => {
+      <section className="mb-6">
+        <SearchBar
+          locations={[]}
+          queryLabel={t('searchPlaceholder')}
+          renderLocation={({ value, onChange }) => <LocationPicker aria-label={t('locationLabel')} value={value} onValueChange={onChange} allowAll />}
+          filters={<Button variant="link" nativeButton={false} render={<Link href="/recruiter/jobs" />}>{t('detailAllFilters')}</Button>}
+          onSearch={({ query, location }) => {
             const params = new URLSearchParams();
             if (query.trim()) params.set('q', query.trim());
             if (location) params.set('location', location);
             router.push(`/recruiter/jobs?${params.toString()}`);
           }}
         />
-        {filters && <div className="job-filter-row"><Link className="detail-card-link" href="/recruiter/jobs">{t('detailAllFilters')}</Link></div>}
       </section>
       <div className="detail-toolbar">
         <Link href="/recruiter/jobs" className="detail-back">

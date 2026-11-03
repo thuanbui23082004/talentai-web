@@ -8,6 +8,25 @@ Trang `/ui` là nơi xem thử; thẻ việc làm và số liệu tại đó là
 
 ## Hệ thống thiết kế
 
+Danh sách và chi tiết tin đăng nhà tuyển dụng tái sử dụng `SearchBar` của trang
+chủ; các nút hành động và bộ lọc dùng `Button`, `Select` chung. Địa điểm tiếp tục
+dùng danh mục tìm kiếm hiện có của nhà tuyển dụng.
+
+Dashboard nhà tuyển dụng dùng biến thể gọn theo ảnh tham chiếu: bắt đầu trực tiếp
+bằng số liệu tổng quan, tiêu đề trang giữ cho trình đọc màn hình. Tiêu đề khối 15px,
+nội dung 13px, bảng và thông tin phụ 12px; nhãn biểu đồ/badge 11px. Sidebar mặc định
+là rail rộng 76px; nút mũi tên tròn ở mép phải sidebar, bên dưới header, mở rộng
+thành menu 208px hoặc thu lại và tách khỏi vùng logo. Trên điện
+thoại, nút mở menu dạng drawer có focus trap, đóng bằng Escape hoặc nút đóng.
+Nội dung dashboard giới hạn 1360px; báo cáo chi tiết trải toàn chiều rộng, bốn chỉ
+số trên một hàng ở desktop và hai cột trên mobile. Danh sách ứng viên trên điện
+thoại xếp thành các hàng thông tin để đọc mà không cần kéo ngang.
+Các vị trí đang tuyển tái sử dụng `JobCard` của trang chủ với biến thể `recruiter`:
+đường dẫn tới quản lý tin, hiển thị số ứng viên, không có lưu việc hoặc ứng tuyển.
+Khối Lịch trình dùng nền tím nhạt, tháng/năm tách màu, thứ và ngày được chọn cùng
+nổi bật màu tím. Các lịch phỏng vấn trong ngày xếp tăng dần theo giờ GMT+7, định
+dạng AM/PM; timeline có cột giờ riêng và hàng nền tím xen kẽ theo ảnh tham chiếu.
+
 | Token / yếu tố | Quy định |
 |---|---|
 | Header, thương hiệu đậm | `brand-deep` — #46009B |

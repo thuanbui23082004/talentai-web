@@ -13,6 +13,8 @@ const eslintConfig = defineConfig([
   },
   // Override default ignores of eslint-config-next.
   globalIgnores([
+    // Installed skill resources have their own tooling conventions.
+    ".agents/skills/**",
     // Default ignores of eslint-config-next:
     ".next/**",
     ".next-e2e/**",

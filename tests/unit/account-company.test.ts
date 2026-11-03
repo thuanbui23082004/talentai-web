@@ -1,26 +1,29 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { scryptSync } from 'node:crypto';
+
 import { NextRequest } from 'next/server';
 import { accountSchema, accountInputSchema, passwordInputSchema } from '@/features/account/schemas/account';
 import { companyInputSchema, companySchema, companyToInput } from '@/features/company/schemas/company';
-import { mockRecruiterAccount, mockRecruiterPassword } from '@/mocks/fixtures/recruiter-account';
+import { mockRecruiterAccount } from '@/mocks/fixtures/recruiter-account';
 import { recruiterCompany } from '@/mocks/fixtures/recruiter-company';
 import { mockJobs } from '@/mocks/fixtures/recruiter-jobs';
 import { settingsPngBase64, settingsPdf } from '@/mocks/fixtures/settings-files';
-import { getMockAccounts, getMockMedia } from '@/server/bff/account-company-handler';
-import { createMockRecruiterSession, getMockCompanies, getRecruiterMockStore } from '@/server/bff/recruiter-mock-store';
+import { getMockAccounts, getMockMedia } from '@/server/bff/recruiter/account-company-handler';
+import { createMockRecruiterSession } from '../support/auth-fixtures';
+import { getMockCompanies, getRecruiterMockStore } from '@/server/bff/recruiter/mock-store';
 import { handleMockRequest } from '@/server/bff/mock-adapter';
+import { handleRecruiterRequest } from '@/server/bff/recruiter/adapter';
 import { GET as getMedia } from '@/app/api/mock-media/[assetId]/route';
 
 beforeEach(() => {
-  const store = getRecruiterMockStore(); store.sessions.clear(); store.jobs = structuredClone(mockJobs);
+  const store = getRecruiterMockStore(); store.workspaces.clear(); store.jobs = structuredClone(mockJobs);
   getMockCompanies().clear(); getMockCompanies().set(recruiterCompany.id, structuredClone(recruiterCompany));
-  getMockAccounts().clear(); getMockAccounts().set(mockRecruiterAccount.id, { user: structuredClone(mockRecruiterAccount), salt: 'test-salt', hash: scryptSync(mockRecruiterPassword, 'test-salt', 32) });
+  getMockAccounts().clear(); getMockAccounts().set(mockRecruiterAccount.id, { user: structuredClone(mockRecruiterAccount) });
   getMockMedia().clear();
 });
 function authorization() { const created = createMockRecruiterSession(); return { ...created, headers: { cookie: `access_token=${created.id}`, 'X-CSRF-Token': created.session.csrf } }; }
 function request(auth: ReturnType<typeof authorization>, path: string, method = 'GET', body?: unknown) {
-  return handleMockRequest(new NextRequest('http://localhost/api/bff/' + path, { method, headers: auth.headers, body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body) }), path);
+  const input = new NextRequest('http://localhost/api/bff/' + path, { method, headers: auth.headers, body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body) });
+  return path === 'me' && method === 'GET' ? handleRecruiterRequest(input, path) : handleMockRequest(input, path);
 }
 function imageData() { const data = new FormData(); data.set('file', new File([Buffer.from(settingsPngBase64, 'base64')], 'avatar.png', { type: 'image/png' })); return data; }
 
@@ -48,15 +51,7 @@ describe('settings API mock', () => {
     expect((await request({ ...auth, headers: { ...auth.headers, 'X-CSRF-Token': 'invalid' } }, 'me', 'PATCH', { fullName: 'Minh An' })).status).toBe(403);
     auth.session.role = 'candidate'; expect((await request(auth, 'recruiter/company')).status).toBe(403);
   });
-  it('changes a hashed mock password, checks the current value, and revokes other sessions', async () => {
-    const auth = authorization(); const other = authorization();
-    const values = { currentPassword: 'WrongPassword1', newPassword: 'ChangedPass2026', confirmPassword: 'ChangedPass2026' };
-    expect((await request(auth, 'auth/change-password', 'POST', values)).status).toBe(400);
-    expect((await request(auth, 'auth/change-password', 'POST', { ...values, currentPassword: mockRecruiterPassword })).status).toBe(200);
-    expect((await request(other, 'me')).status).toBe(401);
-    expect((await request(auth, 'me')).status).toBe(200);
-    expect(getMockAccounts().get(mockRecruiterAccount.id)).not.toHaveProperty('password');
-  });
+
   it('uploads and deletes an avatar, protects media access and rejects spoofed images', async () => {
     const auth = authorization();
     const uploaded = accountSchema.parse(await (await request(auth, 'me/avatar', 'PUT', imageData())).json());

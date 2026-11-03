@@ -22,7 +22,7 @@ Route `/` được dựng theo 6 ảnh tham chiếu: dải tải app, nav tím, 
 | `src/features/jobs/components/job-search.tsx` | Chuyển dữ liệu form thành query URL đúng contract; dùng ở home và `/jobs`. |
 | `src/features/jobs/components/job-card.tsx` | Thẻ việc làm và modal tóm tắt; dùng chung cho hai bộ sưu tập. |
 | `src/features/jobs/components/home-job-collections.tsx` | Cache jobs, bộ sưu tập theo ID, lọc địa điểm, loading/empty/error. |
-| `src/server/bff/home.ts` | Lấy dữ liệu jobs khởi tạo trên server qua cùng adapter/proxy của BFF. |
+| `src/server/bff/public/home.ts` | Lấy dữ liệu jobs khởi tạo trên server qua cùng adapter/proxy của BFF. |
 | `src/mocks/fixtures/home.ts` | Nội dung trình bày minh họa, không phải endpoint home tự tạo. |
 | `src/mocks/fixtures/jobs.ts` | Sáu tin mẫu đúng generated type `JobSummary`. |
 | `src/lib/jobs/validation.ts` | Kiểm tra query ở trang kết quả và BFF mock. |

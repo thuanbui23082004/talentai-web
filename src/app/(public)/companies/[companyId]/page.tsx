@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CompanyDetailPage } from "@/features/companies";
-import { loadCompany, loadCompanyRelated } from "@/server/bff/company-detail";
+import { loadCompany, loadCompanyRelated } from "@/server/bff/public/company-detail";
 
 type Props = { params: Promise<{ companyId: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

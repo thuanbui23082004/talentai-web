@@ -7,12 +7,13 @@ import { mockEditableJob } from '@/mocks/fixtures/editable-job';
 import { recruiterCompany } from '@/mocks/fixtures/recruiter-company';
 import { mockCandidateDetails } from '@/mocks/fixtures/candidate-details';
 import { candidateDetailSchema } from '@/lib/api/candidate-detail-schemas';
-import { getRecruiterApplicationStore } from '@/server/bff/recruiter-application-store';
-import { getDeletedJobIds, getMockCompanies, getRecruiterMockStore, createMockRecruiterSession } from '@/server/bff/recruiter-mock-store';
+import { getRecruiterApplicationStore } from '@/server/bff/recruiter/application-store';
+import { createMockRecruiterSession } from '../support/auth-fixtures';
+import { getDeletedJobIds, getMockCompanies, getRecruiterMockStore } from '@/server/bff/recruiter/mock-store';
 import { handleMockRequest } from '@/server/bff/mock-adapter';
 
 beforeEach(() => {
-  getRecruiterMockStore().jobs = [structuredClone(mockEditableJob)]; getRecruiterMockStore().sessions.clear(); getDeletedJobIds().clear();
+  getRecruiterMockStore().jobs = [structuredClone(mockEditableJob)]; getRecruiterMockStore().workspaces.clear(); getDeletedJobIds().clear();
   getMockCompanies().clear(); getMockCompanies().set(recruiterCompany.id, structuredClone(recruiterCompany));
   getRecruiterApplicationStore().splice(0, getRecruiterApplicationStore().length, ...structuredClone(mockCandidateDetails));
 });

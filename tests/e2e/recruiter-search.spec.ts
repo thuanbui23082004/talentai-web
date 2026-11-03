@@ -1,19 +1,43 @@
 import { expect, test } from './recruiter-fixture';
 
-test('job search keeps a rounded focus indicator and filters results', async ({ page }, info) => {
+test('shared job search filters, resets and fits mobile', async ({ page }, info) => {
   await page.goto('/recruiter/jobs');
-  const input = page.getByRole('textbox', { name: 'Tìm kiếm vị trí, phòng ban, từ khóa…', exact: true });
+  const input = page.getByRole('searchbox', { name: 'Tìm kiếm vị trí, phòng ban, từ khóa…', exact: true });
   await input.fill('Fullstack');
   await expect(input).toBeFocused();
-  expect(await input.evaluate(element => getComputedStyle(element).outlineStyle)).toBe('none');
-  expect(await input.evaluate(element => getComputedStyle(element).boxShadow)).toBe('none');
-  expect(await page.locator('.search-input').evaluate(element => getComputedStyle(element).boxShadow)).not.toBe('none');
   await input.press('Enter');
   await expect(page.locator('.job-card').first()).toContainText('Fullstack');
+  await page.getByRole('button', { name: 'Xóa lọc', exact: true }).first().click();
+  await expect(input).toHaveValue('');
+  await expect.poll(() => page.locator('.job-card').count()).toBeGreaterThan(1);
+  const experience = page.getByRole('combobox', { name: 'Tất cả kinh nghiệm', exact: true });
+  await experience.click();
+  await page.getByRole('option', { name: 'Dưới 2 năm', exact: true }).click();
+  await page.getByRole('button', { name: 'Xóa lọc', exact: true }).first().click();
+  await expect(experience).toContainText('Tất cả kinh nghiệm');
+  await page.getByRole('button', { name: 'Bộ lọc', exact: true }).click();
+  await expect(experience).toBeHidden();
+  await page.getByRole('button', { name: 'Bộ lọc', exact: true }).click();
+  await expect(experience).toBeVisible();
   await page.screenshot({ path: info.outputPath('job-search-focus.png'), fullPage: true });
   await page.setViewportSize({ width: 360, height: 900 });
   await input.focus();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test('shared detail search returns to the managed list and clears an empty result', async ({ page }) => {
+  await page.goto('/recruiter/jobs');
+  await page.locator('.detail-card-link').first().click();
+  await expect(page).toHaveURL(/\/recruiter\/jobs\/[\da-f-]+$/);
+  await expect(page.getByRole('heading', { name: 'Chi tiết tin tuyển dụng', exact: true })).toBeVisible();
+  const input = page.getByRole('searchbox', { name: 'Tìm kiếm vị trí, phòng ban, từ khóa…', exact: true });
+  await input.fill('no-matching-job-123');
+  await input.press('Enter');
+  await expect(page).toHaveURL('/recruiter/jobs?q=no-matching-job-123');
+  await expect(page.locator('.empty-state')).toBeVisible();
+  await page.locator('.empty-state').getByRole('button', { name: 'Xóa lọc', exact: true }).click();
+  await expect(input).toHaveValue('');
+  await expect(page.locator('.job-card').first()).toBeVisible();
 });
 
 test('header search opens candidate and job detail without putting terms in page URLs', async ({ page }, info) => {

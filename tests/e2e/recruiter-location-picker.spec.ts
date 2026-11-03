@@ -38,7 +38,7 @@ test('catalog has 34 locations and form supports accented, unaccented and keyboa
 test('job filters use the same searchable catalog, clear selection and retry API errors', async ({ page }) => {
   await page.route('**/api/bff/catalog/locations?*', route => route.fulfill({ status: 500, contentType: 'application/problem+json', body: JSON.stringify({ error: { code: 'INTERNAL_ERROR' } }) }));
   await page.goto('/recruiter/jobs');
-  const city = page.locator('.location-select').getByRole('combobox');
+  const city = page.getByRole('combobox', { name: 'Địa điểm', exact: true });
   await city.click();
   await expect(page.getByRole('alert')).toContainText('Không thể tải địa điểm.');
   await page.unroute('**/api/bff/catalog/locations?*');

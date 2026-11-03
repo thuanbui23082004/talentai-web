@@ -19,7 +19,7 @@ for (const width of [360, 1440, 1920]) {
       const main = await page.locator('.recruiter-main').boundingBox();
       const box = await content.boundingBox();
       const gutter = width <= 640 ? 16 : 24;
-      const expected = Math.min(1600, main!.width - 2 * gutter);
+      const expected = Math.min(route === 'dashboard' ? 1360 : 1600, main!.width - 2 * gutter);
       expect(box!.width, route).toBeCloseTo(expected, 0);
       expect(box!.x - main!.x, route).toBeCloseTo((main!.width - expected) / 2, 0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${route} at ${width}px`).toBe(true);

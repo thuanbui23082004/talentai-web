@@ -91,7 +91,7 @@ test('recruiter screens keep readable text and fit mobile, tablet and desktop', 
       await expect(page.locator('.recruiter-main:visible').getByRole('heading').first()).toBeVisible();
       await expect(page.locator('main .candidate-skeleton, main .interview-loading, main .stats-skeleton, main .settings-skeleton')).toHaveCount(0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${route} at ${width}px`).toBe(true);
-      const tinyText = await page.locator('.recruiter-main:visible').evaluate(main => Array.from(main.querySelectorAll('p, label, td, th, dt, dd, small, button, input')).filter(element => element.getClientRects().length && Number.parseFloat(getComputedStyle(element).fontSize) < 14).map(element => element.className));
+      const tinyText = await page.locator('.recruiter-main:visible').evaluate((main, minimum) => Array.from(main.querySelectorAll('p, label, td, th, dt, dd, small, button, input')).filter(element => element.getClientRects().length && Number.parseFloat(getComputedStyle(element).fontSize) < minimum).map(element => element.className), route === 'dashboard' ? 11 : 14);
       expect(tinyText, `${route} at ${width}px`).toEqual([]);
       if (width === 375 && ['candidates', 'interviews', 'dashboard', 'jobs/new'].includes(route)) await page.screenshot({ path: info.outputPath(`${route.replaceAll('/', '-')}-mobile.png`), fullPage: true });
     }

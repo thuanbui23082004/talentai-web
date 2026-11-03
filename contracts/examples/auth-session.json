@@ -1,0 +1,31 @@
+{
+  "loginResponse": {
+    "user": {
+      "id": "30000000-0000-4000-8000-000000000001",
+      "email": "candidate@example.test",
+      "fullName": "Nguyễn An",
+      "role": "candidate",
+      "status": "active",
+      "createdAt": "2026-11-02T03:00:00Z"
+    },
+    "expiresInSeconds": 900,
+    "csrfToken": "example-browser-csrf-token",
+    "redirectTo": "/candidate/dashboard"
+  },
+  "registerResponseWithoutCreatedAt": {
+    "user": {
+      "id": "30000000-0000-4000-8000-000000000001",
+      "email": "candidate@example.test",
+      "fullName": "Nguyễn An",
+      "role": "candidate",
+      "status": "active"
+    },
+    "expiresInSeconds": 900,
+    "csrfToken": "example-browser-csrf-token",
+    "redirectTo": "/"
+  },
+  "refreshResponse": {
+    "expiresInSeconds": 900,
+    "csrfToken": "example-rotated-browser-csrf-token"
+  }
+}

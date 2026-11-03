@@ -1,5 +1,78 @@
 # Trạng thái triển khai
 
+## Google/Facebook social login
+
+Đã nối SDK provider → hook/service → BFF → Java `/api/v1/auth/social-login`.
+Google gửi ID token, Facebook gửi access token; Java xác minh và quyết định user/role,
+BFF đặt JWT HttpOnly như login thường. UI chọn role candidate/recruiter cho tài khoản mới.
+Cần điền NEXT_PUBLIC_GOOGLE_CLIENT_ID / NEXT_PUBLIC_FACEBOOK_APP_ID trong `.env.local`
+và cấu hình origin/domain tại provider; thiếu cấu hình thì nút tương ứng bị vô hiệu hóa.
+Hướng dẫn tại `docs/auth-flow.md`. Đã điền hai ID người dùng cung cấp vào `.env.local`
+(gitignored) và tải được SDK thật. Google báo origin `http://localhost:3000` chưa
+được cho phép cho Client ID; Facebook SDK báo FB.login không còn hỗ trợ trang HTTP.
+Đã thêm `npm run dev:https` cho local HTTPS. Cần cấu hình origin/domain tại provider;
+chưa nghiệm thu đăng nhập tài khoản provider thật.
+Đã chạy 25 test auth và smoke trình duyệt bằng SDK double: đúng loại token, đúng role
+hiện chọn, hủy popup không gửi request, lỗi hiển thị và mobile không tràn ngang.
+Đã gọi BFF → Java thật với token sai cho cả hai provider: 401, không đặt cookie.
+
+## Giao diện khôi phục mật khẩu
+
+Đã thêm `/forgot-password` và `/reset-password?token=...`, dùng chung AuthFrame,
+input, button, màu sắc và thông báo lỗi của auth. Có liên kết từ trang đăng nhập,
+validation tại trường, trạng thái đang gửi, thành công và liên kết thiếu/hết hạn.
+Form gọi BFF theo contract; reset chuyển token trong URL qua POST, không lưu vào storage.
+BFF đã nối POST `/api/v1/auth/forgot-password` và `/api/v1/auth/reset-password` theo
+Swagger Java. Forgot trả 200; chỉ khi `NODE_ENV=development` mới chuyển `resetToken`
+đến UI để tạo liên kết thử nghiệm (không prefetch). Production loại bỏ token, không
+báo đã gửi thư. Backend chưa gửi email; token dùng một lần/hạn 15 phút do Java quản lý.
+Reset chấp nhận 8–100 ký tự theo Java, ánh xạ `PASSWORD_RESET_TOKEN_INVALID` sang
+`INVALID_RESET_TOKEN` để hiển thị liên kết hết hạn. Chưa có luồng email thực tế.
+Đã kiểm thử thật qua UI/BFF/Java với tài khoản test riêng: forgot lấy token → reset
+→ đăng nhập bằng mật khẩu mới; dùng lại token trả 400; email không tồn tại trả 200
+không có token. Không dùng response giả lập cho lần nghiệm thu này.
+
+## Đăng ký và đăng nhập ngay
+
+Đăng ký thành công đặt cookie từ token Java, trả RegisterResponse dạng auth
+response và chuyển về `/`. Thông báo thành công góc dưới phải dùng toast chung
+timeout 5 giây; bỏ màn hình thành công và bước đăng nhập thủ công.
+
+## Auth: createdAt chưa có khi đăng ký
+
+BFF chấp nhận createdAt null/thiếu từ Java, bỏ trường đó khi map sang User.
+Contract User và schema tài khoản frontend cho phép thiếu createdAt; không sinh
+ngày thay thế. Có test đăng ký trả 201, login/me với null và từ chối chuỗi ngày sai.
+
+## Đăng ký ứng viên
+
+Đã bỏ trường số điện thoại khỏi form và payload đăng ký ứng viên; validation
+không còn chặn ứng viên thiếu phone. Nhà tuyển dụng giữ trường phone bắt buộc.
+Contract và generated types đã đồng bộ theo role; auth service Java không đổi.
+
+## Cấu trúc BFF
+
+Đã nhóm `src/server/bff` thành `auth/`, `public/`, `candidate/` và `recruiter/`.
+Các điểm điều phối `handler.ts`, `proxy.ts`, `mock-adapter.ts` và helper lỗi
+`responses.ts` ở gốc. Import source/test đã cập nhật theo đường dẫn mới;
+không thay đổi contract hoặc hành vi endpoint. Bản đồ file và thứ tự đọc tại
+`src/server/bff/README.md`.
+
+## Auth luôn dùng backend thật
+
+Đã bỏ mock auth khỏi runtime. Login/register/me/refresh/logout/CSRF và đổi mật
+khẩu dùng auth service qua `AUTH_API_URL`, độc lập với DATA_MODE. Server guard
+và dữ liệu nghiệp vụ mock gọi Java /auth/me để lấy danh tính. Không còn tài khoản demo đăng nhập.
+JWT Java được đặt trực tiếp trong cookie HttpOnly. Đã bỏ session store, mã phiên,
+idle timeout, thời hạn 8 giờ và thu hồi phiên cục bộ ở Next.js. Java quản lý
+expiry/refresh/revocation; BFF chỉ chuyển tiếp, cookie, Origin/CSRF và mapping.
+Contract login/refresh trả expiresInSeconds, không còn expiresAt/idleTimeoutSeconds.
+Recovery chờ backend gửi email; social chưa nối.
+Phone/consent trên form đăng ký chưa được auth service lưu. Unit test kiểm tra
+HTTP upstream bằng test double; chưa nghiệm thu happy path với tài khoản backend
+thật. Các E2E cũ dùng tài khoản demo cần chuyển sang tài khoản backend test.
+Chi tiết tại `docs/auth-flow.md`; mục này thay thế các ghi chú auth mock bên dưới.
+
 ## Tích hợp nhánh nhà tuyển dụng
 
 Đã ghép workspace nhà tuyển dụng với luồng đăng nhập hiện tại: dashboard thống kê,

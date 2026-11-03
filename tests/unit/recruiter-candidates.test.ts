@@ -3,10 +3,11 @@ import { NextRequest } from 'next/server';
 import { recruiterApplicationPageSchema, recruiterApplicationQuerySchema, candidateSearchSchema } from '@/lib/api/application-schemas';
 import { mockApplications } from '@/mocks/fixtures/applications';
 import { mockJobs } from '@/mocks/fixtures/recruiter-jobs';
-import { selectRecruiterApplications } from '@/server/bff/recruiter-application-query';
-import { createSyntheticCvPdf } from '@/server/bff/recruiter-cv-document';
+import { selectRecruiterApplications } from '@/server/bff/recruiter/application-query';
+import { createSyntheticCvPdf } from '@/server/bff/recruiter/cv-document';
 import { handleMockRequest } from '@/server/bff/mock-adapter';
-import { getRecruiterMockStore, createMockRecruiterSession } from '@/server/bff/recruiter-mock-store';
+import { createMockRecruiterSession } from '../support/auth-fixtures';
+import { getRecruiterMockStore } from '@/server/bff/recruiter/mock-store';
 
 const visible = new Set(mockJobs.map(job => job.id));
 describe('candidate filters', () => {
@@ -49,10 +50,10 @@ describe('candidate filters', () => {
   });
 });
 
-beforeEach(() => { const store = getRecruiterMockStore(); store.jobs = structuredClone(mockJobs); store.sessions.clear(); });
+beforeEach(() => { const store = getRecruiterMockStore(); store.jobs = structuredClone(mockJobs); store.workspaces.clear(); });
 async function sessionCookie() {
   const created = createMockRecruiterSession();
-  return { cookie: `access_token=${created.id}`, id: created.id };
+  return { cookie: `access_token=${created.id}`, id: created.id, session: created.session };
 }
 describe('candidate mock API', () => {
   it('returns list data and an authenticated PDF with no public caching', async () => {
@@ -72,7 +73,7 @@ describe('candidate mock API', () => {
     const path = `recruiter/applications/${mockApplications[0].id}/cv`;
     expect((await handleMockRequest(new NextRequest(`http://localhost/api/bff/${path}`), path)).status).toBe(401);
     const auth = await sessionCookie();
-    const session = getRecruiterMockStore().sessions.get(auth.id);
+    const session = getRecruiterMockStore().workspaces.get(auth.session.userId!);
     if (!session) throw new Error('Missing session');
     session.role = 'candidate';
     expect((await handleMockRequest(new NextRequest(`http://localhost/api/bff/${path}`, { headers: { cookie: auth.cookie } }), path)).status).toBe(403);

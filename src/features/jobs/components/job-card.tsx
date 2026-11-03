@@ -13,20 +13,32 @@ export function JobCard({
     variant = "default",
     footer,
     onUnsave,
+    className = "",
 }: {
     job: Job;
-    variant?: "default" | "application" | "saved";
+    variant?: "default" | "application" | "saved" | "recruiter";
     footer?: ReactNode;
     onUnsave?: () => void;
+    className?: string;
 }) {
-    const wordmark = job.company.name.replace("Công ty mẫu ", "");
+    const wordmark = variant === "recruiter"
+        ? job.company.name
+            .replace(/^Công ty(?: mẫu)?\s*/i, "")
+            .split(/\s+/)
+            .slice(-2)
+            .map(word => word[0])
+            .join("")
+            .toLocaleUpperCase("vi")
+        : job.company.name.replace("Công ty mẫu ", "");
     const card = (
         <article
-            className={`group flex min-w-0 flex-col gap-3 rounded-xl border border-border/60 bg-card p-3.5 shadow-card transition hover:border-primary/30 hover:shadow-float ${variant !== "default" ? "h-full" : ""}`}
+            data-job-card-variant={variant}
+            className={`group flex min-w-0 flex-col gap-3 rounded-xl border border-border/60 bg-card p-3.5 shadow-card transition hover:border-primary/30 hover:shadow-float ${variant !== "default" ? "h-full" : ""} ${className}`}
         >
             <div className="flex min-w-0 items-start gap-3">
                 <span
                     aria-hidden="true"
+                    data-slot="job-card-logo"
                     className="flex size-16 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-secondary/15 px-1 text-center text-[13px] font-extrabold tracking-tight break-words text-primary sm:size-18"
                 >
                     {wordmark}
@@ -39,7 +51,7 @@ export function JobCard({
                             </span>
                         ) : (
                             <Link
-                                href={`/jobs/${job.id}`}
+                                href={variant === "recruiter" ? `/recruiter/jobs/${job.id}` : `/jobs/${job.id}`}
                                 className="block w-full truncate text-left hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                                 title={job.title}
                             >
@@ -48,12 +60,13 @@ export function JobCard({
                         )}
                     </h3>
                     <p
+                        data-slot="job-card-company"
                         className="mt-0.5 truncate text-[13px] leading-5 text-muted-foreground"
                         title={job.company.name}
                     >
                         {job.company.name}
                     </p>
-                    <div className="mt-1.5 flex items-center gap-x-2 text-[13px] leading-5 font-medium text-primary">
+                    <div data-slot="job-card-salary-location" className="mt-1.5 flex items-center gap-x-2 text-[13px] leading-5 font-medium text-primary">
                         <span
                             className="shrink-0"
                             title={formatSalaryRange(job.salary)}
@@ -79,7 +92,7 @@ export function JobCard({
             <div
                 className={`flex items-end justify-between gap-3 ${variant === "default" ? "mt-auto" : ""}`}
             >
-                <div className="flex min-w-0 flex-wrap gap-1.5 text-xs leading-4 text-muted-foreground">
+                <div data-slot="job-card-tags" className="flex min-w-0 flex-wrap gap-1.5 text-xs leading-4 text-muted-foreground">
                     <span className="rounded-lg bg-muted px-2 py-1">
                         {WORK_TYPE_LABELS[job.workType]}
                     </span>
@@ -92,7 +105,7 @@ export function JobCard({
                         {formatDeadline(job.applicationDeadline)}
                     </span>
                 </div>
-                <SaveJobButton job={job} onUnsave={onUnsave} />
+                {variant !== "recruiter" && <SaveJobButton job={job} onUnsave={onUnsave} />}
             </div>
             {footer}
         </article>

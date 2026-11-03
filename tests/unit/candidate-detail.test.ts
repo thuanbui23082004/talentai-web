@@ -4,8 +4,9 @@ import { candidateDetailSchema, evaluationInputSchema, interviewInputSchema, int
 import { statusFormSchema, interviewFormSchema, interviewFormToInput } from '@/features/applications/schemas/candidate-detail-forms';
 import { mockCandidateDetails } from '@/mocks/fixtures/candidate-details';
 import { mockJobs } from '@/mocks/fixtures/recruiter-jobs';
-import { getRecruiterApplicationStore } from '@/server/bff/recruiter-application-store';
-import { createMockRecruiterSession, getRecruiterMockStore } from '@/server/bff/recruiter-mock-store';
+import { getRecruiterApplicationStore } from '@/server/bff/recruiter/application-store';
+import { createMockRecruiterSession } from '../support/auth-fixtures';
+import { getRecruiterMockStore } from '@/server/bff/recruiter/mock-store';
 import { handleMockRequest } from '@/server/bff/mock-adapter';
 import { recruiterApplicationPageSchema } from '@/lib/api/application-schemas';
 
@@ -13,7 +14,7 @@ const applicationId = mockCandidateDetails[0].id;
 const validInterview = { applicationId, startTime: '2030-10-25T03:00:00Z', endTime: '2030-10-25T04:00:00Z', mode: 'online' as const, meetingUrl: 'https://example.test/meeting', interviewers: ['Người phỏng vấn giả'] };
 beforeEach(() => {
   const store = getRecruiterMockStore();
-  store.jobs = structuredClone(mockJobs); store.sessions.clear();
+  store.jobs = structuredClone(mockJobs); store.workspaces.clear();
   getRecruiterApplicationStore().splice(0, getRecruiterApplicationStore().length, ...structuredClone(mockCandidateDetails));
 });
 function auth() {

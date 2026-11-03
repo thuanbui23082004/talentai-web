@@ -1,14 +1,15 @@
 import { beforeEach, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
-import { getRecruiterApplicationStore } from '@/server/bff/recruiter-application-store';
-import { getRecruiterMockStore, createMockRecruiterSession } from '@/server/bff/recruiter-mock-store';
+import { getRecruiterApplicationStore } from '@/server/bff/recruiter/application-store';
+import { createMockRecruiterSession } from '../support/auth-fixtures';
+import { getRecruiterMockStore } from '@/server/bff/recruiter/mock-store';
 import { handleMockRequest } from '@/server/bff/mock-adapter';
 import { mockJobs } from '@/mocks/fixtures/recruiter-jobs';
 import { mockCandidateDetails } from '@/mocks/fixtures/candidate-details';
 import { interviewPageSchema, managedInterviewSchema } from '@/features/interviews/schemas';
 import { calendarDays, monthRange, shiftMonth, vietnamDay } from '@/features/interviews/calendar';
 beforeEach(() => {
-  getRecruiterMockStore().jobs = structuredClone(mockJobs); getRecruiterMockStore().sessions.clear();
+  getRecruiterMockStore().jobs = structuredClone(mockJobs); getRecruiterMockStore().workspaces.clear();
   getRecruiterApplicationStore().splice(0, getRecruiterApplicationStore().length, ...structuredClone(mockCandidateDetails));
 });
 function setup() {

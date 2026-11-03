@@ -1,82 +1,152 @@
-# Auth — luồng mock hiện hành
+# Auth — BFF mỏng, Java quản lý xác thực
 
-Workspace nhà tuyển dụng đã có công ty và dữ liệu minh họa: đăng nhập bằng
-`recruiter@example.test` / `TalentAI2026!`. Tài khoản `recruiter@example.com`
-vẫn dùng `TalentAI123!` và giữ màn hình chờ hoàn thiện doanh nghiệp.
-Các route nhà tuyển dụng dùng cùng cookie `access_token`/`refresh_token` với
-ứng viên; gọi `/auth/csrf` khi chưa đăng nhập không tạo phiên mới.
+Auth luôn gọi Java qua AUTH_API_URL, độc lập DATA_MODE. Không có tài khoản
+mock trong runtime. Test double chỉ nằm trong tests/support.
 
-## Màn hình
+## Cấu hình
 
-- `/login`: chọn ngữ cảnh ứng viên/nhà tuyển dụng, nhập email và mật khẩu, validate rồi đăng nhập.
-- `/register`: chọn vai trò, nhập các trường trong RegisterRequest, đồng ý chính sách và tạo tài khoản.
-- Đăng ký thành công **không tự đăng nhập**; chuyển sang `/login` bằng nút Đăng nhập ngay.
-- Đăng nhập thành công: server quyết định vai trò, chuyển tới `/{role}/dashboard`.
-- Truy cập trang sai vai trò: chuyển về dashboard của tài khoản đã xác thực; chưa đăng nhập: về `/login`.
-- `/logout` GET chỉ hiển thị xác nhận. Nhấn Đăng xuất mới gọi POST có CSRF; hủy phiên, xóa cookie và cache rồi về login.
-- Khi lỗi mạng/server, giữ trạng thái để thử lại; không giả vờ đăng nhập/đăng xuất thành công.
+```dotenv
+DATA_MODE=mock
+AUTH_API_URL=http://localhost:3001/api/v1
+```
 
-## Theo contract, không theo các chi tiết nghiệp vụ chưa xác nhận trong ảnh
+DATA_MODE và BACKEND_API_URL chỉ áp dụng dữ liệu nghiệp vụ. Auth không đọc
+DATA_MODE để chọn nguồn danh tính.
 
-Ảnh được dùng cho bố cục hai cột, căn form, role switch, font và tông tím. Không đưa grid xanh/trắng
-hoặc khung chọn của công cụ thiết kế vào sản phẩm.
-Hình bên trái dùng `public/images/auth/login-banner.png`, cấu hình tại `src/features/auth/components/auth-frame.tsx`, vùng `data-slot="auth-illustration"`.
-Khung cao theo viewport động (dvh), ảnh giữ nguyên tỷ lệ và vị trí, logo cố định; chỉ vùng nội dung bên phải cuộn.
-Màn hình nhỏ ẩn vùng minh họa để dành chỗ cho form; nội dung vẫn cuộn bên trong khung và bàn phím có thể đưa trường đang focus vào tầm nhìn.
+## Trách nhiệm
 
-RegisterRequest chỉ có fullName, email, password, confirmPassword, role, acceptedPrivacyPolicy.
-Phone, giới tính, công ty, địa chỉ/phường xã trong ảnh không được tự thêm vào request đăng ký;
-hồ sơ doanh nghiệp là feature riêng. Tài khoản recruiter mới có `companyVerificationStatus=pending`.
-OAuth Google/Facebook chưa có endpoint trong contract. Trang đăng nhập hiển thị nút có logo ở trạng thái disabled cùng nhãn “Sắp ra mắt”; chưa khởi tạo OAuth hoặc session từ các nút này.
-Điều khoản/chính sách chính thức cần được chủ sản phẩm cung cấp trước khi đưa lên môi trường thật;
-không tạo liên kết tới tài liệu chưa tồn tại.
+| Java | Next.js BFF |
+|---|---|
+| Validate nghiệp vụ, kiểm tra mật khẩu, khóa tài khoản | Kiểm tra shape JSON, Origin/CSRF và giới hạn request |
+| Cấp JWT, quyết định thời hạn | Đặt JWT trực tiếp vào cookie HttpOnly |
+| Xác thực danh tính và quyền | Gọi /auth/me, ánh xạ User cho giao diện/guard |
+| Refresh rotation, thu hồi token | Chuyển refresh token tới Java và cập nhật cookie |
+| Đổi mật khẩu, thu hồi refresh theo chính sách Java | Chuyển request và xóa cookie của trình duyệt hiện tại |
 
-## API mock đã triển khai
+BFF không có session-store, mã phiên opaque, cached user, idle timeout,
+thời hạn 8 giờ, bộ đếm login sai hoặc danh sách thu hồi riêng.
 
-| Endpoint              | Hành vi                                                                                     |
-| --------------------- | ------------------------------------------------------------------------------------------- |
-| POST `/auth/register` | Validate, hash phía server mock, báo email trùng bằng fieldErrors, trả 201 không cấp cookie |
-| POST `/auth/login`    | Sai thông tin trả lỗi chung, tài khoản khóa trả 423, cấp session và hai cookie httpOnly     |
-| GET `/me`             | Xác thực session, trả User, không trả token                                                 |
-| GET `/auth/csrf`      | Trả CSRF của session hiện tại                                                               |
-| POST `/auth/refresh`  | Xác thực refresh, xoay access/refresh/CSRF và thu hồi token cũ                              |
-| POST `/auth/logout`   | Kiểm tra CSRF, thu hồi cả access/refresh, xóa cookie, trả 204                               |
+Java có thể trả createdAt=null hoặc chưa gửi trường này khi mới đăng ký.
+BFF chấp nhận và bỏ createdAt khỏi User frontend; không tự tạo ngày thay thế.
+Nếu Java gửi ngày giờ thì vẫn phải đúng ISO và được giữ nguyên.
 
-Client không dùng DATA_MODE và không lưu token vào localStorage/sessionStorage.
-Cookie `access_token`, `refresh_token`: httpOnly, SameSite=Lax, Path=/; Secure trên HTTPS hoặc production.
-Token mock là giá trị ngẫu nhiên không mang role, tra trong store server; không giả làm JWT production.
-Mock hash bằng Node scrypt, không lưu mật khẩu đăng ký dạng rõ. Bcrypt là trách nhiệm backend thật theo contract.
-Trình duyệt chỉ giữ thông tin user và CSRF trong bộ nhớ trong thời gian thao tác.
+## Đọc code
 
-## Thời gian và bảo vệ
+```text
+Form → useLogin → service → /api/bff/* → handler.ts
+  → auth/handler.ts → auth/backend.ts → Java
+```
 
-- Access: 15 phút; session tuyệt đối: 8 giờ (giá trị mặc định mock, backend sẽ chốt khi tích hợp).
-- Hết 30 phút không hoạt động: thu hồi session; refresh không vượt qua giới hạn idle hoặc tuyệt đối.
-- Client kiểm tra idle và chỉ kiểm tra lại server theo tương tác thực, tối đa một lần/phút; không polling để giữ phiên sống vô hạn.
-- GET có thể được gọi lại sau khi refresh thành công. Không tự phát lại mutation khi không rõ kết quả.
-- Login/registration/refresh từ origin khác bị chặn; logout còn yêu cầu X-CSRF-Token.
-- Quá 5 lần đăng nhập sai trong 10 phút: khóa tạm 15 phút, có details.lockedUntil.
-- Thay tài khoản trong cùng trình duyệt thu hồi session cũ; logout thu hồi token trong store, không chỉ xóa cookie.
-- Người dùng tự chọn tab role trên login không được quyết định quyền hoặc URL đích.
+- auth/handler.ts: allowlist endpoint, chuyển payload, đặt/xóa cookie, ánh xạ lỗi.
+- auth/backend.ts: HTTP client, schema upstream và mapUser.
+- auth/cookies.ts: JWT cookie và CSRF không lưu trạng thái.
+- auth/session.ts: gọi Java /auth/me cho guard và mock nghiệp vụ.
 
-## Tài khoản demo
+## Cookie và CSRF
 
-Tất cả tài khoản dưới đây dùng mật khẩu **TalentAI123!**. Chỉ là dữ liệu giả để phát triển:
+Cookie access_token chứa access JWT Java, Max-Age theo expiresInSeconds.
+Cookie refresh_token chứa refresh token Java. Backend chưa trả thời hạn
+refresh riêng nên đây là browser-session cookie, không tự gán 7 ngày/8 giờ.
+Java quyết định refresh token còn hợp lệ hay không.
 
-| Email                 | Vai trò / trạng thái                             |
-| --------------------- | ------------------------------------------------ |
-| candidate@example.com | Ứng viên hoạt động                               |
-| recruiter@example.com | Nhà tuyển dụng, doanh nghiệp pending             |
-| admin@example.com     | Admin hoạt động; không có lựa chọn đăng ký admin |
-| locked@example.com    | Tài khoản bị khóa, dùng kiểm tra lỗi             |
+Cả hai cookie HttpOnly, SameSite=Lax, Path=/, Secure trên HTTPS/production.
+JSON không trả token backend. CSRF là HMAC gắn với secret trong cookie
+HttpOnly; refresh đổi token thì CSRF cũng đổi. Không có CSRF/session store.
 
-Store đặt trên globalThis để giữ qua hot reload. Khởi động lại process reset các tài khoản mới và phiên.
-Không có HTTP endpoint reset hoặc thay đổi role; test reset trực tiếp store trong môi trường unit.
-Mock không phải dịch vụ identity production. Real proxy vẫn chưa mở các endpoint auth; phải tích hợp session,
-cookie, CSRF với backend thật và kiểm thử riêng trước khi sử dụng tài khoản thật.
+GET /auth/csrf chỉ cấp phương tiện bảo vệ request trình duyệt, không phải
+bằng chứng đã đăng nhập. Java vẫn xác thực JWT khi gọi endpoint được bảo vệ.
+Request thay đổi dữ liệu được kiểm tra Origin/Fetch Metadata; logout/đổi mật
+khẩu và mutation nghiệp vụ còn yêu cầu X-CSRF-Token.
 
-## Kiểm tra
+## Các luồng
 
-Unit test: validation, đăng ký, duplicate email, cookie, CSRF, role, khóa tạm, idle, refresh rotation và revoke.
-E2E: đăng ký hai role → đăng nhập → dashboard; sai thông tin/locked; role guard; logout xác nhận/retry;
-làm mới access và giao diện 375px/1280px. Các feature dashboard nghiệp vụ, quên/đổi mật khẩu và OAuth chưa triển khai.
+- Login: Java trả user/tokens → BFF đặt cookie → JSON user/expiresInSeconds/CSRF.
+- /me và guard: gọi Java /auth/me bằng Bearer JWT, không tin JWT decode cục bộ.
+- Refresh: chuyển refresh cookie tới Java → cập nhật cả hai cookie và CSRF.
+  Chỉ gom request HTTP đang chạy cùng refresh token trong một process; không
+  cache token sau khi call kết thúc. Java vẫn quyết định rotation/rejection.
+- Logout: Java thu hồi refresh → BFF xóa cookie. JWT access đã cấp có thể vẫn
+  hợp lệ đến khi hết hạn theo đặc tả Java; không tuyên bố thu hồi mọi phiên.
+- Đổi mật khẩu: Java xử lý và thu hồi refresh theo chính sách Java. BFF chỉ
+  xóa cookie của browser này, không tự vô hiệu hóa browser khác.
+- Đăng ký: chuyển fullName thành displayName, role sang uppercase; dùng ngay
+  token Java trả để đặt cookie và đăng nhập. Frontend về trang chủ, thông báo
+  góc dưới phải khoảng 5 giây rồi ẩn; không còn màn hình xác nhận trung gian.
+  Không gọi thêm login/logout. Cờ thông báo được xóa khỏi URL để reload không lặp.
+- Server Component không ghi cookie. Khi guard gặp access hết hạn, về login;
+  client gọi refresh rồi chuyển lại dashboard khi Java xác nhận danh tính.
+  Không tự phát lại mutation hoặc làm mới cookie qua GET.
+
+Refresh/Java lỗi mạng giữ cookie để thử lại, không giả vờ đăng xuất thành công.
+User có nhiều role: giao diện chọn role đầu tiên Java trả để điều hướng;
+quyền API cuối cùng do Java quyết định.
+
+## Phần chưa tích hợp
+
+Forgot/reset-password đã nối Java theo Swagger: forgot nhận `{email}`, trả 200;
+reset nhận `{token,newPassword,confirmPassword}`. Chỉ development trả `resetToken`
+Java cấp để UI hiển thị liên kết thử nghiệm `/reset-password?token=...`; production
+loại bỏ token. Không lưu token vào localStorage/sessionStorage, không prefetch liên kết.
+Token một lần/hạn 15 phút do Java kiểm tra. Mật khẩu reset dài 8–100 ký tự.
+Java `PASSWORD_RESET_TOKEN_INVALID` → BFF `400 INVALID_RESET_TOKEN`.
+Backend chưa gửi email; giao diện không tuyên bố đã gửi thư.
+
+## Đăng nhập Google/Facebook
+
+`SocialLogin` tải SDK chính thức chỉ khi provider có cấu hình. Google dùng
+`accounts.id.renderButton`/popup, nhận ID token (`credential`); Facebook gọi
+`FB.login` trực tiếp từ click với scope `public_profile,email`, nhận access token.
+Component → `useSocialLogin` → service → POST `/api/bff/auth/social-login` → Java
+POST `/api/v1/auth/social-login` với `{provider,token,role}` (role uppercase).
+Java xác minh provider, tìm/tạo/liên kết tài khoản và trả user/tokens.
+BFF dùng cùng handler login để đặt JWT HttpOnly, trả AuthSessionResponse.
+Client xóa query cache và điều hướng theo role Java trả, không theo role chọn trên UI.
+Không lưu provider token hoặc JWT vào localStorage/sessionStorage, không log token.
+Hủy popup, SDK bị chặn, token không hợp lệ và backend lỗi đều không tạo phiên giả.
+
+### Cấu hình trong `.env.local`
+
+```dotenv
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=<Web OAuth client ID>
+NEXT_PUBLIC_FACEBOOK_APP_ID=<Meta app ID>
+NEXT_PUBLIC_FACEBOOK_API_VERSION=v25.0
+```
+
+Đây là các ID công khai; không đưa Client Secret/App Secret vào NEXT_PUBLIC.
+Khởi động lại `npm run dev` sau khi điền; production cần build lại.
+
+- Google Cloud Console: tạo OAuth client loại Web application; Authorized JavaScript
+  origins chứa chính xác `http://localhost:3000` (và origin HTTPS production).
+  Cấu hình consent screen/test users nếu ứng dụng chưa public. Luồng GIS popup
+  trả credential qua callback, không cần tạo route callback exchange code ở Next.js.
+- Meta Developer Console: cấu hình Facebook Login for Web, bật JavaScript SDK,
+  nhập domain/Website Site URL và allowed JavaScript SDK domains tương ứng.
+  Điền API version đang dùng của app. Khi app còn development, đăng nhập bằng
+  app admins/developers/testers được Meta cho phép; cần email từ tài khoản người dùng.
+  Dùng HTTPS cho site theo yêu cầu Meta; kiểm tra chính sách localhost của app.
+
+Nguồn SDK: [Google GIS](https://developers.google.com/identity/gsi/web/reference/js-reference),
+[Facebook JavaScript SDK](https://developers.facebook.com/docs/javascript/quickstart/).
+Đã nhận Client ID/App ID và lưu trong `.env.local` (gitignored). SDK thật tải được.
+Kiểm tra trên `http://localhost:3000` ghi nhận Google báo origin chưa được phép và
+Facebook báo FB.login không hỗ trợ HTTP. Chưa đăng nhập tài khoản nhà cung cấp thật.
+Thêm cả `http://localhost:3000` và `https://localhost:3000` vào Google Authorized
+JavaScript origins. Dừng server HTTP, chạy `npm run dev:https`, mở
+`https://localhost:3000/login`; cấu hình Website Site URL/domain tương ứng ở Meta.
+Next.js có thể yêu cầu tạo/tin cậy chứng chỉ localhost khi chạy HTTPS lần đầu.
+Đã gọi Java thật qua BFF với token không hợp lệ cho cả Google/Facebook: đều 401,
+không đặt cookie. Smoke SDK trên trình duyệt sử dụng SDK double, không phải nghiệm thu OAuth thật.
+
+Lưu ý khi nghiệm thu production: mã Java `GoogleTokenVerifier` hiện gọi tokeninfo
+nhưng chưa đối chiếu `aud` với client ID của dự án; `FacebookTokenVerifier` gọi `/me`
+nhưng chưa kiểm tra token thuộc App ID của dự án. Phần ràng buộc ứng dụng này thuộc
+backend Java, cần bổ sung/kiểm chứng phía backend, không chuyển sang logic UI.
+Ứng viên đăng ký không có trường phone; nhà tuyển dụng vẫn cần nhập phone.
+Phone của nhà tuyển dụng/consent trên form chưa có nơi lưu trong auth service; cần
+profile/consent service trước khi nghiệm thu việc lưu các thông tin này.
+
+Unit test kiểm tra JWT cookie, không lộ JWT/token reset production trong JSON,
+delegation tới Java, CSRF, refresh và lỗi. Forgot/reset đã kiểm thử với tài khoản
+backend test riêng qua UI/BFF: reset thành công, đăng nhập bằng mật khẩu mới,
+token không dùng lại được và email không tồn tại không có token. Chưa nghiệm thu
+email vì Java chưa gửi thư. E2E cũ dùng tài khoản demo cần seed tài khoản backend test.

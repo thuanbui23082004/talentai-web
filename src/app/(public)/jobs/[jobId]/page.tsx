@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { JobDetailPage } from "@/features/jobs";
-import { loadJobDetail, loadRelatedJobs } from "@/server/bff/job-detail";
+import { loadJobDetail, loadRelatedJobs } from "@/server/bff/public/job-detail";
 
 type Props = { params: Promise<{ jobId: string }> };
 

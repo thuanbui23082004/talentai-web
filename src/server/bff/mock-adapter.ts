@@ -1,27 +1,26 @@
 import { NextRequest } from 'next/server';
-import { handleRecruiterRequest } from './recruiter-adapter';
-export { mockProblem } from './recruiter-adapter';
+import { handleRecruiterRequest } from './recruiter/adapter';
+export { mockProblem } from './recruiter/adapter';
 import type { components } from "@/lib/api/generated/schema";
-import { searchMockJobs } from "./mock-jobs";
+import { searchMockJobs } from "./public/mock-jobs";
 import { apiError } from "./responses";
-import { handleMockAuth } from "./mock-auth";
+import { handleAuthRequest, isAuthRequest } from "./auth/handler";
 import { createMockJobDetails } from "@/mocks/fixtures/job-details";
 import { mockJobs } from "@/mocks/fixtures/jobs";
-import { searchMockCompanies, getMockCompany, getMockCompanyJobs } from "./mock-companies";
-import { handleMockNotifications } from "./mock-notifications";
-import { handleMockApplications } from "./mock-applications";
-import { handleMockSavedJobs } from "./mock-saved-jobs";
+import { searchMockCompanies, getMockCompany, getMockCompanyJobs } from "./public/mock-companies";
+import { handleMockNotifications } from "./candidate/mock-notifications";
+import { handleMockApplications } from "./candidate/mock-applications";
+import { handleMockSavedJobs } from "./candidate/mock-saved-jobs";
 
 const mockJobDetails = createMockJobDetails(mockJobs);
 
 export async function handleMockRequest(request: Request, _targetPath?: string): Promise<Response> {
   void _targetPath;
   const targetPath = new URL(request.url).pathname.replace('/api/bff/', '');
+  if (isAuthRequest(request)) return handleAuthRequest(request);
   if (/^(recruiter\/|catalog\/|analysis-tasks\/|me\/|auth\/change-password)/.test(targetPath) || (targetPath === 'me' && request.method !== 'GET')) {
     return handleRecruiterRequest(new NextRequest(request), targetPath);
   }
-  const auth = await handleMockAuth(request);
-  if (auth) return auth;
   const notifications = await handleMockNotifications(request);
   if (notifications) return notifications;
   const applications = await handleMockApplications(request);

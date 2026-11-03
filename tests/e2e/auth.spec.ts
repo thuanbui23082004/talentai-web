@@ -7,6 +7,16 @@ test("logout notice expires after five seconds", async ({ page }) => {
   await expect(notice).toHaveCount(0, { timeout: 10_000 });
 });
 
+test("logout notice is consumed once and does not return on reload", async ({ page }) => {
+  await page.goto("/login?role=recruiter&reason=logged-out#login");
+  await expect(page.getByText("Bạn đã đăng xuất", { exact: true })).toBeVisible();
+  await expect(page).toHaveURL("/login?role=recruiter#login");
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Đăng nhập tài khoản", exact: true })).toBeVisible();
+  await expect(page.getByText("Bạn đã đăng xuất", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Lợi thế cho doanh nghiệp bằng trải nghiệm tuyển dụng thông minh.")).toBeVisible();
+});
+
 test("submitting login dismisses the previous notice even when validation fails", async ({ page }) => {
   await page.goto("/login?reason=logged-out");
   const notice = page.getByText("Bạn đã đăng xuất", { exact: true });
@@ -51,24 +61,19 @@ test("login uses the verified account role and private pages reject wrong roles"
 });
 
 for (const role of ["candidate", "recruiter"] as const) {
-  test(`registers ${role} without auto-login, then signs in`, async ({ page, context }) => {
+  test(`registers ${role} and arrives home signed in`, async ({ page, context }) => {
     const email = `${role}-${crypto.randomUUID()}@example.com`;
     await page.goto(`/register?role=${role}`);
     await page.getByRole("textbox", { name: "Email đăng nhập", exact: false }).fill(email);
     await page.getByRole("textbox", { name: "Họ và tên", exact: false }).fill("Nguyễn Văn An");
-    await page.locator('input[name="phone"]').fill("0901234567");
+    if (role === "recruiter") await page.locator('input[name="phone"]').fill("0901234567");
     await page.locator('input[name="password"]').fill("TalentAI123!");
     await page.locator('input[name="confirmPassword"]').fill("TalentAI123!");
     await page.getByRole("checkbox", { name: "Tôi đồng ý", exact: false }).check();
     await page.getByRole("button", { name: "Hoàn tất", exact: true }).click();
-    await expect(page.getByRole("heading", { name: "Đăng ký thành công!" })).toBeVisible();
-    expect((await context.cookies()).some((cookie) => cookie.name === "access_token")).toBe(false);
-    await page.getByRole("link", { name: "Đăng nhập ngay", exact: true }).click();
-    await page.getByRole("textbox", { name: "Email", exact: true }).fill(email);
-    await page.getByLabel("Mật khẩu", { exact: true }).fill("TalentAI123!");
-    await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
-    await expect(page).toHaveURL(new RegExp(`/${role}/dashboard$`));
-    if (role === "recruiter") await expect(page.locator('p:visible').filter({ hasText: "Doanh nghiệp đang chờ hoàn thiện và kiểm duyệt" })).toBeVisible();
+    await expect(page).toHaveURL("/");
+    expect((await context.cookies()).some((cookie) => cookie.name === "access_token" && cookie.httpOnly)).toBe(true);
+    await expect(page.getByText("Đăng ký thành công", { exact: true })).toBeVisible();
   });
 }
 
@@ -77,7 +82,6 @@ test("shows inline validation and duplicate email without exposing server text",
   await page.getByRole("button", { name: "Hoàn tất", exact: true }).click();
   await expect(page.getByText("Bạn cần đồng ý với điều khoản và chính sách quyền riêng tư.")).toBeVisible();
   await page.locator('input[name="email"]').fill("candidate@example.com");
-  await page.locator('input[name="phone"]').fill("0901234567");
     await page.locator('input[name="fullName"]').fill("Nguyễn Văn An");
   await page.locator('input[name="password"]').fill("TalentAI123!");
   await page.locator('input[name="confirmPassword"]').fill("wrong");
@@ -108,7 +112,7 @@ test("GET logout preserves the session, confirmation revokes it and private rout
   await expect(page.getByRole("heading", { name: "Đăng xuất tài khoản" })).toBeVisible();
   expect((await context.request.get("/api/bff/me")).status()).toBe(200);
   await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
-  await expect(page).toHaveURL(/\/login\?reason=logged-out$/);
+  await expect(page).toHaveURL(/\/login$/);
   expect((await context.cookies()).filter((cookie) => ["access_token", "refresh_token"].includes(cookie.name))).toHaveLength(0);
   expect((await context.request.get("/api/bff/me")).status()).toBe(401);
   await page.goto("/candidate/dashboard");
@@ -135,7 +139,7 @@ test("a failed logout shows retry and does not discard a valid session", async (
   expect((await context.request.get("/api/bff/me")).status()).toBe(200);
   await page.unroute("**/api/bff/auth/logout");
   await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
-  await expect(page).toHaveURL(/\/login\?reason=logged-out$/);
+  await expect(page).toHaveURL(/\/login$/);
 });
 
 test("auth screens fit desktop and mobile with the provided illustration", async ({ page }, testInfo) => {

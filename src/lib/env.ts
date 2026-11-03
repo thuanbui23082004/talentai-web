@@ -2,6 +2,10 @@ import { z } from "zod";
 
 export const envSchema = z.object({
   DATA_MODE: z.enum(["mock", "real"]).default("mock"),
+  AUTH_API_URL: z.url().refine((value) => {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password && !url.search && !url.hash;
+  }, "AUTH_API_URL phải là URL HTTP(S) hợp lệ").default("http://localhost:3001/api/v1"),
   BACKEND_API_URL: z.url().refine((value) => {
     try {
       const url = new URL(value);
@@ -20,6 +24,12 @@ export const envSchema = z.object({
 export function getServerEnv() {
   return envSchema.parse({
     DATA_MODE: process.env.DATA_MODE,
+    AUTH_API_URL: process.env.AUTH_API_URL || undefined,
     BACKEND_API_URL: process.env.BACKEND_API_URL || undefined,
   });
+}
+
+// Auth is independent of business DATA_MODE/BACKEND_API_URL validation.
+export function getAuthApiUrl() {
+  return envSchema.shape.AUTH_API_URL.parse(process.env.AUTH_API_URL || undefined);
 }

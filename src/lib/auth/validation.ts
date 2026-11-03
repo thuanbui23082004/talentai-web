@@ -29,7 +29,7 @@ export const registerSchema = z
                     .email("Vui lòng nhập email hợp lệ.")
                     .max(254, "Email không được quá 254 ký tự."),
             ),
-        phone: z.string().trim().regex(/^\+?[0-9]{9,15}$/, "Số điện thoại cần 9–15 chữ số, có thể bắt đầu bằng +."),
+        phone: z.string().trim().optional(),
         password: z
             .string()
             .min(8, "Mật khẩu cần ít nhất 8 ký tự.")
@@ -45,6 +45,11 @@ export const registerSchema = z
                 (accepted) => accepted,
                 "Bạn cần đồng ý với điều khoản và chính sách quyền riêng tư.",
             ),
+    })
+    .superRefine((value, context) => {
+        if (value.role === "recruiter" && !/^\+?[0-9]{9,15}$/.test(value.phone ?? "")) {
+            context.addIssue({ code: "custom", path: ["phone"], message: "Số điện thoại cần 9–15 chữ số, có thể bắt đầu bằng +." });
+        }
     })
     .refine((value) => value.password === value.confirmPassword, {
         path: ["confirmPassword"],

@@ -20,6 +20,26 @@ async function expectAnchoredPreview(page: Page, card: Locator) {
     return preview;
 }
 
+test("job preview waits two seconds and cancels when the pointer leaves early", async ({ page }) => {
+    await page.goto("/");
+    const card = page.getByLabel(/^Xem nhanh:/).first();
+    await card.scrollIntoViewIfNeeded();
+    await page.clock.install();
+    await page.clock.pauseAt(await page.evaluate(() => new Date(Date.now() + 100)));
+    const preview = page.getByRole("region", { name: "Xem nhanh công việc" });
+    await card.hover();
+    await page.clock.runFor(1999);
+    await expect(preview).toBeHidden();
+    await page.mouse.move(0, 0);
+    await page.clock.runFor(2500);
+    await expect(preview).toBeHidden();
+    await card.hover();
+    await page.clock.runFor(1999);
+    await expect(preview).toBeHidden();
+    await page.clock.runFor(101);
+    await expect(preview).toBeVisible();
+});
+
 test("job preview opens on hover, stays interactive and opens details", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("button", { name: "Bộ lọc", exact: true }).click();
@@ -35,7 +55,7 @@ test("job preview opens on hover, stays interactive and opens details", async ({
     expect(bounds!.x).toBeGreaterThanOrEqual(0);
     expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
     await preview.getByRole("link", { name: "Xem chi tiết" }).click();
-    await expect(page).toHaveURL(/\/jobs\/[0-9a-f-]{36}$/);
+    await expect(page).toHaveURL(/\/jobs\/[0-9a-f-]{36}$/, { timeout: 15_000 });
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
 

@@ -1,11 +1,16 @@
 import { expect, test } from './recruiter-fixture';
 
-test('dashboard keeps the Figma hierarchy with live data and compact statistics', async ({ page }, info) => {
+test('dashboard balances overview, navigation and detailed reports across screen sizes', async ({ page }, info) => {
   await page.goto('/recruiter/dashboard');
   await expect(page.locator('.stats-cards .stat-card')).toHaveCount(4);
   await expect(page.locator('.dashboard-job-card')).toHaveCount(3);
+  await expect(page.locator('.dashboard-job-card[data-job-card-variant="recruiter"]')).toHaveCount(3);
+  await expect(page.locator('.dashboard-job-card').first().getByRole('heading').getByRole('link')).toHaveAttribute('href', /^\/recruiter\/jobs\//);
+  await expect(page.locator('.dashboard-job-card').getByRole('button', { name: /Lưu|Ứng tuyển/ })).toHaveCount(0);
+  expect(await page.locator('.dashboard-job-card [data-slot="job-card-logo"]').evaluateAll(logos => logos.every(logo => logo.scrollHeight <= logo.clientHeight + 1))).toBe(true);
   await expect(page.locator('.dashboard-candidate-table tbody tr')).toHaveCount(2);
   await expect(page.locator('.dashboard-line-chart')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Tổng quan tuyển dụng', exact: true })).toHaveCount(1);
   await expect(page.locator('.stats-filters')).toBeHidden();
   await expect(page.locator('.stats-funnel')).toHaveCount(0);
   const firstCard = await page.locator('.stat-card').first().boundingBox();
@@ -18,6 +23,14 @@ test('dashboard keeps the Figma hierarchy with live data and compact statistics'
   await expect(page.locator('.dashboard-compose')).toHaveAttribute('href', '/recruiter/jobs/new');
   await expect(page.locator('.dashboard-find-candidates')).toHaveAttribute('href', '/recruiter/candidates');
   await page.screenshot({ path: info.outputPath('dashboard-figma-desktop.png'), fullPage: true });
+  await page.locator('.dashboard-advanced > summary').click();
+  await expect(page.locator('.dashboard-extended-stats > span')).toHaveCount(4);
+  const dashboard = await page.locator('.stats-dashboard').boundingBox();
+  const reports = await page.locator('.dashboard-advanced').boundingBox();
+  expect(reports!.width).toBeCloseTo(dashboard!.width, 0);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: info.outputPath('dashboard-reports-desktop.png'), fullPage: true });
+  await page.locator('.dashboard-advanced > summary').click();
   await page.setViewportSize({ width: 1136, height: 900 });
   await page.screenshot({ path: info.outputPath('dashboard-figma-reference-width.png'), fullPage: true });
   await page.locator('.dashboard-cv-button').first().click();
@@ -30,8 +43,12 @@ test('dashboard keeps the Figma hierarchy with live data and compact statistics'
   await expect(page.locator('.dashboard-candidate-table tbody tr').first()).toContainText('Đang phỏng vấn');
   await page.getByRole('button', { name: 'Tháng sau', exact: true }).click();
   await expect(page.locator('.dashboard-calendar-days .chosen-day')).toHaveText('1');
+  await expect(page.locator('.dashboard-calendar .stats-skeleton')).toHaveCount(0);
   await page.setViewportSize({ width: 360, height: 800 });
   await page.evaluate(() => window.scrollTo(0, 0));
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath('dashboard-figma-mobile.png'), fullPage: true });
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: info.outputPath('dashboard-wide.png'), fullPage: true });
 });

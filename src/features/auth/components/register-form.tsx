@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import { CheckCircle2, LockKeyhole, Mail, Phone, UserRound } from "lucide-react";
+import { LockKeyhole, Mail, Phone, UserRound } from "lucide-react";
 import { Alert, Button, Checkbox, FormField, Input } from "@/components/ui";
 import { ApiError } from "@/lib/api/errors";
 import { useRegister } from "../hooks/use-auth";
 import { registerSchema } from "../schemas/auth";
 import { AuthScrollArea } from "./auth-content";
 import { AuthRoleSwitch, type RegistrationRole } from "./auth-role-switch";
+const REGISTER_FIELDS = ["email", "fullName", "phone", "password", "confirmPassword", "acceptedPrivacyPolicy"] as const;
 export function RegisterForm({ initialRole = "candidate", }: {
     initialRole?: RegistrationRole;
 }) {
@@ -31,19 +32,14 @@ export function RegisterForm({ initialRole = "candidate", }: {
     });
     async function onSubmit(values: z.infer<typeof registerSchema>) {
         try {
-            await mutation.mutateAsync(values);
+            const payload = { ...values };
+            if (payload.role === "candidate") delete payload.phone;
+            await mutation.mutateAsync(payload);
         }
         catch (error) {
             if (error instanceof ApiError)
                 for (const field of error.fieldErrors ?? []) {
-                    if ([
-                        "email",
-                        "fullName",
-                        "phone",
-                        "password",
-                        "confirmPassword",
-                        "acceptedPrivacyPolicy",
-                    ].includes(field.field))
+                    if (REGISTER_FIELDS.some((name) => name === field.field))
                         setError(field.field as keyof z.infer<typeof registerSchema>, {
                             type: "server",
                             message: field.message,
@@ -51,28 +47,9 @@ export function RegisterForm({ initialRole = "candidate", }: {
                 }
         }
     }
-    if (mutation.isSuccess)
-        return (<AuthScrollArea><div className="space-y-6">
-                <span className="flex size-14 items-center justify-center rounded-2xl bg-success-soft text-success">
-                    <CheckCircle2 className="size-7"/>
-                </span>
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">
-                        Đăng ký thành công!
-                    </h1>
-                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                        Tài khoản của bạn đã được tạo. Vui lòng đăng nhập để bắt
-                        đầu hành trình cùng TalentAI.
-                    </p>
-                </div>
-                {role === "recruiter" && (<Alert variant="info" title="Hoàn thiện hồ sơ doanh nghiệp">
-                        Bạn cần bổ sung thông tin doanh nghiệp và được kiểm
-                        duyệt trước khi đăng tin tuyển dụng.
-                    </Alert>)}
-                <Button className="w-full" role="link" nativeButton={false} render={<Link href={`/login?role=${role}&reason=registered`}/>}>
-                    Đăng nhập ngay
-                </Button>
-            </div></AuthScrollArea>);
+    const hasInlineServerError = mutation.error instanceof ApiError &&
+        mutation.error.fieldErrors?.some(({ field }) =>
+            REGISTER_FIELDS.some((name) => name === field) && (field !== "phone" || role === "recruiter"));
     return (<form noValidate className="flex h-full min-h-0 flex-col" onSubmit={handleSubmit(onSubmit)}>
         <div className="min-h-0 flex-1 overflow-hidden [&>div]:h-full"><AuthScrollArea>
         <div>
@@ -98,9 +75,9 @@ export function RegisterForm({ initialRole = "candidate", }: {
                 <FormField label="Email đăng nhập" required error={errors.email?.message}>
                     {(field) => (<Input {...field} {...register("email")} type="email" leadingIcon={<Mail />} placeholder="Email" autoComplete="email" disabled={mutation.isPending}/>)}
                 </FormField>
-                <FormField label="Số điện thoại" required error={errors.phone?.message}>
+                {role === "recruiter" && <FormField label="Số điện thoại" required error={errors.phone?.message}>
  {(field) => <Input {...field} {...register("phone")} type="tel" inputMode="tel" autoComplete="tel" leadingIcon={<Phone />} placeholder="Nhập số điện thoại" disabled={mutation.isPending}/>}
- </FormField>
+ </FormField>}
                 <FormField label="Nhập mật khẩu" required description="8–64 ký tự, gồm chữ hoa, chữ thường và chữ số." error={errors.password?.message}>
                     {(field) => (<Input {...field} {...register("password")} type="password" leadingIcon={<LockKeyhole />} placeholder="Nhập mật khẩu" autoComplete="new-password" disabled={mutation.isPending}/>)}
                 </FormField>
@@ -125,7 +102,7 @@ export function RegisterForm({ initialRole = "candidate", }: {
                             {errors.acceptedPrivacyPolicy.message}
                         </p>)}
                 </div>
-                {mutation.isError && (<Alert variant="error" title="Chưa thể tạo tài khoản">
+                {mutation.isError && !hasInlineServerError && (<Alert variant="error" title="Chưa thể tạo tài khoản">
                         {mutation.error.message}
                     </Alert>)}
             </div>

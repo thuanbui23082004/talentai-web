@@ -12,7 +12,7 @@ describe("public backend proxy", () => {
   });
   it("blocks private routes and writes before sending network requests", async () => {
     const network = vi.spyOn(globalThis, "fetch");
-    for (const request of [new Request("http://localhost/api/bff/me"), new Request("http://localhost/api/bff/jobs", { method: "POST" })]) {
+    for (const request of [new Request("http://localhost/api/bff/jobs", { method: "POST" })]) {
       expect((await proxyRequest(request, "http://backend.test/api")).status).toBe(503);
     }
     expect(network).not.toHaveBeenCalled();

@@ -20,6 +20,12 @@ export function formatDate(value: string) {
     return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Asia/Ho_Chi_Minh" }).format(new Date(value));
 }
 
+export function formatTime(value: string, hour12 = false) {
+  return new Intl.DateTimeFormat(hour12 ? "en-US" : "vi", {
+    hour: "numeric", minute: "2-digit", hour12, timeZone: "Asia/Ho_Chi_Minh",
+  }).format(new Date(value));
+}
+
 export function formatMonthYear(value: string) {
     if (/^\d{4}$/.test(value)) return value;
     if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) return "";

@@ -25,6 +25,16 @@ export function LoginForm({
     const mutation = useLogin();
     useEffect(() => {
         if (reason !== "logged-out") return;
+        // Consume this one-time notice without navigating or clearing other parameters.
+        const url = new URL(window.location.href);
+        if (url.searchParams.get("reason") === "logged-out") {
+            url.searchParams.delete("reason");
+            window.history.replaceState(
+                null,
+                "",
+                `${url.pathname}${url.search}${url.hash}`,
+            );
+        }
         const timeout = window.setTimeout(() => {
             setNoticeDismissed(true);
         }, LOGOUT_NOTICE_DURATION_MS);
@@ -109,6 +119,14 @@ export function LoginForm({
                         />
                     )}
                 </FormField>
+                <div className="flex justify-end">
+                    <Link
+                        href="/forgot-password"
+                        className="flex min-h-1 items-center text-xs font-semibold text-primary hover:underline"
+                    >
+                        Quên mật khẩu?
+                    </Link>
+                </div>
                 {mutation.isError && (
                     <Alert variant="error" title="Không thể đăng nhập">
                         {mutation.error.message}
@@ -131,7 +149,7 @@ export function LoginForm({
                     Đăng ký
                 </Link>
             </p>
-            <SocialLogin />
+            <SocialLogin role={role} disabled={mutation.isPending} />
             <div className="mt-6 text-center">
                 <Link
                     href="/jobs"
