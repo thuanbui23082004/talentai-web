@@ -1,5 +1,16 @@
 # Trạng thái triển khai
 
+## Job-posting thật — tìm kiếm/lọc việc làm
+
+Đã nối `/jobs`, `/jobs/categories`, `/jobs/{id}` qua BFF với job-posting `localhost:3004/api/v1`.
+`.env.local` bật JOB_DATA_MODE=real; cấu hình độc lập với company/auth và các nghiệp vụ mock khác.
+Bộ lọc dùng experienceLevel, jobType, workMode, categoryId theo Swagger, bỏ số năm kinh nghiệm,
+giới tính, tuyển nhanh và sắp xếp “phù hợp nhất” khỏi form public. Địa điểm gửi chuỗi tỉnh/thành,
+không gửi wardCode/provinceCode. Query cũ không hỗ trợ trả 422 trong real.
+Đã kiểm tra với 10 tin công khai của backend. API không trả tên công ty nên UI hiển thị nhãn
+chưa cập nhật, không dùng công ty mock hay gọi N+1. Tài liệu review: `docs/job-posting-integration.md`.
+Các ghi chú tìm việc chỉ mock phía dưới là trạng thái cũ; recruiter/save/apply chưa nằm trong tích hợp này.
+
 ## Company service thật — dữ liệu công ty công khai
 
 Trang chủ, danh sách/tìm kiếm/lọc công ty, tải thêm và chi tiết đã nối company service
@@ -159,7 +170,7 @@ không phụ thuộc vào backend chạy local. Không coi tên thư mục, page
 | GET `/jobs/{jobId}` | Mock chi tiết cho 18 tin công khai; trả 404 cho tin không có; kịch bản empty/error/slow. Real proxy chưa mở endpoint chi tiết |
 | Thẻ việc làm | Popup xem nhanh khi hover/focus; chạm tiêu đề hoặc “Xem chi tiết” mở `/jobs/[jobId]`. Nút trái tim lưu/bỏ lưu hoạt động qua BFF cho ứng viên, đồng bộ với trang đã lưu; khách mở trang đăng nhập. Ứng tuyển chưa triển khai |
 | `/candidate/saved-jobs` | Trang Việc làm đã lưu tái sử dụng JobCard: thống kê tổng/còn tuyển/hết hạn trong 7 ngày; tìm vị trí/công ty không dấu, lọc địa điểm/trạng thái, sắp xếp và phân trang 6 thẻ; bộ lọc qua URL. Tin ngừng tuyển không mở chi tiết/ứng tuyển. Bỏ lưu trực tiếp và hoàn tác; loading/empty/error/retry, desktop/mobile. Đã nối sidebar |
-| API việc làm đã lưu | GET `/candidate/saved-jobs`, PUT/DELETE `/candidate/saved-jobs/{jobId}` theo contract hiện có. 9 tin minh họa (gồm 1 tin lưu trữ đã đóng), trạng thái riêng mỗi tài khoản trong bộ nhớ server, kiểm tra session/role/CSRF/Origin; PUT idempotent. Contract chỉ phân trang: client tải hết các trang rồi tìm kiếm/lọc/sắp xếp cục bộ, không thêm tham số API. Khởi động lại server sẽ reset; chưa xác minh backend thật, real proxy vẫn đóng |
+| API việc làm đã lưu | GET `/candidate/saved-jobs`, PUT/DELETE `/candidate/saved-jobs/{jobId}`. Khi `JOB_DATA_MODE=real`, BFF gọi GET/POST/DELETE `/api/v1/saved-jobs` ở job-posting service; PUT chuyển thành POST `{ jobPostId }`, DELETE gửi `jobPostId` qua query; phân trang từ 1 chuyển về 0. Kiểm tra session/role candidate và CSRF/Origin cho ghi; token chỉ ở server. Phản hồi lưu là `{ jobPostId, saved }`, sau ghi tải lại danh sách từ backend. Client tải hết các trang rồi tìm kiếm/lọc/sắp xếp cục bộ. Chế độ mock vẫn có 9 tin minh họa, dữ liệu riêng từng tài khoản, reset khi khởi động server. Đã kiểm thử real lưu/bỏ lưu/hoàn tác/tải lại và cách ly tài khoản |
 | Backend proxy | Chỉ mở GET `/jobs`, GET `/health`; chưa xác minh với backend thật |
 | Auth/session | Mock đăng ký/đăng nhập/refresh/CSRF/me/logout; cookie và guard server; xem `docs/auth-flow.md` |
 | `/login`, `/register`, `/logout` | Form hai role; khung/ảnh/logo cố định, chỉ content cuộn; ảnh từ `public/images/auth`; logout có xác nhận |
@@ -209,3 +220,19 @@ Ví dụ: `curl -H "x-mock-scenario: empty" http://localhost:3000/api/bff/jobs`.
 4. CV/ứng tuyển, sau đó AI polling và màn hình recruiter/admin theo từng task.
 5. Khi thêm mutation: dùng state mock trong bộ nhớ có reset cho test, không hard-code response thành công.
 6. Khi backend sẵn sàng: test tích hợp từng endpoint; không tuyên bố real đã chạy chỉ vì mock pass.
+
+
+## Tích hợp tạo hồ sơ công ty (2026-11-04)
+
+- Header nhà tuyển dụng có dropdown khi mở thông tin tài khoản, gồm Tài khoản và Đăng xuất. Đăng xuất đi tới trang xác nhận `/logout`, dùng luồng thu hồi phiên/xóa cookie hiện có. Dropdown đóng khi chọn liên kết, bấm ra ngoài hoặc nhấn Escape.
+- Khu vực `/recruiter/*` (ngoài onboarding) kiểm tra company qua BFF ở server trước khi hiển thị. GET company trả 404 thì chuyển về `/recruiter/onboarding`, kể cả đăng nhập lại hoặc mở trực tiếp dashboard/trang tạo tin. Lỗi dịch vụ chặn truy cập và hiển thị trang thử lại; không xem lỗi mạng là chưa có company.
+- Hoàn tất khởi tạo khi request tạo company thành công; bước 1–2 chưa lưu bản nháp. Dùng company-service làm nguồn kiểm tra, không dựa vào `companyId` trong hồ sơ auth. Dashboard hiển thị sau khi đã có company dù auth-service không trả `companyId`.
+- E2E real kiểm tra đăng nhập lại trước/sau khởi tạo, mở route trực tiếp, tạo company sau xác nhận, dữ liệu lưu ở Java và lỗi trùng mã số thuế.
+- `COMPANY_DATA_MODE=real` áp dụng cho đọc/lưu `/recruiter/company` và danh mục `/recruiter/company/catalogs`, ngoài các trang công ty công khai.
+- Bước 1–2 chỉ kiểm tra form; bước 3 gửi một request BFF. BFF chuyển POST/PUT sang `PUT /api/v1/recruiter/company` của Java và chuyển ID danh mục chuỗi sang số.
+- Đã thêm giới thiệu ngắn bắt buộc vì backend yêu cầu `description`. Mã số thuế bắt buộc; trùng mã hiển thị dưới trường và quay về bước 1.
+- Cookie HttpOnly chứa token; BFF xác thực recruiter qua auth-service, kiểm tra origin/CSRF trước khi ghi. Không tự retry lưu.
+- Mock vẫn hỗ trợ cùng endpoint danh mục với ID fixture; danh mục thực tế lấy từ company-service, không dùng UUID mock cho API thật.
+- Ngoài phạm vi: upload logo/giấy tờ, xác minh, ghi tin tuyển dụng thật. Các route company chưa tích hợp trả lỗi rõ ràng thay vì ghi vào mock khi đang real.
+- Backend nhận số nhân viên (`companySize`), chưa có ánh xạ chính xác cho khoảng `size` của form cài đặt; adapter không tự suy diễn số lượng. Onboarding không nhập trường này.
+- Kiểm thử thật: `$env:COMPANY_REAL_E2E='1'; $env:COMPANY_DATA_MODE='real'; npx playwright test tests/e2e/company-onboarding-real.spec.ts`. Test tạo tài khoản/công ty kiểm thử riêng và kiểm tra lưu trực tiếp ở Java, tải lại trang, lỗi trùng mã số thuế.

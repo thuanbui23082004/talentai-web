@@ -1,0 +1,11 @@
+{
+  "name": "Công ty Công nghệ Sao Mai",
+  "taxCode": "0123456789",
+  "description": "Phát triển phần mềm cho doanh nghiệp.",
+  "industryIds": [
+    "1"
+  ],
+  "city": "Đà Nẵng",
+  "address": "12 Đường Hoa",
+  "contactPhone": "0912345678"
+}

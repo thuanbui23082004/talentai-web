@@ -3,7 +3,7 @@ import { envSchema } from "@/lib/env";
 
 describe("server configuration", () => {
   it("starts in mock mode without a backend", () => {
-    expect(envSchema.parse({})).toEqual({ DATA_MODE: "mock", AUTH_API_URL: "http://localhost:3001/api/v1", COMPANY_API_URL: "http://localhost:3003/api/v1" });
+    expect(envSchema.parse({})).toEqual({ DATA_MODE: "mock", AUTH_API_URL: "http://localhost:3001/api/v1", COMPANY_API_URL: "http://localhost:3003/api/v1", JOB_API_URL: "http://localhost:3004/api/v1" });
   });
   it("requires an explicit HTTP backend for real mode", () => {
     for (const value of [undefined, "", "ftp://example.com", "https://user:secret@example.com", "https://example.com/?token=secret"]) {

@@ -54,10 +54,11 @@ export async function handleMockSavedJobs(request: Request): Promise<Response | 
         items.splice(index, 1);
         return new Response(null, { status: 204, headers: { "Cache-Control": "no-store" } });
     }
-    if (index >= 0) return json(items[index]);
+    const result = { jobPostId: id, saved: true } satisfies components["schemas"]["SavedJobResult"];
+    if (index >= 0) return json(result);
     const job = mockJobs.find((item) => item.id === id) ?? initial.find((item) => item.job.id === id)?.job;
     if (!job) return apiError(404, "NOT_FOUND", "Không tìm thấy việc làm.");
     const entry: SavedJob = { job, savedAt: new Date().toISOString() };
     items.unshift(entry);
-    return json(entry);
+    return json(result);
 }

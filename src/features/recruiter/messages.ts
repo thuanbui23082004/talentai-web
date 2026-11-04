@@ -1,5 +1,6 @@
 export const recruiterMessages = {
   Recruiter: {
+    accountMenu: 'Menu tài khoản', logout: 'Đăng xuất',
     searchResults: 'Kết quả tìm kiếm', closeSearch: 'Đóng kết quả tìm kiếm', searchLoading: 'Đang tìm kiếm', searchRetry: 'Thử lại', searchFailed: 'Không thể tải tin tuyển dụng. Vui lòng thử lại.', noCandidateResults: 'Không tìm thấy ứng viên phù hợp.', noJobResults: 'Không tìm thấy tin tuyển dụng phù hợp.',
     expandSidebar: 'Mở rộng sidebar', collapseSidebar: 'Thu gọn sidebar', openMenu: 'Mở menu nhà tuyển dụng', navigationMenu: 'Menu nhà tuyển dụng',
     workspace: 'Không gian làm việc', searchCompact: 'Tìm ứng viên, vị trí…',

@@ -3,6 +3,11 @@ import { z } from "zod";
 export const envSchema = z.object({
   DATA_MODE: z.enum(["mock", "real"]).default("mock"),
   COMPANY_DATA_MODE: z.enum(["mock", "real"]).optional(),
+  JOB_DATA_MODE: z.enum(["mock", "real"]).optional(),
+  JOB_API_URL: z.url().refine(value => {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password && !url.search && !url.hash;
+  }, "JOB_API_URL phải là URL HTTP(S) hợp lệ").default("http://localhost:3004/api/v1"),
   COMPANY_API_URL: z.url().refine(value => {
     const url = new URL(value);
     return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password && !url.search && !url.hash;
@@ -30,6 +35,8 @@ export function getServerEnv() {
   return envSchema.parse({
     DATA_MODE: process.env.DATA_MODE,
     COMPANY_DATA_MODE: process.env.COMPANY_DATA_MODE || undefined,
+    JOB_DATA_MODE: process.env.JOB_DATA_MODE || undefined,
+    JOB_API_URL: process.env.JOB_API_URL || undefined,
     COMPANY_API_URL: process.env.COMPANY_API_URL || undefined,
     AUTH_API_URL: process.env.AUTH_API_URL || undefined,
     BACKEND_API_URL: process.env.BACKEND_API_URL || undefined,

@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { formatDeadline, formatSalaryRange } from "@/lib/utils";
 import type { Job } from "../types";
-import { WORK_TYPE_LABELS } from "../labels";
+import { WORK_TYPE_LABELS, WORK_MODE_LABELS, experienceLabel } from "../labels";
 import { JobHoverPreview } from "./job-hover-preview";
 import { SaveJobButton } from "./save-job-button";
 
@@ -97,10 +97,9 @@ export function JobCard({
                         {WORK_TYPE_LABELS[job.workType]}
                     </span>
                     <span className="rounded-lg bg-muted px-2 py-1">
-                        {job.minExperienceYears
-                            ? `${job.minExperienceYears} năm`
-                            : "Không yêu cầu KN"}
+                        {experienceLabel(job)}
                     </span>
+                    {job.workMode && <span className="rounded-lg bg-muted px-2 py-1">{WORK_MODE_LABELS[job.workMode]}</span>}
                     <span className="rounded-lg bg-muted px-2 py-1">
                         {formatDeadline(job.applicationDeadline)}
                     </span>

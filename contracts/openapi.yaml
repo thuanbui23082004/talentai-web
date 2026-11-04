@@ -2165,6 +2165,26 @@ paths:
           $ref: '#/components/responses/TooManyRequests'
         '500':
           $ref: '#/components/responses/InternalError'
+  /jobs/categories:
+    get:
+      tags:
+      - Jobs
+      operationId: getJobCategories
+      summary: Danh mục nhóm ngành tuyển dụng từ job-posting service
+      security: []
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicJobCategory'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
   /jobs:
     get:
       tags:
@@ -2179,17 +2199,45 @@ paths:
       - {}
       - cookieAuth: []
       parameters:
+      - name: categoryId
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+      - name: experienceLevel
+        in: query
+        schema:
+          $ref: '#/components/schemas/PublicJobExperienceLevel'
+      - name: jobType
+        in: query
+        schema:
+          $ref: '#/components/schemas/PublicJobType'
+      - name: workMode
+        in: query
+        schema:
+          $ref: '#/components/schemas/PublicJobWorkMode'
+      - name: salaryCurrency
+        in: query
+        schema:
+          type: string
+          pattern: '^[A-Z]{3}$'
+      - name: isSalaryNegotiable
+        in: query
+        schema:
+          type: boolean
       - name: q
         in: query
         schema:
           type: string
         description: Từ khóa
       - name: industryId
+        deprecated: true
         in: query
         schema:
           type: string
           format: uuid
       - name: positionId
+        deprecated: true
         in: query
         schema:
           type: string
@@ -2205,17 +2253,20 @@ paths:
           type: string
         description: Tên tỉnh/thành
       - name: locationId
+        deprecated: true
         in: query
         schema:
           type: string
           format: uuid
       - name: provinceCode
+        deprecated: true
         in: query
         description: ID tỉnh/thành theo danh mục backend từ 1 đến 34, không thêm số 0 đầu.
         schema:
           type: string
           pattern: '^([1-9]|[12][0-9]|3[0-4])$'
       - name: wardCode
+        deprecated: true
         in: query
         description: Mã phường/xã/đặc khu hiện hành, gồm 5 chữ số. Phải đi cùng provinceCode và thuộc tỉnh đã chọn.
         schema:
@@ -2232,29 +2283,34 @@ paths:
           type: integer
           minimum: 0
       - name: minExperience
+        deprecated: true
         in: query
         schema:
           type: number
           minimum: 0
         description: Số năm kinh nghiệm tối thiểu của tin
       - name: maxExperience
+        deprecated: true
         in: query
         schema:
           type: number
           minimum: 0
       - name: level
+        deprecated: true
         in: query
         schema:
           type: array
           items:
             $ref: '#/components/schemas/JobLevel'
       - name: workType
+        deprecated: true
         in: query
         schema:
           type: array
           items:
             $ref: '#/components/schemas/WorkType'
       - name: skillIds
+        deprecated: true
         in: query
         schema:
           type: array
@@ -2262,6 +2318,7 @@ paths:
             type: string
             format: uuid
       - name: postedWithinDays
+        deprecated: true
         in: query
         schema:
           type: integer
@@ -2278,7 +2335,7 @@ paths:
           - salary_asc
           - deadline
           - match_score
-          default: relevance
+          default: newest
       - $ref: '#/components/parameters/Page'
       - $ref: '#/components/parameters/PageSize'
       responses:
@@ -2483,6 +2540,12 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/InternalError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
   /candidate/saved-jobs/{jobId}:
     put:
       tags:
@@ -2510,7 +2573,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SavedJob'
+                $ref: '#/components/schemas/SavedJobResult'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -2547,6 +2616,10 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
   /candidate/viewed-jobs:
     get:
       tags:
@@ -2944,6 +3017,27 @@ paths:
           $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /recruiter/company/catalogs:
+    get:
+      tags:
+      - Recruiter Company
+      operationId: getRecruiterCompanyCatalogs
+      summary: Danh mục ngành nghề và địa điểm cho hồ sơ công ty
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyCatalogs'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/InternalError'
   /recruiter/company:
@@ -7199,16 +7293,13 @@ components:
           example: 20000000
         currency:
           type: string
-          enum:
-          - VND
-          - USD
+          pattern: '^[A-Z]{3}$'
           default: VND
         period:
           type: string
           enum:
           - month
           - year
-          default: month
         negotiable:
           type: boolean
           default: false
@@ -8456,7 +8547,18 @@ components:
       - name
       - industryIds
       - city
+      description: Ở chế độ real, description và taxCode bắt buộc; backend hiện hỗ trợ một ngành nghề.
       properties:
+        coverImageUrl:
+          type: string
+          format: uri
+        companySize:
+          type: integer
+          minimum: 1
+        logoUrl:
+          type: string
+          format: uri
+
         name:
           type: string
           minLength: 2
@@ -8472,7 +8574,7 @@ components:
           type: array
           minItems: 1
           items:
-            $ref: '#/components/schemas/Id'
+            type: string
           description: Lĩnh vực hoạt động.
         address:
           type: string
@@ -8501,6 +8603,13 @@ components:
       - verificationStatus
       - createdAt
       properties:
+        coverImageUrl:
+          type: string
+          format: uri
+        companySize:
+          type: integer
+          minimum: 1
+
         id:
           $ref: '#/components/schemas/Id'
         name:
@@ -8514,7 +8623,7 @@ components:
         industries:
           type: array
           items:
-            $ref: '#/components/schemas/CatalogRef'
+            $ref: '#/components/schemas/PublicCompanyCatalogRef'
         address:
           type: string
         city:
@@ -8715,6 +8824,25 @@ components:
           type: boolean
           default: true
           description: true = bắt buộc, false = ưu tiên.
+    PublicJobCategory:
+      type: object
+      required:
+      - categoryId
+      - categoryName
+      properties:
+        categoryId:
+          type: integer
+        categoryName:
+          type: string
+    PublicJobExperienceLevel:
+      type: string
+      enum: [INTERN, FRESHER, JUNIOR, MIDDLE, SENIOR, EXPERT]
+    PublicJobType:
+      type: string
+      enum: [FULL_TIME, PART_TIME, CONTRACT, INTERNSHIP, FREELANCE]
+    PublicJobWorkMode:
+      type: string
+      enum: [ONSITE, HYBRID, REMOTE]
     JobSummary:
       type: object
       required:
@@ -8738,6 +8866,12 @@ components:
           $ref: '#/components/schemas/SalaryRange'
         workType:
           $ref: '#/components/schemas/WorkType'
+        experienceLevel:
+          $ref: '#/components/schemas/PublicJobExperienceLevel'
+        jobType:
+          $ref: '#/components/schemas/PublicJobType'
+        workMode:
+          $ref: '#/components/schemas/PublicJobWorkMode'
         level:
           $ref: '#/components/schemas/JobLevel'
         industry:
@@ -8903,6 +9037,16 @@ components:
             $ref: '#/components/schemas/RecruiterJob'
         meta:
           $ref: '#/components/schemas/PageMeta'
+    SavedJobResult:
+      type: object
+      required:
+      - jobPostId
+      - saved
+      properties:
+        jobPostId:
+          $ref: '#/components/schemas/Id'
+        saved:
+          type: boolean
     SavedJob:
       type: object
       required:

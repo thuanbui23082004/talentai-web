@@ -13,3 +13,5 @@ export { SettingsFrame } from './components/settings-shared';
 export { SettingsImage } from './components/settings-shared';
 export { SettingsLoadError } from './components/settings-shared';
 export { SettingsLoading } from './components/settings-shared';
+
+export { SettingsError } from "./errors";

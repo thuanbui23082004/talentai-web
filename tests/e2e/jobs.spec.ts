@@ -1,27 +1,24 @@
 import { test, expect } from "@playwright/test";
 
-test("selects province and ward, retains URL filters, and clears ward when changing province", async ({ page }, testInfo) => {
+test("selects province as text for the backend and retains the location filter", async ({ page }, testInfo) => {
   await page.goto("/jobs");
   await page.getByRole("button", { name: "Địa điểm tìm việc", exact: true }).click();
-  const dialog = page.getByRole("dialog", { name: "Chọn địa điểm làm việc" });
+  const dialog = page.getByRole("dialog", { name: "Chọn tỉnh/thành phố" });
   await dialog.getByLabel("Tìm tỉnh thành").fill("ha noi");
   await dialog.getByRole("button", { name: "Hà Nội", exact: true }).click();
-  await dialog.getByLabel("Tìm phường xã").fill("ngoc ha");
-  await dialog.getByRole("button", { name: "Phường Ngọc Hà", exact: true }).click();
   await dialog.getByRole("button", { name: "Chọn địa điểm", exact: true }).click();
-  await expect(page).toHaveURL(/provinceCode=1/);
-  await expect(page).toHaveURL(/wardCode=00008/);
+  await expect(page).toHaveURL(/city=/);
+  await expect(page).not.toHaveURL(/provinceCode|wardCode/);
   await expect(page.getByText("Tìm thấy 5 việc làm")).toBeVisible();
   await page.reload();
-  await expect(page.getByRole("button", { name: "Địa điểm tìm việc", exact: true })).toContainText("Phường Ngọc Hà");
+  await expect(page.getByRole("button", { name: "Địa điểm tìm việc", exact: true })).toContainText("Hà Nội");
   await page.setViewportSize({ width: 375, height: 800 });
   await page.getByRole("button", { name: "Địa điểm tìm việc", exact: true }).click();
   await dialog.getByLabel("Tìm tỉnh thành").fill("ho chi minh");
   await dialog.getByRole("button", { name: "TP.HCM", exact: true }).click();
-  await expect(dialog.getByRole("button", { name: "Tất cả phường/xã", exact: true })).toHaveAttribute("aria-pressed", "true");
   await page.screenshot({ path: testInfo.outputPath("location-picker-mobile.png") });
   await dialog.getByRole("button", { name: "Chọn địa điểm", exact: true }).click();
-  await expect(page).toHaveURL(/provinceCode=29/);
+  await expect(page).toHaveURL(/city=TP.HCM/);
   await expect(page).not.toHaveURL(/wardCode=/);
   await expect(page.getByText("Tìm thấy 7 việc làm")).toBeVisible();
   await page.getByRole("button", { name: "Xóa lọc", exact: true }).click();
@@ -36,9 +33,9 @@ test("shows twelve cards per page and applies filters without an apply button", 
   await page.getByRole("button", { name: "Trang sau", exact: true }).click();
   await expect(page).toHaveURL(/page=2/);
   await expect(page.locator("#job-results article")).toHaveCount(6);
-  await page.getByLabel("Tất cả loại hình", { exact: true }).click();
+  await page.getByLabel("Tất cả hình thức", { exact: true }).click();
   await page.getByRole("option", { name: "Từ xa", exact: true }).click();
-  await expect(page).toHaveURL(/workType=remote/);
+  await expect(page).toHaveURL(/workMode=REMOTE/);
   await expect(page).not.toHaveURL(/page=2/);
   await expect(page.locator("#job-results article")).toHaveCount(1);
   await expect(page.getByText("Tìm thấy 1 việc làm")).toBeVisible();

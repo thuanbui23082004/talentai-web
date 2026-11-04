@@ -7,7 +7,7 @@ import {
     type CompanyInput,
 } from "@/features/company/schemas/company";
 import { settingsError, settingsRequest } from "@/features/account";
-import { catalogPageSchema } from "@/lib/api/job-schemas";
+import { z } from "zod";
 export function getCompany() {
     return settingsRequest(async () => {
         await ensureApiSession();
@@ -78,31 +78,15 @@ export function submitDocuments(files: File[]) {
         return companySchema.parse(result.data);
     });
 }
+const companyCatalogsSchema = z.object({
+    industries: z.array(z.object({ id: z.string(), name: z.string() })),
+    locations: z.array(z.object({ id: z.string(), name: z.string() })),
+});
 export function getCompanyCatalogs() {
     return settingsRequest(async () => {
         await ensureApiSession();
-        async function catalog(type: "industries" | "locations") {
-            const items = [];
-            let page = 1;
-            while (true) {
-                const result = await apiClient.GET("/catalog/{catalogType}", {
-                    params: {
-                        path: { catalogType: type },
-                        query: { page, pageSize: 100 },
-                    },
-                });
-                if (result.error)
-                    throw settingsError(result.error, result.response.status);
-                const parsed = catalogPageSchema.parse(result.data);
-                items.push(...parsed.items);
-                if (page >= parsed.meta.totalPages) return items;
-                page += 1;
-            }
-        }
-        const [industries, locations] = await Promise.all([
-            catalog("industries"),
-            catalog("locations"),
-        ]);
-        return { industries, locations };
+        const result = await apiClient.GET("/recruiter/company/catalogs");
+        if (result.error) throw settingsError(result.error, result.response.status);
+        return companyCatalogsSchema.parse(result.data);
     });
 }

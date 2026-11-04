@@ -3,39 +3,38 @@
 .co-header > a:first-child { display: flex; align-items: center; gap: 16px; font-weight: 600; }
 .co-header-label { border-left: 1px solid var(--border); padding-left: 16px; }
 .co-help { color: var(--primary); font-weight: 600; white-space: nowrap; }
-.co-main { width: min(100% - 48px, 1000px); margin: 0 auto; padding: 44px 0 24px; }
-.co-welcome { margin-bottom: 32px; }
-.co-eyebrow { color: var(--primary); font-weight: 700; font-size: 11px; letter-spacing: .12em; }
-.co-welcome h1 { font-size: clamp(24px, 3vw, 32px); font-weight: 700; letter-spacing: -.035em; line-height: 1.3; margin: 12px 0; }
+.co-main { width: min(100% - 48px, 1000px); margin: 0 auto; padding: 24px 0 16px; }
+.co-welcome { margin-bottom: 20px; }
+.co-welcome h1 { font-size: clamp(22px, 2.5vw, 28px); font-weight: 700; letter-spacing: -.035em; line-height: 1.3; margin: 0 0 6px; }
 .co-welcome p, .co-card p { color: var(--muted-foreground); line-height: 1.75; }
-.co-progress { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px 28px; margin-bottom: 28px; }
-.co-progress-label { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; font-size: 12px; color: var(--muted-foreground); }
+.co-progress { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 16px 24px; margin-bottom: 16px; }
+.co-progress-label { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; font-size: 12px; color: var(--muted-foreground); }
 .co-progress-label strong { color: var(--primary); }
 .co-progress ol { display: grid; grid-template-columns: repeat(3, 1fr); }
 .co-progress li { position: relative; min-width: 0; }
-.co-progress li:not(:last-child)::after { content: ""; position: absolute; left: 48px; right: 10px; top: 21px; height: 2px; background: var(--border); }
+.co-progress li:not(:last-child)::after { content: ""; position: absolute; left: calc(50% + 28px); right: calc(-50% + 28px); top: 21px; height: 2px; background: var(--border); }
 .co-progress li[data-state="visited"]::after { background: var(--primary); }
-.co-progress button { position: relative; z-index: 1; text-align: left; display: flex; flex-direction: column; gap: 10px; width: 100%; cursor: pointer; }
+.co-progress button { position: relative; z-index: 1; text-align: center; display: flex; align-items: center; flex-direction: column; gap: 8px; width: 100%; cursor: pointer; }
 .co-progress button:disabled { cursor: default; }
-.co-step-icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--border); background: var(--card); color: var(--muted-foreground); }
+.co-step-icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: var(--radius-xl); border: 1px solid var(--border); background: var(--card); color: var(--muted-foreground); }
 .co-step-icon svg { width: 20px; height: 20px; }
-.co-progress [data-state="active"] .co-step-icon { color: var(--primary); border-color: var(--primary); background: var(--secondary); box-shadow: 0 0 0 4px var(--card); }
+.co-progress [data-state="active"] .co-step-icon { color: var(--primary-foreground, var(--color-primary-foreground)); border-color: var(--primary); background: linear-gradient(145deg, var(--primary), var(--primary-hover)); box-shadow: var(--shadow-button), 0 0 0 4px var(--secondary); }
 .co-progress [data-state="visited"] .co-step-icon { color: var(--color-primary-foreground); background: var(--primary); border-color: var(--primary); }
 .co-progress strong { font-size: 13px; font-weight: 600; }
 .co-progress small { display: block; color: var(--muted-foreground); margin-top: 4px; font-size: 11px; }
 .co-progress [data-state="active"] strong { color: var(--primary); }
-.co-step-title { font-size: 14px; font-weight: 600; margin: 0 0 12px 4px; scroll-margin-top: 24px; }
-.co-card { border: 1px solid var(--border); border-radius: 20px; padding: 32px; background: var(--card); box-shadow: 0 6px 24px color-mix(in srgb, var(--foreground) 4%, transparent); }
+.co-card { border: 1px solid var(--border); border-radius: var(--radius-2xl); padding: 24px; background: var(--card); box-shadow: var(--shadow-card); }
 .co-card > [role="alert"] { margin-top: 20px; }
-.co-card-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
-.co-card h2 { font-size: 20px; font-weight: 650; line-height: 1.4; }
+.co-card-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.co-card h2 { font-size: 18px; font-weight: 650; line-height: 1.4; }
 .co-card h3 { font-weight: 600; line-height: 1.5; }
 .co-card-heading p { font-size: 12px; margin-top: 4px; }
-.co-icon { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; background: var(--secondary); color: var(--primary); }
+.co-icon { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: var(--radius-xl); background: linear-gradient(145deg, var(--secondary), var(--card)); color: var(--primary); border: 1px solid var(--border); box-shadow: var(--shadow-card); }
 .co-icon svg { width: 22px; height: 22px; }
 .co-required-note { margin-left: auto; font-size: 11px; color: var(--muted-foreground); white-space: nowrap; }
-.co-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 20px; }
+.co-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; }
 .co-full { grid-column: 1 / -1; }
+.co-address { order: 1; }
 .co-review { display: grid; gap: 24px; }
 .co-review > section { border: 1px solid var(--border); padding: 20px; border-radius: 16px; }
 .co-review-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
@@ -43,7 +42,7 @@
 .co-review dl > div { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 16px; }
 .co-review dt { color: var(--muted-foreground); font-size: 12px; }
 .co-review dd { font-weight: 500; overflow-wrap: anywhere; }
-.co-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 24px; border: 1px solid var(--border); background: var(--card); border-radius: 16px; margin-top: 20px; }
+.co-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0 0; border-top: 1px solid var(--border); margin-top: 20px; }
 .co-action-buttons { display: flex; gap: 10px; align-items: center; }
 .co-secure { display: flex; align-items: center; gap: 8px; color: var(--muted-foreground); font-size: 12px; line-height: 1.6; }
 .co-secure svg { flex: none; color: var(--primary); }
@@ -58,8 +57,8 @@
 .co-hiring-card { border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; align-items: start; flex-direction: column; gap: 16px; }
 .co-hiring-card p { font-size: 13px; flex: 1; }
 .co-bottom-note, .co-footer { color: var(--muted-foreground); font-size: 11px; text-align: center; line-height: 1.7; }
-.co-bottom-note { margin: 20px auto 0; }
-.co-footer { padding: 20px 24px 28px; }
+.co-bottom-note { margin: 12px auto 0; }
+.co-footer { padding: 12px 24px 16px; }
 .co-loading { display: grid; gap: 24px; min-height: 320px; color: var(--muted-foreground); }
 .co-loading span { background: var(--secondary); border-radius: 12px; min-height: 44px; }
 .company-onboarding :where(button, a):focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
@@ -70,23 +69,24 @@
   .co-header { padding: 12px 20px; }
   .co-header-label { display: none; }
   .co-help { font-size: 12px; }
-  .co-main { width: calc(100% - 32px); padding-top: 28px; }
+  .co-main { width: calc(100% - 32px); padding-top: 20px; }
   .co-welcome p { font-size: 13px; }
-  .co-progress { padding: 20px 16px; }
+  .co-progress { padding: 16px 10px; }
   .co-progress button { align-items: center; text-align: center; padding: 0 3px; }
   .co-progress small { display: none; }
   .co-progress strong { font-size: 10px; }
-  .co-progress li:not(:last-child)::after { left: 50%; right: -50%; }
+  .co-progress li:not(:last-child)::after { left: calc(50% + 24px); right: calc(-50% + 24px); }
   .co-progress-label { font-size: 11px; }
-  .co-card { padding: 24px 20px; }
+  .co-card { padding: 20px 16px; }
   .co-card-heading { align-items: start; gap: 12px; }
   .co-card-heading h2 { font-size: 18px; }
   .co-required-note { display: none; }
   .co-fields, .co-hiring-options { grid-template-columns: 1fr; }
-  .co-fields { gap: 20px; }
-  .co-actions { padding: 16px; flex-wrap: wrap; }
+  .co-fields { gap: 16px; }
+  .co-address { order: initial; }
+  .co-actions { padding: 16px 0 0; flex-wrap: wrap; }
   .co-action-buttons { margin-left: auto; flex-wrap: wrap; justify-content: end; }
   .co-secure { font-size: 11px; }
-  .co-actions > .co-secure { width: 100%; }
+  .co-actions > .co-secure { flex: 1; }
   .co-hiring-card { padding: 20px; }
 }

@@ -41,7 +41,11 @@ describe("saved jobs BFF", () => {
         expect((await (await call()).json()).meta.totalItems).toBe(8);
         expect((await call(path, "DELETE", headers)).status).toBe(404);
         const restored = await (await call(path, "PUT", headers)).json();
-        expect((await (await call(path, "PUT", headers)).json()).savedAt).toBe(restored.savedAt);
+        expect(restored).toEqual({ jobPostId: mockJobs[0].id, saved: true });
+        expect(await (await call(path, "PUT", headers)).json()).toEqual(restored);
+        const savedAt = (await (await call()).json()).items[0].savedAt;
+        await call(path, "PUT", headers);
+        expect((await (await call()).json()).items[0].savedAt).toBe(savedAt);
         expect((await (await call()).json()).meta.totalItems).toBe(9);
         const otherRecord = getAuthStore().accounts.get("candidate@example.com")!;
         const other = { ...otherRecord.user, id: "30000000-0000-4000-8000-000000000099", email: "saved-second@example.com" };
@@ -54,7 +58,7 @@ describe("saved jobs BFF", () => {
     it("failed writes preserve the collection and real proxy stays closed", async () => {
         expect((await call(`/${mockJobs[0].id}`, "DELETE", { "x-csrf-token": session.csrf, "x-mock-scenario": "error" })).status).toBe(500);
         expect((await (await call()).json()).meta.totalItems).toBe(9);
-        vi.stubEnv("DATA_MODE", "real"); vi.stubEnv("BACKEND_API_URL", "https://backend.example");
+        vi.stubEnv("DATA_MODE", "real"); vi.stubEnv("JOB_DATA_MODE", "mock"); vi.stubEnv("BACKEND_API_URL", "https://backend.example");
         expect((await call()).status).toBe(503);
     });
 });

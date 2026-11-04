@@ -1006,6 +1006,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/jobs/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Danh mục nhóm ngành tuyển dụng từ job-posting service */
+        get: operations["getJobCategories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/jobs": {
         parameters: {
             query?: never;
@@ -1353,6 +1370,23 @@ export interface paths {
          *     - `409 CONFLICT`: Lịch đã bị hủy.
          */
         post: operations["respondInterview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recruiter/company/catalogs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Danh mục ngành nghề và địa điểm cho hồ sơ công ty */
+        get: operations["getRecruiterCompanyCatalogs"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3217,16 +3251,10 @@ export interface components {
             min?: number;
             /** @example 20000000 */
             max?: number;
-            /**
-             * @default VND
-             * @enum {string}
-             */
-            currency: "VND" | "USD";
-            /**
-             * @default month
-             * @enum {string}
-             */
-            period: "month" | "year";
+            /** @default VND */
+            currency: string;
+            /** @enum {string} */
+            period?: "month" | "year";
             /**
              * @description Thỏa thuận. Khi true, min/max có thể vắng.
              * @default false
@@ -3803,14 +3831,20 @@ export interface components {
             cvVersionId?: components["schemas"]["Id"];
             jobId: components["schemas"]["Id"];
         };
+        /** @description Ở chế độ real, description và taxCode bắt buộc; backend hiện hỗ trợ một ngành nghề. */
         CompanyInput: {
+            /** Format: uri */
+            coverImageUrl?: string;
+            companySize?: number;
+            /** Format: uri */
+            logoUrl?: string;
             name: string;
             /** Format: uri */
             website?: string;
             /** @description Giới thiệu doanh nghiệp. */
             description?: string;
             /** @description Lĩnh vực hoạt động. */
-            industryIds: components["schemas"]["Id"][];
+            industryIds: string[];
             address?: string;
             city: string;
             size?: components["schemas"]["CompanySize"];
@@ -3822,12 +3856,15 @@ export interface components {
             taxCode?: string;
         };
         Company: {
+            /** Format: uri */
+            coverImageUrl?: string;
+            companySize?: number;
             id: components["schemas"]["Id"];
             name: string;
             logoUrl?: string;
             website?: string;
             description?: string;
-            industries?: components["schemas"]["CatalogRef"][];
+            industries?: components["schemas"]["PublicCompanyCatalogRef"][];
             address?: string;
             city?: string;
             size?: components["schemas"]["CompanySize"];
@@ -3921,6 +3958,16 @@ export interface components {
              */
             required: boolean;
         };
+        PublicJobCategory: {
+            categoryId: number;
+            categoryName: string;
+        };
+        /** @enum {string} */
+        PublicJobExperienceLevel: "INTERN" | "FRESHER" | "JUNIOR" | "MIDDLE" | "SENIOR" | "EXPERT";
+        /** @enum {string} */
+        PublicJobType: "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP" | "FREELANCE";
+        /** @enum {string} */
+        PublicJobWorkMode: "ONSITE" | "HYBRID" | "REMOTE";
         JobSummary: {
             id: components["schemas"]["Id"];
             title: string;
@@ -3928,6 +3975,9 @@ export interface components {
             location: components["schemas"]["JobLocation"];
             salary?: components["schemas"]["SalaryRange"];
             workType: components["schemas"]["WorkType"];
+            experienceLevel?: components["schemas"]["PublicJobExperienceLevel"];
+            jobType?: components["schemas"]["PublicJobType"];
+            workMode?: components["schemas"]["PublicJobWorkMode"];
             level: components["schemas"]["JobLevel"];
             industry?: components["schemas"]["CatalogRef"];
             minExperienceYears?: number;
@@ -4002,6 +4052,10 @@ export interface components {
         RecruiterJobPage: {
             items: components["schemas"]["RecruiterJob"][];
             meta: components["schemas"]["PageMeta"];
+        };
+        SavedJobResult: {
+            jobPostId: components["schemas"]["Id"];
+            saved: boolean;
         };
         SavedJob: {
             job: components["schemas"]["JobSummary"];
@@ -6331,29 +6385,74 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
+    getJobCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thành công */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicJobCategory"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
     searchJobs: {
         parameters: {
             query?: {
+                categoryId?: number;
+                experienceLevel?: components["schemas"]["PublicJobExperienceLevel"];
+                jobType?: components["schemas"]["PublicJobType"];
+                workMode?: components["schemas"]["PublicJobWorkMode"];
+                salaryCurrency?: string;
+                isSalaryNegotiable?: boolean;
                 /** @description Từ khóa */
                 q?: string;
+                /** @deprecated */
                 industryId?: string;
+                /** @deprecated */
                 positionId?: string;
                 companyId?: string;
                 /** @description Tên tỉnh/thành */
                 city?: string;
+                /** @deprecated */
                 locationId?: string;
-                /** @description ID tỉnh/thành theo danh mục backend từ 1 đến 34, không thêm số 0 đầu. */
+                /**
+                 * @deprecated
+                 * @description ID tỉnh/thành theo danh mục backend từ 1 đến 34, không thêm số 0 đầu.
+                 */
                 provinceCode?: string;
-                /** @description Mã phường/xã/đặc khu hiện hành, gồm 5 chữ số. Phải đi cùng provinceCode và thuộc tỉnh đã chọn. */
+                /**
+                 * @deprecated
+                 * @description Mã phường/xã/đặc khu hiện hành, gồm 5 chữ số. Phải đi cùng provinceCode và thuộc tỉnh đã chọn.
+                 */
                 wardCode?: string;
                 salaryMin?: number;
                 salaryMax?: number;
-                /** @description Số năm kinh nghiệm tối thiểu của tin */
+                /**
+                 * @deprecated
+                 * @description Số năm kinh nghiệm tối thiểu của tin
+                 */
                 minExperience?: number;
+                /** @deprecated */
                 maxExperience?: number;
+                /** @deprecated */
                 level?: components["schemas"]["JobLevel"][];
+                /** @deprecated */
                 workType?: components["schemas"]["WorkType"][];
+                /** @deprecated */
                 skillIds?: string[];
+                /** @deprecated */
                 postedWithinDays?: number;
                 sort?: "relevance" | "newest" | "salary_desc" | "salary_asc" | "deadline" | "match_score";
                 /** @description Trang (từ 1). */
@@ -6543,7 +6642,10 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            422: components["responses"]["ValidationError"];
+            429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     saveJob: {
@@ -6563,13 +6665,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SavedJob"];
+                    "application/json": components["schemas"]["SavedJobResult"];
                 };
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+            429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     unsaveJob: {
@@ -6593,7 +6698,9 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     listViewedJobs: {
@@ -6903,6 +7010,29 @@ export interface operations {
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["ValidationError"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getRecruiterCompanyCatalogs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thành công */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyCatalogs"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             500: components["responses"]["InternalError"];
         };
     };

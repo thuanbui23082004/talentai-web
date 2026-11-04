@@ -119,8 +119,8 @@ export function CompanySearch({
             )}
             {expanded && (
                 <div id={filterId} className="space-y-3 p-3 sm:px-5 sm:py-4">
-                    <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        <div className="min-w-0">
+                    <div className="grid grid-cols-2 items-end gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_140px_140px_auto]">
+                        <div className="col-span-2 min-w-0 sm:col-span-1">
                             <p className="mb-2 text-xs font-medium">
                                 Ngành nghề
                             </p>
@@ -144,7 +144,7 @@ export function CompanySearch({
                                 }
                             />
                         </div>
-                        <div className="min-w-0">
+                        <div className="col-span-2 min-w-0 sm:col-span-1">
                             <p className="mb-2 text-xs font-medium">Quy mô</p>
                             <Select
                                 aria-label="Quy mô công ty"
@@ -209,15 +209,10 @@ export function CompanySearch({
                                 }
                             />
                         </div>
-                    </div>
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-xs text-muted-foreground">
-                            Nhấn Tìm kiếm để áp dụng khoảng số nhân viên.
-                        </p>
                         <Button
                             type="button"
                             variant="ghost"
-                            className="text-sm font-medium text-primary"
+                            className="col-span-2 justify-self-end text-sm font-medium text-primary lg:col-span-1"
                             onClick={() => {
                                 setQuery("");
                                 setMinSize("");

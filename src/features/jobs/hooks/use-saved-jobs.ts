@@ -4,26 +4,22 @@ import { useIsMutating, useMutation, useQuery, useQueryClient } from "@tanstack/
 import { useSession } from "@/features/auth";
 import { changeSavedJob, getSavedJobs } from "../services/saved-jobs";
 import { savedJobKeys } from "../query-keys";
-import type { SavedJob } from "../types";
+import type { SavedJob, SavedJobResult } from "../types";
 
 export function useSavedJobs() {
     const { user } = useSession();
     return useQuery({ queryKey: savedJobKeys.list(user?.id), queryFn: ({ signal }) => getSavedJobs(signal), enabled: user?.role === "candidate" });
 }
 
-export function useSavedJobActions(callbacks?: { onSuccess?: (entry: SavedJob | null, variables: { jobId: string; saved: boolean }) => void; onError?: () => void }) {
+export function useSavedJobActions(callbacks?: { onSuccess?: (result: SavedJobResult | null, variables: { jobId: string; saved: boolean }) => void; onError?: () => void }) {
     const { user } = useSession(); const client = useQueryClient();
     const key = savedJobKeys.list(user?.id);
     return useMutation({
         mutationKey: savedJobKeys.mutations(user?.id), mutationFn: changeSavedJob,
         onMutate: () => client.cancelQueries({ queryKey: key }),
-        onSuccess: (entry, variables) => {
-            client.setQueryData<SavedJob[]>(key, (previous) => {
-                if (!previous) return previous;
-                const rest = previous.filter((item) => item.job.id !== variables.jobId);
-                return entry ? [entry, ...rest] : rest;
-            });
-            callbacks?.onSuccess?.(entry, variables);
+        onSuccess: (result, variables) => {
+            if (!variables.saved) client.setQueryData<SavedJob[]>(key, previous => previous?.filter(item => item.job.id !== variables.jobId));
+            callbacks?.onSuccess?.(result, variables);
         },
         onError: () => callbacks?.onError?.(),
         onSettled: () => client.invalidateQueries({ queryKey: key }),

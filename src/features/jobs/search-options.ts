@@ -7,17 +7,16 @@ export const JOB_LOCATIONS = [
 ];
 
 export const JOB_SEARCH_FILTERS: JobSearchFilter[] = [
-    { key: "experience", label: "Tất cả kinh nghiệm", options: [
-        { value: "0:0", label: "Không yêu cầu kinh nghiệm" }, { value: "1:3", label: "1–3 năm" }, { value: "3:5", label: "3–5 năm" }, { value: "5:", label: "Trên 5 năm" },
+    { key: "experienceLevel", label: "Tất cả kinh nghiệm", options: [
+        { value: "INTERN", label: "Thực tập sinh" }, { value: "FRESHER", label: "Mới tốt nghiệp" }, { value: "JUNIOR", label: "Junior" }, { value: "MIDDLE", label: "Middle" }, { value: "SENIOR", label: "Senior" }, { value: "EXPERT", label: "Chuyên gia" },
     ] },
     { key: "salary", label: "Tất cả mức lương", options: [
         { value: ":10000000", label: "Dưới 10 triệu" }, { value: "10000000:20000000", label: "10–20 triệu" }, { value: "20000000:40000000", label: "20–40 triệu" }, { value: "40000000:", label: "Trên 40 triệu" },
     ] },
-    { key: "level", label: "Tất cả cấp bậc", options: [
-        { value: "intern", label: "Thực tập sinh" }, { value: "junior", label: "Nhân viên" }, { value: "middle", label: "Chuyên viên" }, { value: "senior", label: "Chuyên viên cao cấp" }, { value: "manager", label: "Quản lý" },
+    { key: "jobType", label: "Tất cả loại hình", options: [
+        { value: "FULL_TIME", label: "Toàn thời gian" }, { value: "PART_TIME", label: "Bán thời gian" }, { value: "CONTRACT", label: "Hợp đồng" }, { value: "INTERNSHIP", label: "Thực tập" }, { value: "FREELANCE", label: "Tự do" },
     ] },
-    { key: "workType", label: "Tất cả loại hình", options: [
-        { value: "full_time", label: "Toàn thời gian" }, { value: "part_time", label: "Bán thời gian" }, { value: "remote", label: "Từ xa" }, { value: "internship", label: "Thực tập" },
+    { key: "workMode", label: "Tất cả hình thức", options: [
+        { value: "ONSITE", label: "Tại văn phòng" }, { value: "HYBRID", label: "Kết hợp" }, { value: "REMOTE", label: "Từ xa" },
     ] },
-    { key: "gender", label: "Tất cả giới tính", disabled: true, options: [] },
 ];

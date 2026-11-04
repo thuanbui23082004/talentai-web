@@ -19,7 +19,7 @@ export function LocationPicker({ value, onChange, provinceOnly = false, ariaLabe
 
     return <Modal open={open} onOpenChange={(next) => { setOpen(next); if (next) { setDraft(value); setProvinceQuery(""); setWardQuery(""); } }}>
         <ModalTrigger type="button" aria-label={ariaLabel} title={label} className="flex min-h-11 w-full min-w-0 items-center justify-between gap-2 px-3 text-left text-sm font-medium text-primary"><span className="truncate">{label}</span><ChevronDown className="size-4 shrink-0" /></ModalTrigger>
-        <ModalContent title={provinceOnly ? "Chọn địa điểm công ty" : "Chọn địa điểm làm việc"} description={provinceOnly ? "Chọn tỉnh/thành để tìm công ty." : "Chọn tỉnh/thành, sau đó chọn phường/xã nếu muốn tìm chi tiết hơn."} className="max-w-2xl p-4 sm:p-6" footer={<>
+        <ModalContent title={provinceOnly ? "Chọn tỉnh/thành phố" : "Chọn địa điểm làm việc"} description={provinceOnly ? "Chọn tỉnh/thành phố để thu hẹp kết quả tìm kiếm." : "Chọn tỉnh/thành, sau đó chọn phường/xã nếu muốn tìm chi tiết hơn."} className="max-w-2xl p-4 sm:p-6" footer={<>
             <p className="mr-auto w-full text-sm text-muted-foreground sm:w-auto">{province ? [provinceCity(province.name), ward?.name].filter(Boolean).join(" · ") : "Tất cả địa điểm"}</p>
             <Button type="button" variant="outline" onClick={() => { setDraft(""); setWardQuery(""); }}>Bỏ chọn địa điểm</Button>
             <Button type="button" onClick={() => { onChange(draft); setOpen(false); }}>Chọn địa điểm</Button>

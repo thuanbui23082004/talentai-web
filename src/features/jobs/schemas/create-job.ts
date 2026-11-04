@@ -55,11 +55,12 @@ export function toJobInput(values: CreateJobValues): JobInput {
   });
 }
 export function jobToFormValues(job: RecruiterJob): CreateJobValues {
+  const currency = z.enum(['VND', 'USD']).parse(job.salary?.currency ?? 'VND');
   const scale = job.salary?.currency === 'USD' ? 1 : 1_000_000;
   return { ...createJobDefaults, title: job.title, industryId: job.industry?.id ?? '', level: job.level, workType: job.workType,
     description: job.description, requirements: job.requirements, benefits: job.benefits ?? '', headcount: job.headcount ?? 1,
     city: job.location.city, district: job.location.district ?? '', address: job.location.address ?? '',
-    salaryCurrency: job.salary?.currency ?? 'VND', salaryPeriod: job.salary?.period ?? 'month', negotiable: job.salary?.negotiable ?? false,
+    salaryCurrency: currency, salaryPeriod: job.salary?.period ?? 'month', negotiable: job.salary?.negotiable ?? false,
     salaryMin: job.salary?.min === undefined ? '' : String(job.salary.min / scale), salaryMax: job.salary?.max === undefined ? '' : String(job.salary.max / scale),
     minExperienceYears: job.minExperienceYears === undefined ? '' : String(job.minExperienceYears), applicationDeadline: job.applicationDeadline ?? '', educationLevel: job.educationLevel ?? '',
     skills: (job.requiredSkills?.map(skill => skill.name) ?? job.skills ?? []).join(', '),

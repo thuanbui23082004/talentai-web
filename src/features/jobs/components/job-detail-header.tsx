@@ -1,12 +1,11 @@
-import { Bookmark, CalendarDays, Clock3, MapPin, Send } from "lucide-react";
-import { AvailabilityButton } from "@/components/shared/availability-button";
+import { experienceLabel } from "../labels";
+import { CalendarDays, Clock3, MapPin, Send } from "lucide-react";
+import { SaveJobButton } from "./save-job-button";
 import { ApplicationButton } from "@/features/applications";
 import { formatDate, formatSalaryRange } from "@/lib/utils";
 import type { JobDetail } from "../types";
 
 export function JobDetailHeader({ job }: { job: JobDetail }) {
-    const unavailable =
-        "Tính năng này đang được hoàn thiện. Hiện chưa gửi hồ sơ hoặc lưu công việc từ trang này.";
     const facts = [
         {
             Icon: MapPin,
@@ -18,9 +17,7 @@ export function JobDetailHeader({ job }: { job: JobDetail }) {
         {
             Icon: Clock3,
             label: "Kinh nghiệm",
-            value: job.minExperienceYears
-                ? `${job.minExperienceYears} năm`
-                : "Không yêu cầu",
+            value: experienceLabel(job),
         },
         {
             Icon: CalendarDays,
@@ -75,14 +72,7 @@ export function JobDetailHeader({ job }: { job: JobDetail }) {
                         <Send className="size-4" />
                         {job.hasApplied ? "Đã ứng tuyển" : "Ứng tuyển ngay"}
                     </ApplicationButton>
-                    <AvailabilityButton
-                        title="Lưu công việc"
-                        description={unavailable}
-                        className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-primary px-4 py-2.5 text-sm font-medium text-primary hover:bg-secondary"
-                    >
-                        <Bookmark className="size-4" />
-                        Lưu tin
-                    </AvailabilityButton>
+                    <SaveJobButton job={job} showLabel />
                 </div>
             </section>
     );

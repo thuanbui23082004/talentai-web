@@ -5,6 +5,7 @@ export type JobDetail = components["schemas"]["JobDetail"];
 export type JobSearchResponse = components["schemas"]["JobSearchResponse"];
 export type JobFilters = NonNullable<operations["searchJobs"]["parameters"]["query"]>;
 export type SavedJob = components["schemas"]["SavedJob"];
+export type SavedJobResult = components["schemas"]["SavedJobResult"];
 
 export type JobInput = components['schemas']['JobInput'];
 export type RecruiterJob = components['schemas']['RecruiterJob'];

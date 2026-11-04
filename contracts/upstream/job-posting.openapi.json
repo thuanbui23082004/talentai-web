@@ -1,0 +1,780 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TalentAI — Job Posting Service API",
+    "description": "Microservice quản lý tin tuyển dụng (Job Postings), tìm kiếm việc làm tối ưu SLA < 200ms, quản lý vòng đời tin (Draft, Active, Paused, Closed, Expired), danh mục nghề nghiệp và kỹ năng, cùng tính năng lưu việc làm (Saved Jobs) dành cho ứng viên trên nền tảng TalentAI.",
+    "contact": {
+      "name": "TalentAI Backend Team",
+      "email": "backend@talentai.dev"
+    },
+    "license": {
+      "name": "Private",
+      "url": "https://talentai.dev"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3004",
+      "description": "Local Development"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "API Gateway Routing"
+    }
+  ],
+  "paths": {
+    "/api/v1/jobs": {
+      "get": {
+        "tags": [
+          "Public Job Postings"
+        ],
+        "summary": "Tìm kiếm và lọc tin tuyển dụng",
+        "description": "Tìm kiếm tin tuyển dụng đang hoạt động (ACTIVE) theo từ khóa, ngành nghề, kỹ năng, mức lương, hình thức làm việc và địa điểm. Phản hồi tối ưu SLA < 200ms.",
+        "operationId": "search",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/JobSearchRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Danh sách tin tuyển dụng phù hợp phân trang",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseJobSummaryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Tham số tìm kiếm không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseJobSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/jobs/{id}": {
+      "get": {
+        "tags": [
+          "Public Job Postings"
+        ],
+        "summary": "Xem chi tiết tin tuyển dụng công khai",
+        "description": "Lấy toàn bộ thông tin chi tiết của một tin tuyển dụng (mô tả công việc, yêu cầu, đãi ngộ, thông tin công ty tuyển dụng)",
+        "operationId": "detail_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID của tin tuyển dụng",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thông tin chi tiết tin tuyển dụng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePublicJobResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy tin tuyển dụng hoặc tin đã đóng/hết hạn",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePublicJobResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/job-categories": {
+      "get": {
+        "tags": [
+          "Job Catalog & Skills"
+        ],
+        "summary": "Lấy danh mục nhóm ngành nghề tuyển dụng",
+        "description": "Trả về toàn bộ danh sách nhóm công việc (IT, Marketing, Sales...)",
+        "operationId": "categories",
+        "responses": {
+          "200": {
+            "description": "Danh sách nhóm ngành nghề",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/saved-jobs": {
+      "get": {
+        "tags": [
+          "Candidate Saved Jobs"
+        ],
+        "summary": "Xem danh sách việc làm đã lưu",
+        "description": "Lấy danh sách các tin tuyển dụng mà ứng viên đã đánh dấu lưu để xem lại hoặc ứng tuyển sau",
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Số trang (bắt đầu từ 0)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "maximum": 10000,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Số lượng phần tử mỗi trang",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Danh sách việc làm đã lưu phân trang",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseSavedItem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa đăng nhập",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseSavedItem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Yêu cầu quyền ROLE_CANDIDATE",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseSavedItem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Candidate Saved Jobs"
+        ],
+        "summary": "Lưu tin tuyển dụng",
+        "description": "Ứng viên đánh dấu lưu một tin tuyển dụng vào danh sách yêu thích",
+        "operationId": "save",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavedJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Lưu việc làm thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSavedResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSavedResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa đăng nhập",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSavedResult"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Yêu cầu quyền ROLE_CANDIDATE",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSavedResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy tin tuyển dụng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSavedResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Candidate Saved Jobs"
+        ],
+        "summary": "Xóa việc làm khỏi danh sách đã lưu",
+        "description": "Bỏ lưu một tin tuyển dụng khỏi danh sách yêu thích của ứng viên",
+        "operationId": "remove",
+        "parameters": [
+          {
+            "name": "jobPostId",
+            "in": "query",
+            "description": "ID của tin tuyển dụng cần bỏ lưu",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Xóa thành công, không có nội dung trả về"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Yêu cầu quyền ROLE_CANDIDATE"
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "JobSearchRequest": {
+        "type": "object",
+        "properties": {
+          "keyword": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "categoryId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 0
+          },
+          "salaryMin": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "salaryMax": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "salaryCurrency": {
+            "type": "string",
+            "pattern": "[A-Z]{3}"
+          },
+          "isSalaryNegotiable": {
+            "type": "boolean"
+          },
+          "experienceLevel": {
+            "type": "string",
+            "enum": [
+              "INTERN",
+              "FRESHER",
+              "JUNIOR",
+              "MIDDLE",
+              "SENIOR",
+              "EXPERT"
+            ]
+          },
+          "jobType": {
+            "type": "string",
+            "enum": [
+              "FULL_TIME",
+              "PART_TIME",
+              "CONTRACT",
+              "INTERNSHIP",
+              "FREELANCE"
+            ]
+          },
+          "workMode": {
+            "type": "string",
+            "enum": [
+              "ONSITE",
+              "HYBRID",
+              "REMOTE"
+            ]
+          },
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 10000,
+            "minimum": 0
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 100,
+            "minimum": 1
+          },
+          "sort": {
+            "type": "string",
+            "pattern": "(createdAt|publishedAt|salaryMin|salaryMax|deadline),(asc|desc)"
+          },
+          "salaryCurrencyValid": {
+            "type": "boolean"
+          },
+          "salaryRangeValid": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "sort"
+        ]
+      },
+      "ApiResponsePageResponseJobSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageResponseJobSummaryResponse"
+          }
+        }
+      },
+      "PageResponseJobSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JobSummaryResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "JobSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "jobPostId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "categoryId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "salaryMin": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "salaryMax": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "salaryCurrency": {
+            "type": "string"
+          },
+          "isSalaryNegotiable": {
+            "type": "boolean"
+          },
+          "experienceLevel": {
+            "type": "string",
+            "enum": [
+              "INTERN",
+              "FRESHER",
+              "JUNIOR",
+              "MIDDLE",
+              "SENIOR",
+              "EXPERT"
+            ]
+          },
+          "jobType": {
+            "type": "string",
+            "enum": [
+              "FULL_TIME",
+              "PART_TIME",
+              "CONTRACT",
+              "INTERNSHIP",
+              "FREELANCE"
+            ]
+          },
+          "workMode": {
+            "type": "string",
+            "enum": [
+              "ONSITE",
+              "HYBRID",
+              "REMOTE"
+            ]
+          },
+          "deadline": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ApiResponsePublicJobResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PublicJobResponse"
+          }
+        }
+      },
+      "PublicJobResponse": {
+        "type": "object",
+        "properties": {
+          "jobPostId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "companyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "categoryId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "requirements": {
+            "type": "string"
+          },
+          "benefits": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkillResponse"
+            }
+          },
+          "salaryMin": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "salaryMax": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "salaryCurrency": {
+            "type": "string"
+          },
+          "isSalaryNegotiable": {
+            "type": "boolean"
+          },
+          "location": {
+            "type": "string"
+          },
+          "experienceLevel": {
+            "type": "string",
+            "enum": [
+              "INTERN",
+              "FRESHER",
+              "JUNIOR",
+              "MIDDLE",
+              "SENIOR",
+              "EXPERT"
+            ]
+          },
+          "jobType": {
+            "type": "string",
+            "enum": [
+              "FULL_TIME",
+              "PART_TIME",
+              "CONTRACT",
+              "INTERNSHIP",
+              "FREELANCE"
+            ]
+          },
+          "workMode": {
+            "type": "string",
+            "enum": [
+              "ONSITE",
+              "HYBRID",
+              "REMOTE"
+            ]
+          },
+          "headCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deadline": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SkillResponse": {
+        "type": "object",
+        "properties": {
+          "skillId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skillName": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseListCategoryResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryResponse"
+            }
+          }
+        }
+      },
+      "CategoryResponse": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "SavedJobRequest": {
+        "type": "object",
+        "properties": {
+          "jobPostId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "jobPostId"
+        ]
+      },
+      "ApiResponseSavedResult": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SavedResult"
+          }
+        }
+      },
+      "SavedResult": {
+        "type": "object",
+        "properties": {
+          "jobPostId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "saved": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ApiResponsePageResponseSavedItem": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageResponseSavedItem"
+          }
+        }
+      },
+      "PageResponseSavedItem": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SavedItem"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SavedItem": {
+        "type": "object",
+        "properties": {
+          "job": {
+            "$ref": "#/components/schemas/JobSummaryResponse"
+          },
+          "savedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}

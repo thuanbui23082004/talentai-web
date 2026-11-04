@@ -39,6 +39,9 @@ export async function handleRecruiterRequest(request: NextRequest, path: string)
     if (!validOrigin || request.headers.get('sec-fetch-site') === 'cross-site' || request.headers.get('x-csrf-token') !== session.csrf) return mockProblem(403, 'CSRF_TOKEN_INVALID');
   }
   if (!getMockAccounts().has(user.id)) getMockAccounts().set(user.id, { user });
+  if (path === 'recruiter/company/catalogs' && request.method === 'GET') {
+    return NextResponse.json({ industries: recruiterIndustries.filter(item => item.isActive).map(({ id, name }) => ({ id, name })), locations: recruiterLocations.filter(item => item.isActive).map(({ id, name }) => ({ id, name })) });
+  }
   const accountResponse = await handleAccountCompany(request, path, session);
   if (accountResponse) { user.companyId = session.companyId; return accountResponse; }
   const analysisResponse = await handleRecruiterAnalysis(request, path, session);

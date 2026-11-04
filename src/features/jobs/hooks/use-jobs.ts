@@ -2,8 +2,12 @@
 
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { jobKeys } from "../query-keys";
-import { getJobs } from "../services/jobs";
+import { getJobs, getJobCategories } from "../services/jobs";
 import type { JobFilters, JobSearchResponse } from "../types";
+
+export function useJobCategories() {
+  return useQuery({ queryKey: jobKeys.categories, queryFn: ({ signal }) => getJobCategories(signal), staleTime: 60000 });
+}
 
 export function useJobs(filters: JobFilters, initialData?: JobSearchResponse, enabled = true) {
   return useQuery({

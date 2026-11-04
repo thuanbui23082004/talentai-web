@@ -12,7 +12,7 @@ import {
 import { Badge, Button } from "@/components/ui";
 import { ApplicationDialog } from "@/features/applications";
 import { formatDate, formatDeadline, formatSalaryRange } from "@/lib/utils";
-import { JOB_LEVEL_LABELS, WORK_TYPE_LABELS } from "../labels";
+import { JOB_LEVEL_LABELS, WORK_TYPE_LABELS, experienceLabel } from "../labels";
 import type { Job } from "../types";
 
 export function JobHoverPreview({
@@ -95,16 +95,14 @@ export function JobHoverPreview({
                                         className="size-4"
                                         aria-hidden="true"
                                     />
-                                    {job.minExperienceYears
-                                        ? `${job.minExperienceYears} năm kinh nghiệm`
-                                        : "Không yêu cầu kinh nghiệm"}
+                                    {experienceLabel(job)}
                                 </span>
                                 <span className="inline-flex items-center gap-1.5">
                                     <GraduationCap
                                         className="size-4"
                                         aria-hidden="true"
                                     />
-                                    {JOB_LEVEL_LABELS[job.level]}
+                                    {job.experienceLevel ? experienceLabel(job) : JOB_LEVEL_LABELS[job.level]}
                                 </span>
                                 {job.applicationDeadline && (
                                     <span className="inline-flex items-center gap-1.5">
@@ -155,7 +153,7 @@ export function JobHoverPreview({
                                         {WORK_TYPE_LABELS[job.workType]}
                                     </p>
                                     <p className="mt-1">
-                                        Cấp bậc: {JOB_LEVEL_LABELS[job.level]}
+                                        Cấp bậc: {job.experienceLevel ? experienceLabel(job) : JOB_LEVEL_LABELS[job.level]}
                                     </p>
                                 </section>
                                 <section>

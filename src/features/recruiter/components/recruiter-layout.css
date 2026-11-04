@@ -113,6 +113,10 @@
     padding-left: 16px;
     border-left: 1px solid var(--recruiter-border);
 }
+.recruiter-app .recruiter-user:focus-visible {
+    outline: 2px solid var(--recruiter-accent);
+    outline-offset: 3px;
+}
 .recruiter-app .recruiter-user strong {
     font-size: var(--recruiter-font-caption);
     font-weight: 600;

@@ -20,7 +20,7 @@ import { formatDate, formatSalaryRange } from "@/lib/utils";
 import { JobSearch } from "./job-search";
 import { JobCard } from "./job-card";
 import { JobShare } from "./job-share";
-import { JOB_LEVEL_LABELS, WORK_TYPE_LABELS } from "../labels";
+import { JOB_LEVEL_LABELS, WORK_TYPE_LABELS, experienceLabel } from "../labels";
 import type { Job, JobDetail } from "../types";
 import banner from "../../../../public/images/banner/banner3.png";
 
@@ -92,14 +92,12 @@ export function JobDetailPage({
         {
             Icon: BriefcaseBusiness,
             label: "Cấp bậc",
-            value: JOB_LEVEL_LABELS[job.level],
+            value: job.experienceLevel ? experienceLabel(job) : JOB_LEVEL_LABELS[job.level],
         },
         {
             Icon: Clock3,
             label: "Kinh nghiệm",
-            value: job.minExperienceYears
-                ? `Từ ${job.minExperienceYears} năm`
-                : "Không yêu cầu kinh nghiệm",
+            value: experienceLabel(job),
         },
         {
             Icon: GraduationCap,
@@ -249,7 +247,7 @@ export function JobDetailPage({
                             <div className="mt-3 flex flex-wrap gap-2">
                                 {[
                                     WORK_TYPE_LABELS[job.workType],
-                                    JOB_LEVEL_LABELS[job.level],
+                                    job.experienceLevel ? experienceLabel(job) : JOB_LEVEL_LABELS[job.level],
                                     ...(job.skills ?? []),
                                 ].map((tag) => (
                                     <Badge key={tag} variant="outline">

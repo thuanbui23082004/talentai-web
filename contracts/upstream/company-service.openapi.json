@@ -23,7 +23,383 @@
       "description": "API Gateway Routing"
     }
   ],
+  "security": [
+    {
+      "Bearer Authentication": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health & Readiness",
+      "description": "Endpoints kiểm tra trạng thái hoạt động của service"
+    },
+    {
+      "name": "Admin Company Management",
+      "description": "Kiểm duyệt và quản lý trạng thái xác thực doanh nghiệp dành cho Admin"
+    },
+    {
+      "name": "Health & Readiness",
+      "description": "Endpoints kiểm tra sức khỏe và độ sẵn sàng của service"
+    },
+    {
+      "name": "Public Companies",
+      "description": "Tìm kiếm và tra cứu chi tiết công ty công khai"
+    },
+    {
+      "name": "Company Management",
+      "description": "Endpoints quản lý hồ sơ doanh nghiệp, xác thực và danh mục"
+    },
+    {
+      "name": "Recruiter Company",
+      "description": "Quản lý hồ sơ công ty và gửi yêu cầu xác minh dành cho Recruiter"
+    },
+    {
+      "name": "Master Data",
+      "description": "Danh mục ngành nghề (Industries) và địa điểm (Locations)"
+    }
+  ],
   "paths": {
+    "/api/v1/recruiter/company": {
+      "get": {
+        "tags": [
+          "Company Management"
+        ],
+        "summary": "Lấy thông tin hồ sơ doanh nghiệp của Recruiter hiện tại",
+        "description": "Trả về chi tiết công ty gắn liền với tài khoản Recruiter đang đăng nhập",
+        "operationId": "getOwn",
+        "responses": {
+          "200": {
+            "description": "Lấy hồ sơ doanh nghiệp thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCompanyResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực hoặc token không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Yêu cầu quyền ROLE_RECRUITER",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recruiter chưa khởi tạo thông tin doanh nghiệp",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Company Management"
+        ],
+        "summary": "Tạo mới hoặc cập nhật hồ sơ doanh nghiệp",
+        "description": "Cho phép nhà tuyển dụng cập nhật thông tin tên, mô tả, website, quy mô, logo của công ty",
+        "operationId": "upsert",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật hồ sơ công ty thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCompanyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu đầu vào không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa đăng nhập",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Yêu cầu quyền ROLE_RECRUITER",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
+    },
+    "/api/v1/recruiter/company/verification": {
+      "post": {
+        "tags": [
+          "Company Management"
+        ],
+        "summary": "Gửi yêu cầu xác thực doanh nghiệp",
+        "description": "Nhà tuyển dụng gửi yêu cầu xác minh thông tin doanh nghiệp (chuyển sang trạng thái PENDING)",
+        "operationId": "submit",
+        "responses": {
+          "200": {
+            "description": "Gửi yêu cầu xác thực thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCompanyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Công ty đã được xác thực hoặc đang chờ duyệt",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa đăng nhập",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Yêu cầu quyền ROLE_RECRUITER",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Chưa tạo hồ sơ công ty",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/companies/{id}/verification": {
+      "patch": {
+        "tags": [
+          "Company Management"
+        ],
+        "summary": "Admin duyệt hoặc từ chối yêu cầu xác thực",
+        "description": "Admin cập nhật trạng thái xác minh doanh nghiệp (VERIFIED hoặc REJECTED)",
+        "operationId": "decide",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID của công ty",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerificationDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật quyết định xác thực thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCompanyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Trạng thái phê duyệt không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa đăng nhập",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Yêu cầu quyền ROLE_ADMIN",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy công ty",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
+    },
+    "/ready": {
+      "get": {
+        "tags": [
+          "Health & Readiness"
+        ],
+        "summary": "Readiness probe",
+        "description": "Kiểm tra kết nối cơ sở dữ liệu để tiếp nhận traffic",
+        "operationId": "ready",
+        "responses": {
+          "200": {
+            "description": "Database kết nối thành công, sẵn sàng nhận request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database không khả dụng, service chưa sẵn sàng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health & Readiness"
+        ],
+        "summary": "Liveness probe",
+        "description": "Kiểm tra service còn sống hay không",
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "Service đang hoạt động bình thường",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/locations": {
       "get": {
         "tags": [
@@ -143,232 +519,205 @@
           }
         }
       }
+    },
+    "/api/v1/admin/companies": {
+      "get": {
+        "tags": [
+          "Company Management"
+        ],
+        "summary": "Admin tra cứu danh sách công ty theo trạng thái xác thực",
+        "description": "Lấy danh sách các công ty kèm phân trang để xem xét phê duyệt",
+        "operationId": "listForAdmin",
+        "parameters": [
+          {
+            "name": "verificationStatus",
+            "in": "query",
+            "description": "Lọc theo trạng thái xác thực (PENDING, VERIFIED, REJECTED)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "UNVERIFIED",
+                "PENDING",
+                "VERIFIED",
+                "REJECTED"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Số trang (bắt đầu từ 0)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Số lượng phần tử mỗi trang",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Danh sách công ty phân trang",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCompanyPageResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa đăng nhập",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Yêu cầu quyền ROLE_ADMIN",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
     }
   },
   "components": {
     "schemas": {
-      "ApiResponseListLocationResponse": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LocationResponse"
-            }
-          }
-        }
-      },
-      "LocationResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "name": {
-            "type": "string"
-          },
-          "region": {
-            "type": "string"
-          }
-        }
-      },
-      "ApiResponseListIndustryResponse": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/IndustryResponse"
-            }
-          }
-        }
-      },
-      "IndustryResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          }
-        }
-      },
-      "CompanySearchRequest": {
+      "CompanyUpsertRequest": {
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
-          },
-          "industryId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "locationId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "minSize": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 1
-          },
-          "maxSize": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 1
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32",
-            "maximum": 100,
-            "minimum": 1
-          }
-        }
-      },
-      "PageCompanySearchResponse": {
-        "type": "object",
-        "properties": {
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalElements": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "numberOfElements": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "content": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CompanySearchResponse"
-            }
-          },
-          "number": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "sort": {
-            "$ref": "#/components/schemas/SortObject"
-          },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
-          },
-          "first": {
-            "type": "boolean"
-          },
-          "last": {
-            "type": "boolean"
-          },
-          "empty": {
-            "type": "boolean"
-          }
-        }
-      },
-      "CompanySearchResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
             "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string"
+            "maxLength": 255,
+            "minLength": 0
           },
           "logoUrl": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 0,
+            "pattern": "(?i)https?://[^\\s]+"
+          },
+          "coverImageUrl": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 0,
+            "pattern": "(?i)https?://[^\\s]+"
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
+          },
+          "taxCode": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 0
           },
           "website": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 0,
+            "pattern": "(?i)https?://[^\\s]+"
           },
           "companySize": {
             "type": "integer",
             "format": "int32"
           },
-          "address": {
-            "type": "string"
-          },
-          "industryId": {
+          "foundedYear": {
             "type": "integer",
-            "format": "int64"
+            "format": "int32",
+            "minimum": 1
+          },
+          "contactEmail": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 0
+          },
+          "contactPhone": {
+            "type": "string",
+            "maxLength": 30,
+            "minLength": 0
+          },
+          "address": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 0
           },
           "locationId": {
             "type": "integer",
             "format": "int64"
-          }
-        }
-      },
-      "SortObject": {
-        "type": "object",
-        "properties": {
-          "empty": {
-            "type": "boolean"
           },
-          "sorted": {
-            "type": "boolean"
-          },
-          "unsorted": {
-            "type": "boolean"
-          }
-        }
-      },
-      "PageableObject": {
-        "type": "object",
-        "properties": {
-          "offset": {
+          "industryId": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "ErrorDetails": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
           },
-          "sort": {
-            "$ref": "#/components/schemas/SortObject"
+          "message": {
+            "type": "string"
           },
-          "paged": {
-            "type": "boolean"
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
           },
-          "pageNumber": {
-            "type": "integer",
-            "format": "int32"
+          "fieldErrors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldError"
+            }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorDetails"
+          }
+        }
+      },
+      "FieldError": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
           },
-          "pageSize": {
-            "type": "integer",
-            "format": "int32"
+          "code": {
+            "type": "string"
           },
-          "unpaged": {
-            "type": "boolean"
+          "message": {
+            "type": "string"
           }
         }
       },
@@ -458,48 +807,298 @@
           }
         }
       },
-      "ErrorResponse": {
+      "IndustryResponse": {
         "type": "object",
         "properties": {
-          "error": {
-            "$ref": "#/components/schemas/ErrorDetails"
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
           }
         }
       },
-      "ErrorDetails": {
+      "LocationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          }
+        }
+      },
+      "VerificationDecisionRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "UNVERIFIED",
+              "PENDING",
+              "VERIFIED",
+              "REJECTED"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "ApiResponseListLocationResponse": {
         "type": "object",
         "properties": {
           "code": {
-            "type": "string"
+            "type": "integer",
+            "format": "int32"
           },
           "message": {
             "type": "string"
           },
-          "timestamp": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "fieldErrors": {
+          "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/FieldError"
+              "$ref": "#/components/schemas/LocationResponse"
             }
           }
         }
       },
-      "FieldError": {
+      "ApiResponseListIndustryResponse": {
         "type": "object",
         "properties": {
-          "field": {
-            "type": "string"
-          },
           "code": {
-            "type": "string"
+            "type": "integer",
+            "format": "int32"
           },
           "message": {
             "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IndustryResponse"
+            }
           }
         }
+      },
+      "CompanySearchRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "industryId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "locationId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "minSize": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "maxSize": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 100,
+            "minimum": 1
+          }
+        }
+      },
+      "CompanySearchResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "logoUrl": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "website": {
+            "type": "string"
+          },
+          "companySize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "address": {
+            "type": "string"
+          },
+          "industryId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "locationId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PageCompanySearchResponse": {
+        "type": "object",
+        "properties": {
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompanySearchResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageableObject": {
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "paged": {
+            "type": "boolean"
+          },
+          "unpaged": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SortObject": {
+        "type": "object",
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          },
+          "sorted": {
+            "type": "boolean"
+          },
+          "unsorted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ApiResponseCompanyPageResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CompanyPageResponse"
+          }
+        }
+      },
+      "CompanyPageResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompanyResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "Bearer Authentication": {
+        "type": "http",
+        "description": "Dán JWT Access Token với role ROLE_RECRUITER hoặc ROLE_ADMIN",
+        "name": "Bearer Authentication",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }

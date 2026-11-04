@@ -5,7 +5,14 @@ const number = z.coerce.number().finite().nonnegative().optional();
 const list = <T extends z.ZodType>(schema: T) => z.preprocess((value) => typeof value === "string" ? value.split(",") : value, z.array(schema).optional());
 
 export const jobSearchSchema = z.object({
-    q: z.string().optional(), city: z.string().optional(),
+    q: z.string().max(200).optional(), city: z.string().max(500).optional(),
+    companyId: z.uuid().optional(),
+    categoryId: z.coerce.number().int().positive().optional(),
+    experienceLevel: z.enum(["INTERN", "FRESHER", "JUNIOR", "MIDDLE", "SENIOR", "EXPERT"]).optional(),
+    jobType: z.enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP", "FREELANCE"]).optional(),
+    workMode: z.enum(["ONSITE", "HYBRID", "REMOTE"]).optional(),
+    salaryCurrency: z.string().regex(/^[A-Z]{3}$/).optional(),
+    isSalaryNegotiable: z.enum(["true", "false"]).transform(value => value === "true").optional(),
     provinceCode: z.string().regex(/^(?:[1-9]|[12][0-9]|3[0-4])$/).optional(),
     wardCode: z.string().regex(/^\d{5}$/).optional(),
     salaryMin: number, salaryMax: number,
@@ -14,7 +21,7 @@ export const jobSearchSchema = z.object({
     workType: list(z.enum(["full_time", "part_time", "internship", "contract", "freelance", "remote", "hybrid"])),
     page: z.coerce.number().int().min(1).default(1),
     pageSize: z.coerce.number().int().min(1).max(100).default(20),
-    sort: z.enum(["relevance", "newest", "salary_desc", "salary_asc", "deadline", "match_score"]).default("relevance"),
+    sort: z.enum(["relevance", "newest", "salary_desc", "salary_asc", "deadline", "match_score"]).default("newest"),
 }).refine((value) => value.salaryMin === undefined || value.salaryMax === undefined || value.salaryMin <= value.salaryMax, { message: "Khoảng lương không hợp lệ." })
   .refine((value) => value.minExperience === undefined || value.maxExperience === undefined || value.minExperience <= value.maxExperience, { message: "Khoảng kinh nghiệm không hợp lệ." })
   .superRefine((value, context) => {

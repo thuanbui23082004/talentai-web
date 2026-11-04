@@ -4,7 +4,7 @@ import { test, expect, type Page } from "@playwright/test";
 async function login(page: Page) {
     const email = `saved-${randomUUID()}@example.com`; const password = "TalentAI123!";
     expect((await page.request.post("/api/bff/auth/register", { data: { email, password, confirmPassword: password, fullName: "Ứng viên việc làm đã lưu", phone: "0901234567", role: "candidate", acceptedPrivacyPolicy: true } })).status()).toBe(201);
-    expect((await page.request.post("/api/bff/auth/login", { data: { email, password, role: "candidate" } })).status()).toBe(200);
+    // Registration already establishes the session for this fresh test account.
 }
 
 test("saved jobs reuse cards, filter, paginate and persist remove/undo", async ({ page }, testInfo) => {
