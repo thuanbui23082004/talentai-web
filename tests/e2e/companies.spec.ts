@@ -33,12 +33,12 @@ test("recovers from a company API error", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "Sao Việt", exact: true })).toBeVisible();
 });
 
-test("fits desktop and mobile and only animates once per session", async ({ page }, testInfo) => {
+test("fits desktop and mobile with live-compatible filters", async ({ page }, testInfo) => {
     for (const width of [1280, 768, 375]) {
         await page.setViewportSize({ width, height: 900 });
         await page.goto("/companies");
         await expect(page.getByRole("heading", { name: "Sao Việt", exact: true })).toBeVisible();
-        await expect.poll(() => page.evaluate(() => sessionStorage.getItem("companies-hero-count"))).toBe("1");
+        await expect(page.getByRole("combobox", { name: "Ngành nghề công ty" })).toBeVisible();
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
         const cards = page.locator('a[href^="/companies/"]').filter({ has: page.locator("h3") });
         const boxes = await cards.evaluateAll((elements) => elements.map((element) => { const { y, height } = element.getBoundingClientRect(); return { y, height }; }));

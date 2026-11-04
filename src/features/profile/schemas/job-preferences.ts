@@ -26,6 +26,6 @@ export const jobPreferencesDraftSchema = z.object({
 export type JobPreferencesDraft = z.infer<typeof jobPreferencesDraftSchema>;
 export const INITIAL_JOB_PREFERENCES: JobPreferencesDraft = {
     industries: ["it-hardware", "it-software", "banking"], position: "Digital marketing", experience: "under-1",
-    salaryMin: "15", salaryMax: "20", negotiable: false, locations: ["48"], levels: [], workTypes: [],
+    salaryMin: "15", salaryMax: "20", negotiable: false, locations: ["21"], levels: [], workTypes: [],
     hybrid: false, thirteenthMonth: true, healthInsurance: true,
 };

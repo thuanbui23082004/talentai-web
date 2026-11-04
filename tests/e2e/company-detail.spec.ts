@@ -14,7 +14,7 @@ test("opens company details from a card, expands introduction and opens a job", 
     await page.keyboard.press("Escape");
     const jobs = page.getByRole("region", { name: /Việc đang tuyển/ });
     await expect(jobs.locator("article")).toHaveCount(1);
-    await jobs.locator("article h3 a").click();
+    await jobs.locator("article h3 a").press("Enter");
     await expect(page).toHaveURL(/\/jobs\/10000000-/);
 });
 

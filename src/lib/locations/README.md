@@ -4,7 +4,10 @@ Nguồn: [Province Open API v2](https://provinces.open-api.vn/), dữ liệu sau
 
 Tải từ `https://provinces.open-api.vn/api/v2/?depth=2` ngày 21/10/2026.
 Snapshot gồm 34 tỉnh/thành và 3.321 phường/xã/đặc khu. Chỉ giữ tên và mã hành chính;
-mã tỉnh có 2 chữ số, mã xã có 5 chữ số (giữ số 0 đầu).
+mã tỉnh/thành dùng ID backend từ `1` đến `34`, dạng chuỗi không thêm số 0 đầu.
+Danh mục ID theo bảng backend do người dùng cung cấp ngày 04/11/2026:
+Tây Ninh là `28`, Thành phố Hồ Chí Minh là `29`.
+Mã xã có 5 chữ số (giữ số 0 đầu).
 Không sử dụng cấp quận/huyện cũ. Snapshot phục vụ bộ chọn và kiểm tra quan hệ tỉnh–xã;
 không gọi dịch vụ bên ngoài khi người dùng tìm việc.
 

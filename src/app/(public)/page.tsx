@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { HomeHero } from "@/components/home/home-hero";
-import { HomeCompanies, HomeCvBanner, HomeIndustries, HomeOpportunityBanner } from "@/components/home/home-discovery";
+import { HomeCvBanner, HomeIndustries, HomeOpportunityBanner } from "@/components/home/home-discovery";
+import { HomeCompanyList } from "@/features/companies";
 import { HomeNews } from "@/components/home/home-news";
 import { HomeJobCollections } from "@/features/jobs";
 import { loadHomePage } from "@/server/bff/public/home";
@@ -10,7 +11,7 @@ export const metadata: Metadata = { title: "TalentAI – Tìm đúng việc, ch�
 export const dynamic = "force-dynamic";
 
 export default async function PublicPage() {
-    const { content, initialJobs } = await loadHomePage();
+    const { content, initialJobs, initialCompanies } = await loadHomePage();
     return <main>
         <RegistrationNotice />
         <HomeHero statistics={content.statistics} />
@@ -18,7 +19,7 @@ export default async function PublicPage() {
             <HomeJobCollections featuredIds={content.featuredIds} urgentIds={content.urgentIds} initialJobs={initialJobs} />
             <HomeOpportunityBanner />
             <HomeIndustries categories={content.categories} />
-            <HomeCompanies companies={content.companies} />
+            <HomeCompanyList initialData={initialCompanies} />
             <HomeNews articles={content.articles} />
             <HomeCvBanner />
         </div>

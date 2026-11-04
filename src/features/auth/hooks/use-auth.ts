@@ -26,7 +26,7 @@ export function useRegister() {
             await client.cancelQueries();
             client.clear();
             client.setQueryData(authKeys.me, session.user);
-            window.location.replace("/?registered=1");
+            window.location.replace(session.user.role === "recruiter" ? "/recruiter/onboarding" : "/?registered=1");
         },
     });
 }

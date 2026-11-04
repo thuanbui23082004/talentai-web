@@ -14,12 +14,18 @@ describe("company search", () => {
     });
     it("searches unaccented names and combines filters before pagination", async () => {
         expect((await run("q=sao+viet")).items[0].name).toBe("Sao Việt");
-        const result = await run("industryId=30000000-0000-4000-8000-000000000001&size=11-50&isVerified=true&hiringOnly=true");
+        const result = await run("industryId=30000000-0000-4000-8000-000000000001&size=11-50");
         expect(result.items).toHaveLength(2);
         expect(result.items.every((item: { size: string; isVerified: boolean }) => item.size === "11-50" && item.isVerified)).toBe(true);
         expect((await run("q=not-a-company")).meta.totalItems).toBe(0);
     });
     it("rejects invalid and unsupported filters", () => {
-        for (const query of ["page=0", "size=huge", "isVerified=maybe", "industryId=bad", "rating=5", "pageSize=101"]) expect(searchMockCompanies(new URLSearchParams(query)).status).toBe(422);
+        for (const query of ["page=0", "size=huge", "isVerified=true", "hiringOnly=true", "industryId=bad", "rating=5", "pageSize=101"]) expect(searchMockCompanies(new URLSearchParams(query)).status).toBe(422);
+    });
+    it("filters actual employee counts before pagination", async () => {
+        const result = await run("minSize=100&maxSize=200&pageSize=1");
+        expect(result.meta.totalItems).toBe(4);
+        expect(result.items).toHaveLength(1);
+        expect(result.items[0].companySize).toBe(125);
     });
 });

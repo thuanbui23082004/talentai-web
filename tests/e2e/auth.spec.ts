@@ -61,7 +61,7 @@ test("login uses the verified account role and private pages reject wrong roles"
 });
 
 for (const role of ["candidate", "recruiter"] as const) {
-  test(`registers ${role} and arrives home signed in`, async ({ page, context }) => {
+  test(`registers ${role} and reaches the appropriate setup page signed in`, async ({ page, context }) => {
     const email = `${role}-${crypto.randomUUID()}@example.com`;
     await page.goto(`/register?role=${role}`);
     await page.getByRole("textbox", { name: "Email đăng nhập", exact: false }).fill(email);
@@ -71,9 +71,14 @@ for (const role of ["candidate", "recruiter"] as const) {
     await page.locator('input[name="confirmPassword"]').fill("TalentAI123!");
     await page.getByRole("checkbox", { name: "Tôi đồng ý", exact: false }).check();
     await page.getByRole("button", { name: "Hoàn tất", exact: true }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL(role === "recruiter" ? /\/recruiter\/onboarding$/ : /\/$/);
     expect((await context.cookies()).some((cookie) => cookie.name === "access_token" && cookie.httpOnly)).toBe(true);
-    await expect(page.getByText("Đăng ký thành công", { exact: true })).toBeVisible();
+    if (role === "recruiter") {
+      await expect(page.getByRole("heading", { name: "Hoàn thiện hồ sơ tuyển dụng của bạn" })).toBeVisible();
+      await expect(page.getByRole("textbox", { name: "Tên công ty", exact: false })).toHaveValue("");
+    } else {
+      await expect(page.getByText("Đăng ký thành công", { exact: true })).toBeVisible();
+    }
   });
 }
 

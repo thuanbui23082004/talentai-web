@@ -9,7 +9,7 @@ test("selects province and ward, retains URL filters, and clears ward when chang
   await dialog.getByLabel("Tìm phường xã").fill("ngoc ha");
   await dialog.getByRole("button", { name: "Phường Ngọc Hà", exact: true }).click();
   await dialog.getByRole("button", { name: "Chọn địa điểm", exact: true }).click();
-  await expect(page).toHaveURL(/provinceCode=01/);
+  await expect(page).toHaveURL(/provinceCode=1/);
   await expect(page).toHaveURL(/wardCode=00008/);
   await expect(page.getByText("Tìm thấy 5 việc làm")).toBeVisible();
   await page.reload();
@@ -21,7 +21,7 @@ test("selects province and ward, retains URL filters, and clears ward when chang
   await expect(dialog.getByRole("button", { name: "Tất cả phường/xã", exact: true })).toHaveAttribute("aria-pressed", "true");
   await page.screenshot({ path: testInfo.outputPath("location-picker-mobile.png") });
   await dialog.getByRole("button", { name: "Chọn địa điểm", exact: true }).click();
-  await expect(page).toHaveURL(/provinceCode=79/);
+  await expect(page).toHaveURL(/provinceCode=29/);
   await expect(page).not.toHaveURL(/wardCode=/);
   await expect(page.getByText("Tìm thấy 7 việc làm")).toBeVisible();
   await page.getByRole("button", { name: "Xóa lọc", exact: true }).click();

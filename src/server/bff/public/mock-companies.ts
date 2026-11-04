@@ -5,6 +5,16 @@ import { normalizeLocation } from "@/lib/locations/vietnam";
 import type { components } from "@/lib/api/generated/schema";
 import { apiError } from "../responses";
 import { z } from "zod";
+import { COMPANY_INDUSTRIES } from "@/lib/companies/search";
+import { provinces, provinceCity, findProvinceByCity } from "@/lib/locations/vietnam";
+
+export function getMockCompanyCatalogs() {
+    const body: components["schemas"]["CompanyCatalogs"] = {
+        industries: COMPANY_INDUSTRIES.map(item => ({ id: item.value, name: item.label })),
+        locations: provinces.map(item => ({ id: item.code, name: provinceCity(item.name) })),
+    };
+    return Response.json(body, { headers: { "Cache-Control": "no-store" } });
+}
 
 const companies = createMockCompanies(mockJobs);
 export function getMockCompany(id: string, empty = false) {
@@ -31,16 +41,17 @@ export function getMockCompanyJobs(id: string, params: URLSearchParams, empty = 
     return Response.json(body, { headers: { "Cache-Control": "no-store" } });
 }
 export function searchMockCompanies(params: URLSearchParams, empty = false) {
-    const supported = new Set(["q", "city", "industryId", "size", "isVerified", "hiringOnly", "page", "pageSize"]);
+    const supported = new Set(["q", "city", "industryId", "locationId", "size", "minSize", "maxSize", "page", "pageSize"]);
     const parsed = parseCompanySearch(params);
     if (!parsed.success || [...params.keys()].some((key) => !supported.has(key))) return apiError(422, "VALIDATION_FAILED", "Bộ lọc công ty không hợp lệ.");
-    const { q, city, industryId, size, isVerified, hiringOnly, page, pageSize } = parsed.data;
+    const { q, city, industryId, locationId, size, minSize, maxSize, page, pageSize } = parsed.data;
     const matches = empty ? [] : companies.filter((company) => (!q || normalizeLocation(company.name).includes(normalizeLocation(q)))
         && (!city || normalizeLocation(company.city ?? "") === normalizeLocation(city))
         && (!industryId || company.industries?.some((item) => item.id === industryId))
-        && (!size || company.size === size)
-        && (isVerified === undefined || company.isVerified === isVerified)
-        && (!hiringOnly || (company.openJobsCount ?? 0) > 0));
+        && (!locationId || findProvinceByCity(company.city)?.code === locationId)
+        && (minSize === undefined || (company.companySize ?? 0) >= minSize)
+        && (maxSize === undefined || (company.companySize ?? Infinity) <= maxSize)
+        && (!size || company.size === size));
     const body: components["schemas"]["CompanyPage"] = { items: matches.slice((page - 1) * pageSize, page * pageSize), meta: { page, pageSize, totalItems: matches.length, totalPages: Math.ceil(matches.length / pageSize) } };
     return Response.json(body, { headers: { "Cache-Control": "no-store" } });
 }

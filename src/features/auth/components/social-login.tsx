@@ -20,6 +20,7 @@ export function SocialLogin({
     disabled?: boolean;
 }) {
     const mutation = useSocialLogin();
+    const facebookEnabled = role === "candidate";
     const statusId = useId();
     const googleButton = useRef<HTMLDivElement>(null);
     const [googleReady, setGoogleReady] = useState(false);
@@ -72,7 +73,7 @@ export function SocialLogin({
     }
 
     function initializeFacebook() {
-        if (!window.FB || !facebookAppId) return;
+        if (!facebookEnabled || !window.FB || !facebookAppId) return;
         try {
             window.FB.init({
                 appId: facebookAppId,
@@ -89,7 +90,7 @@ export function SocialLogin({
     }
 
     function loginFacebook() {
-        if (!window.FB || !facebookReady || busy) return;
+        if (!facebookEnabled || !window.FB || !facebookReady || busy) return;
         setSdkError("");
         mutation.reset();
         setFacebookPending(true);
@@ -138,7 +139,7 @@ export function SocialLogin({
                     }
                 />
             )}
-            {facebookAppId && (
+            {facebookEnabled && facebookAppId && (
                 <Script
                     src="https://connect.facebook.net/vi_VN/sdk.js"
                     onReady={initializeFacebook}
@@ -206,7 +207,7 @@ export function SocialLogin({
                         </svg>
                     </Button>
                 )}
-                <Button
+                {facebookEnabled && <Button
                     type="button"
                     variant="outline"
                     size="icon"
@@ -232,7 +233,7 @@ export function SocialLogin({
                             d="M13.4 22v-7.7H16l.4-3h-3V9.4c0-.87.25-1.46 1.5-1.46h1.6V5.25a21 21 0 0 0-2.33-.12c-2.3 0-3.87 1.4-3.87 3.97v2.2H7.7v3h2.6V22h3.1Z"
                         />
                     </svg>
-                </Button>
+                </Button>}
             </div>
             <div id={statusId} className="mt-3" aria-live="polite">
                 {mutation.isPending && (
@@ -240,9 +241,9 @@ export function SocialLogin({
                         Đang xác thực tài khoản…
                     </p>
                 )}
-                {(!googleClientId || !facebookAppId) && (
+                {(!googleClientId || (facebookEnabled && !facebookAppId)) && (
                     <p className="text-xs text-muted-foreground">
-                        {!googleClientId && !facebookAppId
+                        {!googleClientId && facebookEnabled && !facebookAppId
                             ? "Đăng nhập Google/Facebook hiện chưa sẵn sàng."
                             : !googleClientId
                               ? "Đăng nhập Google hiện chưa sẵn sàng."

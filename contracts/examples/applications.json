@@ -7,7 +7,7 @@
         "id": "10000000-0000-4000-8000-000000000001",
         "title": "Lập trình viên Frontend React",
         "company": { "id": "20000000-0000-4000-8000-000000000001", "name": "Công ty mẫu Sao Việt" },
-        "location": { "city": "Đà Nẵng", "provinceCode": "48", "wardCode": "20194", "ward": "Phường Hải Vân" },
+        "location": { "city": "Đà Nẵng", "provinceCode": "21", "wardCode": "20194", "ward": "Phường Hải Vân" },
         "workType": "full_time",
         "level": "junior",
         "status": "open",

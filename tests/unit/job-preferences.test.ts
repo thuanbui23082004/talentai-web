@@ -12,7 +12,7 @@ describe("job preference presentation draft", () => {
     it("enforces selection limits, uniqueness and supported options", () => {
         for (const change of [
             { industries: ["it-hardware", "it-software", "banking", "marketing"] },
-            { locations: ["01", "04", "08", "11", "12", "14"] },
+            { locations: ["1", "2", "3", "4", "5", "6"] },
             { levels: ["intern", "fresher", "junior", "middle", "senior", "lead"] },
             { workTypes: ["full_time", "part_time", "internship", "contract", "remote", "hybrid"] },
             { industries: ["banking", "banking"] }, { levels: ["invalid"] }, { locations: ["unknown"] },

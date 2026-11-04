@@ -25,7 +25,7 @@ export function HomeHero({ statistics }: { statistics: HomeContent["statistics"]
                     </div>
                 </div>)}
             </dl>
-            <p className="mt-4 text-center text-[11px] text-muted-foreground">Số liệu và bộ sưu tập trên trang chủ dùng để minh họa giao diện.</p>
+            <p className="mt-4 text-center text-[11px] text-muted-foreground">Số công việc và ứng viên hiện dùng để minh họa giao diện.</p>
         </div>
         <Image src="/images/image 15.png" width={490} height={650} alt="" priority className="pointer-events-none absolute -bottom-5 -left-3 hidden w-40 [clip-path:inset(0_0_10%_0)] lg:block xl:w-44" />
         <Image src="/images/image 16.png" width={578} height={728} alt="" priority className="pointer-events-none absolute -right-3 -bottom-7 hidden w-44 [clip-path:inset(0_0_10%_0)] lg:block xl:w-48" />

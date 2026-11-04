@@ -2211,10 +2211,10 @@ paths:
           format: uuid
       - name: provinceCode
         in: query
-        description: Mã tỉnh/thành hiện hành sau 07/2025, gồm 2 chữ số.
+        description: ID tỉnh/thành theo danh mục backend từ 1 đến 34, không thêm số 0 đầu.
         schema:
           type: string
-          pattern: '^[0-9]{2}$'
+          pattern: '^([1-9]|[12][0-9]|3[0-4])$'
       - name: wardCode
         in: query
         description: Mã phường/xã/đặc khu hiện hành, gồm 5 chữ số. Phải đi cùng provinceCode và thuộc tỉnh đã chọn.
@@ -2332,6 +2332,24 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
+  /companies/catalogs:
+    get:
+      tags:
+      - Companies
+      operationId: getCompanyCatalogs
+      summary: Danh mục ngành nghề và địa điểm để tìm công ty
+      security: []
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyCatalogs'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
   /companies:
     get:
       tags:
@@ -2345,14 +2363,6 @@ paths:
         in: query
         schema:
           $ref: '#/components/schemas/CompanySize'
-      - name: isVerified
-        in: query
-        schema:
-          type: boolean
-      - name: hiringOnly
-        in: query
-        schema:
-          type: boolean
       - name: q
         in: query
         schema:
@@ -2361,7 +2371,22 @@ paths:
         in: query
         schema:
           type: string
-          format: uuid
+          description: ID số của company service; mock cũ chấp nhận UUID.
+      - name: locationId
+        in: query
+        schema:
+          type: string
+          pattern: '^[1-9][0-9]*$'
+      - name: minSize
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+      - name: maxSize
+        in: query
+        schema:
+          type: integer
+          minimum: 1
       - name: city
         in: query
         schema:
@@ -7195,7 +7220,7 @@ components:
       properties:
         provinceCode:
           type: string
-          pattern: '^[0-9]{2}$'
+          pattern: '^([1-9]|[12][0-9]|3[0-4])$'
         wardCode:
           type: string
           pattern: '^[0-9]{5}$'
@@ -8537,12 +8562,35 @@ components:
           type: string
         isVerified:
           type: boolean
+    PublicCompanyCatalogRef:
+      type: object
+      required:
+      - id
+      - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    CompanyCatalogs:
+      type: object
+      required:
+      - industries
+      - locations
+      properties:
+        industries:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicCompanyCatalogRef'
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicCompanyCatalogRef'
     CompanyPublic:
       type: object
       required:
       - id
       - name
-      - isVerified
       description: Hồ sơ doanh nghiệp công khai (không có mã số thuế, giấy tờ xác thực, thông tin liên hệ nội bộ).
       properties:
         id:
@@ -8551,6 +8599,11 @@ components:
           type: string
         logoUrl:
           type: string
+        coverImageUrl:
+          type: string
+        companySize:
+          type: integer
+          minimum: 1
         website:
           type: string
         description:
@@ -8558,7 +8611,7 @@ components:
         industries:
           type: array
           items:
-            $ref: '#/components/schemas/CatalogRef'
+            $ref: '#/components/schemas/PublicCompanyCatalogRef'
         address:
           type: string
         city:

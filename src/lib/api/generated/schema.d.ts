@@ -1050,6 +1050,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/companies/catalogs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Danh mục ngành nghề và địa điểm để tìm công ty */
+        get: operations["getCompanyCatalogs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/companies": {
         parameters: {
             query?: never;
@@ -3835,19 +3852,29 @@ export interface components {
             city?: string;
             isVerified?: boolean;
         };
+        PublicCompanyCatalogRef: {
+            id: string;
+            name: string;
+        };
+        CompanyCatalogs: {
+            industries: components["schemas"]["PublicCompanyCatalogRef"][];
+            locations: components["schemas"]["PublicCompanyCatalogRef"][];
+        };
         /** @description Hồ sơ doanh nghiệp công khai (không có mã số thuế, giấy tờ xác thực, thông tin liên hệ nội bộ). */
         CompanyPublic: {
             id: components["schemas"]["Id"];
             name: string;
             logoUrl?: string;
+            coverImageUrl?: string;
+            companySize?: number;
             website?: string;
             description?: string;
-            industries?: components["schemas"]["CatalogRef"][];
+            industries?: components["schemas"]["PublicCompanyCatalogRef"][];
             address?: string;
             city?: string;
             size?: components["schemas"]["CompanySize"];
             foundedYear?: number;
-            isVerified: boolean;
+            isVerified?: boolean;
             openJobsCount?: number;
         };
         CompanyPage: {
@@ -6315,7 +6342,7 @@ export interface operations {
                 /** @description Tên tỉnh/thành */
                 city?: string;
                 locationId?: string;
-                /** @description Mã tỉnh/thành hiện hành sau 07/2025, gồm 2 chữ số. */
+                /** @description ID tỉnh/thành theo danh mục backend từ 1 đến 34, không thêm số 0 đầu. */
                 provinceCode?: string;
                 /** @description Mã phường/xã/đặc khu hiện hành, gồm 5 chữ số. Phải đi cùng provinceCode và thuộc tỉnh đã chọn. */
                 wardCode?: string;
@@ -6382,14 +6409,37 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
+    getCompanyCatalogs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thành công */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyCatalogs"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
     searchCompanies: {
         parameters: {
             query?: {
                 size?: components["schemas"]["CompanySize"];
-                isVerified?: boolean;
-                hiringOnly?: boolean;
                 q?: string;
                 industryId?: string;
+                locationId?: string;
+                minSize?: number;
+                maxSize?: number;
                 city?: string;
                 /** @description Trang (từ 1). */
                 page?: components["parameters"]["Page"];

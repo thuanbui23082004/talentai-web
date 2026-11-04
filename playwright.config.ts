@@ -16,7 +16,7 @@ export default defineConfig({
     command: "npm run dev -- --hostname 127.0.0.1 --port 3100",
     url: "http://127.0.0.1:3100/jobs",
     reuseExistingServer: false,
-    env: { DATA_MODE: "mock", PLAYWRIGHT_TEST: "1" },
+    env: { DATA_MODE: "mock", COMPANY_DATA_MODE: process.env.COMPANY_DATA_MODE ?? "mock", PLAYWRIGHT_TEST: "1" },
     timeout: 120_000,
   },
   projects: [

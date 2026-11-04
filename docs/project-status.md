@@ -1,5 +1,38 @@
 # Trạng thái triển khai
 
+## Company service thật — dữ liệu công ty công khai
+
+Trang chủ, danh sách/tìm kiếm/lọc công ty, tải thêm và chi tiết đã nối company service
+`http://localhost:3003/api/v1` qua BFF. Cấu hình riêng `COMPANY_DATA_MODE=real` và
+`COMPANY_API_URL` đã đặt trong `.env.local`; các nghiệp vụ khác tiếp tục theo DATA_MODE.
+Đã đồng bộ danh mục ngành/địa điểm ID số, phân trang Spring từ 0, tìm tên và khoảng nhân viên.
+Không ghép việc mock hoặc số liệu giả vào công ty thật. Hai bộ lọc xác minh/đang tuyển chưa có
+trong backend nên đã bỏ khỏi UI tìm kiếm. Các ghi chú công ty chỉ mock bên dưới là trạng thái cũ.
+Đã nghiệm thu bằng backend thật với 20 công ty, 195 unit test, 7 E2E mock và 2 E2E real pass;
+typecheck, lint, build và contract lint pass. Bộ lọc ngành/địa điểm rỗng
+do dữ liệu mẫu chưa gắn danh mục. Chi tiết triển khai, luồng và cách chạy tại
+`docs/company-service-integration.md`.
+
+## Hoàn thiện hồ sơ công ty sau đăng ký nhà tuyển dụng
+
+Theo yêu cầu người dùng, đăng ký chỉ tạo tài khoản đại diện. Nhà tuyển dụng đăng ký thành công
+được chuyển tới `/recruiter/onboarding`, có server guard role recruiter và giao diện riêng
+theo token tím/trắng. Ứng viên vẫn về trang chủ.
+
+Theo yêu cầu cập nhật, onboarding chỉ chia nhỏ phần thông tin công ty thành 3 bước:
+1. Thông tin doanh nghiệp: tên, mã số thuế tùy chọn, lĩnh vực hoạt động.
+2. Địa chỉ và liên hệ: tỉnh/thành, địa chỉ trụ sở, số điện thoại.
+3. Kiểm tra và hoàn tất: xem lại thông tin, quay lại chỉnh sửa và xác nhận tạo hồ sơ.
+
+Đã bỏ bước email, tải giấy tờ và trạng thái chờ duyệt khỏi onboarding.
+Form dùng Zod, kiểm tra từng nhóm trường, giữ bản nháp khi chuyển bước/quay lại/lỗi mạng.
+Chỉ POST/PUT `/recruiter/company` khi xác nhận ở bước cuối; không tạo công ty chưa đủ dữ liệu.
+Bản nháp chưa lưu sẽ mất khi tải lại. Công ty đã lưu được tải lại và hiển thị màn hình hoàn tất.
+Sau hoàn tất có liên kết tạo tin tuyển dụng và chỉnh sửa hồ sơ công ty.
+Các API và trang quản lý xác thực công ty hiện có không thay đổi.
+API nghiệp vụ sử dụng mock hiện có theo DATA_MODE; chưa nghiệm thu công ty với backend thật.
+Yêu cầu onboarding và validation bổ sung ở đây là yêu cầu task, không phải SRS đã xác nhận.
+
 ## Google/Facebook social login
 
 Đã nối SDK provider → hook/service → BFF → Java `/api/v1/auth/social-login`.
@@ -35,7 +68,8 @@ không có token. Không dùng response giả lập cho lần nghiệm thu này.
 ## Đăng ký và đăng nhập ngay
 
 Đăng ký thành công đặt cookie từ token Java, trả RegisterResponse dạng auth
-response và chuyển về `/`. Thông báo thành công góc dưới phải dùng toast chung
+response; ứng viên chuyển về `/`, nhà tuyển dụng sang `/recruiter/onboarding`.
+Thông báo thành công cho ứng viên ở góc dưới phải dùng toast chung
 timeout 5 giây; bỏ màn hình thành công và bước đăng nhập thủ công.
 
 ## Auth: createdAt chưa có khi đăng ký

@@ -6,7 +6,7 @@ const list = <T extends z.ZodType>(schema: T) => z.preprocess((value) => typeof 
 
 export const jobSearchSchema = z.object({
     q: z.string().optional(), city: z.string().optional(),
-    provinceCode: z.string().regex(/^\d{2}$/).optional(),
+    provinceCode: z.string().regex(/^(?:[1-9]|[12][0-9]|3[0-4])$/).optional(),
     wardCode: z.string().regex(/^\d{5}$/).optional(),
     salaryMin: number, salaryMax: number,
     minExperience: number, maxExperience: number,
