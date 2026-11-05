@@ -7,5 +7,8 @@
   ],
   "city": "Đà Nẵng",
   "address": "12 Đường Hoa",
-  "contactPhone": "0912345678"
+  "contactPhone": "0912345678",
+  "website": "https://example.com",
+  "companySize": 50,
+  "foundedYear": 2015
 }

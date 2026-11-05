@@ -4,7 +4,7 @@ export const companyInputSchema = z.object({
   name: z.string().trim().min(2, 'companyName').max(200, 'companyName'), industryIds: z.array(z.string().regex(/^(?:[1-9]\d*|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/i, 'industry')).min(1, 'industry'), city: z.string().trim().min(1, 'required'),
   address: z.string().trim().max(255, 'addressLength').optional(), contactPhone: z.string().optional(), contactEmail: z.email('email').optional(), taxCode: z.string().optional(), size: z.enum(companySizes).optional(),
   logoUrl: z.url().optional(), coverImageUrl: z.url().optional(), companySize: z.number().int().positive().optional(),
-  website: z.url('website').refine(value => /^https?:\/\//i.test(value), 'website').optional(), description: z.string().max(5000, 'descriptionLength').optional(), foundedYear: z.number().int().min(1800).max(2100).optional(),
+  website: z.url('website').max(2048).refine(value => /^https?:\/\//i.test(value), 'website').optional(), description: z.string().max(5000, 'descriptionLength').optional(), foundedYear: z.number().int().min(1).max(9999).optional(),
 }).strict();
 export const companySchema = z.object({
   id: z.uuid(), name: z.string(), logoUrl: z.string().optional(), website: z.string().optional(), description: z.string().optional(),

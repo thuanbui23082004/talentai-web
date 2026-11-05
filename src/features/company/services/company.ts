@@ -8,6 +8,7 @@ import {
 } from "@/features/company/schemas/company";
 import { settingsError, settingsRequest } from "@/features/account";
 import { z } from "zod";
+import { companyImageFileSchema } from "../schemas/onboarding";
 export function getCompany() {
     return settingsRequest(async () => {
         await ensureApiSession();
@@ -57,6 +58,20 @@ export function removeLogo() {
         });
         if (result.error)
             throw settingsError(result.error, result.response.status);
+    });
+}
+export function uploadCover(file: File) {
+    return settingsRequest(async () => {
+        companyImageFileSchema.parse(file);
+        const token = await ensureApiSession();
+        const data = new FormData();
+        data.set("file", file);
+        const result = await apiClient.PUT("/recruiter/company/cover", {
+            body: { file: file.name }, bodySerializer: () => data,
+            headers: { "X-CSRF-Token": token },
+        });
+        if (result.error) throw settingsError(result.error, result.response.status);
+        return companySchema.parse(result.data);
     });
 }
 export function submitDocuments(files: File[]) {

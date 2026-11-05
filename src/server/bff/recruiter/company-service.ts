@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { components } from "@/lib/api/generated/schema";
-import { companyInputSchema, companySchema } from "@/features/company";
+import { companyInputSchema, companySchema, logoFileSchema, companyImageFileSchema } from "@/features/company";
 import { normalizeLocation, provinceCity } from "@/lib/locations/vietnam";
 import { hasValidCsrf, isTrustedOrigin } from "../auth/cookies";
 import { readRequestIdentity } from "../auth/session";
@@ -20,7 +20,7 @@ const upstreamCompany = z.object({
     }),
 });
 const backendError = z.object({ error: z.object({ code: z.string(), fieldErrors: z.array(z.object({ field: z.string() })).optional() }) });
-const fieldNames: Record<string, string> = { name: "name", description: "description", taxCode: "taxCode", industryId: "industryId", locationId: "city", address: "address", contactPhone: "contactPhone", contactEmail: "contactEmail", website: "website", companySize: "size", foundedYear: "foundedYear" };
+const fieldNames: Record<string, string> = { name: "name", description: "description", taxCode: "taxCode", industryId: "industryId", locationId: "city", address: "address", contactPhone: "contactPhone", contactEmail: "contactEmail", website: "website", companySize: "companySize", foundedYear: "foundedYear" };
 const reply = (body: unknown, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
 
 function invalid(fields: string[], duplicateTaxCode = false) {
@@ -43,6 +43,8 @@ async function upstreamError(response: Response) {
     if (response.status === 403) return apiError(403, "FORBIDDEN", "Bạn không có quyền quản lý công ty.");
     if (response.status === 404) return apiError(404, "NOT_FOUND", "Chưa có hồ sơ công ty.");
     if (response.status === 409) return apiError(409, "CONFLICT", "Thông tin công ty bị trùng. Vui lòng kiểm tra lại.");
+    if (response.status === 413) return apiError(413, "PAYLOAD_TOO_LARGE", "Ảnh vượt quá dung lượng cho phép.");
+    if (response.status === 415) return apiError(415, "UNSUPPORTED_MEDIA_TYPE", "Định dạng ảnh không được hỗ trợ.");
     return apiError(503, "SERVICE_UNAVAILABLE", "Không thể kết nối dịch vụ công ty.");
 }
 
@@ -54,10 +56,11 @@ export function isRecruiterCompanyRequest(request: Request) {
 export async function handleRecruiterCompany(request: Request, baseUrl: string): Promise<Response> {
     const path = new URL(request.url).pathname;
     const isCatalog = path === "/api/bff/recruiter/company/catalogs";
-    if (!isCatalog && path !== "/api/bff/recruiter/company") {
+    const imageKind = path === "/api/bff/recruiter/company/logo" ? "logo" : path === "/api/bff/recruiter/company/cover" ? "cover" : undefined;
+    if (!isCatalog && !imageKind && path !== "/api/bff/recruiter/company") {
         return apiError(503, "SERVICE_UNAVAILABLE", "Chức năng công ty này chưa được tích hợp.");
     }
-    if (!(isCatalog ? ["GET"] : ["GET", "POST", "PUT"]).includes(request.method)) {
+    if (!(isCatalog ? ["GET"] : imageKind ? ["PUT"] : ["GET", "POST", "PUT"]).includes(request.method)) {
         return apiError(405, "BAD_REQUEST", "Phương thức không được hỗ trợ.");
     }
     if (request.method !== "GET" && (!isTrustedOrigin(request) || !hasValidCsrf(request))) {
@@ -95,6 +98,27 @@ export async function handleRecruiterCompany(request: Request, baseUrl: string):
             });
         }
         if (isCatalog) return reply(await catalogs());
+        if (imageKind) {
+            const data = await request.formData().catch(() => null);
+            const file = data?.get("file");
+            const validated = (imageKind === "cover" ? companyImageFileSchema : logoFileSchema).safeParse(file);
+            if (!validated.success) return file instanceof File && file.size > 2 * 1024 * 1024
+                ? apiError(413, "PAYLOAD_TOO_LARGE", "Ảnh tối đa 2MB.")
+                : apiError(415, "UNSUPPORTED_MEDIA_TYPE", "Ảnh không hợp lệ.");
+            const bytes = Buffer.from(await validated.data.slice(0, 512).arrayBuffer());
+            const valid = validated.data.type === "image/png" ? bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+                : validated.data.type === "image/jpeg" ? bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255
+                : validated.data.type === "image/webp" ? bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP"
+                : validated.data.type === "image/svg+xml" && /<svg[\s>]/i.test(bytes.toString("utf8"));
+            if (!valid) return apiError(415, "UNSUPPORTED_MEDIA_TYPE", "Nội dung ảnh không hợp lệ.");
+            const body = new FormData();
+            body.set("file", validated.data);
+            const response = await fetch(`${baseUrl.replace(/\/$/, "")}/recruiter/company/${imageKind}`, {
+                method: "POST", headers: { Accept: "application/json", Authorization: `Bearer ${accessToken}` },
+                body, cache: "no-store", redirect: "error", signal: AbortSignal.timeout(15000),
+            });
+            return response.ok ? reply(mapCompany(await response.json())) : upstreamError(response);
+        }
         if (request.method === "GET") {
             const response = await call("recruiter/company");
             return response.ok ? reply(mapCompany(await response.json())) : upstreamError(response);
@@ -113,7 +137,7 @@ export async function handleRecruiterCompany(request: Request, baseUrl: string):
         const location = refs.locations.find(item => normalizeLocation(provinceCity(item.name)) === city);
         if (!industry || !location) return invalid([!industry && "industryId", !location && "city"].filter((field): field is string => !!field));
         const response = await call("recruiter/company", {
-            name: values.name, logoUrl: values.logoUrl, coverImageUrl: values.coverImageUrl, companySize: values.companySize, taxCode: values.taxCode, description: values.description,
+            name: values.name, companySize: values.companySize, taxCode: values.taxCode, description: values.description,
             industryId: Number(industry.id), locationId: Number(location.id),
             address: values.address, contactPhone: values.contactPhone, contactEmail: values.contactEmail,
             website: values.website, foundedYear: values.foundedYear,

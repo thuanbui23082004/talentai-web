@@ -10,7 +10,7 @@
 .co-progress { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 16px 24px; margin-bottom: 16px; }
 .co-progress-label { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; font-size: 12px; color: var(--muted-foreground); }
 .co-progress-label strong { color: var(--primary); }
-.co-progress ol { display: grid; grid-template-columns: repeat(3, 1fr); }
+.co-progress ol { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
 .co-progress li { position: relative; min-width: 0; }
 .co-progress li:not(:last-child)::after { content: ""; position: absolute; left: calc(50% + 28px); right: calc(-50% + 28px); top: 21px; height: 2px; background: var(--border); }
 .co-progress li[data-state="visited"]::after { background: var(--primary); }
@@ -61,6 +61,41 @@
 .co-footer { padding: 12px 24px 16px; }
 .co-loading { display: grid; gap: 24px; min-height: 320px; color: var(--muted-foreground); }
 .co-loading span { background: var(--secondary); border-radius: 12px; min-height: 44px; }
+.co-images { display: grid; gap: 20px; }
+.co-preview-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 12px; }
+.co-preview-heading > span { display: flex; align-items: center; gap: 8px; color: var(--primary); font-weight: 600; }
+.co-preview-heading svg { width: 16px; height: 16px; }
+.co-preview-heading small { color: var(--muted-foreground); }
+.co-brand-preview { overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: var(--card); }
+.co-brand-cover { height: 200px; overflow: hidden; background: var(--secondary); }
+.co-brand-cover > img { width: 100%; height: 100%; object-fit: cover; }
+.co-cover-placeholder { position: relative; height: 100%; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(120deg, var(--brand-deep, var(--primary)), var(--primary)); color: var(--primary-foreground, var(--color-primary-foreground)); }
+.co-cover-placeholder > span { position: absolute; width: 300px; height: 300px; border: 1px solid currentColor; border-radius: 50%; opacity: .12; }
+.co-cover-placeholder > span:first-child { left: -120px; top: -160px; width: 420px; height: 420px; }
+.co-cover-placeholder > span:nth-child(2) { right: -50px; bottom: -220px; width: 460px; height: 460px; }
+.co-cover-placeholder > svg { width: 34px; height: 34px; opacity: .8; }
+.co-card .co-cover-placeholder > p { position: relative; color: inherit; opacity: .8; font-size: 12px; text-align: center; padding: 0 24px; }
+.co-brand-content { position: relative; display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: start; gap: 16px 20px; padding: 0 24px 24px; }
+.co-brand-logo { display: grid; place-items: center; width: 96px; height: 96px; margin-top: -36px; border: 5px solid var(--card); border-radius: 20px; background: var(--card); box-shadow: var(--shadow-card); overflow: hidden; color: var(--primary); }
+.co-brand-logo > img { width: 100%; height: 100%; object-fit: contain; }
+.co-brand-logo > svg { width: 40px; height: 40px; }
+.co-brand-name { padding-top: 16px; min-width: 0; }
+.co-preview-label { display: block; margin-bottom: 5px; color: var(--primary); font-size: 10px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+.co-brand-name h3 { font-size: 20px; line-height: 1.4; overflow-wrap: anywhere; }
+.co-brand-name p { margin-top: 5px; font-size: 12px; }
+.co-brand-facts { grid-column: 2; display: flex; flex-wrap: wrap; gap: 10px 20px; min-width: 0; color: var(--muted-foreground); font-size: 12px; }
+.co-brand-facts > span { display: inline-flex; align-items: center; gap: 6px; overflow-wrap: anywhere; min-width: 0; }
+.co-brand-facts svg { width: 14px; height: 14px; flex: none; color: var(--primary); }
+.co-image-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.co-image-picker { display: grid; grid-template-columns: 40px minmax(0, 1fr); align-content: start; align-items: start; gap: 12px; padding: 20px; border: 1px dashed var(--border); border-radius: 16px; background: var(--background); }
+.co-image-picker-icon { width: 40px; height: 40px; display: grid; place-items: center; background: var(--secondary); color: var(--primary); border-radius: 12px; }
+.co-image-picker-icon svg { width: 19px; height: 19px; }
+.co-image-picker h3 { font-size: 14px; }
+.co-image-picker p { font-size: 12px; margin-top: 4px; }
+.co-image-picker small { display: block; margin-top: 4px; font-size: 11px; color: var(--muted-foreground); }
+.co-image-buttons { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.co-image-filename, .co-image-error { grid-column: 1 / -1; overflow-wrap: anywhere; }
+.co-card .co-image-error { color: var(--destructive); }
 .company-onboarding :where(button, a):focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
 @media (max-width: 700px) {
   .co-review > section { padding: 16px; }
@@ -74,6 +109,15 @@
   .co-progress { padding: 16px 10px; }
   .co-progress button { align-items: center; text-align: center; padding: 0 3px; }
   .co-progress small { display: none; }
+  .co-progress button > span:last-child { display: none; }
+  .co-image-grid { grid-template-columns: 1fr; }
+  .co-brand-cover { height: 150px; }
+  .co-brand-content { grid-template-columns: 1fr; gap: 12px; padding: 0 16px 20px; }
+  .co-brand-logo { width: 80px; height: 80px; margin-top: -30px; }
+  .co-brand-name { padding-top: 0; }
+  .co-brand-name h3 { font-size: 18px; }
+  .co-brand-facts { grid-column: 1; }
+  .co-image-picker { padding: 16px; }
   .co-progress strong { font-size: 10px; }
   .co-progress li:not(:last-child)::after { left: calc(50% + 24px); right: calc(-50% + 24px); }
   .co-progress-label { font-size: 11px; }

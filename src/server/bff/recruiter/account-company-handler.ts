@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { accountPatchSchema, imageFileSchema } from '@/features/account';
-import { companyInputSchema, logoFileSchema, verificationFilesSchema } from '@/features/company';
+import { companyInputSchema, logoFileSchema, companyImageFileSchema, verificationFilesSchema } from '@/features/company';
 import { recruiterIndustries } from '@/mocks/fixtures/recruiter-catalog';
 import { getMockCompanies, getRecruiterMockStore, type RecruiterContext } from '@/server/bff/recruiter/mock-store';
 import type { components } from '@/lib/api/generated/schema';
@@ -32,7 +32,7 @@ async function validSignature(file: File) {
   return false;
 }
 export async function handleAccountCompany(request: NextRequest, path: string, session: RecruiterContext) {
-  if (!['me', 'me/avatar', 'recruiter/company', 'recruiter/company/logo', 'recruiter/company/verification-documents'].includes(path)) return;
+  if (!['me', 'me/avatar', 'recruiter/company', 'recruiter/company/logo', 'recruiter/company/cover', 'recruiter/company/verification-documents'].includes(path)) return;
   if (!session.userId) return problem(401, 'UNAUTHENTICATED');
   const id = session.userId;
   const account = getMockAccounts().get(id);
@@ -69,16 +69,20 @@ export async function handleAccountCompany(request: NextRequest, path: string, s
     else if (company) { deleteMedia(company.logoUrl); delete company.logoUrl; syncCompany(company); }
     return new NextResponse(null, { status: 204 });
   }
-  if (request.method === 'PUT' && (path === 'me/avatar' || path === 'recruiter/company/logo')) {
+  if (request.method === 'PUT' && (path === 'me/avatar' || path === 'recruiter/company/logo' || path === 'recruiter/company/cover')) {
     const data = await request.formData().catch(() => null);
-    const parsed = (path === 'me/avatar' ? imageFileSchema : logoFileSchema).safeParse(data?.get('file'));
-    if (!parsed.success) return problem(parsed.error.issues.some(issue => issue.message === 'fileSize') ? 413 : 415, parsed.error.issues.some(issue => issue.message === 'fileSize') ? 'PAYLOAD_TOO_LARGE' : 'UNSUPPORTED_MEDIA_TYPE');
+    const parsed = (path === 'me/avatar' ? imageFileSchema : path.endsWith('/cover') ? companyImageFileSchema : logoFileSchema).safeParse(data?.get('file'));
+    if (!parsed.success) {
+      const file = data?.get('file');
+      const oversized = parsed.error.issues.some(issue => issue.message === 'fileSize') || path.endsWith('/cover') && file instanceof File && file.size > 2 * 1024 * 1024;
+      return problem(oversized ? 413 : 415, oversized ? 'PAYLOAD_TOO_LARGE' : 'UNSUPPORTED_MEDIA_TYPE');
+    }
     if (!await validSignature(parsed.data)) return problem(415, 'UNSUPPORTED_MEDIA_TYPE');
     const mediaId = randomUUID();
     const url = `/api/mock-media/${mediaId}`;
     getMockMedia().set(mediaId, { ownerId: id, type: parsed.data.type, bytes: new Uint8Array(await parsed.data.arrayBuffer()) });
     if (path === 'me/avatar') { deleteMedia(account.user.avatarUrl); account.user.avatarUrl = url; return response({ ...ownedUser, avatarUrl: url }); }
-    if (company) { deleteMedia(company.logoUrl); company.logoUrl = url; syncCompany(company); return response(company); }
+    if (company) { const key = path.endsWith('/cover') ? 'coverImageUrl' : 'logoUrl'; deleteMedia(company[key]); company[key] = url; syncCompany(company); return response(company); }
   }
   if (path === 'recruiter/company/verification-documents' && request.method === 'POST' && company) {
     const data = await request.formData().catch(() => null);

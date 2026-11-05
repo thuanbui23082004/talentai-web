@@ -1553,6 +1553,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/recruiter/company/cover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Tải ảnh bìa công ty
+         * @description PNG/JPEG/WebP, tối đa 2 MB.
+         *
+         *     **Quyền:** Nhà tuyển dụng.
+         */
+        put: operations["uploadCompanyCover"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/recruiter/company/logo": {
         parameters: {
             query?: never;
@@ -7723,6 +7745,39 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
+    uploadCompanyCover: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Thành công */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Company"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            422: components["responses"]["ValidationError"];
+            500: components["responses"]["InternalError"];
+        };
+    };
     uploadCompanyLogo: {
         parameters: {
             query?: never;
@@ -7750,6 +7805,8 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
             422: components["responses"]["ValidationError"];
             500: components["responses"]["InternalError"];
         };

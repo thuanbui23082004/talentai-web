@@ -10,6 +10,7 @@ import {
     getCompanyCatalogs,
     saveCompany,
     uploadLogo,
+    uploadCover,
     removeLogo,
     submitDocuments,
 } from "@/features/company/services/company";
@@ -74,6 +75,7 @@ export function useCompanyActions() {
             },
             retry: false,
         }),
+        cover: useMutation({ mutationKey: companyKey, mutationFn: uploadCover, onSuccess: updated, retry: false, gcTime: 0 }),
         documents: useMutation({
             mutationKey: companyKey,
             mutationFn: submitDocuments,

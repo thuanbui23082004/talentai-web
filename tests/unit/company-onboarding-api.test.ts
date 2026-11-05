@@ -27,6 +27,29 @@ function network(role = "RECRUITER", companyResponse = () => Response.json({ dat
 afterEach(() => vi.restoreAllMocks());
 
 describe("real recruiter company adapter", () => {
+    it.each(["logo", "cover"])("forwards %s as multipart POST without copying the browser Content-Type", async kind => {
+        const fetch = network();
+        const body = new FormData();
+        const png = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10, 0]);
+        body.set("file", new File([png], "company.png", { type: "image/png" }));
+        const upload = new Request(`http://localhost/api/bff/recruiter/company/${kind}`, { method: "PUT", headers: { cookie: `access_token=${token}`, "x-csrf-token": csrfTokenFor({ access: token }) }, body });
+        const response = await handleRecruiterCompany(upload, base);
+        expect(response.status).toBe(200);
+        const [url, init] = fetch.mock.calls[1];
+        expect(String(url)).toBe(`${base}/recruiter/company/${kind}`);
+        expect(init?.method).toBe("POST");
+        expect(new Headers(init?.headers).has("Content-Type")).toBe(false);
+        expect((init?.body as FormData).get("file")).toBeInstanceOf(File);
+    });
+    it("rejects corrupt or oversized covers before sending a file to the backend", async () => {
+        const fetch = network();
+        for (const [file, status] of [[new File(["not a png"], "cover.png", { type: "image/png" }), 415], [new File([new Uint8Array(2 * 1024 * 1024 + 1)], "cover.png", { type: "image/png" }), 413]] as const) {
+            const body = new FormData(); body.set("file", file);
+            const response = await handleRecruiterCompany(new Request("http://localhost/api/bff/recruiter/company/cover", { method: "PUT", headers: { cookie: `access_token=${token}`, "x-csrf-token": csrfTokenFor({ access: token }) }, body }), base);
+            expect(response.status).toBe(status);
+        }
+        expect(fetch.mock.calls.every(([url]) => String(url).endsWith("/auth/me"))).toBe(true);
+    });
     it("loads catalogs with actual backend IDs", async () => {
         network();
         const response = await handleRecruiterCompany(request("GET", undefined, {}, "/catalogs"), base);

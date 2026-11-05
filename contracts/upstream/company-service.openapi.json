@@ -605,6 +605,82 @@
           }
         ]
       }
+    },
+    "/api/v1/recruiter/company/logo": {
+      "post": {
+        "tags": [
+          "Company Management"
+        ],
+        "operationId": "uploadLogo",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCompanyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recruiter/company/cover": {
+      "post": {
+        "tags": [
+          "Company Management"
+        ],
+        "operationId": "uploadCover",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCompanyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -616,18 +692,6 @@
             "type": "string",
             "maxLength": 255,
             "minLength": 0
-          },
-          "logoUrl": {
-            "type": "string",
-            "maxLength": 2048,
-            "minLength": 0,
-            "pattern": "(?i)https?://[^\\s]+"
-          },
-          "coverImageUrl": {
-            "type": "string",
-            "maxLength": 2048,
-            "minLength": 0,
-            "pattern": "(?i)https?://[^\\s]+"
           },
           "description": {
             "type": "string",

@@ -10,5 +10,13 @@ export const companyOnboardingSchema = z.object({
     contactPhone: z.string().trim().regex(/^(?:0|\+84)[35789]\d{8}$/, "Nhập số di động Việt Nam hợp lệ, ví dụ 0912345678."),
     address: z.string().trim().min(1, "Nhập địa chỉ trụ sở công ty.").max(255, "Địa chỉ tối đa 255 ký tự."),
     industryId: z.string().regex(/^(?:[1-9]\d*|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/i, "Vui lòng chọn lĩnh vực hoạt động."),
+    website: z.string().trim().max(2048, "Website tối đa 2.048 ký tự.").refine(value => !value || /^https?:\/\//i.test(value) && z.url().safeParse(value).success, "Nhập website bắt đầu bằng http:// hoặc https://.").default(""),
+    companySize: z.string().trim().refine(value => !value || /^\d+$/.test(value) && Number(value) > 0 && Number(value) <= 2147483647, "Nhập số nhân viên là số nguyên lớn hơn 0.").default(""),
+    foundedYear: z.string().trim().refine(value => !value || /^\d{1,4}$/.test(value) && Number(value) >= 1 && Number(value) <= new Date().getFullYear(), "Nhập năm thành lập hợp lệ, không lớn hơn năm hiện tại.").default(""),
 });
+
+export const companyImageFileSchema = z.instanceof(File)
+    .refine(file => file.size > 0, "Ảnh không được rỗng.")
+    .refine(file => file.size <= 2 * 1024 * 1024, "Ảnh tối đa 2MB.")
+    .refine(file => ["image/png", "image/jpeg", "image/webp"].includes(file.type) && /\.(png|jpe?g|webp)$/i.test(file.name), "Chọn ảnh PNG, JPG hoặc WebP.");
 
