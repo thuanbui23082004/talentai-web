@@ -825,6 +825,23 @@ export interface paths {
         patch: operations["updateCv"];
         trace?: never;
     };
+    "/cvs/{cvId}/default": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Set the candidate default CV */
+        patch: operations["setDefaultCv"];
+        trace?: never;
+    };
     "/cvs/{cvId}/file": {
         parameters: {
             query?: never;
@@ -3889,6 +3906,19 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        UploadedCv: {
+            id: string;
+            cvId: string;
+            fileName: string;
+            cvTitle: string;
+            fileUrl: string;
+            contentType: string;
+            sizeBytes: number;
+            version: number;
+            isDefault: boolean;
+            /** Format: date-time */
+            createdAt: string;
+        };
         Cv: {
             id: components["schemas"]["Id"];
             /** @example CV Frontend 2026 */
@@ -3908,9 +3938,6 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-        };
-        CvList: {
-            items: components["schemas"]["Cv"][];
         };
         CvVersionList: {
             items: components["schemas"]["CvVersion"][];
@@ -6483,12 +6510,13 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CvList"];
+                    "application/json": components["schemas"]["UploadedCv"][];
                 };
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     uploadCv: {
@@ -6506,8 +6534,6 @@ export interface operations {
                      * @description PDF hoặc DOCX.
                      */
                     file: string;
-                    title?: string;
-                    setAsDefault?: boolean;
                 };
             };
         };
@@ -6518,7 +6544,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Cv"];
+                    "application/json": components["schemas"]["UploadedCv"];
                 };
             };
             401: components["responses"]["Unauthorized"];
@@ -6526,6 +6552,7 @@ export interface operations {
             413: components["responses"]["PayloadTooLarge"];
             422: components["responses"]["ValidationError"];
             500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     createManualCv: {
@@ -6573,13 +6600,14 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Cv"];
+                    "application/json": components["schemas"]["UploadedCv"];
                 };
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     deleteCv: {
@@ -6636,6 +6664,30 @@ export interface operations {
             404: components["responses"]["NotFound"];
             422: components["responses"]["ValidationError"];
             500: components["responses"]["InternalError"];
+        };
+    };
+    setDefaultCv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cvId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default CV updated */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     downloadCv: {

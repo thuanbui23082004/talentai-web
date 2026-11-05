@@ -1004,6 +1004,428 @@
           }
         ]
       }
+    },
+    "/api/v1/cvs": {
+      "get": {
+        "tags": [
+          "Candidate Resumes (CVs)"
+        ],
+        "summary": "Lấy danh sách CV của ứng viên",
+        "description": "Trả về toàn bộ danh sách các CV mà ứng viên đã tải lên, sắp xếp theo thời gian mới nhất.",
+        "operationId": "list",
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách CV thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực hoặc token không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Candidate Resumes (CVs)"
+        ],
+        "summary": "Tải lên CV mới",
+        "description": "Tải lên file CV định dạng PDF hoặc DOCX (tối đa 5 MB). File được lưu trên Cloudinary và tạo bản ghi metadata CV version 1. Nếu chưa có CV nào, hệ thống sẽ tự động đặt CV này làm mặc định.",
+        "operationId": "upload",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "File CV tải lên (PDF hoặc DOCX, dung lượng tối đa 5 MB)"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tải lên CV thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "File không đúng định dạng (chỉ chấp nhận PDF/DOCX) hoặc vượt quá 5MB",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực hoặc token không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
+    },
+    "/api/v1/cvs/{id}/versions": {
+      "get": {
+        "tags": [
+          "Candidate Resumes (CVs)"
+        ],
+        "summary": "Lấy các phiên bản của một CV",
+        "description": "Trả về danh sách tất cả các phiên bản (v1, v2, v3...) thuộc cùng một CV gốc (cvId hoặc ID của một CV bất kỳ trong chuỗi phiên bản).",
+        "operationId": "versions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Mã định danh gốc (cvId) hoặc ID của CV",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "d4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f9a"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách phiên bản thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy CV",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Candidate Resumes (CVs)"
+        ],
+        "summary": "Tải lên phiên bản mới của CV",
+        "description": "Tải lên một file CV mới (PDF hoặc DOCX <= 5MB) liên kết với CV gốc hiện tại. Số phiên bản sẽ tự động tăng dần (v1 -> v2, v3...).",
+        "operationId": "addVersion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Mã định danh gốc (cvId) hoặc ID của CV",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "d4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f9a"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "File CV phiên bản mới (PDF hoặc DOCX, dung lượng tối đa 5 MB)"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tải lên phiên bản mới thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "File không đúng định dạng hoặc vượt quá dung lượng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy CV gốc",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
+    },
+    "/api/v1/cvs/{id}/default": {
+      "patch": {
+        "tags": [
+          "Candidate Resumes (CVs)"
+        ],
+        "summary": "Đặt làm CV mặc định",
+        "description": "Thiết lập CV chỉ định làm CV mặc định khi ứng viên nộp hồ sơ ứng tuyển việc làm. Tất cả các CV khác của ứng viên sẽ được chuyển về không mặc định.",
+        "operationId": "setDefault",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Mã định danh (ID) của CV",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "d4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f9a"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Đặt CV mặc định thành công (không có nội dung phản hồi)"
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy CV",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
+    },
+    "/api/v1/cvs/{id}": {
+      "get": {
+        "tags": [
+          "Candidate Resumes (CVs)"
+        ],
+        "summary": "Lấy chi tiết một CV",
+        "description": "Trả về thông tin chi tiết của một CV (tên file, định dạng, dung lượng, phiên bản, cờ mặc định, thời gian tạo) theo ID.",
+        "operationId": "get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Mã định danh (ID) của CV",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "d4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f9a"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy chi tiết CV thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy CV hoặc không thuộc quyền sở hữu",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Candidate Resumes (CVs)"
+        ],
+        "summary": "Xóa CV",
+        "description": "Xóa file CV khỏi Cloudinary và xóa bản ghi metadata trong cơ sở dữ liệu. Nếu CV bị xóa đang là mặc định, hệ thống sẽ tự động gán mặc định cho CV còn lại gần nhất.",
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Mã định danh (ID) của CV cần xóa",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "d4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f9a"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Xóa CV thành công (không có nội dung phản hồi)"
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy CV",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
     }
   },
   "components": {

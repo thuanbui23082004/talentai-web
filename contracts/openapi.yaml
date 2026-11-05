@@ -1711,11 +1711,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CvList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/UploadedCv'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '500':
           $ref: '#/components/responses/InternalError'
     post:
@@ -1749,18 +1753,13 @@ paths:
                   type: string
                   format: binary
                   description: PDF hoặc DOCX.
-                title:
-                  type: string
-                  maxLength: 150
-                setAsDefault:
-                  type: boolean
       responses:
         '201':
           description: Thành công
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cv'
+                $ref: '#/components/schemas/UploadedCv'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1769,6 +1768,8 @@ paths:
           $ref: '#/components/responses/PayloadTooLarge'
         '422':
           $ref: '#/components/responses/ValidationError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '500':
           $ref: '#/components/responses/InternalError'
   /cvs/manual:
@@ -1830,13 +1831,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cv'
+                $ref: '#/components/schemas/UploadedCv'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '500':
           $ref: '#/components/responses/InternalError'
     patch:
@@ -1918,6 +1921,34 @@ paths:
           $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/InternalError'
+  /cvs/{cvId}/default:
+    patch:
+      tags: [CV]
+      operationId: setDefaultCv
+      summary: Set the candidate default CV
+      security:
+      - cookieAuth: []
+        csrfToken: []
+      x-roles: [candidate]
+      parameters:
+      - name: cvId
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 200
+      responses:
+        '204':
+          description: Default CV updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
   /cvs/{cvId}/file:
     get:
       tags:
@@ -8730,6 +8761,31 @@ components:
         createdAt:
           type: string
           format: date-time
+    UploadedCv:
+      type: object
+      required: [id, cvId, fileName, cvTitle, fileUrl, contentType, sizeBytes, version, isDefault, createdAt]
+      properties:
+        id:
+          type: string
+        cvId:
+          type: string
+        fileName:
+          type: string
+        cvTitle:
+          type: string
+        fileUrl:
+          type: string
+        contentType:
+          type: string
+        sizeBytes:
+          type: integer
+        version:
+          type: integer
+        isDefault:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
     Cv:
       type: object
       required:
@@ -8774,15 +8830,6 @@ components:
         updatedAt:
           type: string
           format: date-time
-    CvList:
-      type: object
-      required:
-      - items
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/Cv'
     CvVersionList:
       type: object
       required:

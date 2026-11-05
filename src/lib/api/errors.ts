@@ -26,6 +26,7 @@ export function toApiError(status: number, body?: components["schemas"]["ApiErro
     CSRF_TOKEN_INVALID: "Phiên thao tác không hợp lệ. Vui lòng tải lại trang rồi thử lại.",
     SERVICE_UNAVAILABLE: "Dịch vụ chưa sẵn sàng. Vui lòng thử lại sau.",
     RATE_LIMITED: "Bạn thao tác quá nhanh. Vui lòng thử lại sau.",
+    CV_IN_USE: "CV đang được dùng trong hồ sơ ứng tuyển nên chưa thể xóa.",
   };
   const fields = body?.error?.fieldErrors?.map((field) => ({
     field: field.field,

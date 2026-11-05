@@ -8,12 +8,4 @@ export const cvPreviewSchema = z.object({
 });
 export type CvPreviewValues = z.infer<typeof cvPreviewSchema>;
 
-// Temporary 5MB UI limit until catalog metadata is integrated.
-export function validateCvSelection(file: Pick<File, "name" | "type" | "size">) {
-    const extension = file.name.split(".").pop()?.toLowerCase();
-    const mime = extension === "pdf" ? "application/pdf" : extension === "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" : undefined;
-    if (!mime || (file.type && file.type !== mime)) return "Vui lòng chọn tệp PDF hoặc DOCX hợp lệ.";
-    if (file.size === 0) return "Tệp CV trống. Vui lòng chọn tệp khác.";
-    if (file.size > 5 * 1024 * 1024) return "Tệp CV không được vượt quá 5MB.";
-    return undefined;
-}
+export { cvFileError as validateCvSelection } from "@/lib/api/cv-schemas";

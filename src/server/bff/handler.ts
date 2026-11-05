@@ -8,11 +8,13 @@ import { handleRecruiterCompany, isRecruiterCompanyRequest } from "./recruiter/c
 import { handleJobService, isPublicJobRequest } from "./public/job-service";
 import { handleSavedJobs, isSavedJobsRequest } from "./candidate/saved-jobs-service";
 import { handleProfileRequest, isProfileRequest } from "./candidate/profile-service";
+import { handleCvsRequest, isCvsRequest } from "./candidate/cv-service";
 
 export async function handleBffRequest(request: Request): Promise<Response> {
     try {
         if (isAuthRequest(request)) return await handleAuthRequest(request);
         const env = getServerEnv();
+        if (isCvsRequest(request)) return await handleCvsRequest(request, (env.PROFILE_DATA_MODE ?? env.DATA_MODE) === "real" ? env.PROFILE_API_URL : undefined);
         if (isProfileRequest(request)) {
             return await handleProfileRequest(request, (env.PROFILE_DATA_MODE ?? env.DATA_MODE) === "real" ? env.PROFILE_API_URL : undefined);
         }

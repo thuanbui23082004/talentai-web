@@ -1,0 +1,12 @@
+{
+  "id": "cv-upload-1",
+  "cvId": "cv-root-1",
+  "fileName": "resume.pdf",
+  "cvTitle": "resume",
+  "fileUrl": "https://example.com/resume.pdf",
+  "contentType": "application/pdf",
+  "sizeBytes": 1024,
+  "version": 1,
+  "isDefault": true,
+  "createdAt": "2026-11-05T00:00:00Z"
+}

@@ -1,4 +1,9 @@
 /* CV design samples: container units keep A4 typography proportional in cards and dialogs. */
+@keyframes cv-upload-progress {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(300%); }
+}
+
 :root {
   --cv-navy: #173d51;
   --cv-green: #218574;
