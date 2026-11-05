@@ -770,6 +770,240 @@
           }
         ]
       }
+    },
+    "/api/v1/candidate/profile": {
+      "get": {
+        "tags": [
+          "Candidate Profile"
+        ],
+        "summary": "Lấy thông tin hồ sơ ứng viên",
+        "description": "Trả về thông tin hồ sơ của ứng viên hiện tại. Nếu hồ sơ chưa tồn tại trong cơ sở dữ liệu MongoDB, hệ thống sẽ tự động khởi tạo bản ghi mới dựa trên claims (email, displayName) có trong JWT token.",
+        "operationId": "getProfile",
+        "responses": {
+          "200": {
+            "description": "Lấy hồ sơ thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực hoặc token không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Candidate Profile"
+        ],
+        "summary": "Cập nhật hồ sơ ứng viên",
+        "description": "Cập nhật các thông tin cá nhân: họ tên, email, số điện thoại, tiêu đề, tóm tắt, địa điểm, avatar URL và các tùy chọn quyền riêng tư.",
+        "operationId": "updateProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật hồ sơ thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu đầu vào không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực hoặc token không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
+    },
+    "/api/v1/candidate/certificates/{id}/attachment": {
+      "post": {
+        "tags": [
+          "Candidate Certificates"
+        ],
+        "summary": "Tải lên tệp chứng chỉ",
+        "description": "Tải ảnh hoặc PDF chứng chỉ lên Cloudinary và gắn vào chứng chỉ hiện có. Hỗ trợ PDF, JPEG, PNG, WEBP, GIF tối đa 5 MB.",
+        "operationId": "uploadCertificateAttachment",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tải tệp chứng chỉ thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Tệp không hợp lệ hoặc vượt quá 5 MB",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy chứng chỉ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Candidate Certificates"
+        ],
+        "summary": "Xóa tệp chứng chỉ",
+        "description": "Gỡ tệp đính kèm khỏi chứng chỉ và xóa asset trên Cloudinary.",
+        "operationId": "deleteCertificateAttachment",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Tệp chứng chỉ đã bị xóa"
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy chứng chỉ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
     }
   },
   "components": {

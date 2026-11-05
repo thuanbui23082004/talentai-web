@@ -929,6 +929,54 @@ paths:
         "404": *a3
         "422": *a4
         "503": *a5
+  /candidate/certificates/{id}/attachment:
+    post:
+      tags:
+        - Candidate Profile
+      operationId: uploadProfileCertificateAttachment
+      summary: Upload certificate file
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      x-roles:
+        - candidate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: PDF, JPEG, PNG, WEBP or GIF. Maximum 5 MB.
+      responses:
+        '200':
+          description: Uploaded certificate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileCertificate'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
   /candidate/certificates/{id}:
     delete:
       tags:
@@ -1033,11 +1081,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CandidateProfile'
+                $ref: '#/components/schemas/PersonalProfile'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '500':
           $ref: '#/components/responses/InternalError'
     put:
@@ -1046,7 +1096,7 @@ paths:
       operationId: updateCandidateProfile
       summary: Cập nhật thông tin cá nhân
       description: |-
-        Cập nhật giới thiệu, ngày sinh, giới tính, địa chỉ, liên kết.
+        Cập nhật thông tin cá nhân, giới thiệu, nghề nghiệp và quyền riêng tư.
 
         **Quyền:** Ứng viên.
       security:
@@ -1059,20 +1109,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CandidateProfileInput'
+              $ref: '#/components/schemas/PersonalProfileInput'
       responses:
         '200':
           description: Thành công
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CandidateProfile'
+                $ref: '#/components/schemas/PersonalProfile'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '422':
           $ref: '#/components/responses/ValidationError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '500':
           $ref: '#/components/responses/InternalError'
   /candidate/profile/educations:
@@ -8177,6 +8229,15 @@ components:
               type: string
               minLength: 1
               maxLength: 200
+            attachmentUrl:
+              type: string
+              nullable: true
+            attachmentFileName:
+              type: string
+              nullable: true
+            attachmentContentType:
+              type: string
+              nullable: true
     ProfileSkills:
       type: object
       required:
@@ -8363,34 +8424,99 @@ components:
         url:
           type: string
           format: uri
-    CandidateProfileInput:
+    PersonalProfileInput:
       type: object
-      description: Thông tin cá nhân (học vấn, kinh nghiệm, kỹ năng, chứng chỉ có endpoint riêng).
+      description: Chỉ gửi các trường thuộc nhóm đang chỉnh sửa. Backend bỏ qua null; ngày sinh và trường số đã lưu chưa hỗ trợ xóa.
       properties:
+        fullName:
+          type: string
+          nullable: true
+          maxLength: 150
+        email:
+          type: string
+          nullable: true
+          maxLength: 320
+        phone:
+          type: string
+          nullable: true
+          maxLength: 30
         headline:
           type: string
-          maxLength: 150
-          example: Frontend Developer
+          nullable: true
+          maxLength: 200
         summary:
           type: string
-          maxLength: 3000
-        dateOfBirth:
+          nullable: true
+          maxLength: 5000
+        location:
           type: string
-          format: date
+          nullable: true
+          maxLength: 200
+        avatarUrl:
+          type: string
+          nullable: true
+          maxLength: 1000
+        dob:
+          type: string
+          nullable: true
+          format: date-time
         gender:
-          $ref: '#/components/schemas/Gender'
+          type: string
+          nullable: true
+          maxLength: 10
         address:
           type: string
-          maxLength: 255
-        city:
+          nullable: true
+          maxLength: 500
+        desiredJobTitle:
           type: string
-        links:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProfileLink'
-        nationalId:
+          nullable: true
+          maxLength: 150
+        minDesiredSalary:
+          type: integer
+          nullable: true
+          format: int64
+        maxDesiredSalary:
+          type: integer
+          nullable: true
+          format: int64
+        currency:
           type: string
-          description: CCCD/CMND. Chỉ ghi, không bao giờ trả lại nguyên văn. Dữ liệu nhạy cảm, mã hóa AES-256 khi lưu.
+          nullable: true
+          maxLength: 10
+        desiredLocation:
+          type: string
+          nullable: true
+          maxLength: 200
+        yearsOfExperience:
+          type: integer
+          nullable: true
+          format: int32
+        jobSearchStatus:
+          type: string
+          nullable: true
+          maxLength: 30
+        searchable:
+          type: boolean
+          nullable: true
+        showEmail:
+          type: boolean
+          nullable: true
+        showPhone:
+          type: boolean
+          nullable: true
+    PersonalProfile:
+      allOf:
+      - $ref: '#/components/schemas/PersonalProfileInput'
+      - type: object
+        required:
+        - fullName
+        - email
+        properties:
+          id:
+            type: string
+          userId:
+            type: string
     CandidateProfile:
       type: object
       required:

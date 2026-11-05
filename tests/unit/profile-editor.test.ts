@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { emptyProfileDraft, profileEditorSchema } from "@/features/profile/schemas/profile-editor";
-import { careerToEntries, certificatePayload, educationPayload, experiencePayload } from "@/features/profile/career-mapping";
+import { careerToEntries, educationPayload, experiencePayload } from "@/features/profile/career-mapping";
 import example from "../../contracts/examples/candidate-career.json";
 
 describe("profile editor and backend mapping", () => {
@@ -21,7 +21,7 @@ describe("profile editor and backend mapping", () => {
         const entries = careerToEntries(example);
         expect(entries.experience?.[0]).toMatchObject({ id: "profile-exp-1", values: { position: example.experience[0].title, address: "Đà Nẵng", startDate: "2022-01-15", current: true } });
         expect(entries.education?.[0].values.degree).toBe(example.education[0].degree);
-        expect(entries.certificates?.[0].values.credentialUrl).toBe(example.certificates[0].credentialUrl);
+        expect(entries.certificates?.[0].values.attachmentUrl).toBe(example.certificates[0].attachmentUrl);
         expect(entries.skills?.[0].values.skills).toEqual(example.skills.skills);
     });
     it("preserves unchanged timestamps and sends null end dates for ongoing entries", () => {
@@ -30,13 +30,6 @@ describe("profile editor and backend mapping", () => {
         expect(experiencePayload(values, example.experience[0])).toMatchObject({ title: values.position, startDate: "2022-01-15T10:30:00Z", endDate: null, current: true });
         expect(experiencePayload({ ...values, startDate: "2025-01-15" }, example.experience[0]).startDate).toBe("2025-01-15T00:00:00Z");
         expect(educationPayload({ ...entries.education![0].values, current: true })).toMatchObject({ isStudying: true, endDate: null });
-        expect(certificatePayload(entries.certificates![0].values)).toMatchObject({ issuedAt: "2024-01-15T00:00:00Z", expiresAt: null });
-    });
-    it("validates certificate metadata and HTTP URLs", () => {
-        const values = { ...emptyProfileDraft("certificates"), name: "Certificate", credentialUrl: "https://example.com/cert" };
-        expect(profileEditorSchema.safeParse(values).success).toBe(true);
-        for (const credentialUrl of ["bad", "javascript:alert(1)", "ftp://example.com/cert"]) expect(profileEditorSchema.safeParse({ ...values, credentialUrl }).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...values, startDate: "2025-01-01", endDate: "2024-01-01" }).success).toBe(false);
     });
     it("matches skill length without imposing an undocumented count limit", () => {
         const values = emptyProfileDraft("skills");
@@ -45,10 +38,9 @@ describe("profile editor and backend mapping", () => {
         expect(profileEditorSchema.safeParse({ ...values, skills: ["x".repeat(101)] }).success).toBe(false);
         expect(profileEditorSchema.safeParse({ ...values, skills: Array.from({ length: 25 }, (_, i) => `Skill ${i}`) }).success).toBe(true);
     });
-    it("validates personal, introduction, project and language previews", () => {
+    it("validates personal, introduction, project previews", () => {
         expect(profileEditorSchema.safeParse({ ...emptyProfileDraft("personal"), name: "Name", email: "invalid" }).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...emptyProfileDraft("introduction"), description: "x".repeat(1001) }).success).toBe(false);
+        expect(profileEditorSchema.safeParse({ ...emptyProfileDraft("introduction"), description: "x".repeat(5001) }).success).toBe(false);
         expect(profileEditorSchema.safeParse({ ...emptyProfileDraft("projects"), name: "Project", startDate: "2024-01", endDate: "2023-01" }).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...emptyProfileDraft("languages"), languages: [{ name: "English", level: "advanced" }, { name: "English", level: "beginner" }] }).success).toBe(false);
     });
 });

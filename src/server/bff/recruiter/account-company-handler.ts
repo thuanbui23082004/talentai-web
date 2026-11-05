@@ -8,7 +8,7 @@ import type { components } from '@/lib/api/generated/schema';
 
 type User = components['schemas']['User'];
 type AccountRecord = { user: User };
-type Media = { ownerId: string; bytes: Uint8Array; type: string };
+type Media = { ownerId: string; ownerRole?: 'candidate' | 'recruiter'; bytes: Uint8Array; type: string };
 const shared = globalThis as typeof globalThis & { talentaiAccounts?: Map<string, AccountRecord>; talentaiMedia?: Map<string, Media> };
 export function getMockAccounts() {
   shared.talentaiAccounts ??= new Map();

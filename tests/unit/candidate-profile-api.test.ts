@@ -3,6 +3,7 @@ import { handleProfileRequest } from "@/server/bff/candidate/profile-service";
 import { resetMockProfile } from "@/server/bff/candidate/mock-profile";
 import { csrfTokenFor } from "@/server/bff/auth/cookies";
 import example from "../../contracts/examples/candidate-career.json";
+import personal from "../../contracts/examples/candidate-personal.json";
 
 const base = "http://localhost:3002/api/v1";
 const token = "profile-test-token";
@@ -19,6 +20,56 @@ function network(reply: () => Response | Promise<Response>, role = "CANDIDATE", 
 afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); resetMockProfile(); });
 
 describe("candidate profile BFF", () => {
+    it("uploads certificate files as multipart without retrying or forwarding private storage metadata", async () => {
+        const file = new File(["%PDF-1.7\ncertificate"], "certificate.pdf", { type: "application/pdf" });
+        const data = new FormData();
+        data.set("file", file);
+        const upload = () => new Request("http://localhost/api/bff/candidate/certificates/cert-id/attachment", {
+            method: "POST", headers: { cookie: `access_token=${token}`, "x-csrf-token": csrfTokenFor({ access: token }) }, body: data,
+        });
+        const fetch = network(() => Response.json({ success: true, data: { ...example.certificates[0], attachmentPublicId: "private-key" } }));
+        const response = await handleProfileRequest(upload(), base);
+        expect(response.status).toBe(200);
+        expect(await response.json()).toEqual(example.certificates[0]);
+        expect(String(fetch.mock.calls[1][0])).toBe(`${base}/candidate/certificates/cert-id/attachment`);
+        const forwarded = fetch.mock.calls[1][1]!;
+        expect(forwarded.body).toBeInstanceOf(FormData);
+        expect(new Headers(forwarded.headers).has("Content-Type")).toBe(false);
+        vi.restoreAllMocks();
+        const offline = network(() => { throw new Error("offline"); });
+        expect((await handleProfileRequest(upload(), base)).status).toBe(503);
+        expect(offline).toHaveBeenCalledTimes(2);
+    });
+    it("rejects forged certificate file contents before calling the backend", async () => {
+        const fetch = network(() => Response.json({}));
+        const data = new FormData();
+        data.set("file", new File(["not a PDF"], "certificate.pdf", { type: "application/pdf" }));
+        const upload = new Request("http://localhost/api/bff/candidate/certificates/cert-id/attachment", {
+            method: "POST", headers: { cookie: `access_token=${token}`, "x-csrf-token": csrfTokenFor({ access: token }) }, body: data,
+        });
+        const response = await handleProfileRequest(upload, base);
+        expect(response.status).toBe(422);
+        expect((await response.json()).error.fieldErrors[0].field).toBe("file");
+        expect(fetch).toHaveBeenCalledTimes(1);
+    });
+    it("maps nested backend privacy and preserves personal dates and addresses", async () => {
+        const { searchable, showEmail, showPhone, ...details } = personal;
+        const fetch = network(() => Response.json({ success: true, data: { ...details, privacy: { isSearchable: searchable, showEmail, showPhone }, avatarPublicId: "private-storage-key" } }));
+        const response = await handleProfileRequest(request("profile"), base);
+        expect(response.status).toBe(200);
+        expect(await response.json()).toEqual(personal);
+        expect(String(fetch.mock.calls[1][0])).toBe(`${base}/candidate/profile`);
+        expect((await handleProfileRequest(request("profile", "PUT", personal), base)).status).toBe(200);
+        expect(JSON.parse(String(fetch.mock.calls[3][1]?.body))).toEqual(personal);
+        expect((await handleProfileRequest(request("profile/another-user"), base)).status).toBe(405);
+    });
+    it("rejects malformed personal fields and does not forward writes", async () => {
+        const fetch = network(() => Response.json({}));
+        for (const input of [{ dob: "1998-08-10" }, { address: "x".repeat(501) }, { headline: "x".repeat(201) }, { userId: "another-user" }]) {
+            expect((await handleProfileRequest(request("profile", "PUT", input), base)).status).toBe(422);
+        }
+        expect(fetch.mock.calls.filter(([, init]) => init?.method === "PUT")).toHaveLength(0);
+    });
     it.each(["experience", "education", "certificates"] as const)("loads %s with nullable values and original dates", async resource => {
         const fetch = network(() => Response.json({ success: true, data: { items: example[resource].map(item => ({ ...item, userId: "private-user" })) } }));
         const response = await handleProfileRequest(request(resource), base);
@@ -90,8 +141,12 @@ describe("candidate profile BFF", () => {
         const created = await (await call("experience", "POST", { company: "Company", title: "Engineer" })).json();
         expect((await call(`experience/${created.id}`, "PUT", { company: "Company", title: "Senior" })).status).toBe(200);
         expect((await (await call("experience")).json())[0].title).toBe("Senior");
+        expect((await call("profile", "PUT", { address: "Đà Nẵng", dob: "1998-08-10T00:00:00Z", showEmail: true })).status).toBe(200);
+        await call("profile", "PUT", { summary: "Giới thiệu đã lưu", dob: null });
+        expect(await (await call("profile")).json()).toMatchObject({ address: "Đà Nẵng", dob: "1998-08-10T00:00:00Z", summary: "Giới thiệu đã lưu", showEmail: true });
         vi.restoreAllMocks(); network(() => Response.json({}), "CANDIDATE", "10000000-0000-4000-8000-000000000002");
         expect(await (await call("experience")).json()).toEqual([]);
+        expect(await (await call("profile")).json()).toMatchObject({ address: null, dob: null, showEmail: false });
         expect((await call(`experience/${created.id}`, "DELETE")).status).toBe(404);
     });
 });

@@ -5,20 +5,20 @@ import { ChevronDown, Check } from "lucide-react";
 import { Button, Input, Modal, ModalContent, ModalTrigger } from "@/components/ui";
 import { normalizeLocation, provinces, provinceCity, resolveLocation } from "@/lib/locations/vietnam";
 
-export function LocationPicker({ value, onChange, provinceOnly = false, ariaLabel = "Địa điểm tìm việc" }: { value: string; onChange: (value: string) => void; provinceOnly?: boolean; ariaLabel?: string }) {
+export function LocationPicker({ value, onChange, provinceOnly = false, ariaLabel = "Địa điểm tìm việc", placeholder = "Tất cả các địa điểm", ...triggerProps }: { value: string; onChange: (value: string) => void; provinceOnly?: boolean; ariaLabel?: string; placeholder?: string; id?: string; disabled?: boolean; onBlur?: () => void; "aria-describedby"?: string; "aria-invalid"?: boolean }) {
     const [open, setOpen] = useState(false);
     const [draft, setDraft] = useState(value);
     const [provinceQuery, setProvinceQuery] = useState("");
     const [wardQuery, setWardQuery] = useState("");
     const selected = resolveLocation(value);
     const { province, ward } = resolveLocation(draft);
-    const label = selected.province ? [selected.ward?.name, provinceCity(selected.province.name)].filter(Boolean).join(", ") : value || "Tất cả các địa điểm";
+    const label = selected.province ? [selected.ward?.name, provinceCity(selected.province.name)].filter(Boolean).join(", ") : value || placeholder;
     const matches = (name: string, query: string) => normalizeLocation(name).includes(normalizeLocation(query));
     const visibleProvinces = provinces.filter((item) => matches(item.name, provinceQuery));
     const visibleWards = province?.wards.filter((item) => matches(item.name, wardQuery)) ?? [];
 
     return <Modal open={open} onOpenChange={(next) => { setOpen(next); if (next) { setDraft(value); setProvinceQuery(""); setWardQuery(""); } }}>
-        <ModalTrigger type="button" aria-label={ariaLabel} title={label} className="flex min-h-11 w-full min-w-0 items-center justify-between gap-2 px-3 text-left text-sm font-medium text-primary"><span className="truncate">{label}</span><ChevronDown className="size-4 shrink-0" /></ModalTrigger>
+        <ModalTrigger {...triggerProps} type="button" aria-label={ariaLabel} title={label} className="flex min-h-11 w-full min-w-0 items-center justify-between gap-2 px-3 text-left text-sm font-medium text-primary disabled:opacity-50"><span className="truncate">{label}</span><ChevronDown className="size-4 shrink-0" /></ModalTrigger>
         <ModalContent title={provinceOnly ? "Chọn tỉnh/thành phố" : "Chọn địa điểm làm việc"} description={provinceOnly ? "Chọn tỉnh/thành phố để thu hẹp kết quả tìm kiếm." : "Chọn tỉnh/thành, sau đó chọn phường/xã nếu muốn tìm chi tiết hơn."} className="max-w-2xl p-4 sm:p-6" footer={<>
             <p className="mr-auto w-full text-sm text-muted-foreground sm:w-auto">{province ? [provinceCity(province.name), ward?.name].filter(Boolean).join(" · ") : "Tất cả địa điểm"}</p>
             <Button type="button" variant="outline" onClick={() => { setDraft(""); setWardQuery(""); }}>Bỏ chọn địa điểm</Button>

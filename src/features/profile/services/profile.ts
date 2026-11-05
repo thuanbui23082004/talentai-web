@@ -1,10 +1,18 @@
 import { apiClient, ensureApiSession } from "@/lib/api";
 import { toApiError } from "@/lib/api/errors";
 import type { components } from "@/lib/api/generated/schema";
-import { experienceSchema, educationSchema, certificateSchema, profileSkillsSchema } from "@/lib/api/profile-schemas";
-import { certificatePayload, educationPayload, experiencePayload } from "../career-mapping";
+import { experienceSchema, educationSchema, certificateSchema, profileSkillsSchema, personalProfileSchema } from "@/lib/api/profile-schemas";
+import { educationPayload, experiencePayload } from "../career-mapping";
 import type { ProfileDraftValues, ProfileEditorSection } from "../schemas/profile-editor";
-import type { CareerProfile } from "../types";
+import type { CareerProfile, PersonalProfileInput } from "../types";
+
+export async function getPersonalProfile(signal?: AbortSignal) {
+    return personalProfileSchema.parse(unwrap(await apiClient.GET("/candidate/profile", { signal })));
+}
+export async function savePersonalProfile(body: PersonalProfileInput) {
+    const headers = { "X-CSRF-Token": await ensureApiSession() };
+    return personalProfileSchema.parse(unwrap(await apiClient.PUT("/candidate/profile", { body, headers })));
+}
 
 function unwrap<T>({ data, error, response }: { data?: T; error?: components["schemas"]["ApiError"]; response: Response }): T {
     if (error || data === undefined) throw toApiError(response.status, error);
@@ -12,10 +20,11 @@ function unwrap<T>({ data, error, response }: { data?: T; error?: components["sc
 }
 
 export async function getCareerProfile(signal?: AbortSignal): Promise<CareerProfile> {
-    const [experience, education, certificates, skills] = await Promise.all([
-        apiClient.GET("/candidate/experience", { signal }), apiClient.GET("/candidate/education", { signal }),
-        apiClient.GET("/candidate/certificates", { signal }), apiClient.GET("/candidate/skills", { signal }),
-    ]);
+    // The profile service intermittently returns an empty 403 for concurrent reads.
+    const experience = await apiClient.GET("/candidate/experience", { signal });
+    const education = await apiClient.GET("/candidate/education", { signal });
+    const certificates = await apiClient.GET("/candidate/certificates", { signal });
+    const skills = await apiClient.GET("/candidate/skills", { signal });
     return {
         experience: experienceSchema.array().parse(unwrap(experience)), education: educationSchema.array().parse(unwrap(education)),
         certificates: certificateSchema.array().parse(unwrap(certificates)), skills: profileSkillsSchema.parse(unwrap(skills)),
@@ -35,10 +44,6 @@ export async function saveCareerSection({ values, id, original }: { values: Prof
             return unwrap(id ? await apiClient.PUT("/candidate/education/{id}", { body, headers, params }) : await apiClient.POST("/candidate/education", { body, headers }));
         }
         case "skills": return unwrap(await apiClient.PUT("/candidate/skills", { body: { skills: values.skills }, headers }));
-        case "certificates": {
-            if (id) throw new Error("Chứng chỉ chưa hỗ trợ chỉnh sửa.");
-            return unwrap(await apiClient.POST("/candidate/certificates", { body: certificatePayload(values), headers }));
-        }
         default: throw new Error("Mục hồ sơ chưa được tích hợp.");
     }
 }

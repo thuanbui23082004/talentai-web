@@ -442,6 +442,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/candidate/certificates/{id}/attachment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload certificate file */
+        post: operations["uploadProfileCertificateAttachment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/candidate/certificates/{id}": {
         parameters: {
             query?: never;
@@ -491,7 +508,7 @@ export interface paths {
         get: operations["getCandidateProfile"];
         /**
          * Cập nhật thông tin cá nhân
-         * @description Cập nhật giới thiệu, ngày sinh, giới tính, địa chỉ, liên kết.
+         * @description Cập nhật thông tin cá nhân, giới thiệu, nghề nghiệp và quyền riêng tư.
          *
          *     **Quyền:** Ứng viên.
          */
@@ -3679,6 +3696,9 @@ export interface components {
         };
         ProfileCertificate: components["schemas"]["ProfileCertificateInput"] & {
             id: string;
+            attachmentUrl?: string | null;
+            attachmentFileName?: string | null;
+            attachmentContentType?: string | null;
         };
         ProfileSkills: {
             skills: string[];
@@ -3755,19 +3775,36 @@ export interface components {
             /** Format: uri */
             url: string;
         };
-        /** @description Thông tin cá nhân (học vấn, kinh nghiệm, kỹ năng, chứng chỉ có endpoint riêng). */
-        CandidateProfileInput: {
-            /** @example Frontend Developer */
-            headline?: string;
-            summary?: string;
-            /** Format: date */
-            dateOfBirth?: string;
-            gender?: components["schemas"]["Gender"];
-            address?: string;
-            city?: string;
-            links?: components["schemas"]["ProfileLink"][];
-            /** @description CCCD/CMND. Chỉ ghi, không bao giờ trả lại nguyên văn. Dữ liệu nhạy cảm, mã hóa AES-256 khi lưu. */
-            nationalId?: string;
+        /** @description Chỉ gửi các trường thuộc nhóm đang chỉnh sửa. Backend bỏ qua null; ngày sinh và trường số đã lưu chưa hỗ trợ xóa. */
+        PersonalProfileInput: {
+            fullName?: string | null;
+            email?: string | null;
+            phone?: string | null;
+            headline?: string | null;
+            summary?: string | null;
+            location?: string | null;
+            avatarUrl?: string | null;
+            /** Format: date-time */
+            dob?: string | null;
+            gender?: string | null;
+            address?: string | null;
+            desiredJobTitle?: string | null;
+            /** Format: int64 */
+            minDesiredSalary?: number | null;
+            /** Format: int64 */
+            maxDesiredSalary?: number | null;
+            currency?: string | null;
+            desiredLocation?: string | null;
+            /** Format: int32 */
+            yearsOfExperience?: number | null;
+            jobSearchStatus?: string | null;
+            searchable?: boolean | null;
+            showEmail?: boolean | null;
+            showPhone?: boolean | null;
+        };
+        PersonalProfile: components["schemas"]["PersonalProfileInput"] & {
+            id?: string;
+            userId?: string;
         };
         CandidateProfile: {
             userId: components["schemas"]["Id"];
@@ -5773,6 +5810,43 @@ export interface operations {
             503: components["responses"]["ServiceUnavailable"];
         };
     };
+    uploadProfileCertificateAttachment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description PDF, JPEG, PNG, WEBP or GIF. Maximum 5 MB.
+                     */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Uploaded certificate */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileCertificate"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
     deleteProfileCertificate: {
         parameters: {
             query?: never;
@@ -5869,12 +5943,13 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CandidateProfile"];
+                    "application/json": components["schemas"]["PersonalProfile"];
                 };
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     updateCandidateProfile: {
@@ -5886,7 +5961,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CandidateProfileInput"];
+                "application/json": components["schemas"]["PersonalProfileInput"];
             };
         };
         responses: {
@@ -5896,13 +5971,14 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CandidateProfile"];
+                    "application/json": components["schemas"]["PersonalProfile"];
                 };
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             422: components["responses"]["ValidationError"];
             500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     listEducations: {

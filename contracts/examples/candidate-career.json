@@ -1,6 +1,46 @@
 {
-  "experience": [{ "id": "profile-exp-1", "company": "Công ty Sao Mai", "title": "Kỹ sư phần mềm", "location": "Đà Nẵng", "description": "Phát triển phần mềm", "startDate": "2022-01-15T10:30:00Z", "endDate": null, "current": true }],
-  "education": [{ "id": "profile-edu-1", "school": "Đại học kiểm thử", "degree": "Kỹ sư Công nghệ thông tin", "fieldOfStudy": "Khoa học máy tính", "description": null, "startDate": "2018-09-01T00:00:00Z", "endDate": "2022-06-30T00:00:00Z", "isStudying": false }],
-  "certificates": [{ "id": "profile-cert-1", "name": "Chứng chỉ kiểm thử", "issuer": "Tổ chức kiểm thử", "credentialId": "TEST-001", "credentialUrl": "https://example.com/certificates/1", "issuedAt": "2024-01-15T00:00:00Z", "expiresAt": null }],
-  "skills": { "skills": ["Java", "TypeScript"] }
+  "experience": [
+    {
+      "id": "profile-exp-1",
+      "company": "Công ty Sao Mai",
+      "title": "Kỹ sư phần mềm",
+      "location": "Đà Nẵng",
+      "description": "Phát triển phần mềm",
+      "startDate": "2022-01-15T10:30:00Z",
+      "endDate": null,
+      "current": true
+    }
+  ],
+  "education": [
+    {
+      "id": "profile-edu-1",
+      "school": "Đại học kiểm thử",
+      "degree": "Kỹ sư Công nghệ thông tin",
+      "fieldOfStudy": "Khoa học máy tính",
+      "description": null,
+      "startDate": "2018-09-01T00:00:00Z",
+      "endDate": "2022-06-30T00:00:00Z",
+      "isStudying": false
+    }
+  ],
+  "certificates": [
+    {
+      "id": "profile-cert-1",
+      "name": "Chứng chỉ kiểm thử",
+      "issuer": "Tổ chức kiểm thử",
+      "credentialId": "TEST-001",
+      "credentialUrl": "https://example.com/certificates/1",
+      "issuedAt": "2024-01-15T00:00:00Z",
+      "expiresAt": null,
+      "attachmentUrl": "https://example.com/certificate.png",
+      "attachmentFileName": "certificate.png",
+      "attachmentContentType": "image/png"
+    }
+  ],
+  "skills": {
+    "skills": [
+      "Java",
+      "TypeScript"
+    ]
+  }
 }

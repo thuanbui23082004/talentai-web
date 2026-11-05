@@ -15,7 +15,9 @@ export function CandidateShell({ user, children }: { user: AuthUser; children: R
             <CandidateHeader user={user} />
             <div className="flex min-h-[calc(100dvh-4rem)] items-start">
                 <aside id="candidate-desktop-sidebar" aria-label="Thanh bên ứng viên" className={`sticky top-16 hidden h-[calc(100dvh-4rem)] shrink-0 border-r border-border/50 transition-[width] duration-200 motion-reduce:transition-none lg:block ${sidebarCollapsed ? "w-20" : "w-60"}`}><CandidateSidebar collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed((value) => !value)} /></aside>
-                <main id="candidate-content" tabIndex={-1} className="min-h-[calc(100dvh-4rem)] min-w-0 flex-1 p-4 outline-none sm:p-6 lg:p-8">{children}</main>
+                <main id="candidate-content" tabIndex={-1} className="min-h-[calc(100dvh-4rem)] min-w-0 flex-1 p-4 outline-none sm:p-6 lg:p-8">
+                    <div className="mx-auto w-full min-w-0 max-w-6xl">{children}</div>
+                </main>
             </div>
             <ModalContent title="Menu ứng viên" className="top-0 left-0 h-dvh max-h-dvh w-[min(20rem,calc(100vw-2rem))] max-w-none translate-x-0 translate-y-0 rounded-none p-4 [&>div.mt-6]:h-[calc(100%-4rem)] [&>div.mt-6]:mt-4"><CandidateSidebar onNavigate={() => setMobileOpen(false)} /></ModalContent>
         </Modal>

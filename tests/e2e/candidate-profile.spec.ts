@@ -69,7 +69,10 @@ test("profile forms validate dates, save previews, edit and cancel changes", asy
     await page.goto("/candidate/profile");
     await page.getByRole("button", { name: "Chỉnh sửa thông tin cá nhân", exact: true }).click();
     const personal = page.getByRole("dialog", { name: "Chỉnh sửa thông tin cá nhân", exact: true });
-    await personal.getByLabel("Địa chỉ hiện tại", { exact: true }).fill("Đà Nẵng");
+    await personal.getByRole("button", { name: "Tỉnh/thành phố, phường/xã", exact: true }).click();
+    const locations = page.getByRole("dialog", { name: "Chọn địa điểm làm việc", exact: true });
+    await locations.getByRole("button", { name: "Đà Nẵng", exact: true }).click();
+    await locations.getByRole("button", { name: "Chọn địa điểm", exact: true }).click();
     await chooseDate(page, personal, "Ngày sinh", "1998-08-10");
     await personal.getByRole("button", { name: "Lưu thông tin", exact: true }).click();
     await expect(page.getByRole("region", { name: "Thông tin cá nhân", exact: true }).getByText("Đà Nẵng", { exact: true })).toBeVisible();
@@ -89,7 +92,7 @@ test("profile forms validate dates, save previews, edit and cancel changes", asy
     await dialog.getByRole("button", { name: "Lưu thông tin", exact: true }).click();
     await expect(dialog).toBeHidden();
     await expect(experience.getByText("Frontend Engineer", { exact: true })).toBeVisible();
-    await expect(experience.getByText(/15\/01\/2022 – Hiện tại/)).toBeVisible();
+    await expect(experience.getByText(/01\/2022 – Hiện tại/)).toBeVisible();
     await experience.getByRole("button", { name: "Chỉnh sửa Frontend Engineer", exact: true }).click();
     await dialog.getByLabel("Vị trí công việc", { exact: false }).fill("Thay đổi chưa lưu");
     await dialog.getByRole("button", { name: "Hủy", exact: true }).click();
@@ -126,7 +129,7 @@ test("profile forms validate dates, save previews, edit and cancel changes", asy
     await expect(projects.getByText("Ứng dụng tìm việc", { exact: true })).toBeVisible();
 });
 
-test("skills, languages and certificate metadata forms support selection and validation", async ({ page }) => {
+test("skills and certificate files support selection and validation", async ({ page }) => {
     await loginCandidate(page);
     await page.goto("/candidate/profile");
     const skills = page.getByRole("region", { name: "Kỹ năng", exact: true });
@@ -140,41 +143,26 @@ test("skills, languages and certificate metadata forms support selection and val
     await expect(skills.getByText("React", { exact: true })).toBeVisible();
     await expect(skills.getByText("Thiết kế hệ thống", { exact: true })).toBeVisible();
 
-    const languages = page.getByRole("region", { name: "Ngoại ngữ", exact: true });
-    await languages.getByRole("button", { name: "Thêm", exact: true }).click();
-    dialog = page.getByRole("dialog", { name: "Ngoại ngữ", exact: true });
-    await dialog.getByRole("combobox", { name: /Tên ngoại ngữ/ }).selectOption("Tiếng Anh");
-    await dialog.getByRole("radio", { name: "Cao cấp", exact: true }).check();
-    await dialog.getByRole("button", { name: "Thêm ngoại ngữ", exact: true }).click();
-    await dialog.getByRole("combobox", { name: /Tên ngoại ngữ/ }).nth(1).selectOption("Tiếng Anh");
-    await dialog.getByRole("button", { name: "Lưu thông tin", exact: true }).click();
-    await expect(dialog.getByText("Ngoại ngữ này đã được chọn.", { exact: true })).toBeVisible();
-    await dialog.getByRole("combobox", { name: /Tên ngoại ngữ/ }).nth(1).selectOption("Tiếng Nhật");
-    await dialog.getByRole("button", { name: "Lưu thông tin", exact: true }).click();
-    await expect(languages.getByText("Tiếng Anh", { exact: false })).toBeVisible();
-    await expect(languages.getByText("Tiếng Nhật", { exact: false })).toBeVisible();
-
     const certificates = page.getByRole("region", { name: "Chứng chỉ/bằng cấp", exact: true });
     await certificates.getByRole("button", { name: "Thêm", exact: true }).click();
     dialog = page.getByRole("dialog", { name: "Chứng chỉ/bằng cấp", exact: true });
     await dialog.getByLabel("Tên chứng chỉ", { exact: false }).fill("Chứng chỉ lập trình React");
-    await dialog.getByLabel("Tổ chức cấp").fill("Tổ chức kiểm thử");
-    await dialog.getByLabel("Link xác thực chứng chỉ").fill("https://example.com/certificate");
-    await dialog.getByRole("button", { name: "Lưu thông tin", exact: true }).click();
+    await dialog.getByLabel("File chứng chỉ", { exact: false }).setInputFiles("public/logo/image 1.png");
+    await dialog.getByRole("button", { name: "Lưu chứng chỉ", exact: true }).click();
     await expect(certificates.getByText("Chứng chỉ lập trình React", { exact: true })).toBeVisible();
 });
 
 test("all profile popups fit desktop and mobile with fixed save actions", async ({ page }, testInfo) => {
     await loginCandidate(page);
     await page.goto("/candidate/profile");
-    const titles = ["Giới thiệu bản thân", "Kinh nghiệm làm việc", "Học vấn", "Kỹ năng", "Dự án/thành tựu", "Chứng chỉ/bằng cấp", "Ngoại ngữ"];
+    const titles = ["Giới thiệu bản thân", "Kinh nghiệm làm việc", "Học vấn", "Kỹ năng", "Dự án/thành tựu", "Chứng chỉ/bằng cấp"];
     for (const width of [1280, 375]) {
         await page.setViewportSize({ width, height: width === 375 ? 640 : 900 });
         for (const [index, title] of titles.entries()) {
             const trigger = page.getByRole("region", { name: title, exact: true }).getByRole("button", { name: "Thêm", exact: true });
             await trigger.click();
             const dialog = page.getByRole("dialog", { name: title, exact: true });
-            await expect(dialog.getByRole("button", { name: "Lưu thông tin", exact: true })).toBeInViewport();
+            await expect(dialog.getByRole("button", { name: title === "Chứng chỉ/bằng cấp" ? "Lưu chứng chỉ" : "Lưu thông tin", exact: true })).toBeInViewport();
             expect(await dialog.evaluate((element) => { const rect = element.getBoundingClientRect(); return rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight; })).toBe(true);
             await page.screenshot({ path: testInfo.outputPath(`profile-popup-${width}-${index}.png`) });
             await dialog.getByRole("button", { name: "Hủy", exact: true }).click();

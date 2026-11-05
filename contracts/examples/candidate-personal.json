@@ -1,0 +1,22 @@
+{
+  "fullName": "Ứng viên kiểm thử",
+  "email": "candidate@example.com",
+  "phone": "0901234567",
+  "headline": "Frontend Developer",
+  "summary": "Phát triển ứng dụng web.",
+  "location": "Đà Nẵng",
+  "address": "123 đường Nguyễn Văn Linh",
+  "dob": "1998-08-10T00:00:00Z",
+  "gender": "MALE",
+  "avatarUrl": "https://example.com/avatar.png",
+  "desiredJobTitle": "Frontend Engineer",
+  "minDesiredSalary": 15000000,
+  "maxDesiredSalary": 25000000,
+  "currency": "VND",
+  "desiredLocation": "Đà Nẵng (Hybrid)",
+  "yearsOfExperience": 3,
+  "jobSearchStatus": "OPEN_TO_OFFERS",
+  "searchable": true,
+  "showEmail": false,
+  "showPhone": false
+}
