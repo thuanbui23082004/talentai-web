@@ -1,4 +1,5 @@
 export const jobFormMessages = { JobForm: {
+  workplaceLocality: 'Tỉnh/thành phố, phường/xã', workplacePlaceholder: 'Chọn tỉnh/thành phố, phường/xã', minimumExperience: 'Từ {count} năm', streetPlaceholder: 'Số nhà, tên đường, tòa nhà',
   locationPlaceholder: 'Chọn hoặc nhập tên tỉnh/thành', openLocations: 'Mở danh sách tỉnh/thành', allLocations: 'Tất cả địa điểm', locationsLoading: 'Đang tải địa điểm…', locationsError: 'Không thể tải địa điểm. Vui lòng thử lại.', locationsRetry: 'Thử lại', locationsEmpty: 'Không tìm thấy tỉnh/thành phù hợp.',
   editHeading: 'Chỉnh sửa tin', saveChanges: 'Lưu thay đổi', cancelEdit: 'Hủy chỉnh sửa', editLocked: 'Tin đang bị khóa và không thể chỉnh sửa.',
   editGuideText: 'Cập nhật nội dung tin tuyển dụng rồi chọn Lưu thay đổi.',

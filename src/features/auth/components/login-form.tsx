@@ -92,7 +92,7 @@ export function LoginForm({
                 className="mt-6 space-y-5"
                 onSubmitCapture={() => setNoticeDismissed(true)}
                 onSubmit={handleSubmit(async (values) => {
-                    await mutation.mutateAsync(values).catch(() => undefined);
+                    await mutation.mutateAsync({ ...values, role }).catch(() => undefined);
                 })}
             >
                 <FormField label="Email" error={errors.email?.message}>

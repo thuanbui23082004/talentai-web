@@ -9,11 +9,18 @@ import { handleJobService, isPublicJobRequest } from "./public/job-service";
 import { handleSavedJobs, isSavedJobsRequest } from "./candidate/saved-jobs-service";
 import { handleProfileRequest, isProfileRequest } from "./candidate/profile-service";
 import { handleCvsRequest, isCvsRequest } from "./candidate/cv-service";
+import { handleRecruiterJobPostings, isRecruiterJobPostingRequest } from './recruiter/job-posting-service';
+import { mockJobPostingOptions } from './recruiter/job-posting-mock';
 
 export async function handleBffRequest(request: Request): Promise<Response> {
     try {
         if (isAuthRequest(request)) return await handleAuthRequest(request);
         const env = getServerEnv();
+        if (isRecruiterJobPostingRequest(request)) {
+            if ((env.JOB_DATA_MODE ?? env.DATA_MODE) === 'real') return await handleRecruiterJobPostings(request, env.JOB_API_URL, env.COMPANY_API_URL);
+            if (new URL(request.url).pathname === '/api/bff/recruiter/jobs/options') return await mockJobPostingOptions(request);
+            return await handleMockRequest(request);
+        }
         if (isCvsRequest(request)) return await handleCvsRequest(request, (env.PROFILE_DATA_MODE ?? env.DATA_MODE) === "real" ? env.PROFILE_API_URL : undefined);
         if (isProfileRequest(request)) {
             return await handleProfileRequest(request, (env.PROFILE_DATA_MODE ?? env.DATA_MODE) === "real" ? env.PROFILE_API_URL : undefined);

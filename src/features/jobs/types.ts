@@ -9,3 +9,5 @@ export type SavedJobResult = components["schemas"]["SavedJobResult"];
 
 export type JobInput = components['schemas']['JobInput'];
 export type RecruiterJob = components['schemas']['RecruiterJob'];
+export type JobPostingInput = components['schemas']['JobPostingInput'];
+export type JobPostingRecord = components['schemas']['JobPostingRecord'];

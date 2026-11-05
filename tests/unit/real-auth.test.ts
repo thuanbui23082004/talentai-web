@@ -13,6 +13,43 @@ function request(body: unknown = { email: "candidate@example.test", password: "P
 describe("real BFF login", () => {
   afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
 
+  it.each([["candidate", "recruiter"], ["recruiter", "candidate"], ["admin", "recruiter"]])("rejects %s accounts on the %s login without issuing cookies", async (actualRole, selectedRole) => {
+    const result = payload();
+    result.data.user.roles = [actualRole.toUpperCase()];
+    const network = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(Response.json(result))
+      .mockResolvedValueOnce(Response.json({ success: true, message: "Logged out" }));
+    const response = await proxyRequest(request({ email: "candidate@example.test", password: "Password123!", role: selectedRole }), backend);
+    expect(response.status).toBe(403);
+    expect(response.headers.has("set-cookie")).toBe(false);
+    const body = await response.json();
+    expect(body.error.code).toBe("AUTH_ROLE_MISMATCH");
+    expect(body).not.toHaveProperty("redirectTo");
+    expect(JSON.stringify(body)).not.toContain("backend-refresh-secret");
+    expect(JSON.parse(network.mock.calls[0][1]!.body as string)).toEqual({ email: "candidate@example.test", password: "Password123!" });
+    expect(network.mock.calls[1][0]).toBe(`${backend}/auth/logout`);
+    expect(JSON.parse(network.mock.calls[1][1]!.body as string)).toEqual({ refreshToken: "backend-refresh-secret" });
+  });
+
+  it.each(["candidate", "recruiter", "admin"])("accepts a matching %s login", async (role) => {
+    const result = payload();
+    result.data.user.roles = [role.toUpperCase()];
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json(result));
+    const response = await proxyRequest(request({ email: "candidate@example.test", password: "Password123!", role }), backend);
+    expect(response.status).toBe(200);
+    expect(response.headers.has("set-cookie")).toBe(true);
+    expect((await response.json()).redirectTo).toBe(`/${role}/dashboard`);
+  });
+
+  it("still rejects a mismatched role if revoking the new backend session fails", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(Response.json(payload()))
+      .mockRejectedValueOnce(new TypeError("Network failure"));
+    const response = await proxyRequest(request({ email: "candidate@example.test", password: "Password123!", role: "recruiter" }), backend);
+    expect(response.status).toBe(403);
+    expect(response.headers.has("set-cookie")).toBe(false);
+  });
+
   it("calls Java once and puts its JWT directly in HttpOnly cookies, never JSON", async () => {
     const network = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json(payload()));
     const response = await proxyRequest(request(undefined, { Authorization: "browser-secret", Cookie: "untrusted", "x-mock-scenario": "error" }), backend);

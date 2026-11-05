@@ -55,9 +55,9 @@ test('salary fields align and negotiable salary retains entered amounts in creat
     const maxBox = await max.boundingBox();
     expect(minBox!.y).toBeCloseTo(maxBox!.y, 0);
     expect(minBox!.width).toBeCloseTo(maxBox!.width, 0);
-    expect(minBox!.height).toBe(40);
-    const controls = await basic.locator('.job-basic-details [data-slot=select-trigger], .job-basic-details input').evaluateAll(elements => elements.filter(element => element.getAttribute('data-slot') === 'input' || element.getAttribute('data-slot') === 'select-trigger').map(element => element.getBoundingClientRect().y));
-    expect(controls).toHaveLength(3);
+    expect(minBox!.height).toBe(44);
+    const controls = await basic.locator('#job-experienceLevel, #job-applicationDeadline').evaluateAll(elements => elements.map(element => element.getBoundingClientRect().y));
+    expect(controls).toHaveLength(2);
     for (const y of controls) expect(y).toBeCloseTo(controls[0], 0);
     expect((await negotiable.boundingBox())!.y).toBeGreaterThan(minBox!.y + minBox!.height);
     await negotiable.check();
@@ -78,7 +78,7 @@ test('salary fields align and negotiable salary retains entered amounts in creat
   }
 });
 
-test('workplace fields have one heading, balanced locality inputs and a full-width address', async ({ page }, info) => {
+test('workplace fields have one heading, a province/ward picker and a full-width address', async ({ page }, info) => {
   await page.goto('/recruiter/jobs');
   const link = page.locator('.detail-card-link').first();
   await expect(link).toBeVisible();
@@ -90,26 +90,22 @@ test('workplace fields have one heading, balanced locality inputs and a full-wid
     await expect(section.getByRole('heading', { name: 'Địa điểm làm việc', exact: true })).toBeVisible();
     await expect(section.locator('.workplace-box, h3')).toHaveCount(0);
     const city = section.locator('#job-city');
-    const district = section.getByRole('textbox', { name: 'Quận/Huyện', exact: true });
     const address = section.getByRole('textbox', { name: 'Địa chỉ cụ thể', exact: true });
     await expect(city).toHaveAttribute('aria-required', 'true');
-    await expect(address).toHaveAttribute('placeholder', 'Số nhà, tên đường, phường/xã');
-    await district.fill('Quận kiểm thử');
+    await expect(address).toHaveAttribute('placeholder', 'Số nhà, tên đường, tòa nhà');
     await address.fill('Địa chỉ kiểm thử');
-    const cityBox = await section.locator('.location-picker').boundingBox();
-    const districtBox = await district.boundingBox();
+    const cityBox = await city.boundingBox();
     const addressBox = await address.boundingBox();
     const fieldsBox = await section.locator('.location-fields').boundingBox();
-    expect(cityBox!.y).toBeCloseTo(districtBox!.y, 0);
-    expect(cityBox!.width).toBeCloseTo(districtBox!.width, 0);
-    expect(cityBox!.height).toBe(40);
+    expect(cityBox!.width).toBeCloseTo(fieldsBox!.width - 2, 0);
+    expect(cityBox!.height).toBeGreaterThanOrEqual(44);
     expect(addressBox!.width).toBeCloseTo(fieldsBox!.width, 0);
-    expect(addressBox!.y).toBeGreaterThan(districtBox!.y + districtBox!.height);
+    expect(addressBox!.y).toBeGreaterThan(cityBox!.y + cityBox!.height);
     await section.screenshot({ path: info.outputPath(route.endsWith('/edit') ? 'edit-workplace.png' : 'create-workplace.png') });
     await page.setViewportSize({ width: 375, height: 900 });
     await expect(address).toHaveValue('Địa chỉ kiểm thử');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    expect((await district.boundingBox())!.y).toBeGreaterThan((await section.locator('.location-picker').boundingBox())!.y);
+    expect((await address.boundingBox())!.y).toBeGreaterThan((await city.boundingBox())!.y);
     await section.screenshot({ path: info.outputPath(route.endsWith('/edit') ? 'edit-workplace-mobile.png' : 'create-workplace-mobile.png') });
   }
 });

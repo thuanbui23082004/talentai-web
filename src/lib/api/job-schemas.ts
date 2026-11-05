@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { jobPostingRecordSchema } from './job-posting-schemas';
 
 export const workTypes = ['full_time', 'part_time', 'internship', 'contract', 'freelance', 'remote', 'hybrid'] as const;
 export const jobLevels = ['intern', 'fresher', 'junior', 'middle', 'senior', 'lead', 'manager', 'director'] as const;
@@ -21,6 +22,7 @@ export const jobInputSchema = z.object({
 });
 
 export const recruiterJobSchema = z.object({
+  posting: jobPostingRecordSchema.optional(),
   id: z.uuid(), title: z.string(), company: z.object({ id: z.uuid(), name: z.string(), logoUrl: z.string().optional() }).passthrough(),
   location: jobLocationSchema, salary: salarySchema.optional(), workType: z.enum(workTypes), level: z.enum(jobLevels),
   status: z.enum(jobStatuses), description: z.string(), requirements: z.string(), benefits: z.string().optional(),

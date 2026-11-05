@@ -1,5 +1,19 @@
 # Trạng thái triển khai
 
+Đăng nhập gửi loại tài khoản đang chọn tới BFF. BFF đối chiếu role Java trả về trước khi đặt cookie;
+sai loại tài khoản trả `403 AUTH_ROLE_MISMATCH`, giữ người dùng ở trang đăng nhập.
+
+## Tạo tin recruiter — backend thật
+
+`JOB_DATA_MODE=real` nối form tạo/sửa tin, danh mục, danh sách và chi tiết tới job-posting service.
+UI đã được người dùng xác nhận: kinh nghiệm theo enum, tách loại hình/chế độ làm việc,
+ngành nghề và kỹ năng dùng ID backend, bỏ cấp bậc riêng, bằng cấp và vòng tuyển dụng.
+Popup tỉnh/xã dùng chung; BFF tra ID địa điểm thật, không gửi mã địa phương thay cho ID.
+Lương VND đổi triệu đồng → đồng; ngày hết hạn gửi cuối ngày theo múi giờ Việt Nam.
+Đã kiểm tra UI desktop/mobile với backend thật: tạo DRAFT, reload, đọc/sửa/lưu lại,
+giữ dữ liệu khi lỗi và thử lại; xóa các bản nháp trong lần nghiệm thu thành công.
+Tài liệu và thứ tự đọc code: `docs/recruiter-job-posting-integration.md`.
+
 ## Job-posting thật — tìm kiếm/lọc việc làm
 
 Đã nối `/jobs`, `/jobs/categories`, `/jobs/{id}` qua BFF với job-posting `localhost:3004/api/v1`.
@@ -9,7 +23,7 @@ giới tính, tuyển nhanh và sắp xếp “phù hợp nhất” khỏi form 
 không gửi wardCode/provinceCode. Query cũ không hỗ trợ trả 422 trong real.
 Đã kiểm tra với 10 tin công khai của backend. API không trả tên công ty nên UI hiển thị nhãn
 chưa cập nhật, không dùng công ty mock hay gọi N+1. Tài liệu review: `docs/job-posting-integration.md`.
-Các ghi chú tìm việc chỉ mock phía dưới là trạng thái cũ; recruiter/save/apply chưa nằm trong tích hợp này.
+Các ghi chú mock phía dưới là trạng thái cũ; phần ứng tuyển và thống kê recruiter chưa nằm trong tích hợp job-posting này.
 
 ## Company service thật — dữ liệu công ty công khai
 

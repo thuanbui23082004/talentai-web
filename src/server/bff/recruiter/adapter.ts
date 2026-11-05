@@ -2,6 +2,8 @@ import { readRequestIdentity } from '../auth/session';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'node:crypto';
 import { jobInputSchema } from '@/lib/api/job-schemas';
+import { mockPostingJob } from './job-posting-mock';
+import { getMockCompanies } from './mock-store';
 import { matchesLocationName } from '@/features/jobs';
 import { handleAccountCompany, getMockAccounts } from '@/server/bff/recruiter/account-company-handler';
 import { recruiterIndustries, recruiterLocations } from '@/mocks/fixtures/recruiter-catalog';
@@ -93,6 +95,15 @@ export async function handleRecruiterRequest(request: NextRequest, path: string)
     if (!session.companyId) return mockProblem(409, 'COMPANY_REQUIRED');
     let body: unknown;
     try { body = await request.json(); } catch { return mockProblem(400, 'BAD_REQUEST'); }
+    if (body && typeof body === 'object' && 'skillIds' in body) {
+      const company = getMockCompanies().get(session.companyId);
+      if (!company) return mockProblem(409, 'COMPANY_REQUIRED');
+      try {
+        const job = mockPostingJob(body, company);
+        store.jobs.unshift(job);
+        return NextResponse.json(job, { status: 201 });
+      } catch (error) { if (error instanceof Response) return error; throw error; }
+    }
     const result = jobInputSchema.safeParse(body);
     if (!result.success) return NextResponse.json({ error: { code: 'VALIDATION_FAILED', message: 'VALIDATION_FAILED', fieldErrors: result.error.issues.map(issue => ({ field: issue.path.join('.'), code: 'VALIDATION_FAILED', message: 'VALIDATION_FAILED' })), requestId: randomUUID() } }, { status: 422 });
     if (!recruiterIndustries.some(item => item.id === result.data.industryId)) return mockProblem(422, 'VALIDATION_FAILED');

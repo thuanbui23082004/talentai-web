@@ -1,0 +1,35 @@
+{
+  "title": "Frontend Developer",
+  "description": "Phát triển giao diện web.",
+  "requirements": "Có kiến thức React và TypeScript.",
+  "benefits": "Đào tạo và phát triển kỹ năng.",
+  "categoryId": 1,
+  "skillIds": [
+    2,
+    3
+  ],
+  "salaryMin": 15000000,
+  "salaryMax": 25000000,
+  "salaryCurrency": "VND",
+  "isSalaryNegotiable": false,
+  "experienceLevel": "JUNIOR",
+  "jobType": "FULL_TIME",
+  "workMode": "ONSITE",
+  "headCount": 2,
+  "deadline": "2026-12-31T23:59:59+07:00",
+  "workplace": "1:00004",
+  "addressLine": "12 Hùng Vương",
+  "jobPostId": "123e4567-e89b-42d3-a456-426614174000",
+  "companyId": "223e4567-e89b-42d3-a456-426614174000",
+  "status": "DRAFT",
+  "version": 0,
+  "createdAt": "2026-11-05T00:00:00Z",
+  "updatedAt": "2026-11-05T00:00:00Z",
+  "locations": [
+    {
+      "provinceId": 1000001,
+      "wardId": 3000004,
+      "addressLine": "12 Hùng Vương"
+    }
+  ]
+}

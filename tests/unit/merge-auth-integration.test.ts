@@ -214,19 +214,30 @@ it("delegates password reset to Java and maps its used/expired token error", asy
 
 it.each(["GOOGLE", "FACEBOOK"])("exchanges %s provider tokens for HttpOnly Java cookies", async provider => {
   const network = vi.spyOn(globalThis, "fetch").mockResolvedValue(authResult());
-  const response = await request("/auth/social-login", { provider, token: "provider-test-token", role: "recruiter" });
+  const response = await request("/auth/social-login", { provider, token: "provider-test-token", role: "candidate" });
   expect(response.status).toBe(200);
   expect(network.mock.calls[0][0]).toBe("http://auth.test/api/v1/auth/social-login");
-  expect(JSON.parse(String(network.mock.calls[0][1]?.body))).toEqual({ provider, token: "provider-test-token", role: "RECRUITER" });
+  expect(JSON.parse(String(network.mock.calls[0][1]?.body))).toEqual({ provider, token: "provider-test-token", role: "CANDIDATE" });
   expect(response.headers.getSetCookie().every(value => value.includes("HttpOnly"))).toBe(true);
   expect(cookies(response)).toBe(cookie);
   const body = await response.json();
-  // Existing identity/role is decided by Java, not the role chosen on the login screen.
+  // The verified Java identity must match the selected login role.
   expect(body.user.role).toBe("candidate");
   expect(body.redirectTo).toBe("/candidate/dashboard");
   expect(body.csrfToken).toBe(csrf);
   for (const token of [tokens.accessToken, tokens.refreshToken, "provider-test-token"])
     expect(JSON.stringify(body)).not.toContain(token);
+});
+
+it.each(["GOOGLE", "FACEBOOK"])("rejects %s login when Java returns a different role", async provider => {
+  const network = vi.spyOn(globalThis, "fetch")
+    .mockResolvedValueOnce(authResult())
+    .mockResolvedValueOnce(Response.json({ success: true, message: "Logged out" }));
+  const response = await request("/auth/social-login", { provider, token: "provider-test-token", role: "recruiter" });
+  expect(response.status).toBe(403);
+  expect((await response.json()).error.code).toBe("AUTH_ROLE_MISMATCH");
+  expect(response.headers.has("set-cookie")).toBe(false);
+  expect(network.mock.calls[1][0]).toBe("http://auth.test/api/v1/auth/logout");
 });
 
 it("rejects social admin/local inputs and cross-origin requests before contacting Java", async () => {

@@ -1,4 +1,4 @@
-.recruiter-main:has(.create-job-page){background:var(--recruiter-surface)}
+.recruiter-main:has(.create-job-page){background:var(--recruiter-bg)}
 .recruiter-main .create-job-page { max-width: var(--recruiter-content-width); padding-inline: 0; }
 .recruiter-main .create-job-side { top: calc(var(--recruiter-header-height) + var(--recruiter-gutter)); }
 .recruiter-main .create-job-section { scroll-margin-top: calc(var(--recruiter-header-height) + var(--recruiter-gutter)); }
@@ -11,6 +11,37 @@
 
 .create-job-fieldset{border:0;padding:0;margin:0;min-width:0}.job-management{margin-bottom:24px}.job-management-buttons{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.job-edit-link{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:7px;background:var(--recruiter-soft);color:var(--recruiter-primary);font-size:var(--recruiter-font-body);min-height:34px}.job-management-buttons button{font-size:var(--recruiter-font-body);min-height:34px}.job-delete-button{color:var(--recruiter-danger)}.job-management-confirm{margin-top:15px;padding:20px}.job-management-confirm p{font-size:var(--recruiter-font-body);line-height:1.8;margin:12px 0}.job-management-notice{font-size:var(--recruiter-font-body);color:var(--recruiter-primary);background:var(--recruiter-soft);padding:12px;border-radius:7px;margin-top:12px!important}@media(max-width:640px){.job-edit-link,.job-management-buttons button{min-height:40px}.job-management-confirm{padding:16px}}
 .hiring-rounds-fields ol{list-style:none;padding:0;margin:0 0 14px;display:grid;gap:14px}.hiring-rounds-fields li{display:flex;align-items:end;gap:12px;flex-wrap:wrap;min-width:0}.hiring-round-input{display:grid;gap:7px;flex:1;min-width:150px}.hiring-round-input label{font-size:var(--recruiter-font-body)}.hiring-round-controls{display:flex;gap:7px;flex-shrink:0}.hiring-rounds-fields .field-error{flex-basis:100%}.hiring-rounds-empty{font-size:var(--recruiter-font-body);color:var(--recruiter-muted);margin-bottom:14px}@media(max-width:640px){.hiring-round-input{flex-basis:100%}.hiring-round-controls{margin-left:auto}.hiring-round-controls button{min-width:40px;min-height:40px}}
+
+/* Distinguish form panels from the page while retaining the shared surface tokens. */
+.recruiter-app :is(.create-job-section, .create-job-preview, .create-job-steps, .create-job-actions) {
+  background: var(--recruiter-surface);
+  border-color: var(--border);
+  box-shadow: var(--shadow-card);
+}
+
+.recruiter-app .create-job-section > summary {
+  background: color-mix(in srgb, var(--recruiter-soft) 45%, var(--recruiter-surface));
+  border-radius: 14px;
+}
+
+.recruiter-app .create-job-section[open] > summary {
+  border-bottom: 1px solid var(--border);
+  border-radius: 14px 14px 0 0;
+}
+
+.recruiter-app .create-job-section > summary:focus-visible {
+  outline: 2px solid var(--recruiter-primary);
+  outline-offset: 3px;
+}
+
+.recruiter-app .create-job-section-body {
+  padding-top: 22px;
+}
+
+.recruiter-app .create-job-field :is([data-slot=input], [data-slot=select-trigger], [data-slot=textarea]),
+.recruiter-app .editor-toolbar {
+  border-color: var(--border);
+}
 
 /* A readable preview balances the form without introducing a second page gutter. */
 .recruiter-app .create-job-grid{grid-template-columns:minmax(0,1fr) 360px;gap:24px;align-items:start}
@@ -46,3 +77,39 @@
 .recruiter-app .salary-negotiable{display:flex;align-items:center;gap:8px;margin-top:12px;min-height:28px;line-height:22px;width:fit-content}
 @media(max-width:760px){.recruiter-app .job-basic-details{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:640px){.recruiter-app .salary-fields{gap:12px}.recruiter-app .salary-negotiable{min-height:40px}}
+
+/* Shared selectors and calendar controls keep the same size and focus treatment. */
+.recruiter-app .create-job-field :is(.ui-input, [data-slot=select-trigger]),
+.recruiter-app #job-basic :is(.ui-input, [data-slot=select-trigger]),
+.recruiter-app .location-fields input[data-slot=input] {
+  height: 44px;
+  min-height: 44px;
+  width: 100%;
+  border-radius: 12px;
+  background: var(--recruiter-surface);
+}
+
+.recruiter-app .job-workplace-field {
+  grid-column: 1 / -1;
+}
+
+.recruiter-app .create-job-field :is(.ui-input, [data-slot=select-trigger]):focus-visible {
+  border-color: var(--primary);
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.job-workplace-trigger {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--recruiter-surface);
+}
+
+.job-workplace-trigger:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+.job-workplace-trigger:has([aria-invalid=true]) {
+  border-color: var(--destructive);
+}

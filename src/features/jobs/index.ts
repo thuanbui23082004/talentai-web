@@ -7,7 +7,7 @@ export { JobDetailPage } from "./components/job-detail-page";
 export { HomeJobCollections } from "./components/home-job-collections";
 export type { Job, JobFilters, JobSearchResponse } from "./types";
 
-export { CreateJobForm } from './components/recruiter/create-job-form';
+export { CreateJobForm } from './components/recruiter/job-posting-form';
 export { JobDetailLoader } from './components/recruiter/job-detail-loader';
 export { JobDataState } from './components/recruiter/job-data-state';
 export { useRecruiterJobs } from './hooks/use-create-job';

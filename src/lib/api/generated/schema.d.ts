@@ -46,6 +46,7 @@ export interface paths {
          *
          *     **Lỗi nghiệp vụ:**
          *     - `401 INVALID_CREDENTIALS`: Email hoặc mật khẩu không đúng.
+         *     - `403 AUTH_ROLE_MISMATCH`: Tài khoản không thuộc loại tài khoản đang chọn; không đặt cookie đăng nhập.
          *     - `423 ACCOUNT_LOCKED`: Java từ chối vì tài khoản bị khóa hoặc vô hiệu hóa.
          */
         post: operations["login"];
@@ -68,6 +69,7 @@ export interface paths {
          * Đăng nhập bằng Google hoặc Facebook
          * @description Chuyển Google ID token hoặc Facebook access token tới Java để xác thực.
          *     Java tạo tài khoản nếu cần; role chỉ là lựa chọn cho tài khoản mới.
+         *     BFF đối chiếu role đã xác thực với role đang chọn; không khớp trả `403 AUTH_ROLE_MISMATCH` và không đặt cookie.
          *     BFF đặt JWT Java vào cookie HttpOnly, không trả JWT cho trình duyệt.
          */
         post: operations["socialLogin"];
@@ -1651,6 +1653,23 @@ export interface paths {
          *     **Quyền:** Nhà tuyển dụng.
          */
         post: operations["submitCompanyVerification"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recruiter/jobs/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Job posting categories and skills */
+        get: operations["getJobPostingOptions"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3344,7 +3363,7 @@ export interface components {
          *     | Danh mục | CATALOG_ITEM_IN_USE |
          * @enum {string}
          */
-        ErrorCode: "VALIDATION_FAILED" | "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "CSRF_TOKEN_INVALID" | "SERVICE_UNAVAILABLE" | "INTERNAL_ERROR" | "EMAIL_ALREADY_EXISTS" | "INVALID_CREDENTIALS" | "ACCOUNT_LOCKED" | "SESSION_EXPIRED" | "INVALID_RESET_TOKEN" | "CURRENT_PASSWORD_INCORRECT" | "CV_INVALID_FORMAT" | "CV_FILE_TOO_LARGE" | "CV_UNREADABLE" | "CV_IN_USE" | "JD_INSUFFICIENT" | "AI_ANALYSIS_FAILED" | "AI_TASK_NOT_READY" | "JOB_CLOSED" | "JOB_NOT_OPEN" | "ALREADY_APPLIED" | "APPLICATION_NOT_WITHDRAWABLE" | "INVALID_STATUS_TRANSITION" | "COMPANY_REQUIRED" | "COMPANY_NOT_VERIFIED" | "INTERVIEW_TIME_CONFLICT" | "INTERVIEW_ALREADY_RESPONDED" | "CATALOG_ITEM_IN_USE";
+        ErrorCode: "VALIDATION_FAILED" | "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "CSRF_TOKEN_INVALID" | "SERVICE_UNAVAILABLE" | "INTERNAL_ERROR" | "EMAIL_ALREADY_EXISTS" | "INVALID_CREDENTIALS" | "AUTH_ROLE_MISMATCH" | "ACCOUNT_LOCKED" | "SESSION_EXPIRED" | "INVALID_RESET_TOKEN" | "CURRENT_PASSWORD_INCORRECT" | "CV_INVALID_FORMAT" | "CV_FILE_TOO_LARGE" | "CV_UNREADABLE" | "CV_IN_USE" | "JD_INSUFFICIENT" | "AI_ANALYSIS_FAILED" | "AI_TASK_NOT_READY" | "JOB_CLOSED" | "JOB_NOT_OPEN" | "ALREADY_APPLIED" | "APPLICATION_NOT_WITHDRAWABLE" | "INVALID_STATUS_TRANSITION" | "COMPANY_REQUIRED" | "COMPANY_NOT_VERIFIED" | "INTERVIEW_TIME_CONFLICT" | "INTERVIEW_ALREADY_RESPONDED" | "CATALOG_ITEM_IN_USE";
         /** Format: uuid */
         Id: string;
         FieldError: {
@@ -3516,6 +3535,11 @@ export interface components {
         /** @description Tài khoản mới đã đăng nhập bằng token Java; redirectTo là trang chủ. */
         RegisterResponse: components["schemas"]["AuthSessionResponse"];
         LoginRequest: {
+            /**
+             * @description Loại tài khoản mong đợi. BFF kiểm tra với role backend trả về trước khi tạo cookie phiên; bỏ trống để đăng nhập theo role đã xác thực.
+             * @enum {string}
+             */
+            role?: "candidate" | "recruiter" | "admin";
             /** Format: email */
             email: string;
             password: string;
@@ -4268,6 +4292,123 @@ export interface components {
             items: components["schemas"]["CompanyPublic"][];
             meta: components["schemas"]["PageMeta"];
         };
+        JobPostingInput: {
+            version?: number;
+            title?: string;
+            description?: string;
+            requirements?: string;
+            benefits?: string;
+            /** Format: int64 */
+            categoryId?: number;
+            skillIds: number[];
+            /** Format: int64 */
+            salaryMin?: number;
+            /** Format: int64 */
+            salaryMax?: number;
+            salaryCurrency: string;
+            isSalaryNegotiable: boolean;
+            location?: string;
+            locations?: components["schemas"]["JobLocationRequest"][];
+            /** @enum {string} */
+            experienceLevel?: "INTERN" | "FRESHER" | "JUNIOR" | "MIDDLE" | "SENIOR" | "EXPERT";
+            /** @enum {string} */
+            jobType?: "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP" | "FREELANCE";
+            /** @enum {string} */
+            workMode?: "ONSITE" | "HYBRID" | "REMOTE";
+            /** Format: int32 */
+            headCount?: number;
+            /** Format: date-time */
+            deadline?: string;
+            /** @description BFF-only: provinceCode[:wardCode], resolved against job-locations before calling Java. */
+            workplace?: string;
+            /** @description BFF-only detailed street address. */
+            addressLine?: string;
+        };
+        JobPostingRecord: {
+            workplace?: string;
+            addressLine?: string;
+            /** Format: uuid */
+            jobPostId: string;
+            /** Format: uuid */
+            companyId: string;
+            /** Format: int64 */
+            categoryId?: number;
+            title?: string;
+            description?: string;
+            requirements?: string;
+            benefits?: string;
+            skillIds?: number[];
+            /** Format: int64 */
+            salaryMin?: number;
+            /** Format: int64 */
+            salaryMax?: number;
+            salaryCurrency?: string;
+            isSalaryNegotiable?: boolean;
+            location?: string;
+            locations?: components["schemas"]["JobLocationResponse"][];
+            /** @enum {string} */
+            experienceLevel?: "INTERN" | "FRESHER" | "JUNIOR" | "MIDDLE" | "SENIOR" | "EXPERT";
+            /** @enum {string} */
+            jobType?: "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP" | "FREELANCE";
+            /** @enum {string} */
+            workMode?: "ONSITE" | "HYBRID" | "REMOTE";
+            /** Format: int32 */
+            headCount?: number;
+            /** Format: date-time */
+            deadline?: string;
+            /** @enum {string} */
+            status: "DRAFT" | "ACTIVE" | "PAUSED" | "CLOSED" | "EXPIRED";
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+            /** Format: int64 */
+            version: number;
+            /** Format: date-time */
+            publishedAt?: string;
+            /** Format: date-time */
+            closedAt?: string;
+            closeReason?: string;
+        };
+        JobLocationRequest: {
+            /** Format: int64 */
+            provinceId: number;
+            /** Format: int64 */
+            districtId?: number;
+            /** Format: int64 */
+            wardId?: number;
+            addressLine?: string;
+        };
+        JobLocationResponse: {
+            /** Format: int64 */
+            provinceId?: number;
+            /** Format: int64 */
+            districtId?: number;
+            /** Format: int64 */
+            wardId?: number;
+            addressLine?: string;
+        };
+        JobPostingCategory: {
+            /** Format: int64 */
+            categoryId?: number;
+            categoryName?: string;
+            description?: string;
+        };
+        JobPostingSkill: {
+            /** Format: int64 */
+            skillId?: number;
+            skillName?: string;
+        };
+        RecruiterJobWriteInput: components["schemas"]["JobInput"] | components["schemas"]["JobPostingInput"];
+        JobPostingOptions: {
+            company?: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            };
+            categories: components["schemas"]["JobPostingCategory"][];
+            skills: components["schemas"]["JobPostingSkill"][];
+        };
         JobInput: {
             title: string;
             positionId?: components["schemas"]["Id"];
@@ -4376,6 +4517,7 @@ export interface components {
             byStatus?: components["schemas"]["CountByKey"];
         };
         RecruiterJob: components["schemas"]["JobDetail"] & {
+            posting?: components["schemas"]["JobPostingRecord"];
             moderation?: components["schemas"]["ModerationInfo"];
             stats?: components["schemas"]["JobStats"];
             /** @enum {string} */
@@ -5204,6 +5346,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             422: components["responses"]["ValidationError"];
             423: components["responses"]["Locked"];
             429: components["responses"]["TooManyRequests"];
@@ -5233,6 +5376,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             422: components["responses"]["ValidationError"];
             423: components["responses"]["Locked"];
             429: components["responses"]["TooManyRequests"];
@@ -8002,6 +8146,28 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
+    getJobPostingOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Catalogs */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobPostingOptions"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
     listMyJobs: {
         parameters: {
             query?: {
@@ -8043,7 +8209,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["JobInput"];
+                "application/json": components["schemas"]["RecruiterJobWriteInput"];
             };
         };
         responses: {
@@ -8100,7 +8266,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["JobInput"];
+                "application/json": components["schemas"]["RecruiterJobWriteInput"];
             };
         };
         responses: {
@@ -8124,7 +8290,10 @@ export interface operations {
     deleteJob: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Saved posting version; required in real JOB_DATA_MODE for lifecycle commands and deletion. */
+                "If-Match"?: string;
+            };
             path: {
                 jobId: components["schemas"]["Id"];
             };
@@ -8148,7 +8317,10 @@ export interface operations {
     publishJob: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Saved posting version; required in real JOB_DATA_MODE for lifecycle commands and deletion. */
+                "If-Match"?: string;
+            };
             path: {
                 jobId: components["schemas"]["Id"];
             };
@@ -8175,7 +8347,10 @@ export interface operations {
     pauseJob: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Saved posting version; required in real JOB_DATA_MODE for lifecycle commands and deletion. */
+                "If-Match"?: string;
+            };
             path: {
                 jobId: components["schemas"]["Id"];
             };
@@ -8202,7 +8377,10 @@ export interface operations {
     reopenJob: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Saved posting version; required in real JOB_DATA_MODE for lifecycle commands and deletion. */
+                "If-Match"?: string;
+            };
             path: {
                 jobId: components["schemas"]["Id"];
             };
@@ -8229,7 +8407,10 @@ export interface operations {
     closeJob: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Saved posting version; required in real JOB_DATA_MODE for lifecycle commands and deletion. */
+                "If-Match"?: string;
+            };
             path: {
                 jobId: components["schemas"]["Id"];
             };

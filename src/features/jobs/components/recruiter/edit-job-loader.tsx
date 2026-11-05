@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useRecruiterJob } from '@/features/jobs/hooks/use-create-job';
 import { JobDataState } from '@/features/jobs/components/recruiter/job-data-state';
-import { CreateJobForm } from '@/features/jobs/components/recruiter/create-job-form';
+import { CreateJobForm } from '@/features/jobs/components/recruiter/job-posting-form';
 export function EditJobLoader({ id }: { id: string }) {
   const t = useTranslations('JobForm'); const query = useRecruiterJob(id);
   if (query.isPending || query.isError || !query.data) return <JobDataState loading={query.isPending} error={query.error} onRetry={() => void query.refetch()} />;

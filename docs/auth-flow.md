@@ -15,6 +15,19 @@ DATA_MODE để chọn nguồn danh tính.
 
 ## Trách nhiệm
 
+Form đăng nhập gửi `role` đang chọn cùng email/mật khẩu. BFF chỉ chuyển email/mật khẩu
+tới Java, sau đó so sánh role đã xác thực trước khi đặt cookie. Nếu không khớp, BFF
+trả `403 AUTH_ROLE_MISMATCH`, không đặt cookie hoặc trả dữ liệu phiên, đồng thời thử
+thu hồi refresh token vừa được cấp. Đăng nhập mạng xã hội cũng kiểm tra role tương tự.
+`LoginRequest.role` là tùy chọn để giữ tương thích với các client đăng nhập theo role
+đã xác thực; form đăng nhập luôn gửi trường này. Role gửi lên không dùng để cấp quyền.
+
+Kiểm tra bản sửa role: 270 unit test pass; trình duyệt với backend thật đã xác nhận
+sai role trả lỗi và không đặt cookie. E2E đầy đủ còn bị chặn ở bước đăng nhập lại:
+đã tái hiện trực tiếp Java trả `500 INTERNAL_SERVER_ERROR` cho chuỗi
+register → logout → login; BFF chuyển lỗi này thành 503. Cần kiểm tra auth backend
+trước khi nghiệm thu toàn bộ kịch bản đăng nhập lại.
+
 | Java | Next.js BFF |
 |---|---|
 | Validate nghiệp vụ, kiểm tra mật khẩu, khóa tài khoản | Kiểm tra shape JSON, Origin/CSRF và giới hạn request |
@@ -100,7 +113,8 @@ Component → `useSocialLogin` → service → POST `/api/bff/auth/social-login`
 POST `/api/v1/auth/social-login` với `{provider,token,role}` (role uppercase).
 Java xác minh provider, tìm/tạo/liên kết tài khoản và trả user/tokens.
 BFF dùng cùng handler login để đặt JWT HttpOnly, trả AuthSessionResponse.
-Client xóa query cache và điều hướng theo role Java trả, không theo role chọn trên UI.
+Chỉ khi role Java trả khớp lựa chọn trên UI, BFF mới đặt cookie để client xóa query cache
+và điều hướng theo role đã xác thực. Sai role trả lỗi và giữ nguyên trang đăng nhập.
 Không lưu provider token hoặc JWT vào localStorage/sessionStorage, không log token.
 Hủy popup, SDK bị chặn, token không hợp lệ và backend lỗi đều không tạo phiên giả.
 

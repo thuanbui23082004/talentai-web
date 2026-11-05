@@ -2,7 +2,8 @@ import { z } from 'zod';
 import { apiClient } from '@/lib/api';
 import { catalogPageSchema, companySchema, recruiterJobPageSchema, recruiterJobSchema } from '@/lib/api/job-schemas';
 import { jobRequestError } from '@/features/jobs/errors';
-import type { JobInput } from '@/features/jobs/types';
+import type { JobInput, JobPostingInput } from '@/features/jobs/types';
+import { postingOptionsSchema } from '@/lib/api/job-posting-schemas';
 
 async function csrf() {
   const result = await apiClient.GET('/auth/csrf');
@@ -24,7 +25,12 @@ export async function getRecruiterLocations() {
   if (result.error) throw jobRequestError(result.error, result.response.status);
   return catalogPageSchema.parse(result.data).items;
 }
-export async function createRecruiterJob(input: JobInput) {
+export async function getJobPostingOptions() {
+  const result = await apiClient.GET('/recruiter/jobs/options');
+  if (result.error) throw jobRequestError(result.error, result.response.status);
+  return postingOptionsSchema.parse(result.data);
+}
+export async function createRecruiterJob(input: JobInput | JobPostingInput) {
   const token = await csrf();
   const result = await apiClient.POST('/recruiter/jobs', { body: input, headers: { 'X-CSRF-Token': token } });
   if (result.error) throw jobRequestError(result.error, result.response.status);
@@ -43,27 +49,27 @@ export async function getRecruiterJob(id: string) {
   if (result.error) throw jobRequestError(result.error, result.response.status);
   return recruiterJobSchema.parse(result.data);
 }
-export async function updateRecruiterJob(id: string, input: JobInput) {
+export async function updateRecruiterJob(id: string, input: JobInput | JobPostingInput) {
   const token = await csrf();
   const result = await apiClient.PUT('/recruiter/jobs/{jobId}', { params: { path: { jobId: z.uuid().parse(id) } }, body: input, headers: { 'X-CSRF-Token': token } });
   if (result.error) throw jobRequestError(result.error, result.response.status);
   return recruiterJobSchema.parse(result.data);
 }
-export async function deleteRecruiterJob(id: string) {
+export async function deleteRecruiterJob(id: string, version?: number) {
   const token = await csrf();
-  const result = await apiClient.DELETE('/recruiter/jobs/{jobId}', { params: { path: { jobId: z.uuid().parse(id) } }, headers: { 'X-CSRF-Token': token } });
+  const result = await apiClient.DELETE('/recruiter/jobs/{jobId}', { params: { path: { jobId: z.uuid().parse(id) } }, headers: { 'X-CSRF-Token': token, ...(version === undefined ? {} : { 'If-Match': String(version) }) } });
   if (result.error) throw jobRequestError(result.error, result.response.status);
 }
-export async function publishRecruiterJob(id: string) {
+export async function publishRecruiterJob(id: string, version?: number) {
   const token = await csrf();
-  const result = await apiClient.POST('/recruiter/jobs/{jobId}/publish', { params: { path: { jobId: z.uuid().parse(id) } }, headers: { 'X-CSRF-Token': token } });
+  const result = await apiClient.POST('/recruiter/jobs/{jobId}/publish', { params: { path: { jobId: z.uuid().parse(id) } }, headers: { 'X-CSRF-Token': token, ...(version === undefined ? {} : { 'If-Match': String(version) }) } });
   if (result.error) throw jobRequestError(result.error, result.response.status);
   return recruiterJobSchema.parse(result.data);
 }
-export async function changeRecruiterJobStatus(id: string, action: import('@/features/jobs/job-status').JobStatusAction) {
+export async function changeRecruiterJobStatus(id: string, action: import('@/features/jobs/job-status').JobStatusAction, version?: number) {
   const endpoints = { pause: '/recruiter/jobs/{jobId}/pause', reopen: '/recruiter/jobs/{jobId}/reopen', close: '/recruiter/jobs/{jobId}/close' } as const;
   const token = await csrf();
-  const result = await apiClient.POST(endpoints[action], { params: { path: { jobId: z.uuid().parse(id) } }, headers: { 'X-CSRF-Token': token } });
+  const result = await apiClient.POST(endpoints[action], { params: { path: { jobId: z.uuid().parse(id) } }, headers: { 'X-CSRF-Token': token, ...(version === undefined ? {} : { 'If-Match': String(version) }) } });
   if (result.error) throw jobRequestError(result.error, result.response.status);
   return recruiterJobSchema.parse(result.data);
 }

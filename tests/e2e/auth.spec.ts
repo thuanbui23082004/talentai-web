@@ -36,20 +36,36 @@ test("submitting login dismisses the previous notice even when validation fails"
 });
 
 async function login(page: Page, email = "candidate@example.com") {
-  await page.goto("/login");
+  await page.goto(email === "recruiter@example.com" ? "/login?role=recruiter" : "/login");
   await page.getByRole("textbox", { name: "Email", exact: true }).fill(email);
   await page.getByLabel("Mật khẩu", { exact: true }).fill("TalentAI123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(page).toHaveURL(/\/(candidate|recruiter|admin)\/dashboard$/);
 }
 
-test("login uses the verified account role and private pages reject wrong roles", async ({ page, context }) => {
+test("login rejects a different selected role and private pages reject wrong roles", async ({ page, context, request }) => {
+  test.setTimeout(60_000);
+  const email = `login-role-${crypto.randomUUID()}@example.com`;
+  const registration = await request.post("/api/bff/auth/register", {
+    data: { email, password: "TalentAI123!", fullName: "Login Role Test", role: "candidate" },
+  });
+  expect(registration.status()).toBe(201);
+  const session = await registration.json();
+  expect((await request.post("/api/bff/auth/logout", {
+    headers: { "X-CSRF-Token": session.csrfToken },
+  })).status()).toBe(204);
   await page.goto("/login?role=recruiter");
   await expect(page.getByRole("radio", { name: "Nhà tuyển dụng", exact: true })).toBeChecked();
-  await page.getByRole("textbox", { name: "Email", exact: true }).fill("candidate@example.com");
+  await page.getByRole("textbox", { name: "Email", exact: true }).fill(email);
   await page.getByLabel("Mật khẩu", { exact: true }).fill("TalentAI123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
-  await expect(page).toHaveURL(/\/candidate\/dashboard$/);
+  await expect(page.getByText("Không thể đăng nhập", { exact: true })).toBeVisible();
+  await expect(page.getByText("Tài khoản không thuộc loại tài khoản đang chọn. Vui lòng chọn đúng loại tài khoản để đăng nhập.")).toBeVisible();
+  await expect(page).toHaveURL(/\/login\?role=recruiter$/);
+  expect((await context.cookies()).filter((cookie) => ["access_token", "refresh_token"].includes(cookie.name))).toHaveLength(0);
+  await page.locator("label").filter({ hasText: /^Ứng viên$/ }).click();
+  await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
+  await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
   const tokens = (await context.cookies()).filter((cookie) => ["access_token", "refresh_token"].includes(cookie.name));
   expect(tokens).toHaveLength(2);
   expect(tokens.every((cookie) => cookie.httpOnly && cookie.sameSite === "Lax")).toBe(true);

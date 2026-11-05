@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jobInputSchema } from '@/lib/api/job-schemas';
+import { mockPostingJob } from './job-posting-mock';
 import { getDeletedJobIds, getMockCompanies, getRecruiterMockStore } from '@/server/bff/recruiter/mock-store';
 import { recruiterIndustries } from '@/mocks/fixtures/recruiter-catalog';
 import { canChangeJobStatus, type JobStatusAction } from '@/features/jobs';
@@ -25,7 +26,12 @@ export async function handleJobManagement(request: NextRequest, path: string, co
   }
   if (!match[2] && request.method === 'PUT') {
     if (job.status === 'locked') return problem(409, 'INVALID_STATUS_TRANSITION');
-    const parsed = jobInputSchema.safeParse(await request.json().catch(() => null));
+    const body: unknown = await request.json().catch(() => null);
+    if (body && typeof body === 'object' && 'skillIds' in body) {
+      try { Object.assign(job, mockPostingJob(body, job.company, job)); return NextResponse.json(job); }
+      catch (error) { if (error instanceof Response) return error; throw error; }
+    }
+    const parsed = jobInputSchema.safeParse(body);
     if (!parsed.success) return problem(422, 'VALIDATION_FAILED');
     const industry = recruiterIndustries.find(item => item.id === parsed.data.industryId);
     if (!industry) return problem(422, 'VALIDATION_FAILED');

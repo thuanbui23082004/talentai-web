@@ -57,6 +57,7 @@ type AuthCookies = ReturnType<typeof readAuthCookies>;
 const loginInput = z.object({
     email: z.string().min(1),
     password: z.string().min(1),
+    role: z.enum(["candidate", "recruiter", "admin"]).optional(),
 });
 
 const registerInput = loginInput.extend({
@@ -320,6 +321,10 @@ function toRegisterPayload(input: z.infer<typeof registerInput>) {
     };
 }
 
+function toLoginPayload({ email, password }: z.infer<typeof loginInput>) {
+    return { email, password };
+}
+
 /**
  * Xử lý các route nhận body JSON:
  * login, register, change-password, reset-password.
@@ -342,7 +347,9 @@ async function handleJsonRoute(
             ? toRegisterPayload(body.data as z.infer<typeof registerInput>)
             : path === "/auth/social-login"
               ? { ...body.data, role: (body.data as z.infer<typeof bodySchemas["/auth/social-login"]>).role.toUpperCase() }
-              : body.data;
+              : path === "/auth/login"
+                ? toLoginPayload(body.data as z.infer<typeof loginInput>)
+                : body.data;
 
     const upstream = await callAuth(
         backend,
@@ -353,7 +360,7 @@ async function handleJsonRoute(
     if (!upstream.ok) return upstreamError(upstream, path);
 
     if (path === "/auth/login" || path === "/auth/register" || path === "/auth/social-login")
-        return handleLoginOrRegisterSuccess(request, upstream, path);
+        return handleLoginOrRegisterSuccess(request, upstream, path, backend, "role" in body.data ? body.data.role : undefined);
 
     if (path === "/auth/forgot-password") {
         const result = passwordResetSchema.parse(await upstream.json());
@@ -391,12 +398,19 @@ async function handleLoginOrRegisterSuccess(
     request: Request,
     upstream: Response,
     path: "/auth/login" | "/auth/register" | "/auth/social-login",
+    backend: string,
+    expectedRole?: components["schemas"]["User"]["role"],
 ) {
     const result = authSchema.parse(await upstream.json());
     const user = mapUser(result.data.user);
     if (!user) return unavailable();
 
     const tokens = result.data.tokens;
+    if (expectedRole && user.role !== expectedRole) {
+        // Revoke only the newly issued session; never replace the browser's existing cookies.
+        await callAuth(backend, "logout", { refreshToken: tokens.refreshToken }).catch(() => undefined);
+        return apiError(403, "AUTH_ROLE_MISMATCH", "Tài khoản không thuộc loại tài khoản đang chọn. Vui lòng chọn đúng loại tài khoản để đăng nhập.");
+    }
     const session: components["schemas"]["AuthSessionResponse"] = {
         user,
         expiresInSeconds: tokens.expiresInSeconds,

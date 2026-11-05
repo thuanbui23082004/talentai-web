@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type Ref } from "react";
 import { ChevronDown, Check } from "lucide-react";
 import { Button, Input, Modal, ModalContent, ModalTrigger } from "@/components/ui";
 import { normalizeLocation, provinces, provinceCity, resolveLocation } from "@/lib/locations/vietnam";
 
-export function LocationPicker({ value, onChange, provinceOnly = false, ariaLabel = "Địa điểm tìm việc", placeholder = "Tất cả các địa điểm", ...triggerProps }: { value: string; onChange: (value: string) => void; provinceOnly?: boolean; ariaLabel?: string; placeholder?: string; id?: string; disabled?: boolean; onBlur?: () => void; "aria-describedby"?: string; "aria-invalid"?: boolean }) {
+export function LocationPicker({ value, onChange, provinceOnly = false, ariaLabel = "Địa điểm tìm việc", placeholder = "Tất cả các địa điểm", ...triggerProps }: { value: string; onChange: (value: string) => void; provinceOnly?: boolean; ariaLabel?: string; placeholder?: string; id?: string; ref?: Ref<HTMLButtonElement>; disabled?: boolean; onBlur?: () => void; "aria-describedby"?: string; "aria-invalid"?: boolean; "aria-required"?: boolean }) {
     const [open, setOpen] = useState(false);
     const [draft, setDraft] = useState(value);
     const [provinceQuery, setProvinceQuery] = useState("");

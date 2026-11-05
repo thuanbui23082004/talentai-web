@@ -44,7 +44,7 @@ export function RecruiterJobDetail({ job }: { job: RecruiterJobView }) {
   function openConfirmation(action: Action) { mutation.reset(); setSaved(false); setConfirmation(action); }
 
   const facts = [
-    { label: t('detailExperience'), value: t('detailYears', { count: job.experience }) },
+    { label: t('detailExperience'), value: job.experienceLabel ?? t('detailYears', { count: job.experience }) },
     { label: t('type'), value: t(job.type) },
     { label: t('locationLabel'), value: job.location },
     { label: t('detailCompany'), value: job.company },

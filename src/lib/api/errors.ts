@@ -16,6 +16,7 @@ export function toApiError(status: number, body?: components["schemas"]["ApiErro
   const code = body?.error?.code ?? "INTERNAL_ERROR";
   // Only use controlled UI messages; never show upstream error text.
   const messages: Partial<Record<components["schemas"]["ErrorCode"], string>> = {
+    AUTH_ROLE_MISMATCH: "Tài khoản không thuộc loại tài khoản đang chọn. Vui lòng chọn đúng loại tài khoản để đăng nhập.",
     UNAUTHENTICATED: "Vui lòng đăng nhập để tiếp tục.",
     FORBIDDEN: "Bạn không có quyền thực hiện thao tác này.",
     VALIDATION_FAILED: "Vui lòng kiểm tra lại thông tin đã nhập.",
