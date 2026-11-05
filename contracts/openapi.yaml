@@ -656,6 +656,366 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/InternalError'
+  /candidate/experience:
+    get:
+      tags:
+        - Candidate Profile
+      operationId: listProfileExperience
+      summary: listProfileExperience
+      security:
+        - cookieAuth: []
+      x-roles:
+        - candidate
+      responses:
+        "200":
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProfileExperience"
+        "401": &a1
+          $ref: "#/components/responses/Unauthorized"
+        "403": &a2
+          $ref: "#/components/responses/Forbidden"
+        "404": &a3
+          $ref: "#/components/responses/NotFound"
+        "422": &a4
+          $ref: "#/components/responses/ValidationError"
+        "503": &a5
+          $ref: "#/components/responses/ServiceUnavailable"
+    post:
+      tags:
+        - Candidate Profile
+      operationId: createProfileExperience
+      summary: createProfileExperience
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      x-roles:
+        - candidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileExperienceInput"
+      responses:
+        "201":
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileExperience"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "422": *a4
+        "503": *a5
+  /candidate/experience/{id}:
+    put:
+      tags:
+        - Candidate Profile
+      operationId: updateProfileExperience
+      summary: updateProfileExperience
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      x-roles:
+        - candidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileExperienceInput"
+      responses:
+        "200":
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileExperience"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "422": *a4
+        "503": *a5
+      parameters: &a6
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+    delete:
+      tags:
+        - Candidate Profile
+      operationId: deleteProfileExperience
+      summary: deleteProfileExperience
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      x-roles:
+        - candidate
+      responses:
+        "204":
+          description: Thành công
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "422": *a4
+        "503": *a5
+      parameters: *a6
+  /candidate/education:
+    get:
+      tags:
+        - Candidate Profile
+      operationId: listProfileEducation
+      summary: listProfileEducation
+      security:
+        - cookieAuth: []
+      x-roles:
+        - candidate
+      responses:
+        "200":
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProfileEducation"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "422": *a4
+        "503": *a5
+    post:
+      tags:
+        - Candidate Profile
+      operationId: createProfileEducation
+      summary: createProfileEducation
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      x-roles:
+        - candidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileEducationInput"
+      responses:
+        "201":
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileEducation"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "422": *a4
+        "503": *a5
+  /candidate/education/{id}:
+    put:
+      tags:
+        - Candidate Profile
+      operationId: updateProfileEducation
+      summary: updateProfileEducation
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      x-roles:
+        - candidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileEducationInput"
+      responses:
+        "200":
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileEducation"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "422": *a4
+        "503": *a5
+      parameters: &a7
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+    delete:
+      tags:
+        - Candidate Profile
+      operationId: deleteProfileEducation
+      summary: deleteProfileEducation
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      x-roles:
+        - candidate
+      responses:
+        "204":
+          description: Thành công
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "422": *a4
+        "503": *a5
+      parameters: *a7
+  /candidate/certificates:
+    get:
+      tags:
+        - Candidate Profile
+      operationId: listProfileCertificate
+      summary: listProfileCertificate
+      security:
+        - cookieAuth: []
+      x-roles:
+        - candidate
+      responses:
+        "200":
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProfileCertificate"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "422": *a4
+        "503": *a5
+    post:
+      tags:
+        - Candidate Profile
+      operationId: createProfileCertificate
+      summary: createProfileCertificate
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      x-roles:
+        - candidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileCertificateInput"
+      responses:
+        "201":
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileCertificate"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "422": *a4
+        "503": *a5
+  /candidate/certificates/{id}:
+    delete:
+      tags:
+        - Candidate Profile
+      operationId: deleteProfileCertificate
+      summary: deleteProfileCertificate
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      x-roles:
+        - candidate
+      responses:
+        "204":
+          description: Thành công
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "422": *a4
+        "503": *a5
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+  /candidate/skills:
+    get:
+      tags:
+        - Candidate Profile
+      operationId: getProfileSkills
+      summary: getProfileSkills
+      security:
+        - cookieAuth: []
+      x-roles:
+        - candidate
+      responses:
+        "200":
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileSkills"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "422": *a4
+        "503": *a5
+    put:
+      tags:
+        - Candidate Profile
+      operationId: setProfileSkills
+      summary: setProfileSkills
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      x-roles:
+        - candidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - skills
+              properties:
+                skills:
+                  type: array
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 100
+                  minItems: 1
+      responses:
+        "200":
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileSkills"
+        "401": *a1
+        "403": *a2
+        "404": *a3
+        "422": *a4
+        "503": *a5
   /candidate/profile:
     get:
       tags:
@@ -7588,6 +7948,193 @@ components:
           enum:
           - DELETE
           description: Phải là chuỗi `DELETE`.
+    ProfileExperienceInput:
+      type: object
+      description: Dữ liệu yêu cầu thêm hoặc cập nhật kinh nghiệm làm việc của ứng viên
+      properties:
+        company:
+          type: string
+          description: Tên công ty / doanh nghiệp
+          example: Tech Global Solution
+          maxLength: 200
+          minLength: 1
+        title:
+          type: string
+          description: Chức danh / vị trí công việc đảm nhiệm
+          example: Senior Backend Engineer
+          maxLength: 200
+          minLength: 1
+        location:
+          type: string
+          description: Địa điểm làm việc
+          example: Hà Nội, Việt Nam (Hybrid)
+          maxLength: 200
+          minLength: 0
+          nullable: true
+        description:
+          type: string
+          description: Mô tả chi tiết trách nhiệm, công nghệ sử dụng và dự án đã tham gia
+          example: Thiết kế và phát triển hệ thống microservices phục vụ hơn 100k CCU với Java, Spring Boot, Kafka và PostgreSQL.
+          maxLength: 4000
+          minLength: 0
+          nullable: true
+        startDate:
+          type: string
+          format: date-time
+          description: Thời gian bắt đầu công việc (ISO-8601 UTC)
+          example: 2023-07-01T00:00:00Z
+          nullable: true
+        endDate:
+          type: string
+          format: date-time
+          description: Thời gian kết thúc công việc (ISO-8601 UTC). Để null nếu đang làm việc tại đây
+          example: 2026-03-31T00:00:00Z
+          nullable: true
+        current:
+          type: boolean
+          description: Đánh dấu công việc hiện tại (đang làm việc)
+          example: false
+      required:
+        - company
+        - title
+    ProfileExperience:
+      allOf:
+        - $ref: "#/components/schemas/ProfileExperienceInput"
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              minLength: 1
+              maxLength: 200
+    ProfileEducationInput:
+      type: object
+      description: Dữ liệu yêu cầu thêm hoặc cập nhật thông tin học vấn của ứng viên
+      properties:
+        school:
+          type: string
+          description: Tên trường đại học / cao đẳng / viện đào tạo
+          example: Đại học Bách Khoa Hà Nội
+          maxLength: 200
+          minLength: 1
+        degree:
+          type: string
+          description: Bằng cấp / trình độ học vấn
+          example: Kỹ sư Công nghệ Thông tin
+          maxLength: 150
+          minLength: 0
+          nullable: true
+        fieldOfStudy:
+          type: string
+          description: Chuyên ngành đào tạo
+          example: Khoa học Máy tính
+          maxLength: 150
+          minLength: 0
+          nullable: true
+        description:
+          type: string
+          description: Mô tả chi tiết về thành tích, đề tài hoặc hoạt động tại trường
+          example: Tốt nghiệp loại Giỏi, GPA 3.6/4.0
+          maxLength: 2000
+          minLength: 0
+          nullable: true
+        startDate:
+          type: string
+          format: date-time
+          description: Thời gian bắt đầu học (ISO-8601 UTC)
+          example: 2018-09-01T00:00:00Z
+          nullable: true
+        endDate:
+          type: string
+          format: date-time
+          description: Thời gian tốt nghiệp hoặc dự kiến tốt nghiệp (ISO-8601 UTC)
+          example: 2023-06-30T00:00:00Z
+          nullable: true
+        isStudying:
+          type: boolean
+          description: Đang theo học tại trường (chưa tốt nghiệp)
+          example: false
+      required:
+        - school
+    ProfileEducation:
+      allOf:
+        - $ref: "#/components/schemas/ProfileEducationInput"
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              minLength: 1
+              maxLength: 200
+    ProfileCertificateInput:
+      type: object
+      description: Dữ liệu yêu cầu thêm chứng chỉ nghề nghiệp của ứng viên
+      properties:
+        name:
+          type: string
+          description: Tên chứng chỉ nghề nghiệp
+          example: AWS Certified Solutions Architect – Associate
+          maxLength: 200
+          minLength: 1
+        issuer:
+          type: string
+          description: Tổ chức cấp chứng chỉ
+          example: Amazon Web Services
+          maxLength: 200
+          minLength: 0
+          nullable: true
+        credentialId:
+          type: string
+          description: Mã số chứng chỉ (Credential ID)
+          example: AWS-SAA-12345678
+          maxLength: 200
+          minLength: 0
+          nullable: true
+        credentialUrl:
+          type: string
+          description: Đường dẫn tra cứu / xác thực chứng chỉ trực tuyến
+          example: https://www.credly.com/badges/sample-id
+          maxLength: 1000
+          minLength: 0
+          nullable: true
+        issuedAt:
+          type: string
+          format: date-time
+          description: Thời gian cấp chứng chỉ (ISO-8601 UTC)
+          example: 2024-01-15T00:00:00Z
+          nullable: true
+        expiresAt:
+          type: string
+          format: date-time
+          description: Thời gian hết hạn của chứng chỉ (ISO-8601 UTC). Để null nếu vĩnh viễn
+          example: 2027-01-15T00:00:00Z
+          nullable: true
+      required:
+        - name
+    ProfileCertificate:
+      allOf:
+        - $ref: "#/components/schemas/ProfileCertificateInput"
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              minLength: 1
+              maxLength: 200
+    ProfileSkills:
+      type: object
+      required:
+        - skills
+      properties:
+        skills:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 100
     EducationInput:
       type: object
       required:

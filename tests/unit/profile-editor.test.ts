@@ -1,64 +1,54 @@
 import { describe, expect, it } from "vitest";
 import { emptyProfileDraft, profileEditorSchema } from "@/features/profile/schemas/profile-editor";
-import { formatMonthYear } from "@/lib/utils";
+import { careerToEntries, certificatePayload, educationPayload, experiencePayload } from "@/features/profile/career-mapping";
+import example from "../../contracts/examples/candidate-career.json";
 
-describe("profile editor draft validation", () => {
-    const experience = { ...emptyProfileDraft("experience"), company: "Sao Việt", position: "Frontend Developer", startDate: "2022-01", endDate: "2024-06" };
-    it("requires company, position and a valid employment period", () => {
+describe("profile editor and backend mapping", () => {
+    it("requires identity fields but accepts missing optional dates", () => {
         expect(profileEditorSchema.safeParse(emptyProfileDraft("experience")).success).toBe(false);
-        expect(profileEditorSchema.safeParse(experience).success).toBe(true);
-        expect(profileEditorSchema.safeParse({ ...experience, startDate: "2024-13" }).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...experience, endDate: "2021-12" }).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...experience, endDate: "" }).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...experience, current: true, endDate: "" }).success).toBe(true);
+        expect(profileEditorSchema.safeParse({ ...emptyProfileDraft("experience"), company: "Sao Mai", position: "Engineer" }).success).toBe(true);
+        expect(profileEditorSchema.safeParse({ ...emptyProfileDraft("education"), name: "Trường kiểm thử" }).success).toBe(true);
     });
-    it("validates education years and project month ranges", () => {
-        const education = { ...emptyProfileDraft("education"), name: "Đại học Bách khoa", startDate: "2018", endDate: "2022" };
-        expect(profileEditorSchema.safeParse(education).success).toBe(true);
-        expect(profileEditorSchema.safeParse({ ...education, endDate: "2017" }).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...education, startDate: "18" }).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...experience, section: "projects", name: "Website tuyển dụng" }).success).toBe(true);
-        expect(profileEditorSchema.safeParse({ ...experience, section: "projects", name: "Website tuyển dụng", endDate: "2020-01" }).success).toBe(false);
+    it("validates actual dates, ordering, and current employment/study", () => {
+        const values = { ...emptyProfileDraft("experience"), company: "Sao Mai", position: "Engineer", startDate: "2024-02-29", endDate: "2024-03-01" };
+        expect(profileEditorSchema.safeParse(values).success).toBe(true);
+        expect(profileEditorSchema.safeParse({ ...values, startDate: "2023-02-29" }).success).toBe(false);
+        expect(profileEditorSchema.safeParse({ ...values, endDate: "2023-01-01" }).success).toBe(false);
+        expect(profileEditorSchema.safeParse({ ...values, current: true, endDate: "2023-01-01" }).success).toBe(true);
+        expect(profileEditorSchema.safeParse({ ...values, section: "education", name: "School", current: true }).success).toBe(true);
     });
-    it("requires meaningful introduction and limits it to 1000 characters", () => {
-        const intro = emptyProfileDraft("introduction");
-        expect(profileEditorSchema.safeParse({ ...intro, description: "  " }).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...intro, description: "a".repeat(1000) }).success).toBe(true);
-        expect(profileEditorSchema.safeParse({ ...intro, description: "a".repeat(1001) }).success).toBe(false);
+    it("keeps IDs, free-form degrees and optional fields while mapping backend records", () => {
+        const entries = careerToEntries(example);
+        expect(entries.experience?.[0]).toMatchObject({ id: "profile-exp-1", values: { position: example.experience[0].title, address: "Đà Nẵng", startDate: "2022-01-15", current: true } });
+        expect(entries.education?.[0].values.degree).toBe(example.education[0].degree);
+        expect(entries.certificates?.[0].values.credentialUrl).toBe(example.certificates[0].credentialUrl);
+        expect(entries.skills?.[0].values.skills).toEqual(example.skills.skills);
     });
-    it("limits skill count, rejects blanks and duplicates", () => {
-        const skills = emptyProfileDraft("skills");
-        expect(profileEditorSchema.safeParse(skills).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...skills, skills: ["React", "react"] }).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...skills, skills: [" "] }).success).toBe(false);
-        const names = Array.from({ length: 20 }, (_, index) => `Kỹ năng ${index}`);
-        expect(profileEditorSchema.safeParse({ ...skills, skills: names }).success).toBe(true);
-        expect(profileEditorSchema.safeParse({ ...skills, skills: [...names, "SQL"] }).success).toBe(false);
+    it("preserves unchanged timestamps and sends null end dates for ongoing entries", () => {
+        const entries = careerToEntries(example);
+        const values = entries.experience![0].values;
+        expect(experiencePayload(values, example.experience[0])).toMatchObject({ title: values.position, startDate: "2022-01-15T10:30:00Z", endDate: null, current: true });
+        expect(experiencePayload({ ...values, startDate: "2025-01-15" }, example.experience[0]).startDate).toBe("2025-01-15T00:00:00Z");
+        expect(educationPayload({ ...entries.education![0].values, current: true })).toMatchObject({ isStudying: true, endDate: null });
+        expect(certificatePayload(entries.certificates![0].values)).toMatchObject({ issuedAt: "2024-01-15T00:00:00Z", expiresAt: null });
     });
-    it("requires distinct languages with a valid level", () => {
-        const languages = emptyProfileDraft("languages");
-        expect(profileEditorSchema.safeParse(languages).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...languages, languages: [{ name: "Tiếng Anh", level: "advanced" }, { name: "Tiếng Nhật", level: "beginner" }] }).success).toBe(true);
-        expect(profileEditorSchema.safeParse({ ...languages, languages: [{ name: "Tiếng Anh", level: "advanced" }, { name: "Tiếng Anh", level: "beginner" }] }).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...languages, languages: [{ name: "Tiếng Anh", level: "invalid" }] }).success).toBe(false);
+    it("validates certificate metadata and HTTP URLs", () => {
+        const values = { ...emptyProfileDraft("certificates"), name: "Certificate", credentialUrl: "https://example.com/cert" };
+        expect(profileEditorSchema.safeParse(values).success).toBe(true);
+        for (const credentialUrl of ["bad", "javascript:alert(1)", "ftp://example.com/cert"]) expect(profileEditorSchema.safeParse({ ...values, credentialUrl }).success).toBe(false);
+        expect(profileEditorSchema.safeParse({ ...values, startDate: "2025-01-01", endDate: "2024-01-01" }).success).toBe(false);
     });
-    it("checks certificate file extension, MIME and 5MB limit", () => {
-        const certificate = { ...emptyProfileDraft("certificates"), name: "Chứng chỉ React" };
-        expect(profileEditorSchema.safeParse({ ...certificate, image: new File(["image"], "certificate.png", { type: "image/png" }) }).success).toBe(true);
-        expect(profileEditorSchema.safeParse({ ...certificate, image: new File(["text"], "certificate.png", { type: "text/plain" }) }).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...certificate, image: new File(["text"], "certificate.svg", { type: "image/svg+xml" }) }).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...certificate, image: new File([new Uint8Array(5 * 1024 * 1024 + 1)], "large.jpg", { type: "image/jpeg" }) }).success).toBe(false);
+    it("matches skill length without imposing an undocumented count limit", () => {
+        const values = emptyProfileDraft("skills");
+        expect(profileEditorSchema.safeParse(values).success).toBe(false);
+        expect(profileEditorSchema.safeParse({ ...values, skills: ["React", "react"] }).success).toBe(false);
+        expect(profileEditorSchema.safeParse({ ...values, skills: ["x".repeat(101)] }).success).toBe(false);
+        expect(profileEditorSchema.safeParse({ ...values, skills: Array.from({ length: 25 }, (_, i) => `Skill ${i}`) }).success).toBe(true);
     });
-    it("validates personal email and phone and rejects a future birthday", () => {
-        const personal = { ...emptyProfileDraft("personal"), name: "Nguyễn Minh Anh", email: "candidate@example.com" };
-        expect(profileEditorSchema.safeParse(personal).success).toBe(true);
-        expect(profileEditorSchema.safeParse({ ...personal, email: "invalid" }).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...personal, phone: "abc" }).success).toBe(false);
-        expect(profileEditorSchema.safeParse({ ...personal, birthDate: "2999-01-01" }).success).toBe(false);
-    });
-    it("formats month and year consistently", () => {
-        expect(formatMonthYear("2024-06")).toBe("06/2024");
-        expect(formatMonthYear("2024")).toBe("2024");
-        expect(formatMonthYear("2024-13")).toBe("");
+    it("validates personal, introduction, project and language previews", () => {
+        expect(profileEditorSchema.safeParse({ ...emptyProfileDraft("personal"), name: "Name", email: "invalid" }).success).toBe(false);
+        expect(profileEditorSchema.safeParse({ ...emptyProfileDraft("introduction"), description: "x".repeat(1001) }).success).toBe(false);
+        expect(profileEditorSchema.safeParse({ ...emptyProfileDraft("projects"), name: "Project", startDate: "2024-01", endDate: "2023-01" }).success).toBe(false);
+        expect(profileEditorSchema.safeParse({ ...emptyProfileDraft("languages"), languages: [{ name: "English", level: "advanced" }, { name: "English", level: "beginner" }] }).success).toBe(false);
     });
 });

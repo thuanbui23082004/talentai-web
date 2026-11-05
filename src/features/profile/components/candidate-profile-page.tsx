@@ -4,7 +4,9 @@ import { CandidatePageTitle } from "@/components/layout/candidate/candidate-page
 
 import { useState, type ReactNode } from "react";
 import { BadgeCheck, BookOpen, BriefcaseBusiness, CircleAlert, GraduationCap, Languages, Pencil, Plus, Rocket, Sparkles, UserRound } from "lucide-react";
-import { Badge, Select } from "@/components/ui";
+import { Alert, Badge, Button, Select } from "@/components/ui";
+import { LoadingState } from "@/components/shared/loading-state";
+import { isCareerSection } from "../career-mapping";
 import type { AuthUser } from "@/features/auth";
 import { EDUCATION_OPTIONS, type ProfileEditorSection } from "../schemas/profile-editor";
 import { FixedRecommendedJobs } from "./fixed-recommended-jobs";
@@ -15,12 +17,13 @@ import { ProfilePersonalInfo } from "./profile-personal-info";
 import { ProfileCvUpload } from "./profile-cv-upload";
 
 function SectionCard({ section, title, description, icon, badge, children, initialDegree }: { section: ProfileEditorSection; title: string; description: string; icon: ReactNode; badge?: string; children?: ReactNode; initialDegree?: string }) {
-    const { entries } = useProfileDraft();
+    const { entries, isPending, isError, reload } = useProfileDraft();
+    const remote = isCareerSection(section);
     const hasContent = !!entries[section]?.length;
     const edit = hasContent && ["introduction", "skills", "languages"].includes(section);
     return <section aria-label={title} className="rounded-2xl border border-border/80 bg-card p-5 shadow-card sm:p-6">
         <div className="flex items-start justify-between gap-3"><div className="flex min-w-0 items-start gap-3"><span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary [&_svg]:size-4.5">{icon}</span><div><div className="flex flex-wrap items-center gap-2"><h2 className="font-semibold">{title}</h2>{badge && !hasContent && <Badge variant="new">{badge}</Badge>}</div>{!hasContent && <p className="mt-1.5 text-xs leading-5 text-muted-foreground">{description}</p>}</div></div><ProfileAction section={section} initialDegree={initialDegree} className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-lg px-2 text-xs font-medium text-primary hover:bg-secondary">{edit ? <Pencil className="size-4" /> : <Plus className="size-4" />}{edit ? "Chỉnh sửa" : "Thêm"}</ProfileAction></div>
-        {hasContent ? <div className="mt-5"><ProfileEntries section={section} /></div> : children && <div className="mt-5">{children}</div>}
+        {remote && isPending ? <LoadingState title="Đang tải thông tin hồ sơ" /> : remote && isError ? <Alert variant="error" title="Không tải được thông tin hồ sơ"><Button variant="outline" onClick={reload}>Thử lại</Button></Alert> : hasContent ? <div className="mt-5"><ProfileEntries section={section} /></div> : children && <div className="mt-5">{children}</div>}
     </section>;
 }
 
@@ -33,7 +36,7 @@ function CandidateProfileContent({ user }: { user: AuthUser }) {
     const [educationDegree, setEducationDegree] = useState("");
     return <div className="candidate-page">
         <CandidatePageTitle className="mb-5">Hồ sơ của tôi</CandidatePageTitle>
-        <p role="status" className="mb-5 rounded-xl border border-info/20 bg-info-soft px-4 py-3 text-xs leading-5 text-info-foreground">Bạn đang chỉnh sửa bản xem trước. Thông tin được giữ trong trang hiện tại và sẽ mất khi tải lại; chưa lưu lên tài khoản.</p>
+        <p role="status" className="mb-5 rounded-xl border border-info/20 bg-info-soft px-4 py-3 text-xs leading-5 text-info-foreground">Kinh nghiệm, học vấn, kỹ năng và chứng chỉ được lưu vào tài khoản. Các mục còn lại đang ở chế độ xem trước và sẽ mất khi tải lại trang.</p>
         <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div className="min-w-0 space-y-4">
                 <ProfilePersonalInfo user={user} />

@@ -352,6 +352,131 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/candidate/experience": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** listProfileExperience */
+        get: operations["listProfileExperience"];
+        put?: never;
+        /** createProfileExperience */
+        post: operations["createProfileExperience"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/candidate/experience/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** updateProfileExperience */
+        put: operations["updateProfileExperience"];
+        post?: never;
+        /** deleteProfileExperience */
+        delete: operations["deleteProfileExperience"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/candidate/education": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** listProfileEducation */
+        get: operations["listProfileEducation"];
+        put?: never;
+        /** createProfileEducation */
+        post: operations["createProfileEducation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/candidate/education/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** updateProfileEducation */
+        put: operations["updateProfileEducation"];
+        post?: never;
+        /** deleteProfileEducation */
+        delete: operations["deleteProfileEducation"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/candidate/certificates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** listProfileCertificate */
+        get: operations["listProfileCertificate"];
+        put?: never;
+        /** createProfileCertificate */
+        post: operations["createProfileCertificate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/candidate/certificates/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** deleteProfileCertificate */
+        delete: operations["deleteProfileCertificate"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/candidate/skills": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** getProfileSkills */
+        get: operations["getProfileSkills"];
+        /** setProfileSkills */
+        put: operations["setProfileSkills"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/candidate/profile": {
         parameters: {
             query?: never;
@@ -3409,6 +3534,133 @@ export interface components {
              */
             confirmation: "DELETE";
         };
+        /** @description Dữ liệu yêu cầu thêm hoặc cập nhật kinh nghiệm làm việc của ứng viên */
+        ProfileExperienceInput: {
+            /**
+             * @description Tên công ty / doanh nghiệp
+             * @example Tech Global Solution
+             */
+            company: string;
+            /**
+             * @description Chức danh / vị trí công việc đảm nhiệm
+             * @example Senior Backend Engineer
+             */
+            title: string;
+            /**
+             * @description Địa điểm làm việc
+             * @example Hà Nội, Việt Nam (Hybrid)
+             */
+            location?: string | null;
+            /**
+             * @description Mô tả chi tiết trách nhiệm, công nghệ sử dụng và dự án đã tham gia
+             * @example Thiết kế và phát triển hệ thống microservices phục vụ hơn 100k CCU với Java, Spring Boot, Kafka và PostgreSQL.
+             */
+            description?: string | null;
+            /**
+             * Format: date-time
+             * @description Thời gian bắt đầu công việc (ISO-8601 UTC)
+             * @example 2023-07-01T00:00:00Z
+             */
+            startDate?: string | null;
+            /**
+             * Format: date-time
+             * @description Thời gian kết thúc công việc (ISO-8601 UTC). Để null nếu đang làm việc tại đây
+             * @example 2026-03-31T00:00:00Z
+             */
+            endDate?: string | null;
+            /**
+             * @description Đánh dấu công việc hiện tại (đang làm việc)
+             * @example false
+             */
+            current?: boolean;
+        };
+        ProfileExperience: components["schemas"]["ProfileExperienceInput"] & {
+            id: string;
+        };
+        /** @description Dữ liệu yêu cầu thêm hoặc cập nhật thông tin học vấn của ứng viên */
+        ProfileEducationInput: {
+            /**
+             * @description Tên trường đại học / cao đẳng / viện đào tạo
+             * @example Đại học Bách Khoa Hà Nội
+             */
+            school: string;
+            /**
+             * @description Bằng cấp / trình độ học vấn
+             * @example Kỹ sư Công nghệ Thông tin
+             */
+            degree?: string | null;
+            /**
+             * @description Chuyên ngành đào tạo
+             * @example Khoa học Máy tính
+             */
+            fieldOfStudy?: string | null;
+            /**
+             * @description Mô tả chi tiết về thành tích, đề tài hoặc hoạt động tại trường
+             * @example Tốt nghiệp loại Giỏi, GPA 3.6/4.0
+             */
+            description?: string | null;
+            /**
+             * Format: date-time
+             * @description Thời gian bắt đầu học (ISO-8601 UTC)
+             * @example 2018-09-01T00:00:00Z
+             */
+            startDate?: string | null;
+            /**
+             * Format: date-time
+             * @description Thời gian tốt nghiệp hoặc dự kiến tốt nghiệp (ISO-8601 UTC)
+             * @example 2023-06-30T00:00:00Z
+             */
+            endDate?: string | null;
+            /**
+             * @description Đang theo học tại trường (chưa tốt nghiệp)
+             * @example false
+             */
+            isStudying?: boolean;
+        };
+        ProfileEducation: components["schemas"]["ProfileEducationInput"] & {
+            id: string;
+        };
+        /** @description Dữ liệu yêu cầu thêm chứng chỉ nghề nghiệp của ứng viên */
+        ProfileCertificateInput: {
+            /**
+             * @description Tên chứng chỉ nghề nghiệp
+             * @example AWS Certified Solutions Architect – Associate
+             */
+            name: string;
+            /**
+             * @description Tổ chức cấp chứng chỉ
+             * @example Amazon Web Services
+             */
+            issuer?: string | null;
+            /**
+             * @description Mã số chứng chỉ (Credential ID)
+             * @example AWS-SAA-12345678
+             */
+            credentialId?: string | null;
+            /**
+             * @description Đường dẫn tra cứu / xác thực chứng chỉ trực tuyến
+             * @example https://www.credly.com/badges/sample-id
+             */
+            credentialUrl?: string | null;
+            /**
+             * Format: date-time
+             * @description Thời gian cấp chứng chỉ (ISO-8601 UTC)
+             * @example 2024-01-15T00:00:00Z
+             */
+            issuedAt?: string | null;
+            /**
+             * Format: date-time
+             * @description Thời gian hết hạn của chứng chỉ (ISO-8601 UTC). Để null nếu vĩnh viễn
+             * @example 2027-01-15T00:00:00Z
+             */
+            expiresAt?: string | null;
+        };
+        ProfileCertificate: components["schemas"]["ProfileCertificateInput"] & {
+            id: string;
+        };
+        ProfileSkills: {
+            skills: string[];
+        };
         EducationInput: {
             school: string;
             degree: components["schemas"]["EducationLevel"];
@@ -5223,6 +5475,361 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             500: components["responses"]["InternalError"];
+        };
+    };
+    listProfileExperience: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thành công */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileExperience"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    createProfileExperience: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileExperienceInput"];
+            };
+        };
+        responses: {
+            /** @description Thành công */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileExperience"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    updateProfileExperience: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileExperienceInput"];
+            };
+        };
+        responses: {
+            /** @description Thành công */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileExperience"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    deleteProfileExperience: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thành công */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    listProfileEducation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thành công */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileEducation"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    createProfileEducation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileEducationInput"];
+            };
+        };
+        responses: {
+            /** @description Thành công */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileEducation"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    updateProfileEducation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileEducationInput"];
+            };
+        };
+        responses: {
+            /** @description Thành công */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileEducation"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    deleteProfileEducation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thành công */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    listProfileCertificate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thành công */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileCertificate"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    createProfileCertificate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileCertificateInput"];
+            };
+        };
+        responses: {
+            /** @description Thành công */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileCertificate"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    deleteProfileCertificate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thành công */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getProfileSkills: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thành công */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileSkills"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    setProfileSkills: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    skills: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description Thành công */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileSkills"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     getCandidateProfile: {

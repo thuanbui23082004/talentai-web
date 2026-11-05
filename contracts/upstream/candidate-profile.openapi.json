@@ -1,0 +1,1165 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TalentAI — Profile Service API",
+    "description": "Microservice quản lý hồ sơ ứng viên (Candidate Profile), kỹ năng (Skills), học vấn (Education), kinh nghiệm làm việc (Experience), chứng chỉ (Certificates), và tải lên/quản lý CV (Resumes) với kho lưu trữ đối tượng S3/MinIO cho nền tảng TalentAI.",
+    "contact": {
+      "name": "TalentAI Backend Team",
+      "email": "backend@talentai.dev"
+    },
+    "license": {
+      "name": "Private",
+      "url": "https://talentai.dev"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3002",
+      "description": "Local Development"
+    }
+  ],
+  "security": [
+    {
+      "Bearer Authentication": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Candidate Resumes (CVs)",
+      "description": "Quản lý tải lên CV, xem chi tiết, phân chia phiên bản và thiết lập CV mặc định"
+    },
+    {
+      "name": "Candidate Education",
+      "description": "Quản lý quá trình học vấn và bằng cấp"
+    },
+    {
+      "name": "Candidate Experience",
+      "description": "Quản lý kinh nghiệm và lịch sử làm việc"
+    },
+    {
+      "name": "Health & Diagnostics",
+      "description": "Kiểm tra tình trạng hoạt động và tính sẵn sàng của profile-service"
+    },
+    {
+      "name": "Health & Diagnostics",
+      "description": "Kiểm tra sức khỏe và độ sẵn sàng của service"
+    },
+    {
+      "name": "Candidate Profile",
+      "description": "Quản lý thông tin tổng quan hồ sơ ứng viên"
+    },
+    {
+      "name": "Candidate Resumes (CVs)",
+      "description": "Tải lên, quản lý phiên bản và đặt CV mặc định"
+    },
+    {
+      "name": "Candidate Skills",
+      "description": "Quản lý danh sách kỹ năng chuyên môn"
+    },
+    {
+      "name": "Candidate Certificates",
+      "description": "Quản lý chứng chỉ nghề nghiệp"
+    }
+  ],
+  "paths": {
+    "/api/v1/candidate/skills": {
+      "get": {
+        "tags": [
+          "Candidate Skills"
+        ],
+        "summary": "Lấy danh sách kỹ năng chuyên môn",
+        "description": "Trả về mảng danh sách các kỹ năng của ứng viên hiện tại.",
+        "operationId": "getSkills",
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách kỹ năng thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực hoặc token không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Candidate Skills"
+        ],
+        "summary": "Cập nhật danh sách kỹ năng",
+        "description": "Thay thế toàn bộ danh sách kỹ năng hiện tại bằng danh sách mới. Hệ thống sẽ tự động chuẩn hóa: cắt khoảng trắng, loại bỏ chuỗi rỗng và lọc trùng lặp.",
+        "operationId": "setSkills",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkillsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật danh sách kỹ năng thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Danh sách kỹ năng rỗng hoặc có phần tử không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực hoặc token không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
+    },
+    "/api/v1/candidate/experience/{id}": {
+      "put": {
+        "tags": [
+          "Candidate Experience"
+        ],
+        "summary": "Cập nhật kinh nghiệm làm việc",
+        "description": "Cập nhật chi tiết một mục kinh nghiệm làm việc theo ID.",
+        "operationId": "updateExperience",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Mã định danh (ID) của mục kinh nghiệm",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperienceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật kinh nghiệm thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy mục kinh nghiệm",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Candidate Experience"
+        ],
+        "summary": "Xóa kinh nghiệm làm việc",
+        "description": "Xóa một mục kinh nghiệm làm việc theo ID.",
+        "operationId": "deleteExperience",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Mã định danh (ID) của mục kinh nghiệm",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Xóa kinh nghiệm thành công (không có nội dung phản hồi)"
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy mục kinh nghiệm",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
+    },
+    "/api/v1/candidate/education/{id}": {
+      "put": {
+        "tags": [
+          "Candidate Education"
+        ],
+        "summary": "Cập nhật thông tin học vấn",
+        "description": "Cập nhật chi tiết một mục học vấn thuộc quyền sở hữu của ứng viên theo ID.",
+        "operationId": "updateEducation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Mã định danh (ID) của mục học vấn",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EducationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật học vấn thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu cập nhật không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy mục học vấn hoặc không thuộc quyền sở hữu",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Candidate Education"
+        ],
+        "summary": "Xóa thông tin học vấn",
+        "description": "Xóa vĩnh viễn một mục học vấn thuộc quyền sở hữu của ứng viên theo ID.",
+        "operationId": "deleteEducation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Mã định danh (ID) của mục học vấn",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Xóa học vấn thành công (không có nội dung phản hồi)"
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy mục học vấn",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
+    },
+    "/api/v1/candidate/experience": {
+      "get": {
+        "tags": [
+          "Candidate Experience"
+        ],
+        "summary": "Lấy danh sách kinh nghiệm làm việc",
+        "description": "Trả về toàn bộ danh sách kinh nghiệm làm việc của ứng viên hiện tại, sắp xếp theo thời gian mới nhất.",
+        "operationId": "getExperience",
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách kinh nghiệm thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Candidate Experience"
+        ],
+        "summary": "Thêm kinh nghiệm làm việc mới",
+        "description": "Thêm một vị trí công việc mới (công ty, chức danh, địa điểm, mô tả, ngày bắt đầu, ngày kết thúc, cờ đang làm việc).",
+        "operationId": "addExperience",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperienceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Thêm kinh nghiệm thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu công ty hoặc chức danh thiếu",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
+    },
+    "/api/v1/candidate/education": {
+      "get": {
+        "tags": [
+          "Candidate Education"
+        ],
+        "summary": "Lấy danh sách học vấn",
+        "description": "Trả về danh sách tất cả các mục học vấn của ứng viên, được sắp xếp theo thời gian bắt đầu giảm dần (mới nhất trước).",
+        "operationId": "getEducation",
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách học vấn thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Candidate Education"
+        ],
+        "summary": "Thêm thông tin học vấn mới",
+        "description": "Tạo một mục học vấn mới (trường học, bằng cấp, chuyên ngành, mô tả, ngày bắt đầu và kết thúc).",
+        "operationId": "addEducation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EducationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Thêm học vấn thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu trường học hoặc thời gian không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
+    },
+    "/api/v1/candidate/certificates": {
+      "get": {
+        "tags": [
+          "Candidate Certificates"
+        ],
+        "summary": "Lấy danh sách chứng chỉ nghề nghiệp",
+        "description": "Trả về danh sách chứng chỉ của ứng viên hiện tại, sắp xếp theo ngày cấp mới nhất.",
+        "operationId": "getCertificates",
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách chứng chỉ thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Candidate Certificates"
+        ],
+        "summary": "Thêm chứng chỉ nghề nghiệp mới",
+        "description": "Tạo một bản ghi chứng chỉ mới (tên, tổ chức cấp, mã xác thực, URL chứng chỉ, ngày cấp, ngày hết hạn).",
+        "operationId": "addCertificate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CertificateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Thêm chứng chỉ thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Tên chứng chỉ bị trống hoặc dữ liệu sai định dạng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
+    },
+    "/api/v1/candidate/certificates/{id}": {
+      "delete": {
+        "tags": [
+          "Candidate Certificates"
+        ],
+        "summary": "Xóa chứng chỉ nghề nghiệp",
+        "description": "Xóa một bản ghi chứng chỉ thuộc sở hữu của ứng viên theo ID.",
+        "operationId": "deleteCertificate",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Mã định danh (ID) của chứng chỉ",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "c3d4e5f6-a7b8-9c0d-1e2f-3a4b5c6d7e8f"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Xóa chứng chỉ thành công (không có nội dung phản hồi)"
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy chứng chỉ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer Authentication": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SkillsRequest": {
+        "type": "object",
+        "description": "Dữ liệu yêu cầu cập nhật danh sách kỹ năng",
+        "properties": {
+          "skills": {
+            "type": "array",
+            "description": "Danh sách kỹ năng chuyên môn",
+            "example": [
+              "Java",
+              "Spring Boot",
+              "PostgreSQL",
+              "Docker",
+              "Microservices"
+            ],
+            "items": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 0
+            },
+            "minItems": 1
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "description": "Nội dung chi tiết của lỗi",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Mã lỗi nghiệp vụ chuẩn (ví dụ: VALIDATION_FAILED, FILE_TOO_LARGE, PROFILE_NOT_FOUND)",
+            "example": "VALIDATION_FAILED"
+          },
+          "message": {
+            "type": "string",
+            "description": "Thông điệp mô tả lỗi",
+            "example": "Dữ liệu đầu vào không hợp lệ"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời điểm xảy ra lỗi (ISO-8601 UTC)",
+            "example": "2026-10-28T00:00:00Z"
+          },
+          "fieldErrors": {
+            "type": "array",
+            "description": "Danh sách chi tiết lỗi trên từng trường dữ liệu (nếu có)",
+            "items": {
+              "$ref": "#/components/schemas/FieldError"
+            }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Cấu trúc phản hồi lỗi chuẩn của hệ thống",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/Error",
+            "description": "Chi tiết thông tin lỗi"
+          }
+        }
+      },
+      "FieldError": {
+        "type": "object",
+        "description": "Chi tiết lỗi trên từng trường dữ liệu đầu vào",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Tên trường gặp lỗi",
+            "example": "school"
+          },
+          "code": {
+            "type": "string",
+            "description": "Mã lỗi trên trường",
+            "example": "VALIDATION_FAILED"
+          },
+          "message": {
+            "type": "string",
+            "description": "Thông báo lỗi cụ thể",
+            "example": "must not be blank"
+          }
+        }
+      },
+      "ProfileUpdateRequest": {
+        "type": "object",
+        "description": "Dữ liệu yêu cầu cập nhật hồ sơ cá nhân của ứng viên",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "description": "Họ và tên đầy đủ của ứng viên",
+            "example": "Nguyễn Văn A",
+            "maxLength": 150,
+            "minLength": 0
+          },
+          "email": {
+            "type": "string",
+            "description": "Địa chỉ email liên hệ",
+            "example": "candidate@example.com",
+            "maxLength": 320,
+            "minLength": 0
+          },
+          "phone": {
+            "type": "string",
+            "description": "Số điện thoại liên lạc",
+            "example": "+84901234567",
+            "maxLength": 30,
+            "minLength": 0
+          },
+          "headline": {
+            "type": "string",
+            "description": "Tiêu đề nghề nghiệp / vị trí hiện tại",
+            "example": "Senior Java Backend Engineer",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "summary": {
+            "type": "string",
+            "description": "Tóm tắt bản thân, thế mạnh và định hướng sự nghiệp",
+            "example": "Kỹ sư phần mềm 5 năm kinh nghiệm về Spring Boot, Microservices và Distributed Systems.",
+            "maxLength": 5000,
+            "minLength": 0
+          },
+          "location": {
+            "type": "string",
+            "description": "Tỉnh/Thành phố sinh sống",
+            "example": "Hà Nội, Việt Nam",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "avatarUrl": {
+            "type": "string",
+            "description": "Đường dẫn ảnh đại diện (URL)",
+            "example": "https://cdn.example.com/avatars/user-1.jpg",
+            "maxLength": 1000,
+            "minLength": 0
+          },
+          "dob": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Ngày tháng năm sinh (ISO-8601 UTC)",
+            "example": "1998-05-15T00:00:00Z"
+          },
+          "gender": {
+            "type": "string",
+            "description": "Giới tính (MALE, FEMALE, OTHER)",
+            "example": "MALE",
+            "maxLength": 10,
+            "minLength": 0
+          },
+          "address": {
+            "type": "string",
+            "description": "Địa chỉ chi tiết nơi ở",
+            "example": "Số 123 Đường Cầu Giấy, Phường Dịch Vọng, Quận Cầu Giấy",
+            "maxLength": 500,
+            "minLength": 0
+          },
+          "desiredJobTitle": {
+            "type": "string",
+            "description": "Vị trí công việc mong muốn ứng tuyển",
+            "example": "Backend Tech Lead",
+            "maxLength": 150,
+            "minLength": 0
+          },
+          "minDesiredSalary": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Mức lương tối thiểu kỳ vọng (VNĐ)",
+            "example": 25000000
+          },
+          "maxDesiredSalary": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Mức lương tối đa kỳ vọng (VNĐ)",
+            "example": 45000000
+          },
+          "currency": {
+            "type": "string",
+            "description": "Đơn vị tiền tệ (mặc định VND)",
+            "example": "VND",
+            "maxLength": 10,
+            "minLength": 0
+          },
+          "desiredLocation": {
+            "type": "string",
+            "description": "Địa điểm mong muốn làm việc",
+            "example": "Hà Nội (Hybrid)",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "yearsOfExperience": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Tổng số năm kinh nghiệm làm việc",
+            "example": 5
+          },
+          "jobSearchStatus": {
+            "type": "string",
+            "description": "Trạng thái tìm việc (ACTIVELY_LOOKING, OPEN_TO_OFFERS, NOT_LOOKING)",
+            "example": "ACTIVELY_LOOKING",
+            "maxLength": 30,
+            "minLength": 0
+          },
+          "searchable": {
+            "type": "boolean",
+            "description": "Cho phép nhà tuyển dụng tìm thấy hồ sơ của bạn (tương đương is_public)",
+            "example": true
+          },
+          "showEmail": {
+            "type": "boolean",
+            "description": "Hiển thị công khai địa chỉ email với nhà tuyển dụng",
+            "example": true
+          },
+          "showPhone": {
+            "type": "boolean",
+            "description": "Hiển thị công khai số điện thoại với nhà tuyển dụng",
+            "example": false
+          }
+        }
+      },
+      "ExperienceRequest": {
+        "type": "object",
+        "description": "Dữ liệu yêu cầu thêm hoặc cập nhật kinh nghiệm làm việc của ứng viên",
+        "properties": {
+          "company": {
+            "type": "string",
+            "description": "Tên công ty / doanh nghiệp",
+            "example": "Tech Global Solution",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "title": {
+            "type": "string",
+            "description": "Chức danh / vị trí công việc đảm nhiệm",
+            "example": "Senior Backend Engineer",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "location": {
+            "type": "string",
+            "description": "Địa điểm làm việc",
+            "example": "Hà Nội, Việt Nam (Hybrid)",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "description": {
+            "type": "string",
+            "description": "Mô tả chi tiết trách nhiệm, công nghệ sử dụng và dự án đã tham gia",
+            "example": "Thiết kế và phát triển hệ thống microservices phục vụ hơn 100k CCU với Java, Spring Boot, Kafka và PostgreSQL.",
+            "maxLength": 4000,
+            "minLength": 0
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời gian bắt đầu công việc (ISO-8601 UTC)",
+            "example": "2023-07-01T00:00:00Z"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời gian kết thúc công việc (ISO-8601 UTC). Để null nếu đang làm việc tại đây",
+            "example": "2026-03-31T00:00:00Z"
+          },
+          "current": {
+            "type": "boolean",
+            "description": "Đánh dấu công việc hiện tại (đang làm việc)",
+            "example": false
+          }
+        },
+        "required": [
+          "company",
+          "title"
+        ]
+      },
+      "EducationRequest": {
+        "type": "object",
+        "description": "Dữ liệu yêu cầu thêm hoặc cập nhật thông tin học vấn của ứng viên",
+        "properties": {
+          "school": {
+            "type": "string",
+            "description": "Tên trường đại học / cao đẳng / viện đào tạo",
+            "example": "Đại học Bách Khoa Hà Nội",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "degree": {
+            "type": "string",
+            "description": "Bằng cấp / trình độ học vấn",
+            "example": "Kỹ sư Công nghệ Thông tin",
+            "maxLength": 150,
+            "minLength": 0
+          },
+          "fieldOfStudy": {
+            "type": "string",
+            "description": "Chuyên ngành đào tạo",
+            "example": "Khoa học Máy tính",
+            "maxLength": 150,
+            "minLength": 0
+          },
+          "description": {
+            "type": "string",
+            "description": "Mô tả chi tiết về thành tích, đề tài hoặc hoạt động tại trường",
+            "example": "Tốt nghiệp loại Giỏi, GPA 3.6/4.0",
+            "maxLength": 2000,
+            "minLength": 0
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời gian bắt đầu học (ISO-8601 UTC)",
+            "example": "2018-09-01T00:00:00Z"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời gian tốt nghiệp hoặc dự kiến tốt nghiệp (ISO-8601 UTC)",
+            "example": "2023-06-30T00:00:00Z"
+          },
+          "isStudying": {
+            "type": "boolean",
+            "description": "Đang theo học tại trường (chưa tốt nghiệp)",
+            "example": false
+          }
+        },
+        "required": [
+          "school"
+        ]
+      },
+      "CertificateRequest": {
+        "type": "object",
+        "description": "Dữ liệu yêu cầu thêm chứng chỉ nghề nghiệp của ứng viên",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Tên chứng chỉ nghề nghiệp",
+            "example": "AWS Certified Solutions Architect – Associate",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "issuer": {
+            "type": "string",
+            "description": "Tổ chức cấp chứng chỉ",
+            "example": "Amazon Web Services",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "credentialId": {
+            "type": "string",
+            "description": "Mã số chứng chỉ (Credential ID)",
+            "example": "AWS-SAA-12345678",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "credentialUrl": {
+            "type": "string",
+            "description": "Đường dẫn tra cứu / xác thực chứng chỉ trực tuyến",
+            "example": "https://www.credly.com/badges/sample-id",
+            "maxLength": 1000,
+            "minLength": 0
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời gian cấp chứng chỉ (ISO-8601 UTC)",
+            "example": "2024-01-15T00:00:00Z"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời gian hết hạn của chứng chỉ (ISO-8601 UTC). Để null nếu vĩnh viễn",
+            "example": "2027-01-15T00:00:00Z"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "Bearer Authentication": {
+        "type": "http",
+        "description": "Nhập JWT Access Token (nhận từ Auth Service hoặc test token có role CANDIDATE)",
+        "name": "Bearer Authentication",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

@@ -1,40 +1,23 @@
-import { test, expect, type Locator, type Page } from "@playwright/test";
+import { chooseDate } from "../support/choose-profile-date";
+import { test, expect, type Page } from "@playwright/test";
 
 async function loginCandidate(page: Page) {
-    await page.goto("/login");
-    await page.getByRole("textbox", { name: "Email", exact: true }).fill("candidate@example.com");
-    await page.getByLabel("Mật khẩu", { exact: true }).fill("TalentAI123!");
-    await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/);
-}
-
-async function chooseDate(page: Page, form: Locator, label: string, value: string) {
-    const precision = value.length === 4 ? "year" : value.length === 7 ? "month" : "date";
-    await form.getByLabel(label, { exact: false }).click();
-    const picker = page.getByRole("dialog", { name: precision === "year" ? "Chọn năm" : precision === "month" ? "Chọn tháng" : "Chọn ngày", exact: true });
-    if (precision === "date") await picker.getByRole("button", { name: "Chọn tháng và năm", exact: true }).click();
-    if (precision !== "year") await picker.getByRole("button", { name: "Chọn năm", exact: true }).click();
-    const year = Number(value.slice(0, 4));
-    const target = picker.getByRole("button", { name: `Năm ${year}`, exact: true });
-    for (let attempt = 0; attempt < 18 && !(await target.count()); attempt++) {
-        const first = await picker.getByRole("group", { name: "Danh sách năm", exact: true }).getByRole("button").first().textContent();
-        await picker.getByRole("button", { name: year < Number(first) ? "12 năm trước" : "12 năm sau", exact: true }).click();
-    }
-    await target.click();
-    if (precision !== "year") await picker.getByRole("button", { name: `Tháng ${Number(value.slice(5, 7))}`, exact: true }).click();
-    if (precision === "date") await picker.getByRole("button", { name: `${value.slice(8)}/${value.slice(5, 7)}/${year}`, exact: true }).click();
-    await expect(picker).toBeHidden();
+    const email = `profile-${crypto.randomUUID()}@example.com`;
+    const response = await page.request.post("/api/bff/auth/register", { data: { email, password: "TalentAI123!", fullName: "Ứng viên kiểm thử hồ sơ", role: "candidate", acceptedPrivacyPolicy: true } });
+    expect(response.status()).toBe(201);
+    await page.goto("/candidate/dashboard");
+    return email;
 }
 
 test("candidate profile follows the reference layout and uses fixed recommendations", async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await loginCandidate(page);
+    const email = await loginCandidate(page);
     const menu = page.getByRole("navigation", { name: "Menu ứng viên", exact: true });
     await menu.locator("summary").filter({ hasText: "Hồ sơ việc làm" }).click();
     await menu.getByRole("link", { name: "Hồ sơ của tôi", exact: true }).click();
     await expect(page).toHaveURL(/\/candidate\/profile$/);
     await expect(page.getByRole("heading", { name: "Hồ sơ của tôi", exact: true })).toBeVisible();
-    await expect(page.locator("#candidate-content").getByText("candidate@example.com", { exact: true })).toBeVisible();
+    await expect(page.locator("#candidate-content").getByText(email, { exact: true })).toBeVisible();
     await expect(page.getByRole("complementary", { name: "Việc làm gợi ý cho bạn", exact: true }).getByRole("article")).toHaveCount(6);
     await expect(page.getByText("Danh sách gợi ý cố định", { exact: true })).toBeVisible();
     await page.locator('input[type="file"]').setInputFiles({ name: "cv-nguyen-minh-anh.pdf", mimeType: "application/pdf", buffer: Buffer.from("mock pdf") });
@@ -54,6 +37,26 @@ test("candidate profile stacks cleanly on mobile", async ({ page }, testInfo) =>
     await expect(page.getByRole("complementary", { name: "Việc làm gợi ý cho bạn", exact: true }).getByRole("article")).toHaveCount(6);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: testInfo.outputPath("candidate-profile-mobile.png"), fullPage: true });
+});
+
+test("career sections show loading, block edits on load failure and recover on retry", async ({ page }) => {
+    await loginCandidate(page);
+    let release: () => void = () => {};
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    await page.route("**/api/bff/candidate/education", async route => {
+        await gate;
+        await route.fulfill({ status: 503, json: { error: { code: "SERVICE_UNAVAILABLE" } } });
+    });
+    await page.goto("/candidate/profile");
+    const experience = page.getByRole("region", { name: "Kinh nghiệm làm việc", exact: true });
+    await expect(experience.getByText("Đang tải thông tin hồ sơ", { exact: true })).toBeVisible();
+    await expect(experience.getByRole("button", { name: "Thêm", exact: true })).toBeDisabled();
+    release();
+    await expect(experience.getByText("Không tải được thông tin hồ sơ", { exact: true })).toBeVisible();
+    await expect(experience.getByRole("button", { name: "Thêm", exact: true })).toBeDisabled();
+    await page.unroute("**/api/bff/candidate/education");
+    await experience.getByRole("button", { name: "Thử lại", exact: true }).click();
+    await expect(experience.getByRole("button", { name: "Thêm", exact: true })).toBeEnabled();
 });
 
 test("candidate profile redirects anonymous users", async ({ page }) => {
@@ -77,8 +80,8 @@ test("profile forms validate dates, save previews, edit and cancel changes", asy
     await expect(dialog.getByText("Vui lòng nhập tên công ty.", { exact: true })).toBeVisible();
     await dialog.getByLabel("Tên công ty", { exact: false }).fill("Công ty Sao Việt");
     await dialog.getByLabel("Vị trí công việc", { exact: false }).fill("Frontend Engineer");
-    await chooseDate(page, dialog, "Thời gian bắt đầu", "2022-01");
-    await chooseDate(page, dialog, "Thời gian kết thúc", "2021-01");
+    await chooseDate(page, dialog, "Thời gian bắt đầu", "2022-01-15");
+    await chooseDate(page, dialog, "Thời gian kết thúc", "2021-01-15");
     await dialog.getByRole("button", { name: "Lưu thông tin", exact: true }).click();
     await expect(dialog.getByText("Thời gian kết thúc phải từ thời gian bắt đầu trở đi.", { exact: true })).toBeVisible();
     await dialog.getByRole("checkbox", { name: "Tôi đang làm việc ở đây", exact: true }).check();
@@ -86,7 +89,7 @@ test("profile forms validate dates, save previews, edit and cancel changes", asy
     await dialog.getByRole("button", { name: "Lưu thông tin", exact: true }).click();
     await expect(dialog).toBeHidden();
     await expect(experience.getByText("Frontend Engineer", { exact: true })).toBeVisible();
-    await expect(experience.getByText(/01\/2022 – Hiện tại/)).toBeVisible();
+    await expect(experience.getByText(/15\/01\/2022 – Hiện tại/)).toBeVisible();
     await experience.getByRole("button", { name: "Chỉnh sửa Frontend Engineer", exact: true }).click();
     await dialog.getByLabel("Vị trí công việc", { exact: false }).fill("Thay đổi chưa lưu");
     await dialog.getByRole("button", { name: "Hủy", exact: true }).click();
@@ -107,9 +110,9 @@ test("profile forms validate dates, save previews, edit and cancel changes", asy
     await education.getByRole("button", { name: "Thêm", exact: true }).click();
     dialog = page.getByRole("dialog", { name: "Học vấn", exact: true });
     await dialog.getByLabel("Tên trường", { exact: false }).fill("Đại học Bách khoa");
-    await chooseDate(page, dialog, "Năm bắt đầu", "2018");
-    await chooseDate(page, dialog, "Năm kết thúc", "2022");
-    await dialog.getByLabel("Bằng cấp", { exact: true }).selectOption("Đại học");
+    await chooseDate(page, dialog, "Thời gian bắt đầu", "2018-09-01");
+    await chooseDate(page, dialog, "Thời gian kết thúc", "2022-06-30");
+    await dialog.getByLabel("Bằng cấp", { exact: true }).fill("Đại học");
     await dialog.getByRole("button", { name: "Lưu thông tin", exact: true }).click();
     await expect(education.getByText("Đại học Bách khoa", { exact: true })).toBeVisible();
 
@@ -123,7 +126,7 @@ test("profile forms validate dates, save previews, edit and cancel changes", asy
     await expect(projects.getByText("Ứng dụng tìm việc", { exact: true })).toBeVisible();
 });
 
-test("skills, languages and certificate image forms support selection and validation", async ({ page }) => {
+test("skills, languages and certificate metadata forms support selection and validation", async ({ page }) => {
     await loginCandidate(page);
     await page.goto("/candidate/profile");
     const skills = page.getByRole("region", { name: "Kỹ năng", exact: true });
@@ -132,7 +135,7 @@ test("skills, languages and certificate image forms support selection and valida
     await dialog.getByRole("checkbox", { name: "React", exact: true }).check();
     await dialog.getByRole("textbox", { name: /Kỹ năng/ }).fill("Thiết kế hệ thống");
     await dialog.getByRole("button", { name: "Thêm mới: Thiết kế hệ thống", exact: true }).click();
-    await expect(dialog.getByText("Đã chọn 2/20", { exact: true })).toBeVisible();
+    await expect(dialog.getByText("Đã chọn 2", { exact: true })).toBeVisible();
     await dialog.getByRole("button", { name: "Lưu thông tin", exact: true }).click();
     await expect(skills.getByText("React", { exact: true })).toBeVisible();
     await expect(skills.getByText("Thiết kế hệ thống", { exact: true })).toBeVisible();
@@ -155,10 +158,8 @@ test("skills, languages and certificate image forms support selection and valida
     await certificates.getByRole("button", { name: "Thêm", exact: true }).click();
     dialog = page.getByRole("dialog", { name: "Chứng chỉ/bằng cấp", exact: true });
     await dialog.getByLabel("Tên chứng chỉ", { exact: false }).fill("Chứng chỉ lập trình React");
-    await dialog.getByLabel("Ảnh chứng chỉ", { exact: true }).setInputFiles({ name: "invalid.txt", mimeType: "text/plain", buffer: Buffer.from("invalid") });
-    await expect(dialog.getByText("Vui lòng chọn ảnh PNG, JPG hoặc JPEG.", { exact: true })).toBeVisible();
-    await dialog.getByLabel("Ảnh chứng chỉ", { exact: true }).setInputFiles({ name: "certificate.png", mimeType: "image/png", buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=", "base64") });
-    await expect(dialog.getByRole("img", { name: "Ảnh chứng chỉ đã chọn", exact: true })).toBeVisible();
+    await dialog.getByLabel("Tổ chức cấp").fill("Tổ chức kiểm thử");
+    await dialog.getByLabel("Link xác thực chứng chỉ").fill("https://example.com/certificate");
     await dialog.getByRole("button", { name: "Lưu thông tin", exact: true }).click();
     await expect(certificates.getByText("Chứng chỉ lập trình React", { exact: true })).toBeVisible();
 });
@@ -215,7 +216,8 @@ test("modern calendar supports keyboard, clearing, leap days and fits mobile", a
         await page.getByRole("region", { name: "Kinh nghiệm làm việc", exact: true }).getByRole("button", { name: "Thêm", exact: true }).click();
         const experience = page.getByRole("dialog", { name: "Kinh nghiệm làm việc", exact: true });
         await experience.getByLabel("Thời gian bắt đầu", { exact: false }).click();
-        const months = page.getByRole("dialog", { name: "Chọn tháng", exact: true });
+        const months = page.getByRole("dialog", { name: "Chọn ngày", exact: true });
+        await months.getByRole("button", { name: "Chọn tháng và năm", exact: true }).click();
         await expect(months.getByRole("button", { name: "Tháng 1", exact: true })).toBeVisible();
         expect(await months.evaluate((element) => { const rect = element.getBoundingClientRect(); return rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight; })).toBe(true);
         await page.screenshot({ path: testInfo.outputPath(`modern-month-picker-${width}.png`) });

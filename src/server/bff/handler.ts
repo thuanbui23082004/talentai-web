@@ -7,11 +7,15 @@ import { handleCompanyService, isPublicCompanyRequest } from "./public/company-s
 import { handleRecruiterCompany, isRecruiterCompanyRequest } from "./recruiter/company-service";
 import { handleJobService, isPublicJobRequest } from "./public/job-service";
 import { handleSavedJobs, isSavedJobsRequest } from "./candidate/saved-jobs-service";
+import { handleProfileRequest, isProfileRequest } from "./candidate/profile-service";
 
 export async function handleBffRequest(request: Request): Promise<Response> {
     try {
         if (isAuthRequest(request)) return await handleAuthRequest(request);
         const env = getServerEnv();
+        if (isProfileRequest(request)) {
+            return await handleProfileRequest(request, (env.PROFILE_DATA_MODE ?? env.DATA_MODE) === "real" ? env.PROFILE_API_URL : undefined);
+        }
         if (isSavedJobsRequest(request) && (env.JOB_DATA_MODE ?? env.DATA_MODE) === "real") {
             return await handleSavedJobs(request, env.JOB_API_URL);
         }
