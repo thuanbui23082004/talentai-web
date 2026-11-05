@@ -22,7 +22,11 @@ export async function mockProfileRequest(userId: string, resource: Resource, id:
     const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
     if (resource === "profile") {
         // Upstream updates supplied, non-null values; null leaves the field unchanged.
-        if (method === "PUT") career.profile = { ...career.profile, ...Object.fromEntries(Object.entries(input as components["schemas"]["PersonalProfileInput"]).filter(([, value]) => value !== null)) };
+        if (method === "PUT") {
+            const update = input as components["schemas"]["PersonalProfileInput"];
+            career.profile = { ...career.profile, ...Object.fromEntries(Object.entries(update).filter(([, value]) => value !== null)) };
+            if (update.desiredLocations?.length) career.profile.desiredLocation = update.desiredLocations[0];
+        }
         return json(career.profile);
     }
     if (resource === "skills") {

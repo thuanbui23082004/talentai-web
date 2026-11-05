@@ -3801,6 +3801,18 @@ export interface components {
             searchable?: boolean | null;
             showEmail?: boolean | null;
             showPhone?: boolean | null;
+            desiredIndustries?: string[] | null;
+            experienceLevel?: string | null;
+            salaryNegotiable?: boolean | null;
+            desiredLocations?: string[] | null;
+            currentSeniorityLevels?: string[] | null;
+            employmentTypes?: string[] | null;
+            workPreferences?: components["schemas"]["ProfileWorkPreferences"];
+        };
+        ProfileWorkPreferences: {
+            hybrid?: boolean;
+            thirteenthMonthSalary?: boolean;
+            healthInsurance?: boolean;
         };
         PersonalProfile: components["schemas"]["PersonalProfileInput"] & {
             id?: string;

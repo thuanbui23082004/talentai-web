@@ -20,6 +20,21 @@ function network(reply: () => Response | Promise<Response>, role = "CANDIDATE", 
 afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); resetMockProfile(); });
 
 describe("candidate profile BFF", () => {
+    it("forwards job preference fields without modifying personal information", async () => {
+        const { desiredIndustries, experienceLevel, salaryNegotiable, desiredLocations, currentSeniorityLevels, employmentTypes, workPreferences } = personal;
+        const input = { desiredIndustries, experienceLevel, salaryNegotiable, desiredLocations, currentSeniorityLevels, employmentTypes, workPreferences, desiredJobTitle: "Frontend Developer", minDesiredSalary: 15500000, maxDesiredSalary: 20750000, currency: "VND" };
+        const fetch = network(() => Response.json({ success: true, data: { ...personal, ...input, privacy: { isSearchable: true, showEmail: false, showPhone: false } } }));
+        const response = await handleProfileRequest(request("profile", "PUT", input), base);
+        expect(response.status).toBe(200);
+        expect(JSON.parse(String(fetch.mock.calls[1][1]?.body))).toEqual(input);
+        expect(await response.json()).toMatchObject({ ...input, fullName: personal.fullName, searchable: true });
+        const writes = fetch.mock.calls.length;
+        for (const change of [{ desiredIndustries: ["A", "B", "C", "D"] }, { desiredLocations: Array(6).fill("Đà Nẵng") }, { experienceLevel: "x".repeat(51) }, { workPreferences: { hybrid: "yes" } }]) {
+            expect((await handleProfileRequest(request("profile", "PUT", change), base)).status).toBe(422);
+        }
+        expect(fetch.mock.calls.filter(([, init]) => init?.method === "PUT")).toHaveLength(1);
+        expect(writes).toBe(2);
+    });
     it("uploads certificate files as multipart without retrying or forwarding private storage metadata", async () => {
         const file = new File(["%PDF-1.7\ncertificate"], "certificate.pdf", { type: "application/pdf" });
         const data = new FormData();

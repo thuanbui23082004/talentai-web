@@ -1224,6 +1224,81 @@
             "type": "boolean",
             "description": "Hiển thị công khai số điện thoại với nhà tuyển dụng",
             "example": false
+          },
+          "desiredIndustries": {
+            "type": "array",
+            "description": "Ngành nghề ứng viên muốn làm, tối đa 3 lựa chọn",
+            "example": [
+              "IT Phần mềm",
+              "Ngân hàng"
+            ],
+            "items": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 0
+            },
+            "maxItems": 3,
+            "minItems": 0
+          },
+          "experienceLevel": {
+            "type": "string",
+            "description": "Nhóm số năm kinh nghiệm theo lựa chọn của giao diện",
+            "example": "UNDER_1_YEAR",
+            "maxLength": 50,
+            "minLength": 0
+          },
+          "salaryNegotiable": {
+            "type": "boolean",
+            "description": "Cho phép thương lượng mức lương",
+            "example": true
+          },
+          "desiredLocations": {
+            "type": "array",
+            "description": "Danh sách địa điểm làm việc mong muốn, tối đa 5 lựa chọn",
+            "example": [
+              "Đà Nẵng",
+              "Hà Nội"
+            ],
+            "items": {
+              "type": "string",
+              "maxLength": 200,
+              "minLength": 0
+            },
+            "maxItems": 5,
+            "minItems": 0
+          },
+          "currentSeniorityLevels": {
+            "type": "array",
+            "description": "Các cấp bậc hiện tại/mong muốn, tối đa 5 lựa chọn",
+            "example": [
+              "Mới tốt nghiệp"
+            ],
+            "items": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 0
+            },
+            "maxItems": 5,
+            "minItems": 0
+          },
+          "employmentTypes": {
+            "type": "array",
+            "description": "Hình thức làm việc mong muốn, tối đa 5 lựa chọn",
+            "example": [
+              "Freelance",
+              "Full-time"
+            ],
+            "items": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 0
+            },
+            "maxItems": 5,
+            "minItems": 0
+          },
+          "workPreferences": {
+            "$ref": "#/components/schemas/WorkPreferencesRequest",
+            "description": "Tùy chọn chế độ/phúc lợi mong muốn"
           }
         }
       },
@@ -1384,6 +1459,27 @@
         "required": [
           "name"
         ]
+      },
+      "WorkPreferencesRequest": {
+        "type": "object",
+        "description": "Các chế độ/phúc lợi mong muốn",
+        "properties": {
+          "hybrid": {
+            "type": "boolean",
+            "description": "Mong muốn làm việc Hybrid",
+            "example": true
+          },
+          "thirteenthMonthSalary": {
+            "type": "boolean",
+            "description": "Mong muốn có thưởng tháng 13 trở lên",
+            "example": true
+          },
+          "healthInsurance": {
+            "type": "boolean",
+            "description": "Mong muốn có bảo hiểm sức khỏe",
+            "example": true
+          }
+        }
       }
     },
     "securitySchemes": {

@@ -8505,6 +8505,52 @@ components:
         showPhone:
           type: boolean
           nullable: true
+        desiredIndustries:
+          type: array
+          nullable: true
+          maxItems: 3
+          items:
+            type: string
+            maxLength: 100
+        experienceLevel:
+          type: string
+          nullable: true
+          maxLength: 50
+        salaryNegotiable:
+          type: boolean
+          nullable: true
+        desiredLocations:
+          type: array
+          nullable: true
+          maxItems: 5
+          items:
+            type: string
+            maxLength: 200
+        currentSeniorityLevels:
+          type: array
+          nullable: true
+          maxItems: 5
+          items:
+            type: string
+            maxLength: 100
+        employmentTypes:
+          type: array
+          nullable: true
+          maxItems: 5
+          items:
+            type: string
+            maxLength: 100
+        workPreferences:
+          $ref: '#/components/schemas/ProfileWorkPreferences'
+    ProfileWorkPreferences:
+      type: object
+      properties:
+        hybrid:
+          type: boolean
+        thirteenthMonthSalary:
+          type: boolean
+        healthInsurance:
+          type: boolean
     PersonalProfile:
       allOf:
       - $ref: '#/components/schemas/PersonalProfileInput'

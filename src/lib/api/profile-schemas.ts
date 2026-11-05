@@ -10,6 +10,12 @@ export const personalProfileInputSchema = z.object({
     minDesiredSalary: z.number().int().safe().nullish(), maxDesiredSalary: z.number().int().safe().nullish(),
     currency: z.string().max(10).nullish(), yearsOfExperience: z.number().int().nullish(),
     jobSearchStatus: z.string().max(30).nullish(), searchable: z.boolean().nullish(), showEmail: z.boolean().nullish(), showPhone: z.boolean().nullish(),
+    desiredIndustries: z.array(z.string().max(100)).max(3).nullish(),
+    experienceLevel: z.string().max(50).nullish(), salaryNegotiable: z.boolean().nullish(),
+    desiredLocations: z.array(z.string().max(200)).max(5).nullish(),
+    currentSeniorityLevels: z.array(z.string().max(100)).max(5).nullish(),
+    employmentTypes: z.array(z.string().max(100)).max(5).nullish(),
+    workPreferences: z.object({ hybrid: z.boolean().optional(), thirteenthMonthSalary: z.boolean().optional(), healthInsurance: z.boolean().optional() }).strict().optional(),
 }).strict();
 export const personalProfileSchema = personalProfileInputSchema.extend({ fullName: z.string(), email: z.string(), id: z.string().optional(), userId: z.string().optional() }).strip();
 // The service nests privacy in responses, but accepts flat flags in PUT requests.

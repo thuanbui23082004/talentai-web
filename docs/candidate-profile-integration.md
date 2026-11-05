@@ -38,7 +38,29 @@ Thông tin cá nhân và giới thiệu đã lưu thật qua GET/PUT profile:
 - Kiểm tra trực tiếp ngày 2026-11-05: backend bỏ qua giá trị null khi cập nhật. Form chặn để trống ngày sinh đã có giá trị và báo lỗi tại trường đó. Chưa có API xóa giá trị này; chuỗi có thể cập nhật thành rỗng.
 - Popup này không chỉnh sửa ảnh đại diện. Luồng upload file `/candidate/avatar` riêng chưa tích hợp trong tác vụ thông tin cá nhân này.
 
-Dự án, ngoại ngữ và chọn CV vẫn là bản xem trước, có nhãn rõ. Cấu hình công việc tại trang riêng nằm ngoài tác vụ popup này.
+Dự án và chọn CV vẫn là bản xem trước, có nhãn rõ. Mục ngoại ngữ đã bỏ khỏi giao diện.
+
+## Tiêu chí tìm việc
+
+Trang `/candidate/job-preferences` dùng GET/PUT `/candidate/profile`, cùng query theo user ID với thông tin cá nhân. Không gọi endpoint `/candidate/job-preferences` cũ. Backend đã bổ sung đầy đủ trường tương ứng với giao diện:
+
+| Form | ProfileUpdateRequest |
+| --- | --- |
+| Ngành nghề | `desiredIndustries` (tên, tối đa 3) |
+| Nhóm kinh nghiệm | `experienceLevel` (chuỗi; ví dụ `UNDER_1_YEAR`) |
+| Vị trí | `desiredJobTitle` |
+| Khoảng lương, đơn vị triệu | `minDesiredSalary`, `maxDesiredSalary` (VNĐ), `currency=VND` |
+| Thỏa thuận | `salaryNegotiable` |
+| Địa điểm | `desiredLocations` (tên, tối đa 5) |
+| Cấp bậc | `currentSeniorityLevels` (tên, tối đa 5) |
+| Hình thức làm việc | `employmentTypes` (tên, tối đa 5) |
+| Phúc lợi | `workPreferences.hybrid`, `.thirteenthMonthSalary`, `.healthInsurance` |
+
+`job-preferences-mapping.ts` tập trung đổi tên trường, mã lựa chọn và lương. Không suy diễn nhóm kinh nghiệm thành `yearsOfExperience` vì nhóm là khoảng, còn trường cũ là số năm chính xác. Các lựa chọn từng lưu ngoài danh sách gợi ý được giữ nguyên và bổ sung vào options khi hiển thị. Dữ liệu cũ dùng `desiredLocation` có thể đọc lại khi chưa có `desiredLocations`.
+
+Chỉ gửi các trường tiêu chí; không ghi đè tên, liên hệ, địa chỉ cá nhân, quyền riêng tư hoặc giới thiệu. Lưu thành công cập nhật/invalidate query profile; form reset từ phản hồi backend. Hủy khôi phục lần lưu gần nhất. Tài khoản mới không có dữ liệu mẫu. Lỗi tải có nút thử lại; lỗi ghi giữ nội dung và ánh xạ field errors.
+
+Backend giữ khoảng lương cũ nếu gửi null. Khi bật thỏa thuận, chỉ gửi `salaryNegotiable=true` và bỏ các trường tiền; khoảng lương cũ được giữ để dùng lại khi tắt thỏa thuận. Không giả lập xóa lương bằng null hoặc bằng 0. Mock giữ cùng hành vi. E2E tại `tests/e2e/job-preferences.spec.ts` dùng được với mock hoặc `PROFILE_DATA_MODE=real`, `PROFILE_REAL_E2E=1`.
 
 ## Quyền và lỗi
 
