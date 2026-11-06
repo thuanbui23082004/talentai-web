@@ -34,7 +34,7 @@ Thư viện 6 mẫu và editor HTML/CSS được giữ trong `cv-template-studio
 Popup ứng tuyển cũng tái sử dụng `useCvs`/`useCvActions`: tải danh sách theo tài khoản,
 chọn CV mặc định, upload ngay khi chọn/kéo thả và chọn CV vừa upload sau khi đọc lại danh sách.
 Không dùng CV mẫu trong popup nghiệp vụ; mẫu chỉ giữ ở showcase `/ui/application`.
-Upload lưu CV vào tài khoản, chưa tạo hồ sơ ứng tuyển hoặc gửi thư giới thiệu tới nhà tuyển dụng.
+Upload lưu CV vào tài khoản. Nút nộp hồ sơ gửi CV đã chọn qua application-service; xem phạm vi và trạng thái nghiệm thu thật tại `docs/application-submission-integration.md`.
 Đã kiểm tra popup trên desktop/mobile bằng E2E mock và real: danh sách lỗi/thử lại,
 upload lỗi/thử lại, tự chọn CV vừa upload, mở lại popup và đối chiếu danh sách backend.
 CV kiểm thử của lượt real thành công đã được xóa.

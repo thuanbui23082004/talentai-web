@@ -28,6 +28,13 @@ export function toApiError(status: number, body?: components["schemas"]["ApiErro
     SERVICE_UNAVAILABLE: "Dịch vụ chưa sẵn sàng. Vui lòng thử lại sau.",
     RATE_LIMITED: "Bạn thao tác quá nhanh. Vui lòng thử lại sau.",
     CV_IN_USE: "CV đang được dùng trong hồ sơ ứng tuyển nên chưa thể xóa.",
+    ALREADY_APPLIED: "Bạn đã ứng tuyển vị trí này. Không cần nộp lại.",
+    PROFILE_INCOMPLETE: "Vui lòng cập nhật họ tên và email trong hồ sơ cá nhân trước khi ứng tuyển.",
+    CV_NOT_FOUND: "CV không tồn tại hoặc không thuộc tài khoản. Vui lòng tải lại danh sách CV.",
+    JOB_NOT_FOUND: "Tin tuyển dụng không tồn tại hoặc đã bị gỡ.",
+    JOB_CLOSED: "Tin tuyển dụng đã đóng, không còn nhận hồ sơ.",
+    JOB_NOT_OPEN: "Tin tuyển dụng hiện không nhận hồ sơ.",
+    CONFLICT: "Không thể thực hiện thao tác. Vui lòng kiểm tra trạng thái hiện tại rồi thử lại.",
   };
   const fields = body?.error?.fieldErrors?.map((field) => ({
     field: field.field,

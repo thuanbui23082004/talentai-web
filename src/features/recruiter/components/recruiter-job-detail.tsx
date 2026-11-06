@@ -57,6 +57,7 @@ export function RecruiterJobDetail({ job }: { job: RecruiterJobView }) {
           <h1>{t('jobDetailHeading')}</h1>
         </Link>
         <JobManagementActions job={job}>
+          <Link href={`/recruiter/candidates?jobId=${job.id}`} className="inline-flex min-h-10 items-center rounded-lg border border-border px-3 text-sm font-semibold text-primary hover:bg-secondary">Xem ứng viên</Link>
           {status === 'open' && (
             <Button variant="outline" disabled={mutation.isPending} onClick={() => openConfirmation('pause')}>
               <Pause size={14} />{t('pauseJob')}

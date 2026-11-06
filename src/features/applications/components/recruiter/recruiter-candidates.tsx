@@ -1,78 +1,417 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { ChevronLeft, ChevronRight, LayoutGrid, List, RotateCcw, Search, SlidersHorizontal } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useRecruiterJobs } from '@/features/jobs';
-import { useApplicantCv, useRecruiterApplications } from '@/features/applications/hooks/use-recruiter-applications';
-import { applicationStatuses, candidateSearchSchema } from '@/features/applications/schemas/recruiter-applications';
-import type { RecruiterApplicationQuery } from '@/features/applications/schemas/recruiter-applications';
-import { CandidateRequestError } from '@/features/applications/errors';
-import { CandidateCard, CandidateCvButton, CandidateDetailLink, CandidateIdentity } from '@/features/applications/components/recruiter/candidate-card';
-import { CandidateCvViewer } from '@/features/applications/components/recruiter/candidate-cv-viewer';
-import './recruiter-candidates.css';
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { z } from "zod";
+import {
+    ChevronLeft,
+    ChevronRight,
+    FileText,
+    LayoutGrid,
+    Kanban,
+    RotateCcw,
+    SlidersHorizontal,
+    Users,
+} from "lucide-react";
+import { Alert, Button, Select } from "@/components/ui";
+import { useRecruiterJobs } from "@/features/jobs";
+import { ApiError } from "@/lib/api/errors";
+import { formatDate } from "@/lib/utils";
+import { jobApplicantQuerySchema } from "@/lib/api/job-applicant-schemas";
+import { useJobApplicants } from "../../hooks/use-recruiter-applications";
+import {
+    JOB_APPLICANT_STATUS_LABELS,
+    JOB_EMPLOYMENT_LABELS,
+} from "../../job-applicant-messages";
+import { JobApplicantCvDialog } from "./job-applicant-cv-dialog";
+import type { JobApplicant } from "../../types";
+import "./recruiter-candidates.css";
+import "./job-applicants.css";
 
-function CandidateSelect({ label, value, items, onChange }: { label: string; value: string; items: { value: string; label: string }[]; onChange: (value: string) => void }) {
-  return <Select value={value} onValueChange={next => onChange(next ?? 'all')} items={items}><SelectTrigger aria-label={label}><SelectValue /></SelectTrigger><SelectContent>{items.map(item => <SelectItem value={item.value} key={item.value}>{item.label}</SelectItem>)}</SelectContent></Select>;
+function ApplicantIdentity({ item }: { item: JobApplicant }) {
+    const name = item.fullName || "Chưa cập nhật tên";
+    const employment = item.employmentType && JOB_EMPLOYMENT_LABELS[item.employmentType];
+    return (
+        <div className="candidate-identity">
+            <span className="candidate-avatar" aria-hidden="true">
+                {name
+                    .trim()
+                    .split(/\s+/)
+                    .slice(-2)
+                    .map((word) => word[0])
+                    .join("")}
+            </span>
+            <div>
+                <div className="job-applicant-name-row">
+                    <h2>{name}</h2>
+                    <span className={`candidate-status status-${item.status}`}>
+                        <span />
+                        {JOB_APPLICANT_STATUS_LABELS[item.status]}
+                    </span>
+                </div>
+                <p>{item.email || item.headline || "Chưa cung cấp email"}</p>
+                {employment && <span className="job-applicant-employment"><span />{employment}</span>}
+            </div>
+        </div>
+    );
 }
-type Filters = { job: string; status: string; experience: string; education: 'all' | NonNullable<RecruiterApplicationQuery['educationLevel']>; sort: 'applied_desc' | 'applied_asc' | 'experience_desc'; page: number };
-const defaults: Filters = { job: 'all', status: 'all', experience: 'all', education: 'all', sort: 'applied_desc', page: 1 };
+
+function ApplicantCard({
+    item,
+    jobTitle,
+    onViewCv,
+}: {
+    item: JobApplicant;
+    jobTitle?: string;
+    onViewCv: (item: JobApplicant) => void;
+}) {
+    return (
+        <article className="job-applicant-card">
+            <Link
+                href={`/recruiter/candidates/${item.id}?from=job`}
+                prefetch={false}
+                className="job-applicant-card-link"
+                aria-label={`Xem chi tiết ứng viên ${item.fullName || "chưa cập nhật tên"}`}
+            >
+                <span className="sr-only">Xem chi tiết ứng viên</span>
+            </Link>
+            <div className="job-applicant-card-intro">
+                <ApplicantIdentity item={item} />
+            </div>
+            <dl className="job-applicant-card-info">
+                <div>
+                    <dt>Vị trí ứng tuyển</dt>
+                    <dd className="job-applicant-position-name">
+                        {item.jobTitle || jobTitle || "Chưa cung cấp vị trí"}
+                    </dd>
+                </div>
+                <div>
+                    <dt>Mã hồ sơ</dt>
+                    <dd title={item.id} className="job-applicant-reference">
+                        {item.id.slice(-8)}
+                    </dd>
+                </div>
+                <div>
+                    <dt>Ngày nộp CV</dt>
+                    <dd>{formatDate(item.appliedAt)}</dd>
+                </div>
+                <div>
+                    <dt>CV đính kèm</dt>
+                    <dd>
+                        <button
+                            type="button"
+                            className="job-applicant-view-cv"
+                            onClick={() => onViewCv(item)}
+                        >
+                            <FileText size={17} aria-hidden="true" />
+                            Xem CV
+                        </button>
+                    </dd>
+                </div>
+            </dl>
+        </article>
+    );
+}
 
 export function RecruiterCandidates() {
-  const t = useTranslations('Candidates');
-  const pipelineText = useTranslations('Pipeline');
-  const educationText = useTranslations('JobForm.educationLevels');
-  const [view, setView] = useState<'cards' | 'list'>('cards');
-  const [filters, setFilters] = useState<Filters>(defaults);
-  const [showFilters, setShowFilters] = useState(true);
-  const [search, setSearch] = useState('');
-  const [skills, setSkills] = useState('');
-  const [debounced, setDebounced] = useState({ search: '', skills: '' });
-  const [activeCv, setActiveCv] = useState<string | null>(null);
-  const cv = useApplicantCv();
-  const jobs = useRecruiterJobs();
-  useEffect(() => { const timeout = setTimeout(() => setDebounced({ search, skills }), 300); return () => clearTimeout(timeout); }, [search, skills]);
-  const rawSearch = candidateSearchSchema.safeParse(search);
-  const rawSkills = candidateSearchSchema.safeParse(skills);
-  const safeSearch = candidateSearchSchema.safeParse(debounced.search);
-  const safeSkills = candidateSearchSchema.safeParse(debounced.skills);
-  const valid = rawSearch.success && rawSkills.success && safeSearch.success && safeSkills.success;
-  const query: RecruiterApplicationQuery = {
-    q: safeSearch.success ? safeSearch.data || undefined : undefined,
-    skills: safeSkills.success && safeSkills.data ? safeSkills.data.split(',').map(value => value.trim()).filter(Boolean) : undefined,
-    jobId: filters.job === 'all' ? undefined : filters.job,
-    status: filters.status === 'all' ? undefined : [filters.status as typeof applicationStatuses[number]],
-    minExperienceYears: filters.experience === 'all' ? undefined : Number(filters.experience),
-    educationLevel: filters.education === 'all' ? undefined : filters.education,
-    sort: filters.sort, page: filters.page, pageSize: 9,
-  };
-  const applications = useRecruiterApplications(query, valid);
-  const data = applications.data;
-  function update<K extends keyof Filters>(key: K, value: Filters[K]) { setFilters(current => ({ ...current, [key]: value, page: 1 })); }
-  function clear() { setSearch(''); setSkills(''); setDebounced({ search: '', skills: '' }); setFilters(defaults); }
-  function viewCv(id: string) { cv.reset(); setActiveCv(id); cv.mutate(id); }
-  const total = data?.meta.totalItems ?? 0;
-  const pages = data?.meta.totalPages ?? 0;
-  const current = filters.page;
-  const pageNumbers = [...new Set([1, ...Array.from({ length: 5 }, (_, index) => current - 2 + index), pages])].filter(page => page >= 1 && page <= pages).sort((a, b) => a - b);
-  const searchError = !rawSearch.success || !rawSkills.success;
-  return <div className="candidates-page">
-    <header className="candidates-page-heading"><div><h1>{t('heading')}</h1><p>{t('subtitle')}</p></div><div className="candidate-heading-actions"><Link className="candidate-pipeline-link" href="/recruiter/candidates/pipeline">{pipelineText('board')}</Link><div className="candidate-view-toggle"><Button size="sm" variant={view === 'list' ? 'default' : 'outline'} onClick={() => setView('list')} aria-pressed={view === 'list'}><List size={13} />{t('list')}</Button><Button size="sm" variant={view === 'cards' ? 'default' : 'outline'} onClick={() => setView('cards')} aria-pressed={view === 'cards'}><LayoutGrid size={13} />{t('cards')}</Button></div></div></header>
-    <section className="candidates-toolbar" aria-label={t('filter')}><div className="candidates-toolbar-top"><strong>{t('total', { count: total })}</strong><div className="candidate-search"><Search size={14} /><Input value={search} maxLength={200} onChange={event => { setSearch(event.target.value); update('page', 1); }} placeholder={t('search')} aria-label={t('searchLabel')} aria-invalid={!rawSearch.success} aria-describedby={searchError ? 'candidate-search-error' : undefined} /></div><Button variant="outline" size="sm" aria-expanded={showFilters} onClick={() => setShowFilters(!showFilters)}><SlidersHorizontal size={13} />{t('filter')}</Button><CandidateSelect label={t('sort')} value={filters.sort} onChange={value => update('sort', value as Filters['sort'])} items={(['applied_desc', 'applied_asc', 'experience_desc'] as const).map(value => ({ value, label: t(`sorts.${value}`) }))} /></div>
-      {showFilters && <div className="candidates-filter-row"><CandidateSelect label={t('job')} value={filters.job} items={[{ value: 'all', label: t('allJobs') }, ...(jobs.data?.items ?? []).map(job => ({ value: job.id, label: job.title }))]} onChange={value => update('job', value)} /><CandidateSelect label={t('status')} value={filters.status} items={[{ value: 'all', label: t('allStatuses') }, ...applicationStatuses.map(value => ({ value, label: t(`statuses.${value}`) }))]} onChange={value => update('status', value)} /><Input value={skills} maxLength={200} aria-label={t('skills')} placeholder={t('skillsPlaceholder')} onChange={event => { setSkills(event.target.value); update('page', 1); }} aria-invalid={!rawSkills.success} /><CandidateSelect label={t('experience')} value={filters.experience} items={[{ value: 'all', label: t('allExperiences') }, ...[1, 2, 3, 5].map(count => ({ value: String(count), label: t('experienceYears', { count }) }))]} onChange={value => update('experience', value)} /><CandidateSelect label={t('education')} value={filters.education} onChange={value => update('education', value as Filters['education'])} items={[{ value: 'all', label: t('allEducation') }, ...(['high_school', 'vocational', 'college', 'bachelor', 'master', 'doctorate', 'other'] as const).map(value => ({ value, label: educationText(value) }))]} /><Button variant="ghost" size="sm" onClick={clear}><RotateCcw size={12} />{t('clear')}</Button></div>}
+    const router = useRouter();
+    const params = useSearchParams();
+    const jobId = params.get("jobId") ?? "";
+    const status = params.get("status") ?? "";
+    const parsed = jobApplicantQuerySchema.safeParse({
+        status: status || undefined,
+        page: params.get("page") ?? 1,
+        pageSize: 9,
+    });
+    const valid =
+        parsed.success && (!jobId || z.uuid().safeParse(jobId).success);
+    const query = parsed.success ? parsed.data : { page: 1, pageSize: 9 };
+    const [requireJob, setRequireJob] = useState(false);
+    const [jobPage, setJobPage] = useState(1);
+    const [activeCv, setActiveCv] = useState<JobApplicant | null>(null);
+    const jobs = useRecruiterJobs({ page: jobPage, pageSize: 100 });
+    const applications = useJobApplicants(jobId, query, valid);
+    const data = applications.data;
+    const page = query.page;
+    const total = data?.meta.totalItems ?? 0;
+    const items = jobs.data?.items ?? [];
+    const selectedJobTitle =
+        items.find((job) => job.id === jobId)?.title ||
+        data?.items[0]?.jobTitle;
+    const jobOptions = [
+        { value: "", label: "Chọn tin tuyển dụng" },
+        ...items.map((job) => ({ value: job.id, label: job.title })),
+    ];
+    if (jobId && !items.some((job) => job.id === jobId))
+        jobOptions.push({
+            value: jobId,
+            label: data?.items[0]?.jobTitle || "Tin tuyển dụng đang chọn",
+        });
+    function update(values: Record<string, string>) {
+        const next = new URLSearchParams(params);
+        for (const [key, value] of Object.entries(values)) {
+            if (value) next.set(key, value);
+            else next.delete(key);
+        }
+        router.push(`/recruiter/candidates${next.size ? `?${next}` : ""}`, {
+            scroll: false,
+        });
+    }
+    const error =
+        applications.error instanceof ApiError &&
+        applications.error.status === 404
+            ? "Tin tuyển dụng không tồn tại hoặc không thuộc công ty của bạn."
+            : applications.error instanceof ApiError &&
+                applications.error.status === 403
+              ? "Bạn không có quyền xem ứng viên của tin này."
+              : "Không tải được danh sách ứng viên. Vui lòng thử lại.";
 
-      {searchError && <p role="alert" id="candidate-search-error" className="candidate-error">{t(search.length > 200 || skills.length > 200 ? 'searchTooLong' : 'privateSearch')}</p>}
-      {jobs.isError && <p className="candidate-filter-error" role="alert">{t('errors.requestFailed')} <Button variant="ghost" size="sm" onClick={() => void jobs.refetch()}>{t('retry')}</Button></p>}
-    </section>
-    {activeCv && <CandidateCvViewer key={activeCv} blob={cv.data} loading={cv.isPending} error={cv.error} onClose={() => { setActiveCv(null); cv.reset(); }} onRetry={() => cv.mutate(activeCv)} />}
-    {applications.isError ? <section className="candidate-empty" role="alert"><h2>{t(`errors.${applications.error instanceof CandidateRequestError ? applications.error.messageKey : 'requestFailed'}`)}</h2><Button variant="outline" onClick={() => void applications.refetch()}>{t('retry')}</Button></section>
-      : applications.isPending && valid ? <div className="candidate-card-grid candidate-skeleton" aria-busy="true">{Array.from({ length: 9 }, (_, index) => <span key={index} />)}</div>
-      : !data?.items.length ? <section className="candidate-empty"><h2>{t('empty')}</h2><p>{t('emptyHint')}</p><Button variant="outline" onClick={clear}>{t('clear')}</Button></section>
-      : <section aria-busy={applications.isFetching} aria-label={t('heading')} className={applications.isPlaceholderData ? 'candidate-results-updating' : ''}>{applications.isFetching && <p className="candidate-updating" role="status">{t('updating')}</p>}{view === 'cards' ? <div className="candidate-card-grid">{data.items.map(application => <CandidateCard application={application} key={application.id} onView={viewCv} busy={cv.isPending} />)}</div> : <div className="candidate-table-container"><table className="candidates-list-table"><thead><tr>{(['candidate', 'position', 'reference', 'appliedAt', 'status', 'actions'] as const).map(key => <th key={key}>{t(key)}</th>)}</tr></thead><tbody>{data.items.map(application => <tr key={application.id}><td><CandidateIdentity application={application} /></td><td>{application.jobTitle || t('unknownPosition')}</td><td className="candidate-reference" title={application.id}>{application.id.slice(-8)}</td><td>{new Intl.DateTimeFormat('vi', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(application.appliedAt))}</td><td><span className={`candidate-status status-${application.status}`}><span />{t(`statuses.${application.status}`)}</span></td><td><div className="candidate-table-actions"><CandidateDetailLink application={application} /><CandidateCvButton application={application} busy={cv.isPending} onView={viewCv} /></div></td></tr>)}</tbody></table></div>}</section>}
-    <footer className="candidates-results-footer"><span>{t('range', { from: data?.items.length ? (current - 1) * 9 + 1 : 0, to: data?.items.length ? (current - 1) * 9 + data.items.length : 0, total })}</span><nav aria-label={t('pagination')}><Button variant="ghost" size="sm" disabled={current <= 1 || applications.isFetching} onClick={() => setFilters(value => ({ ...value, page: value.page - 1 }))}><ChevronLeft size={12} />{t('previous')}</Button>{pageNumbers.map((page, index) => <span key={page}>{index > 0 && page > pageNumbers[index - 1] + 1 && <span className="candidate-pagination-gap">…</span>}<Button size="icon-sm" variant={current === page ? 'default' : 'ghost'} aria-label={t('page', { page })} aria-current={current === page ? 'page' : undefined} disabled={applications.isFetching} onClick={() => setFilters(value => ({ ...value, page }))}>{page}</Button></span>)}<Button variant="ghost" size="sm" disabled={current >= pages || applications.isFetching} onClick={() => setFilters(value => ({ ...value, page: value.page + 1 }))}>{t('next')}<ChevronRight size={12} /></Button></nav></footer>
-  </div>;
+    return (
+        <div className="candidates-page job-applicants-page">
+            <header className="candidates-page-heading">
+                <div>
+                    <h1>Ứng viên</h1>
+                    <p>
+                        Theo dõi hồ sơ và tìm ứng viên phù hợp cho từng vị trí.
+                    </p>
+                </div>
+            </header>
+            <section
+                className="job-applicants-filter"
+                aria-label="Lọc ứng viên"
+            >
+                <div className="job-applicants-filter-title">
+                    <SlidersHorizontal size={16} aria-hidden="true" />
+                    <span>Bộ lọc hồ sơ</span>
+                </div>
+                <div className="job-applicants-filter-fields">
+                    <div className="job-applicants-field">
+                        <span>Tin tuyển dụng</span>
+                        <Select
+                            aria-label="Tin tuyển dụng"
+                            aria-invalid={requireJob && !jobId}
+                            aria-describedby={requireJob && !jobId ? 'applicants-job-error' : undefined}
+                            placeholder="Chọn tin tuyển dụng"
+                            value={jobId}
+                            options={jobOptions}
+                            disabled={jobs.isPending}
+                            onValueChange={(value) =>
+                                update({ jobId: value ?? "", page: "" })
+                            }
+                        />
+                        {requireJob && !jobId && <p id="applicants-job-error" role="alert">Vui lòng chọn tin tuyển dụng trước khi mở bảng theo dõi.</p>}
+                    </div>
+                    <div className="job-applicants-field">
+                        <span>Trạng thái hồ sơ</span>
+                        <Select
+                            aria-label="Trạng thái hồ sơ"
+                            placeholder="Tất cả trạng thái"
+                            value={status}
+                            options={[
+                                { value: "", label: "Tất cả trạng thái" },
+                                ...Object.entries(
+                                    JOB_APPLICANT_STATUS_LABELS,
+                                ).map(([value, label]) => ({ value, label })),
+                            ]}
+                            disabled={!jobId}
+                            onValueChange={(value) =>
+                                update({ status: value ?? "", page: "" })
+                            }
+                        />
+                    </div>
+                    <Button
+                        className="job-applicants-reset"
+                        variant="ghost"
+                        disabled={!status}
+                        onClick={() => update({ status: "", page: "" })}
+                    >
+                        <RotateCcw size={15} aria-hidden="true" />
+                        Xóa lọc trạng thái
+                    </Button>
+                </div>
+                {(jobs.data?.meta.totalPages ?? 0) > 1 && (
+                    <div className="candidates-filter-row">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={jobPage <= 1 || jobs.isFetching}
+                            onClick={() => setJobPage((value) => value - 1)}
+                        >
+                            Tin trang trước
+                        </Button>
+                        <span>
+                            Danh mục tin: trang {jobPage}/
+                            {jobs.data?.meta.totalPages}
+                        </span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={
+                                jobPage >= (jobs.data?.meta.totalPages ?? 0) ||
+                                jobs.isFetching
+                            }
+                            onClick={() => setJobPage((value) => value + 1)}
+                        >
+                            Tin trang sau
+                        </Button>
+                    </div>
+                )}
+                {jobs.isError && (
+                    <Alert
+                        variant="error"
+                        title="Không tải được danh sách tin tuyển dụng"
+                    >
+                        <Button
+                            variant="outline"
+                            onClick={() => void jobs.refetch()}
+                        >
+                            Thử lại
+                        </Button>
+                    </Alert>
+                )}
+            </section>
+            <div className="job-applicants-results-heading">
+                <div>
+                    <span className="job-applicants-heading-icon">
+                        <Users size={18} aria-hidden="true" />
+                    </span>
+                    <h2>
+                        Hồ sơ ứng tuyển
+                        {jobId && selectedJobTitle && (
+                            <span className="job-applicants-job-title">
+                                {" "}
+                                · {selectedJobTitle}
+                            </span>
+                        )}
+                    </h2>
+                    {jobId && (
+                        <span className="job-applicants-count">
+                            {applications.isFetching ? "…" : total}
+                        </span>
+                    )}
+                </div>
+                <div
+                    className="candidate-view-toggle"
+                    aria-label="Kiểu hiển thị"
+                >
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                            if (!jobId || !valid) {
+                                setRequireJob(true);
+                                document.querySelector<HTMLElement>('[aria-label="Tin tuyển dụng"]')?.focus();
+                                return;
+                            }
+                            router.push(`/recruiter/candidates/pipeline?jobId=${jobId}`);
+                        }}
+                    >
+                        <Kanban size={15} aria-hidden="true" />
+                        Bảng theo dõi
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="secondary"
+                        aria-pressed="true"
+                    >
+                        <LayoutGrid size={15} aria-hidden="true" />
+                        Dạng thẻ
+                    </Button>
+                </div>
+            </div>
+            {!valid ? (
+                <Alert
+                    variant="error"
+                    title="Mã tin hoặc bộ lọc không hợp lệ"
+                />
+            ) : !jobId ? (
+                <section className="candidate-empty">
+                    <h2>Chọn tin tuyển dụng để xem ứng viên</h2>
+                    <p>Chỉ hiển thị hồ sơ đã ứng tuyển vào tin bạn chọn.</p>
+                </section>
+            ) : applications.isError ? (
+                <section className="candidate-empty" role="alert">
+                    <h2>{error}</h2>
+                    <Button
+                        variant="outline"
+                        onClick={() => void applications.refetch()}
+                    >
+                        Thử lại
+                    </Button>
+                </section>
+            ) : applications.isPending ? (
+                <div
+                    className="candidate-card-grid candidate-skeleton"
+                    aria-label="Đang tải ứng viên"
+                    aria-busy="true"
+                >
+                    {Array.from({ length: 3 }, (_, index) => (
+                        <span key={index} />
+                    ))}
+                </div>
+            ) : !data?.items.length ? (
+                <section className="candidate-empty">
+                    <h2>Chưa có ứng viên ứng tuyển</h2>
+                    <p>
+                        {status
+                            ? "Thử chọn trạng thái khác để xem thêm hồ sơ."
+                            : "Các hồ sơ gửi vào tin này sẽ xuất hiện tại đây."}
+                    </p>
+                </section>
+            ) : (
+                <section
+                    aria-label="Danh sách ứng viên"
+                    className="job-applicants-results"
+                >
+                    {data.items.map((item) => (
+                        <ApplicantCard
+                            item={item}
+                            jobTitle={
+                                items.find((job) => job.id === jobId)?.title
+                            }
+                            onViewCv={setActiveCv}
+                            key={item.id}
+                        />
+                    ))}
+                </section>
+            )}
+            {activeCv && (
+                <JobApplicantCvDialog
+                    item={activeCv}
+                    onClose={() => setActiveCv(null)}
+                />
+            )}
+            {jobId && data && total > 0 && (
+                <footer className="candidates-results-footer">
+                    <span>
+                        {total} hồ sơ · Trang {page}/{data.meta.totalPages}
+                    </span>
+                    <nav aria-label="Phân trang ứng viên">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={page <= 1 || applications.isFetching}
+                            onClick={() => update({ page: String(page - 1) })}
+                        >
+                            <ChevronLeft size={14} />
+                            Trang trước
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={
+                                page >= data.meta.totalPages ||
+                                applications.isFetching
+                            }
+                            onClick={() => update({ page: String(page + 1) })}
+                        >
+                            Trang sau
+                            <ChevronRight size={14} />
+                        </Button>
+                    </nav>
+                </footer>
+            )}
+        </div>
+    );
 }

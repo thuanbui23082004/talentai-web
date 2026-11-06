@@ -1,78 +1,171 @@
 'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { ArrowLeft, Plus } from 'lucide-react';
-import { DndContext, DragOverlay, MouseSensor, TouchSensor, KeyboardSensor, pointerWithin, rectIntersection, useSensor, useSensors, useDroppable } from '@dnd-kit/core';
-import { recruiterApplicationSchema } from '@/lib/api/application-schemas';
-import { Button } from '@/components/ui/button';
-import { usePipelineColumn, usePipelineMove } from '@/features/applications/hooks/use-pipeline';
-import { pipelineStages, canMoveApplication, isFinalStage, type ApplicationStatus, type PipelineStage } from '@/features/applications/pipeline';
-import type { RecruiterApplication } from '@/features/applications/types';
-import { PipelineCard } from '@/features/applications/components/recruiter/pipeline-card';
-import { PipelineMovePanel, PipelinePicker } from '@/features/applications/components/recruiter/pipeline-action-panels';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { z } from 'zod';
+import { DndContext, DragOverlay, MouseSensor, TouchSensor, useSensor, useSensors, useDroppable, pointerWithin } from '@dnd-kit/core';
+import { ArrowLeft } from 'lucide-react';
+import { Alert, Button, Select } from '@/components/ui';
+import { useRecruiterJobs } from '@/features/jobs';
+import { ApiError } from '@/lib/api/errors';
+import { JOB_APPLICANT_TRANSITIONS } from '@/lib/api/job-applicant-transitions';
+import { useJobPipeline, useJobPipelineMove } from '../../hooks/use-job-pipeline';
+import { JOB_APPLICANT_STATUS_LABELS } from '../../job-applicant-messages';
+import type { JobApplicant } from '../../types';
+import { JobPipelineCard } from './job-pipeline-card';
+import { JobApplicantCvDialog } from './job-applicant-cv-dialog';
 import './recruiter-pipeline.css';
-
-function PipelineColumn({ stage, disabled, dragging, onMove, onPick }: {
-  stage: ApplicationStatus; disabled: boolean; dragging: RecruiterApplication | null;
-  onMove: (application: RecruiterApplication, stage: PipelineStage) => void; onPick: (stage: PipelineStage) => void;
+type Status = JobApplicant['status'];
+const STAGES: Status[] = ['submitted', 'reviewing', 'shortlisted', 'interview_scheduled', 'offered', 'hired', 'rejected', 'withdrawn'];
+function PipelineColumn({
+  stage,
+  items,
+  disabled,
+  dragging,
+  onMove,
+  onCv
+}: {
+  stage: Status;
+  items: JobApplicant[];
+  disabled: boolean;
+  dragging: JobApplicant | null;
+  onMove: (item: JobApplicant, target: Status) => void;
+  onCv: (item: JobApplicant) => void;
 }) {
-  const t = useTranslations('Pipeline');
-  const query = usePipelineColumn(stage);
-  const total = query.data?.pages[0]?.meta.totalItems;
-  const items = [...new Map(query.data?.pages.flatMap(page => page.items).map(application => [application.id, application]) ?? []).values()];
-  const target = stage === 'withdrawn' ? undefined : stage;
-  const droppable = !disabled && target !== undefined && (!dragging || canMoveApplication(dragging.status, target));
-  const { setNodeRef, isOver } = useDroppable({ id: stage, disabled: !droppable });
-  return <section ref={setNodeRef} className={`pipeline-column${isOver && droppable ? ' pipeline-column-over' : ''}${stage === 'withdrawn' ? ' pipeline-withdrawn' : ''}`} data-stage={stage} aria-label={t('column', { stage: t(`stages.${stage}`) })}>
-    <header className="pipeline-column-heading"><h2>{t(`stages.${stage}`)}</h2><span aria-label={total === undefined ? t('loading') : t('count', { count: total })}>{total ?? '—'}</span>{target && <Button variant="ghost" size="icon-xs" disabled={disabled} aria-label={t('add', { stage: t(`stages.${stage}`) })} onClick={() => onPick(target)}><Plus size={15} /></Button>}</header>
-    {stage === 'withdrawn' && <p className="pipeline-withdrawn-hint">{t('withdrawnHint')}</p>}
-    {query.isPending ? <div className="pipeline-column-skeleton" aria-label={t('loading')} aria-busy="true"><span /><span /><span /></div> : query.isError && !query.data ? <div className="pipeline-column-state" role="alert"><p>{t('error')}</p><Button size="sm" variant="outline" onClick={() => void query.refetch()}>{t('retry')}</Button></div> : <>
-      <div className="pipeline-column-cards" aria-busy={query.isFetching}>{items.length ? items.map(application => <PipelineCard application={application} key={application.id} disabled={disabled || query.isFetching} onMove={onMove} />) : <p className="pipeline-column-state">{t('empty')}</p>}</div>
-      {query.isError && <div className="pipeline-column-state" role="alert"><p>{t('error')}</p><Button size="sm" variant="outline" onClick={() => void (query.isFetchNextPageError ? query.fetchNextPage() : query.refetch())}>{t('retry')}</Button></div>}
-      {query.hasNextPage && !query.isError && <Button className="pipeline-load-more" variant="ghost" size="sm" disabled={query.isFetching} onClick={() => void query.fetchNextPage()}>{t(query.isFetchingNextPage ? 'loadingMore' : 'more')}</Button>}
-    </>}
-  </section>;
+  const allowed = !disabled && !!dragging && JOB_APPLICANT_TRANSITIONS[dragging.status].includes(stage);
+  const {
+    setNodeRef,
+    isOver
+  } = useDroppable({
+    id: stage,
+    disabled: !allowed
+  });
+  return <section ref={setNodeRef} data-stage={stage} aria-label={JOB_APPLICANT_STATUS_LABELS[stage]} className={`pipeline-column ${isOver ? 'pipeline-column-over' : ''}`}>
+        <header className="pipeline-column-heading">
+            <h2>{JOB_APPLICANT_STATUS_LABELS[stage]}</h2>
+            <span>{items.length}</span>
+        </header>
+        <div className="pipeline-column-cards">
+            {items.map(item => <JobPipelineCard key={item.id} item={item} disabled={disabled} onMove={onMove} onCv={onCv} />)}
+            {!items.length && <p className="pipeline-column-state">Chưa có hồ sơ</p>}
+        </div>
+    </section>;
 }
-
-export function RecruiterPipeline() {
-  const t = useTranslations('Pipeline');
-  const mutation = usePipelineMove();
-  const [dragging, setDragging] = useState<RecruiterApplication | null>(null);
-  const [selection, setSelection] = useState<{ application: RecruiterApplication; target: PipelineStage } | null>(null);
-  const [picker, setPicker] = useState<PipelineStage | null>(null);
-  const [notice, setNotice] = useState<{ name: string; stage: PipelineStage } | null>(null);
-  const [failedDrop, setFailedDrop] = useState<{ application: RecruiterApplication; target: PipelineStage } | null>(null);
-  const sensors = useSensors(useSensor(MouseSensor, { activationConstraint: { distance: 6 } }), useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }), useSensor(KeyboardSensor));
-  const panel = useRef<HTMLDivElement>(null);
-  const boardLink = useRef<HTMLAnchorElement>(null);
-  useEffect(() => { if (selection || picker) panel.current?.scrollIntoView({ block: 'start' }); }, [selection, picker]);
-  function move(application: RecruiterApplication, target: PipelineStage) {
-    if (mutation.isPending || !canMoveApplication(application.status, target)) return;
-    mutation.reset(); setFailedDrop(null); setNotice(null); setPicker(null); setDragging(null); setSelection({ application, target });
-  }
-  function saveDrop(application: RecruiterApplication, target: PipelineStage) {
-    setNotice(null); setFailedDrop(null);
-    mutation.mutate({ application, values: { from: application.status, to: target, confirmed: false } }, {
-      onSuccess: () => setNotice({ name: application.candidate.fullName, stage: target }),
-      onError: () => setFailedDrop({ application, target }),
+function JobPipelineBoard({
+  jobId
+}: {
+  jobId: string;
+}) {
+  const query = useJobPipeline(jobId);
+  const mutation = useJobPipelineMove(jobId);
+  const [dragging, setDragging] = useState<JobApplicant | null>(null);
+  const [activeCv, setActiveCv] = useState<JobApplicant | null>(null);
+  const [notice, setNotice] = useState('');
+  const sensors = useSensors(useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 6
+    }
+  }), useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 200,
+      tolerance: 8
+    }
+  }));
+  const items = query.data ?? [];
+  const disabled = mutation.isPending || query.isFetching;
+  function move(item: JobApplicant, status: Status) {
+    if (disabled || !JOB_APPLICANT_TRANSITIONS[item.status].includes(status)) return;
+    setNotice('');
+    mutation.mutate({
+      id: item.id,
+      values: {
+        status,
+        version: item.version
+      }
+    }, {
+      onSuccess: saved => setNotice(`Đã chuyển ${saved.fullName || 'ứng viên'} sang “${JOB_APPLICANT_STATUS_LABELS[saved.status]}”.`)
     });
   }
-  function close() { setPicker(null); setSelection(null); mutation.reset(); boardLink.current?.focus({ preventScroll: true }); }
-  const disabled = mutation.isPending || selection !== null || picker !== null;
-  const columnProps = { disabled, dragging, onMove: move, onPick: (target: PipelineStage) => { setNotice(null); setFailedDrop(null); setSelection(null); setPicker(target); } };
-  return <DndContext id="recruiter-pipeline" sensors={sensors} collisionDetection={args => args.pointerCoordinates ? pointerWithin(args) : rectIntersection(args)}
-    accessibility={{ screenReaderInstructions: { draggable: t('dragInstructions') }, announcements: { onDragStart: () => t('dragStarted'), onDragOver: ({ over }) => { const stage = pipelineStages.find(stage => stage === over?.id); return stage ? t('dragOver', { stage: t(`stages.${stage}`) }) : t('dragOutside'); }, onDragEnd: () => t('dragEnded'), onDragCancel: () => t('dragCancelled') } }}
-    onDragStart={event => { const parsed = recruiterApplicationSchema.safeParse(event.active.data.current?.application); if (parsed.success && !disabled) { setDragging(parsed.data); setNotice(null); } }}
-    onDragCancel={() => setDragging(null)}
-    onDragEnd={event => { const target = pipelineStages.find(stage => stage === event.over?.id); setDragging(null); if (!dragging || !target || disabled || !canMoveApplication(dragging.status, target)) return; if (isFinalStage(target)) move(dragging, target); else saveDrop(dragging, target); }}>
-    <div className="pipeline-page"><header className="pipeline-page-heading"><h1>{t('heading')}</h1><Link ref={boardLink} className="pipeline-back" href="/recruiter/candidates"><ArrowLeft size={14} />{t('back')}</Link></header>
-    {notice && <p className="pipeline-notice" role="status">{t('saved', { name: notice.name, stage: t(`stages.${notice.stage}`) })}</p>}
-    {mutation.isPending && !selection && <p className="pipeline-notice" role="status">{t('saving')}</p>}
-    {failedDrop && <div className="pipeline-notice pipeline-drop-error" role="alert"><p>{t('moveError')}</p><Button variant="outline" size="sm" onClick={() => saveDrop(failedDrop.application, failedDrop.target)}>{t('retry')}</Button></div>}
-    <div className="pipeline-panel-anchor" ref={panel}>{selection && <PipelineMovePanel key={`${selection.application.id}-${selection.target}`} application={selection.application} target={selection.target} mutation={mutation} onCancel={close} onDone={() => { setNotice({ name: selection.application.candidate.fullName, stage: selection.target }); close(); }} />}{picker && <PipelinePicker key={picker} target={picker} onSelect={move} onCancel={close} />}</div>
-    <div className="pipeline-board-scroll" role="region" aria-label={t('board')} tabIndex={0}><div className="pipeline-board">{pipelineStages.map(stage => <PipelineColumn key={stage} stage={stage} {...columnProps} />)}</div></div>
-    <PipelineColumn stage="withdrawn" {...columnProps} />
-    </div><DragOverlay dropAnimation={null} zIndex={80}>{dragging && <article className="pipeline-card pipeline-drag-preview"><strong>{dragging.candidate.fullName}</strong><p>{dragging.candidate.headline || t('unknownPosition')}</p></article>}</DragOverlay>
-  </DndContext>;
+  if (query.isPending) return <p className="pipeline-notice" role="status">Đang tải hồ sơ ứng tuyển…</p>;
+  if (query.isError) return <Alert variant="error" title="Không tải được hồ sơ của tin tuyển dụng này"><Button variant="outline" onClick={() => void query.refetch()}>Thử lại</Button></Alert>;
+  return <>
+        <p className="pipeline-advisory">{items.length} hồ sơ · Kéo thẻ sang bước tiếp theo hoặc cột từ chối. Bạn cũng có thể dùng nút chuyển trạng thái trên từng thẻ.</p>
+        {mutation.isPending && <p role="status" className="pipeline-notice">Đang cập nhật trạng thái hồ sơ…</p>}
+        {notice && <p role="status" className="pipeline-notice">{notice}</p>}
+        {mutation.isError && <Alert variant="error" title={mutation.error instanceof ApiError && mutation.error.status === 409 ? 'Hồ sơ đã thay đổi hoặc không thể chuyển sang bước này. Bảng đã được tải lại.' : 'Chưa xác nhận được cập nhật. Kiểm tra trạng thái trước khi thử lại.'}><Button variant="outline" disabled={query.isFetching} onClick={() => void query.refetch()}>Tải lại bảng</Button></Alert>}
+        {!items.length && <p className="pipeline-notice">Chưa có ứng viên ứng tuyển vào tin này.</p>}
+        <DndContext id="job-applicant-pipeline" sensors={sensors} collisionDetection={pointerWithin} accessibility={{
+      screenReaderInstructions: {
+        draggable: 'Dùng mục Chuyển trạng thái trên thẻ để di chuyển hồ sơ bằng bàn phím.'
+      }
+    }} onDragStart={({
+      active
+    }) => {
+      setDragging(items.find(item => item.id === active.id) ?? null);
+      setNotice('');
+    }} onDragCancel={() => setDragging(null)} onDragEnd={({
+      over
+    }) => {
+      const target = STAGES.find(stage => stage === over?.id);
+      if (dragging && target) move(dragging, target);
+      setDragging(null);
+    }}>
+            <div className="pipeline-board-scroll" role="region" aria-label="Bảng theo dõi ứng viên" tabIndex={0} aria-busy={disabled}>
+                <div className="pipeline-board job-pipeline-board">
+                    {STAGES.map(stage => <PipelineColumn key={stage} stage={stage} items={items.filter(item => item.status === stage)} disabled={disabled} dragging={dragging} onMove={move} onCv={setActiveCv} />)}
+                </div>
+            </div>
+            <DragOverlay dropAnimation={null}>
+                {dragging && <article className="pipeline-card pipeline-drag-preview">
+                    <strong>{dragging.fullName || 'Ứng viên'}</strong>
+                    <p>{dragging.email}</p>
+                </article>}
+            </DragOverlay>
+        </DndContext>
+        {activeCv && <JobApplicantCvDialog item={activeCv} onClose={() => setActiveCv(null)} />}
+    </>;
+}
+export function RecruiterPipeline() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const jobId = params.get('jobId') ?? '';
+  const [jobPage, setJobPage] = useState(1);
+  const jobs = useRecruiterJobs({
+    page: jobPage,
+    pageSize: 100
+  });
+  const valid = z.uuid().safeParse(jobId).success;
+  const options = [{
+    value: '',
+    label: 'Chọn tin tuyển dụng'
+  }, ...(jobs.data?.items ?? []).map(job => ({
+    value: job.id,
+    label: job.title
+  }))];
+  if (valid && !options.some(option => option.value === jobId)) options.push({
+    value: jobId,
+    label: 'Tin tuyển dụng đang chọn'
+  });
+  return <div className="pipeline-page">
+        <header className="pipeline-page-heading">
+            <div><h1>Bảng theo dõi ứng viên</h1><p>Theo dõi hồ sơ theo từng giai đoạn tuyển dụng.</p></div>
+            <Link className="pipeline-back" href={`/recruiter/candidates${valid ? `?jobId=${jobId}` : ''}`}>
+                <ArrowLeft size={16} />Quay lại ứng viên
+            </Link>
+        </header>
+        <section className="job-pipeline-filter" aria-label="Chọn tin tuyển dụng">
+            <span>Tin tuyển dụng</span>
+            <Select aria-label="Tin tuyển dụng" options={options} value={valid ? jobId : ''} disabled={jobs.isPending} onValueChange={value => router.push(`/recruiter/candidates/pipeline${value ? `?jobId=${value}` : ''}`, {
+        scroll: false
+      })} />
+            {(jobs.data?.meta.totalPages ?? 0) > 1 && <div className="job-pipeline-job-pages">
+                <Button variant="outline" size="sm" disabled={jobs.isFetching || jobPage <= 1} onClick={() => setJobPage(page => page - 1)}>Tin trang trước</Button>
+                <span>Trang {jobPage}/{jobs.data?.meta.totalPages}</span>
+                <Button variant="outline" size="sm" disabled={jobs.isFetching || jobPage >= (jobs.data?.meta.totalPages ?? 1)} onClick={() => setJobPage(page => page + 1)}>Tin trang sau</Button>
+            </div>}
+            {jobs.isError && <Alert variant="error" title="Không tải được tin tuyển dụng"><Button variant="outline" onClick={() => void jobs.refetch()}>Thử lại</Button></Alert>}
+        </section>
+        {valid ? <JobPipelineBoard key={jobId} jobId={jobId} /> : <p role="status" className="pipeline-notice">Vui lòng chọn tin tuyển dụng để xem bảng theo dõi ứng viên.</p>}
+    </div>;
 }

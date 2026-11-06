@@ -4,6 +4,7 @@ import { createMockApplications, createMockApplicationInterviews } from "@/mocks
 import { mockJobs } from "@/mocks/fixtures/jobs";
 import { readRequestIdentity } from "../auth/session";
 import { apiError } from "../responses";
+import { getSubmittedMockApplications } from "./mock-application-submission";
 
 const mockApplications = createMockApplications(mockJobs);
 const mockApplicationInterviews = createMockApplicationInterviews(mockApplications);
@@ -77,7 +78,9 @@ export async function handleMockApplications(request: Request): Promise<Response
     if (!parsed.success) return apiError(422, "VALIDATION_FAILED", "Bộ lọc không hợp lệ.");
     const { page, pageSize, status, sort, q } = parsed.data;
     const normalize = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
-    const items = (scenario === "empty" ? [] : mockApplications).filter((item) => (!status || status.includes(item.status)) && (!q || normalize(`${item.job.title} ${item.job.company.name}`).includes(normalize(q))))
+    const submitted = getSubmittedMockApplications(user.id);
+    const allApplications = [...submitted, ...mockApplications.filter(item => !submitted.some(entry => entry.jobId === item.jobId))];
+    const items = (scenario === "empty" ? [] : allApplications).filter((item) => (!status || status.includes(item.status)) && (!q || normalize(`${item.job.title} ${item.job.company.name}`).includes(normalize(q))))
         .toSorted((a, b) => (sort === "oldest" ? 1 : -1) * a.appliedAt.localeCompare(b.appliedAt));
     return json({ items: items.slice((page - 1) * pageSize, page * pageSize), meta: meta(page, pageSize, items.length) } satisfies components["schemas"]["ApplicationPage"]);
 }

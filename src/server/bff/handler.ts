@@ -11,11 +11,24 @@ import { handleProfileRequest, isProfileRequest } from "./candidate/profile-serv
 import { handleCvsRequest, isCvsRequest } from "./candidate/cv-service";
 import { handleRecruiterJobPostings, isRecruiterJobPostingRequest } from './recruiter/job-posting-service';
 import { mockJobPostingOptions } from './recruiter/job-posting-mock';
+import { handleApplicationSubmission } from "./candidate/application-submission";
+import { handleJobApplicants } from './recruiter/job-applicants-service';
+import { handleJobApplicationDetail } from './recruiter/job-application-detail-service';
+import { handleJobApplicantStatus } from './recruiter/job-applicant-status-service';
 
 export async function handleBffRequest(request: Request): Promise<Response> {
     try {
         if (isAuthRequest(request)) return await handleAuthRequest(request);
         const env = getServerEnv();
+        const applicantStatus = new URL(request.url).pathname.match(/^\/api\/bff\/recruiter\/job-applications\/([^/]+)\/status$/);
+        if (applicantStatus) return await handleJobApplicantStatus(request, applicantStatus[1], (env.APPLICATION_DATA_MODE ?? env.DATA_MODE) === 'real' ? env.APPLICATION_API_URL : undefined);
+        const applicantDetail = new URL(request.url).pathname.match(/^\/api\/bff\/recruiter\/job-applications\/([^/]+)(?:\/(resume|cv))?$/);
+        if (applicantDetail) return await handleJobApplicationDetail(request, applicantDetail[1], applicantDetail[2] === 'cv' ? 'cv' : applicantDetail[2] === 'resume' ? 'resume' : 'detail', (env.APPLICATION_DATA_MODE ?? env.DATA_MODE) === 'real' ? env.APPLICATION_API_URL : undefined);
+        const applicantsJobId = new URL(request.url).pathname.match(/^\/api\/bff\/recruiter\/jobs\/([^/]+)\/applications$/)?.[1];
+        if (applicantsJobId) return await handleJobApplicants(request, applicantsJobId, (env.APPLICATION_DATA_MODE ?? env.DATA_MODE) === 'real' ? env.APPLICATION_API_URL : undefined);
+        if (request.method === "POST" && new URL(request.url).pathname === "/api/bff/applications") {
+            return await handleApplicationSubmission(request, (env.APPLICATION_DATA_MODE ?? env.DATA_MODE) === "real" ? env.APPLICATION_API_URL : undefined);
+        }
         if (isRecruiterJobPostingRequest(request)) {
             if ((env.JOB_DATA_MODE ?? env.DATA_MODE) === 'real') return await handleRecruiterJobPostings(request, env.JOB_API_URL, env.COMPANY_API_URL);
             if (new URL(request.url).pathname === '/api/bff/recruiter/jobs/options') return await mockJobPostingOptions(request);

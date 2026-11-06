@@ -1,0 +1,27 @@
+{
+  "items": [
+    {
+      "id": "b0000000-0000-4000-8000-000000000001",
+      "jobId": "10000000-0000-4000-8000-000000000001",
+      "applicantId": "c0000000-0000-4000-8000-000000000001",
+      "resumeId": "a0000000-0000-4000-8000-000000000001",
+      "fullName": "Ứng viên kiểm thử",
+      "headline": "Frontend Developer",
+      "email": "applicant@example.test",
+      "employmentType": "INTERNSHIP",
+      "resumeContentType": "application/pdf",
+      "jobTitle": "React Developer",
+      "resumeFileName": "resume.pdf",
+      "coverLetter": "Tôi mong muốn ứng tuyển vị trí này.",
+      "status": "shortlisted",
+      "appliedAt": "2026-11-06T08:00:00Z",
+      "version": 0
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 9,
+    "totalItems": 1,
+    "totalPages": 1
+  }
+}

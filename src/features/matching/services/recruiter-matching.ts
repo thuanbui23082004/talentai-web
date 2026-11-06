@@ -30,7 +30,7 @@ export function getAnalysisTask(taskId: string, signal?: AbortSignal) { return s
 export function listRankedApplications(jobId: string, query: RecruiterApplicationQuery) { return session(async () => {
   const values = recruiterApplicationQuerySchema.parse(query);
   const { jobId: _jobId, ...filters } = values; void _jobId;
-  const result = await apiClient.GET('/recruiter/jobs/{jobId}/applications', { params: { path: { jobId: z.uuid().parse(jobId) }, query: filters } });
+  const result = await apiClient.GET('/recruiter/applications', { params: { query: { ...filters, jobId: z.uuid().parse(jobId) } } });
   if (result.error) throw screeningError(result.error, result.response.status);
   return recruiterApplicationPageSchema.parse(result.data);
 }); }

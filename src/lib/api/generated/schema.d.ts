@@ -1414,7 +1414,7 @@ export interface paths {
         put?: never;
         /**
          * Nộp hồ sơ ứng tuyển
-         * @description Kiểm tra tin còn hiệu lực, chưa ứng tuyển trước đó và CV hợp lệ; lưu hồ sơ, đặt trạng thái `submitted`, gửi cho nhà tuyển dụng và tạo thông báo.
+         * @description Nộp jobId, resumeId và coverLetter tới application-service. Backend kiểm tra tin/CV, lưu bản chụp và bản sao CV khi nộp.
          *
          *     **Quyền:** Ứng viên.
          *
@@ -1844,11 +1844,80 @@ export interface paths {
         };
         /**
          * Danh sách ứng viên của một tin
-         * @description Xem, tìm kiếm, lọc theo kỹ năng/kinh nghiệm/trình độ/điểm phù hợp và sắp xếp (kể cả xếp hạng theo Matching Score). Không ẩn tự động ứng viên điểm thấp.
-         *
-         *     **Quyền:** Nhà tuyển dụng.
+         * @description Danh s?ch h? s? c?a m?t tin thu?c c?ng ty recruiter; l?c tr?ng th?i v? ph?n trang theo application-service.
          */
         get: operations["listJobApplications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recruiter/job-applications/{applicationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Chi ti?t h? s? ?ng tuy?n c?a recruiter */
+        get: operations["getJobApplicantDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recruiter/job-applications/{applicationId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Cập nhật trạng thái hồ sơ theo luồng tuyển dụng
+         * @description Chuyển từng bước submitted → reviewing → shortlisted → interview_scheduled → offered → hired; hoặc rejected trước hired. Gửi version mới nhất.
+         */
+        patch: operations["updateJobApplicantStatus"];
+        trace?: never;
+    };
+    "/recruiter/job-applications/{applicationId}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** URL xem b?n CV ?? n?p */
+        get: operations["getJobApplicantResume"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recruiter/job-applications/{applicationId}/cv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** N?i dung PDF ?? n?p ?? xem tr?c ti?p */
+        get: operations["getJobApplicantCv"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3363,7 +3432,7 @@ export interface components {
          *     | Danh mục | CATALOG_ITEM_IN_USE |
          * @enum {string}
          */
-        ErrorCode: "VALIDATION_FAILED" | "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "CSRF_TOKEN_INVALID" | "SERVICE_UNAVAILABLE" | "INTERNAL_ERROR" | "EMAIL_ALREADY_EXISTS" | "INVALID_CREDENTIALS" | "AUTH_ROLE_MISMATCH" | "ACCOUNT_LOCKED" | "SESSION_EXPIRED" | "INVALID_RESET_TOKEN" | "CURRENT_PASSWORD_INCORRECT" | "CV_INVALID_FORMAT" | "CV_FILE_TOO_LARGE" | "CV_UNREADABLE" | "CV_IN_USE" | "JD_INSUFFICIENT" | "AI_ANALYSIS_FAILED" | "AI_TASK_NOT_READY" | "JOB_CLOSED" | "JOB_NOT_OPEN" | "ALREADY_APPLIED" | "APPLICATION_NOT_WITHDRAWABLE" | "INVALID_STATUS_TRANSITION" | "COMPANY_REQUIRED" | "COMPANY_NOT_VERIFIED" | "INTERVIEW_TIME_CONFLICT" | "INTERVIEW_ALREADY_RESPONDED" | "CATALOG_ITEM_IN_USE";
+        ErrorCode: "VALIDATION_FAILED" | "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "CSRF_TOKEN_INVALID" | "SERVICE_UNAVAILABLE" | "INTERNAL_ERROR" | "EMAIL_ALREADY_EXISTS" | "INVALID_CREDENTIALS" | "AUTH_ROLE_MISMATCH" | "ACCOUNT_LOCKED" | "SESSION_EXPIRED" | "INVALID_RESET_TOKEN" | "CURRENT_PASSWORD_INCORRECT" | "CV_INVALID_FORMAT" | "CV_FILE_TOO_LARGE" | "CV_UNREADABLE" | "CV_IN_USE" | "CV_NOT_FOUND" | "PROFILE_INCOMPLETE" | "JOB_NOT_FOUND" | "JD_INSUFFICIENT" | "AI_ANALYSIS_FAILED" | "AI_TASK_NOT_READY" | "JOB_CLOSED" | "JOB_NOT_OPEN" | "ALREADY_APPLIED" | "APPLICATION_NOT_WITHDRAWABLE" | "INVALID_STATUS_TRANSITION" | "COMPANY_REQUIRED" | "COMPANY_NOT_VERIFIED" | "INTERVIEW_TIME_CONFLICT" | "INTERVIEW_ALREADY_RESPONDED" | "CATALOG_ITEM_IN_USE";
         /** Format: uuid */
         Id: string;
         FieldError: {
@@ -4634,11 +4703,20 @@ export interface components {
         };
         ApplicationCreateRequest: {
             jobId: components["schemas"]["Id"];
-            cvId: components["schemas"]["Id"];
-            cvVersionId?: components["schemas"]["Id"];
+            resumeId: components["schemas"]["Id"];
             /** @description Thư giới thiệu (tùy chọn). */
             coverLetter?: string;
-            additionalInfo?: string;
+        };
+        ApplicationSubmission: {
+            id: components["schemas"]["Id"];
+            jobId: components["schemas"]["Id"];
+            resumeId: components["schemas"]["Id"];
+            coverLetter?: string;
+            /** @enum {string} */
+            status: "submitted";
+            /** Format: date-time */
+            createdAt: string;
+            version: number;
         };
         Application: {
             id: components["schemas"]["Id"];
@@ -4675,6 +4753,42 @@ export interface components {
             note?: string;
             /** Format: date-time */
             updatedAt?: string;
+        };
+        /** @enum {string} */
+        JobApplicantStatus: "submitted" | "reviewing" | "shortlisted" | "interview_scheduled" | "offered" | "rejected" | "withdrawn" | "hired";
+        JobApplicant: {
+            id: components["schemas"]["Id"];
+            jobId: components["schemas"]["Id"];
+            applicantId: components["schemas"]["Id"];
+            resumeId: components["schemas"]["Id"];
+            email?: string;
+            phone?: string;
+            employmentType?: string;
+            resumeContentType?: string;
+            fullName?: string;
+            headline?: string;
+            jobTitle?: string;
+            resumeFileName?: string;
+            coverLetter?: string;
+            status: components["schemas"]["JobApplicantStatus"];
+            version: number;
+            /** Format: date-time */
+            appliedAt: string;
+        };
+        JobApplicantStatusUpdate: {
+            status: components["schemas"]["JobApplicantStatus"];
+            version: number;
+            note?: string;
+        };
+        ApplicationResumeDownload: {
+            /** @description URL HTTPS k? t?m th?i, ho?c endpoint CV c?ng origin trong mock. */
+            url: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
+        JobApplicantPage: {
+            items: components["schemas"]["JobApplicant"][];
+            meta: components["schemas"]["PageMeta"];
         };
         RecruiterApplicationSummary: {
             id: components["schemas"]["Id"];
@@ -7742,10 +7856,7 @@ export interface operations {
     createApplication: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description Khóa chống gửi trùng (UUID do client sinh). */
-                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -7761,7 +7872,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Application"];
+                    "application/json": components["schemas"]["ApplicationSubmission"];
                 };
             };
             401: components["responses"]["Unauthorized"];
@@ -7769,6 +7880,7 @@ export interface operations {
             409: components["responses"]["Conflict"];
             422: components["responses"]["ValidationError"];
             500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     getMyApplication: {
@@ -8431,17 +8543,7 @@ export interface operations {
     listJobApplications: {
         parameters: {
             query?: {
-                /** @description Tìm theo tên, kỹ năng, chức danh */
-                q?: string;
-                status?: components["schemas"]["ApplicationStatus"][];
-                /** @description Lọc theo kỹ năng (khớp tất cả) */
-                skills?: string[];
-                minExperienceYears?: number;
-                educationLevel?: components["schemas"]["EducationLevel"];
-                city?: string;
-                minMatchScore?: number;
-                classification?: components["schemas"]["ApplicationClassification"];
-                sort?: "match_score_desc" | "applied_desc" | "applied_asc" | "experience_desc";
+                status?: components["schemas"]["JobApplicantStatus"];
                 /** @description Trang (từ 1). */
                 page?: components["parameters"]["Page"];
                 /** @description Số phần tử mỗi trang. */
@@ -8461,7 +8563,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RecruiterApplicationPage"];
+                    "application/json": components["schemas"]["JobApplicantPage"];
                 };
             };
             401: components["responses"]["Unauthorized"];
@@ -8469,6 +8571,125 @@ export interface operations {
             404: components["responses"]["NotFound"];
             422: components["responses"]["ValidationError"];
             500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getJobApplicantDetail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                applicationId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Th?nh c?ng */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobApplicant"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    updateJobApplicantStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                applicationId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JobApplicantStatusUpdate"];
+            };
+        };
+        responses: {
+            /** @description Hồ sơ đã cập nhật */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobApplicant"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            /** @description Version cũ hoặc chuyển trạng thái không hợp lệ */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getJobApplicantResume: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                applicationId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Th?nh c?ng */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationResumeDownload"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getJobApplicantCv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                applicationId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Th?nh c?ng */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     listAllApplications: {

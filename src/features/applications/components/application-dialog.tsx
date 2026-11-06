@@ -2,16 +2,17 @@
 
 import { useId, useRef, useState, type ComponentProps, type ReactNode } from "react";
 import Link from "next/link";
-import { FileText, FolderOpen, Info, MapPin, Send, UploadCloud, X } from "lucide-react";
+import { CheckCircle2, FileText, FolderOpen, Info, MapPin, Send, UploadCloud, X } from "lucide-react";
 import { Alert, Button, Checkbox, Modal, ModalContent, Select } from "@/components/ui";
 import { useCvs, useCvActions, validateCvSelection, type CvPreviewDraft } from "@/features/cv";
 import { useSession } from "@/features/auth";
 import { ApiError } from "@/lib/api/errors";
 import { cn, formatDate } from "@/lib/utils";
 import type { Application } from "../types";
-import { applicationPreviewSchema } from "../schemas/application-preview";
+import { applicationFormSchema, applicationPreviewSchema } from "../schemas/application-preview";
+import { useSubmitApplication } from "../hooks/use-submit-application";
 
-type Job = Pick<Application["job"], "title" | "location" | "status" | "hasApplied"> & { company: Pick<Application["job"]["company"], "name"> };
+type Job = Pick<Application["job"], "title" | "location" | "status" | "hasApplied"> & { id?: string; company: Pick<Application["job"]["company"], "name"> };
 type CvOption = Pick<CvPreviewDraft, "id" | "title" | "person" | "updatedAt"> & { isDefault?: boolean };
 type ApplicationDialogProps = {
     job: Job;
@@ -21,6 +22,7 @@ type ApplicationDialogProps = {
     locations?: Job["location"][];
     cvs?: CvOption[];
     finalFocus?: ComponentProps<typeof ModalContent>["finalFocus"];
+    onApplied?: () => void;
 };
 
 export function ApplicationButton({ job, children, className, variant = "primary" }: {
@@ -28,27 +30,36 @@ export function ApplicationButton({ job, children, className, variant = "primary
     variant?: ComponentProps<typeof Button>["variant"];
 }) {
     const [open, setOpen] = useState(false);
+    const [applied, setApplied] = useState(false);
     const triggerRef = useRef<HTMLButtonElement>(null);
     return <>
-        <Button ref={triggerRef} variant={variant} className={className} disabled={job.status !== "open" || job.hasApplied} onClick={() => setOpen(true)}>
-            {children ?? <><Send className="size-4" />{job.hasApplied ? "Đã ứng tuyển" : job.status !== "open" ? "Đã ngừng tuyển" : "Ứng tuyển"}</>}
+        <Button ref={triggerRef} variant={variant} className={className} disabled={job.status !== "open" || job.hasApplied || applied} onClick={() => setOpen(true)}>
+            {applied ? "Đã ứng tuyển" : children ?? <><Send className="size-4" />{job.hasApplied ? "Đã ứng tuyển" : job.status !== "open" ? "Đã ngừng tuyển" : "Ứng tuyển"}</>}
         </Button>
-        <ApplicationDialog job={job} open={open} onOpenChange={setOpen} finalFocus={triggerRef} />
+        <ApplicationDialog job={job} open={open} onOpenChange={setOpen} finalFocus={triggerRef} onApplied={() => setApplied(true)} />
     </>;
 }
 
-export function ApplicationDialog({ job, open, onOpenChange, locations = [job.location], cvs, finalFocus }: ApplicationDialogProps) {
+export function ApplicationDialog({ job, open, onOpenChange, locations = [job.location], cvs, finalFocus, onApplied }: ApplicationDialogProps) {
+    const [submitted, setSubmitted] = useState(false);
     return <Modal open={open} onOpenChange={onOpenChange}>
         <ModalContent title="Ứng tuyển" description={job.title} finalFocus={finalFocus}
-            className="flex max-h-[min(840px,calc(100dvh-4rem))] max-w-[680px] flex-col overflow-hidden p-0"
-            headerClassName="shrink-0 border-b border-border/60 px-5 py-4 pr-14 sm:px-6"
-            bodyClassName="ui-scrollbar-subtle mt-0 min-h-0 overflow-y-auto overscroll-contain px-5 py-4 sm:px-6">
-            {open && (cvs ? <ApplicationForm job={job} locations={locations} cvs={cvs} /> : <AccountApplicationForm job={job} locations={locations} />)}
+            className={cn("flex max-h-[min(840px,calc(100dvh-4rem))] flex-col overflow-hidden p-0", submitted ? "max-w-[460px]" : "max-w-[680px]")}
+            headerClassName={submitted ? "sr-only" : "shrink-0 border-b border-border/60 px-5 py-4 pr-14 sm:px-6"}
+            bodyClassName={cn("ui-scrollbar-subtle mt-0 min-h-0 overflow-y-auto overscroll-contain", submitted ? "px-6 pt-10 pb-6 sm:px-8 sm:pt-12 sm:pb-8" : "px-5 py-4 sm:px-6")}>
+            {open && (submitted ? <div className="text-center" role="status">
+                <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-secondary ring-8 ring-secondary/40"><CheckCircle2 aria-hidden="true" className="size-10 text-primary" strokeWidth={1.75} /></div>
+                <h3 className="mt-7 text-xl font-bold tracking-tight text-foreground">Nộp hồ sơ thành công</h3>
+                <p className="mt-3 text-sm font-semibold text-primary">{job.title}</p>
+                <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-muted-foreground">Hồ sơ và CV của bạn đã được gửi tới nhà tuyển dụng.</p>
+                <Button className="mt-7 w-full" onClick={() => onOpenChange(false)}>Đóng</Button>
+            </div> : cvs ? <ApplicationForm job={job} locations={locations} cvs={cvs} /> : <AccountApplicationForm job={job} locations={locations} onApplied={() => { setSubmitted(true); onApplied?.(); }} />)}
         </ModalContent>
     </Modal>;
 }
 
-function AccountApplicationForm(props: { job: Job; locations: Job["location"][] }) {
+type AccountFormProps = { job: Job; locations: Job["location"][]; onApplied: () => void };
+function AccountApplicationForm(props: AccountFormProps) {
     const { user, isPending } = useSession();
     if (isPending) return <p role="status" className="text-sm">Đang tải tài khoản…</p>;
     if (!user) return <p className="text-sm">Vui lòng <Link href="/login" className="text-primary underline">đăng nhập tài khoản ứng viên</Link> để chọn hoặc tải CV lên.</p>;
@@ -56,16 +67,21 @@ function AccountApplicationForm(props: { job: Job; locations: Job["location"][] 
     return <AccountCvForm key={user.id} {...props} userId={user.id} />;
 }
 
-function AccountCvForm({ userId, ...props }: { userId: string; job: Job; locations: Job["location"][] }) {
+function AccountCvForm({ userId, onApplied, ...props }: AccountFormProps & { userId: string }) {
     const query = useCvs(userId);
     const { upload } = useCvActions(userId);
+    const submit = useSubmitApplication();
     if (query.isPending) return <p role="status" className="text-sm">Đang tải danh sách CV…</p>;
     if (query.isError) return <Alert variant="error" title="Không tải được danh sách CV"><Button variant="outline" onClick={() => void query.refetch()}>Thử lại</Button></Alert>;
     const cvs = query.data.map(cv => ({ id: cv.id, title: cv.cvTitle || cv.fileName, person: cv.fileName, updatedAt: cv.createdAt, isDefault: cv.isDefault }));
-    return <ApplicationForm {...props} cvs={cvs} onUpload={async file => (await upload.mutateAsync(file)).id} />;
+    return <ApplicationForm {...props} cvs={cvs} onUpload={async file => (await upload.mutateAsync(file)).id} onSubmitApplication={async (resumeId, coverLetter) => {
+        if (!props.job.id) throw new Error("Tin minh họa chưa có ID để nộp hồ sơ.");
+        await submit.mutateAsync({ jobId: props.job.id, resumeId, coverLetter });
+        onApplied();
+    }} />;
 }
 
-function ApplicationForm({ job, locations, cvs, onUpload }: { job: Job; locations: Job["location"][]; cvs: CvOption[]; onUpload?: (file: File) => Promise<string> }) {
+function ApplicationForm({ job, locations, cvs, onUpload, onSubmitApplication }: { job: Job; locations: Job["location"][]; cvs: CvOption[]; onUpload?: (file: File) => Promise<string>; onSubmitApplication?: (resumeId: string, coverLetter: string) => Promise<void> }) {
     const id = useId();
     const fileInput = useRef<HTMLInputElement>(null);
     const formRef = useRef<HTMLFormElement>(null);
@@ -76,6 +92,11 @@ function ApplicationForm({ job, locations, cvs, onUpload }: { job: Job; location
     const selectedCv = selection || cvs.find(cv => cv.isDefault)?.id || cvs[0]?.id || "upload";
     const uploadingRef = useRef(false);
     const [uploading, setUploading] = useState(false);
+    const submittingRef = useRef(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState("");
+    const [alreadyApplied, setAlreadyApplied] = useState(false);
+    const busy = uploading || submitting;
     const [file, setFile] = useState<File>();
     const [fileError, setFileError] = useState("");
     const [dragging, setDragging] = useState(false);
@@ -86,11 +107,11 @@ function ApplicationForm({ job, locations, cvs, onUpload }: { job: Job; location
     const [showErrors, setShowErrors] = useState(false);
     const [notice, setNotice] = useState(false);
     const [termsOpen, setTermsOpen] = useState(false);
-    const parsed = applicationPreviewSchema.safeParse({ cv: selectedCv === "upload" ? (onUpload ? "" : file?.name ?? "") : cvs.some((cv) => cv.id === selectedCv) ? selectedCv : "", location: options.includes(location) ? location : "", coverLetter, allowAi, acceptedTerms });
+    const parsed = (onUpload ? applicationFormSchema : applicationPreviewSchema).safeParse({ cv: selectedCv === "upload" ? (onUpload ? "" : file?.name ?? "") : cvs.some((cv) => cv.id === selectedCv) ? selectedCv : "", location: options.includes(location) ? location : "", coverLetter, allowAi, acceptedTerms });
     const errors = showErrors && !parsed.success ? parsed.error.flatten().fieldErrors : {};
 
     async function chooseFiles(files: File[]) {
-        if (uploadingRef.current) return;
+        if (uploadingRef.current || submittingRef.current) return;
         setNotice(false);
         if (files.length !== 1) return setFileError("Vui lòng chọn một tệp CV mỗi lần.");
         const error = validateCvSelection(files[0]);
@@ -113,19 +134,31 @@ function ApplicationForm({ job, locations, cvs, onUpload }: { job: Job; location
         }
     }
 
-    return <form ref={formRef} noValidate className="space-y-5" onChange={() => setNotice(false)} onSubmit={(event) => {
+    return <form ref={formRef} noValidate className="space-y-5" onChange={() => setNotice(false)} onSubmit={async (event) => {
         event.preventDefault();
-        if (uploadingRef.current) return;
+        if (uploadingRef.current || submittingRef.current || alreadyApplied) return;
         setShowErrors(true);
         if (!parsed.success) {
             requestAnimationFrame(() => formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"], [data-invalid="true"]')?.focus());
             return;
         }
+        if (onSubmitApplication) {
+            submittingRef.current = true;
+            setSubmitting(true);
+            setSubmitError("");
+            try { await onSubmitApplication(selectedCv, parsed.data.coverLetter); }
+            catch (error) {
+                setSubmitError(error instanceof ApiError ? error.message : "Không thể gửi hồ sơ. Vui lòng thử lại.");
+                if (error instanceof ApiError && error.code === "ALREADY_APPLIED") setAlreadyApplied(true);
+            } finally { submittingRef.current = false; setSubmitting(false); }
+            return;
+        }
         setNotice(true);
         requestAnimationFrame(() => noticeRef.current?.scrollIntoView({ block: "nearest", behavior: "instant" }));
     }}>
-        <p className="flex items-start gap-2 rounded-lg bg-info-soft px-3 py-2 text-[11px] leading-5 text-info-foreground"><Info className="mt-0.5 size-3.5 shrink-0" />{onUpload ? "CV tải lên sẽ được lưu vào tài khoản. Chức năng gửi hồ sơ ứng tuyển đang được phát triển." : "Bản xem trước giao diện. CV bên dưới là minh họa; chưa tải tệp hoặc gửi hồ sơ lên hệ thống."}</p>
-        <fieldset disabled={uploading} aria-busy={uploading} aria-describedby={errors.cv ? `${id}-cv-error` : undefined} className="min-w-0 space-y-2.5">
+        {!onUpload && <p className="flex items-start gap-2 rounded-lg bg-info-soft px-3 py-2 text-[11px] leading-5 text-info-foreground"><Info className="mt-0.5 size-3.5 shrink-0" />Bản xem trước giao diện. CV bên dưới là minh họa; chưa tải tệp hoặc gửi hồ sơ lên hệ thống.</p>}
+        {onUpload && !job.id && <Alert variant="info" title="Tin tuyển dụng minh họa">Tin này chưa có ID để nộp hồ sơ ứng tuyển.</Alert>}
+        <fieldset disabled={busy} aria-busy={busy} aria-describedby={errors.cv ? `${id}-cv-error` : undefined} className="min-w-0 space-y-2.5">
             <legend className="mb-3 flex items-center gap-2 text-sm font-semibold"><FolderOpen className="size-4 text-primary" />Chọn CV để ứng tuyển</legend>
             {cvs.length === 0 && <p className="text-xs text-muted-foreground">Chưa có CV để chọn. Bạn có thể chọn tệp từ máy ở bên dưới.</p>}
             {cvs.map((cv) => <label key={cv.id} className={cn("flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-3 transition-colors hover:border-primary/50", selectedCv === cv.id ? "border-primary/50 bg-secondary/20" : "border-border bg-card")}>
@@ -150,23 +183,25 @@ function ApplicationForm({ job, locations, cvs, onUpload }: { job: Job; location
             {errors.cv && <p role="alert" id={`${id}-cv-error`} className="text-xs text-destructive">{errors.cv[0]}</p>}
         </fieldset>
         <div className="space-y-2">
-            <p id={`${id}-location-label`} className="text-xs font-semibold">Địa điểm làm việc mong muốn <span className="text-destructive">*</span></p>
-            {options.length === 1 ? <div aria-label="Địa điểm làm việc mặc định" className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-muted/40 px-3 text-xs"><MapPin className="size-4 shrink-0 text-primary" /><span>{options[0]}</span><span className="ml-auto shrink-0 text-[10px] font-medium text-muted-foreground">Mặc định</span></div> : <Select aria-labelledby={`${id}-location-label`} aria-describedby={errors.location ? `${id}-location-error` : undefined} aria-invalid={!!errors.location} options={options.map((label) => ({ value: label, label }))} value={location || null} onValueChange={(value) => { setLocation(value ?? ""); setNotice(false); }} placeholder="Chọn địa điểm bạn muốn làm việc" className="text-xs" />}
+            <p id={`${id}-location-label`} className="text-xs font-semibold">{onUpload ? "Địa điểm làm việc" : <>Địa điểm làm việc mong muốn <span className="text-destructive">*</span></>}</p>
+            {onUpload ? <p className="text-xs text-muted-foreground">{options.join("; ")}</p> : options.length === 1 ? <div aria-label="Địa điểm làm việc mặc định" className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-muted/40 px-3 text-xs"><MapPin className="size-4 shrink-0 text-primary" /><span>{options[0]}</span><span className="ml-auto shrink-0 text-[10px] font-medium text-muted-foreground">Mặc định</span></div> : <Select aria-labelledby={`${id}-location-label`} aria-describedby={errors.location ? `${id}-location-error` : undefined} aria-invalid={!!errors.location} options={options.map((label) => ({ value: label, label }))} value={location || null} onValueChange={(value) => { setLocation(value ?? ""); setNotice(false); }} placeholder="Chọn địa điểm bạn muốn làm việc" className="text-xs" />}
             {options.length === 0 && <p className="text-xs text-muted-foreground">Tin tuyển dụng chưa cung cấp địa điểm làm việc.</p>}
             {errors.location && <p role="alert" id={`${id}-location-error`} className="text-xs text-destructive">{errors.location[0]}</p>}
         </div>
         <div className="space-y-2">
             <div className="flex items-center justify-between"><label htmlFor={`${id}-letter`} className="text-xs font-semibold">Thư giới thiệu</label><span className="text-[10px] text-muted-foreground">Không bắt buộc</span></div>
-            <textarea id={`${id}-letter`} value={coverLetter} onChange={(event) => setCoverLetter(event.target.value)} maxLength={3000} rows={3} placeholder="Viết giới thiệu ngắn gọn về bản thân, mong muốn..." className="ui-input h-auto min-h-24 resize-y py-3 text-xs leading-6" />
-            <p className="text-right text-[10px] text-muted-foreground">{coverLetter.length}/3.000 ký tự</p>
+            <textarea id={`${id}-letter`} disabled={submitting} aria-invalid={!!errors.coverLetter} value={coverLetter} onChange={(event) => setCoverLetter(event.target.value)} maxLength={onUpload ? 10000 : 3000} rows={3} placeholder="Viết giới thiệu ngắn gọn về bản thân, mong muốn..." className="ui-input h-auto min-h-24 resize-y py-3 text-xs leading-6" />
+            <p className="text-right text-[10px] text-muted-foreground">{coverLetter.length}/{onUpload ? "10.000" : "3.000"} ký tự</p>
+            {errors.coverLetter && <p role="alert" className="text-xs text-destructive">{errors.coverLetter[0]}</p>}
         </div>
-        <div className="space-y-3">
+        {!onUpload && <div className="space-y-3">
             <Checkbox checked={allowAi} onChange={(event) => setAllowAi(event.target.checked)} className="text-xs leading-5 text-muted-foreground" label={<>Cho phép TalentAI sử dụng <span className="text-primary">công nghệ AI</span> để phân tích độ phù hợp CV của bạn.</>} />
             <Checkbox checked={acceptedTerms} onChange={(event) => setAcceptedTerms(event.target.checked)} aria-invalid={!!errors.acceptedTerms} aria-describedby={errors.acceptedTerms ? `${id}-terms-error` : undefined} className="text-xs leading-5 text-muted-foreground" label={<>Tôi đã đọc và đồng ý với <button type="button" className="text-primary underline underline-offset-2" onClick={() => setTermsOpen(true)}>Thỏa thuận sử dụng dữ liệu cá nhân</button> của Nhà tuyển dụng.</>} />
             {errors.acceptedTerms && <p role="alert" id={`${id}-terms-error`} className="text-xs text-destructive">{errors.acceptedTerms[0]}</p>}
-        </div>
-        {notice && <div ref={noticeRef}><Alert variant="info" title="Chưa gửi hồ sơ">{onUpload ? "CV đã lưu trong tài khoản. Hồ sơ ứng tuyển, thư giới thiệu và các lựa chọn chưa được gửi tới nhà tuyển dụng." : "Đây là bản xem trước giao diện. CV, địa điểm và các lựa chọn của bạn chưa được tải lên hoặc lưu vào tài khoản."}</Alert></div>}
-        <div className="sticky -bottom-4 border-t border-border/50 bg-card pt-3 pb-1"><Button type="submit" disabled={uploading} className="w-full bg-linear-to-r from-brand-bright to-primary"><Send className="size-4" />Nộp hồ sơ ứng tuyển</Button></div>
+        </div>}
+        {notice && <div ref={noticeRef}><Alert variant="info" title="Chưa gửi hồ sơ">Đây là bản xem trước giao diện. CV, địa điểm và các lựa chọn của bạn chưa được tải lên hoặc lưu vào tài khoản.</Alert></div>}
+        {submitError && <Alert variant="error" title="Chưa nộp được hồ sơ">{submitError}</Alert>}
+        <div className="sticky -bottom-4 border-t border-border/50 bg-card pt-3 pb-1"><Button type="submit" disabled={busy || alreadyApplied || (!!onUpload && !job.id)} className="w-full bg-linear-to-r from-brand-bright to-primary"><Send className="size-4" />{submitting ? "Đang nộp hồ sơ…" : alreadyApplied ? "Đã ứng tuyển" : "Nộp hồ sơ ứng tuyển"}</Button></div>
         <Modal open={termsOpen} onOpenChange={setTermsOpen}><ModalContent title="Thỏa thuận sử dụng dữ liệu cá nhân" description={`Nhà tuyển dụng: ${job.company.name}`}><p className="text-sm leading-6 text-muted-foreground">Bản xem trước chưa có nội dung thỏa thuận do nhà tuyển dụng cung cấp. Việc chọn ô đồng ý ở đây chỉ minh họa giao diện, không ghi nhận sự chấp thuận hoặc gửi dữ liệu cá nhân.</p><Button className="mt-5" variant="outline" onClick={() => setTermsOpen(false)}>Đã hiểu</Button></ModalContent></Modal>
     </form>;
 }

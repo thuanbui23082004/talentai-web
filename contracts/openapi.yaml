@@ -3175,7 +3175,7 @@ paths:
       operationId: createApplication
       summary: Nộp hồ sơ ứng tuyển
       description: |-
-        Kiểm tra tin còn hiệu lực, chưa ứng tuyển trước đó và CV hợp lệ; lưu hồ sơ, đặt trạng thái `submitted`, gửi cho nhà tuyển dụng và tạo thông báo.
+        Nộp jobId, resumeId và coverLetter tới application-service. Backend kiểm tra tin/CV, lưu bản chụp và bản sao CV khi nộp.
 
         **Quyền:** Ứng viên.
 
@@ -3188,8 +3188,6 @@ paths:
         csrfToken: []
       x-roles:
       - candidate
-      parameters:
-      - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -3202,7 +3200,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Application'
+                $ref: '#/components/schemas/ApplicationSubmission'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -3211,6 +3209,8 @@ paths:
           $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/ValidationError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '500':
           $ref: '#/components/responses/InternalError'
     get:
@@ -4165,10 +4165,7 @@ paths:
       - Recruiter Candidates
       operationId: listJobApplications
       summary: Danh sách ứng viên của một tin
-      description: |-
-        Xem, tìm kiếm, lọc theo kỹ năng/kinh nghiệm/trình độ/điểm phù hợp và sắp xếp (kể cả xếp hạng theo Matching Score). Không ẩn tự động ứng viên điểm thấp.
-
-        **Quyền:** Nhà tuyển dụng.
+      description: 'Danh s?ch h? s? c?a m?t tin thu?c c?ng ty recruiter; l?c tr?ng th?i v? ph?n trang theo application-service.'
       security:
       - cookieAuth: []
       x-roles:
@@ -4179,57 +4176,10 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/Id'
-      - name: q
-        in: query
-        schema:
-          type: string
-        description: Tìm theo tên, kỹ năng, chức danh
       - name: status
         in: query
         schema:
-          type: array
-          items:
-            $ref: '#/components/schemas/ApplicationStatus'
-      - name: skills
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-        description: Lọc theo kỹ năng (khớp tất cả)
-      - name: minExperienceYears
-        in: query
-        schema:
-          type: number
-          minimum: 0
-      - name: educationLevel
-        in: query
-        schema:
-          $ref: '#/components/schemas/EducationLevel'
-      - name: city
-        in: query
-        schema:
-          type: string
-      - name: minMatchScore
-        in: query
-        schema:
-          type: integer
-          minimum: 0
-          maximum: 100
-      - name: classification
-        in: query
-        schema:
-          $ref: '#/components/schemas/ApplicationClassification'
-      - name: sort
-        in: query
-        schema:
-          type: string
-          enum:
-          - match_score_desc
-          - applied_desc
-          - applied_asc
-          - experience_desc
-          default: applied_desc
+          $ref: '#/components/schemas/JobApplicantStatus'
       - $ref: '#/components/parameters/Page'
       - $ref: '#/components/parameters/PageSize'
       responses:
@@ -4238,7 +4188,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RecruiterApplicationPage'
+                $ref: '#/components/schemas/JobApplicantPage'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -4247,8 +4197,142 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ValidationError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
         '500':
           $ref: '#/components/responses/InternalError'
+  /recruiter/job-applications/{applicationId}:
+    get:
+      tags: [Recruiter Candidates]
+      operationId: getJobApplicantDetail
+      summary: Chi ti?t h? s? ?ng tuy?n c?a recruiter
+      security:
+      - cookieAuth: []
+      x-roles: [recruiter]
+      parameters:
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Id'
+      responses:
+        '200':
+          description: Th?nh c?ng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobApplicant'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /recruiter/job-applications/{applicationId}/status:
+    patch:
+      tags: [Recruiter Candidates]
+      operationId: updateJobApplicantStatus
+      summary: Cập nhật trạng thái hồ sơ theo luồng tuyển dụng
+      description: Chuyển từng bước submitted → reviewing → shortlisted → interview_scheduled → offered → hired; hoặc rejected trước hired. Gửi version mới nhất.
+      security:
+      - cookieAuth: []
+      x-roles: [recruiter]
+      parameters:
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobApplicantStatusUpdate'
+      responses:
+        '200':
+          description: Hồ sơ đã cập nhật
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobApplicant'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Version cũ hoặc chuyển trạng thái không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /recruiter/job-applications/{applicationId}/resume:
+    get:
+      tags: [Recruiter Candidates]
+      operationId: getJobApplicantResume
+      summary: URL xem b?n CV ?? n?p
+      security:
+      - cookieAuth: []
+      x-roles: [recruiter]
+      parameters:
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Id'
+      responses:
+        '200':
+          description: Th?nh c?ng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResumeDownload'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /recruiter/job-applications/{applicationId}/cv:
+    get:
+      tags: [Recruiter Candidates]
+      operationId: getJobApplicantCv
+      summary: N?i dung PDF ?? n?p ?? xem tr?c ti?p
+      security:
+      - cookieAuth: []
+      x-roles: [recruiter]
+      parameters:
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Id'
+      responses:
+        '200':
+          description: Th?nh c?ng
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
   /recruiter/applications:
     get:
       tags:
@@ -7688,6 +7772,9 @@ components:
       - CV_FILE_TOO_LARGE
       - CV_UNREADABLE
       - CV_IN_USE
+      - CV_NOT_FOUND
+      - PROFILE_INCOMPLETE
+      - JOB_NOT_FOUND
       - JD_INSUFFICIENT
       - AI_ANALYSIS_FAILED
       - AI_TASK_NOT_READY
@@ -10413,21 +10500,37 @@ components:
       type: object
       required:
       - jobId
-      - cvId
+      - resumeId
       properties:
         jobId:
           $ref: '#/components/schemas/Id'
-        cvId:
-          $ref: '#/components/schemas/Id'
-        cvVersionId:
+        resumeId:
           $ref: '#/components/schemas/Id'
         coverLetter:
           type: string
-          maxLength: 3000
+          maxLength: 10000
           description: Thư giới thiệu (tùy chọn).
-        additionalInfo:
+    ApplicationSubmission:
+      type: object
+      required: [id, jobId, resumeId, status, createdAt, version]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        jobId:
+          $ref: '#/components/schemas/Id'
+        resumeId:
+          $ref: '#/components/schemas/Id'
+        coverLetter:
           type: string
-          maxLength: 2000
+        status:
+          type: string
+          enum: [submitted]
+        createdAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          minimum: 0
     Application:
       type: object
       required:
@@ -10515,6 +10618,80 @@ components:
         updatedAt:
           type: string
           format: date-time
+    JobApplicantStatus:
+      type: string
+      enum: [submitted, reviewing, shortlisted, interview_scheduled, offered, rejected, withdrawn, hired]
+    JobApplicant:
+      type: object
+      required: [id, jobId, applicantId, resumeId, status, version, appliedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        jobId:
+          $ref: '#/components/schemas/Id'
+        applicantId:
+          $ref: '#/components/schemas/Id'
+        resumeId:
+          $ref: '#/components/schemas/Id'
+        email:
+          type: string
+        phone:
+          type: string
+        employmentType:
+          type: string
+        resumeContentType:
+          type: string
+        fullName:
+          type: string
+        headline:
+          type: string
+        jobTitle:
+          type: string
+        resumeFileName:
+          type: string
+        coverLetter:
+          type: string
+        status:
+          $ref: '#/components/schemas/JobApplicantStatus'
+        version:
+          type: integer
+          minimum: 0
+        appliedAt:
+          type: string
+          format: date-time
+    JobApplicantStatusUpdate:
+      type: object
+      additionalProperties: false
+      required: [status, version]
+      properties:
+        status:
+          $ref: '#/components/schemas/JobApplicantStatus'
+        version:
+          type: integer
+          minimum: 0
+        note:
+          type: string
+          maxLength: 2000
+    ApplicationResumeDownload:
+      type: object
+      required: [url, expiresAt]
+      properties:
+        url:
+          type: string
+          description: URL HTTPS k? t?m th?i, ho?c endpoint CV c?ng origin trong mock.
+        expiresAt:
+          type: string
+          format: date-time
+    JobApplicantPage:
+      type: object
+      required: [items, meta]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobApplicant'
+        meta:
+          $ref: '#/components/schemas/PageMeta'
     RecruiterApplicationSummary:
       type: object
       required:

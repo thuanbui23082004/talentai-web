@@ -3,6 +3,20 @@ import { z } from "zod";
 export const envSchema = z
     .object({
         DATA_MODE: z.enum(["mock", "real"]).default("mock"),
+        APPLICATION_DATA_MODE: z.enum(["mock", "real"]).optional(),
+        APPLICATION_API_URL: z
+            .url()
+            .refine((value) => {
+                const url = new URL(value);
+                return (
+                    ["http:", "https:"].includes(url.protocol) &&
+                    !url.username &&
+                    !url.password &&
+                    !url.search &&
+                    !url.hash
+                );
+            }, "APPLICATION_API_URL phải là URL HTTP(S) hợp lệ")
+            .default("http://localhost:3005/api/v1"),
         PROFILE_DATA_MODE: z.enum(["mock", "real"]).optional(),
         PROFILE_API_URL: z
             .url()
@@ -90,6 +104,8 @@ export const envSchema = z
 export function getServerEnv() {
     return envSchema.parse({
         DATA_MODE: process.env.DATA_MODE,
+        APPLICATION_DATA_MODE: process.env.APPLICATION_DATA_MODE || undefined,
+        APPLICATION_API_URL: process.env.APPLICATION_API_URL || undefined,
         PROFILE_DATA_MODE: process.env.PROFILE_DATA_MODE || undefined,
         PROFILE_API_URL: process.env.PROFILE_API_URL || undefined,
         COMPANY_DATA_MODE: process.env.COMPANY_DATA_MODE || undefined,

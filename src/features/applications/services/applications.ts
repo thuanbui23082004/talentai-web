@@ -1,6 +1,12 @@
-import { apiClient } from "@/lib/api/client";
+import { apiClient, ensureApiSession } from "@/lib/api";
 import { toApiError } from "@/lib/api/errors";
-import type { ApplicationFilters } from "../types";
+import type { ApplicationFilters, ApplicationSubmitInput } from "../types";
+
+export async function submitApplication(body: ApplicationSubmitInput) {
+    const { data, error, response } = await apiClient.POST("/applications", { body, headers: { "X-CSRF-Token": await ensureApiSession() } });
+    if (!data || error) throw toApiError(response.status, error);
+    return data;
+}
 
 export async function getApplications(filters: ApplicationFilters, signal?: AbortSignal) {
     const { data, error, response } = await apiClient.GET("/applications", { params: { query: filters }, signal });

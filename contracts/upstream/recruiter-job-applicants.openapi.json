@@ -1,0 +1,673 @@
+{
+    "openapi":  "3.1.0",
+    "info":  {
+                 "title":  "TalentAI - Application Service API",
+                 "description":  "Candidate applications and recruiter application management. Use an Auth access token with the required role and permissions.",
+                 "version":  "1.0.0"
+             },
+    "paths":  {
+                  "/api/v1/recruiter/jobs/{id}/applications":  {
+                                                                   "get":  {
+                                                                               "tags":  [
+                                                                                            "NhÃ  tuyá»n dá»¥ng"
+                                                                                        ],
+                                                                               "summary":  "Xem á»©ng viÃªn cá»§a tin tuyá»n dá»¥ng",
+                                                                               "description":  "Cáº§n RECRUITER vÃ  application:read hoáº·c application:*. id lÃ  ID tin thuá»c cÃ´ng ty cá»§a nhÃ  tuyá»n dá»¥ng. Há» trá»£ lá»c tráº¡ng thÃ¡i vÃ  phÃ¢n trang.",
+                                                                               "operationId":  "recruiterList",
+                                                                               "parameters":  [
+                                                                                                  {
+                                                                                                      "name":  "id",
+                                                                                                      "in":  "path",
+                                                                                                      "description":  "ID há» sÆ¡ á»©ng tuyá»n; riÃªng API recruiter/jobs dÃ¹ng ID tin tuyá»n dá»¥ng",
+                                                                                                      "required":  true,
+                                                                                                      "schema":  {
+                                                                                                                     "type":  "string",
+                                                                                                                     "format":  "uuid"
+                                                                                                                 }
+                                                                                                  },
+                                                                                                  {
+                                                                                                      "name":  "status",
+                                                                                                      "in":  "query",
+                                                                                                      "description":  "Lá»c tráº¡ng thÃ¡i; bá» trá»ng Äá» láº¥y táº¥t cáº£",
+                                                                                                      "required":  false,
+                                                                                                      "schema":  {
+                                                                                                                     "type":  "string",
+                                                                                                                     "enum":  [
+                                                                                                                                  "submitted",
+                                                                                                                                  "reviewing",
+                                                                                                                                  "shortlisted",
+                                                                                                                                  "interview_scheduled",
+                                                                                                                                  "offered",
+                                                                                                                                  "rejected",
+                                                                                                                                  "withdrawn",
+                                                                                                                                  "hired"
+                                                                                                                              ]
+                                                                                                                 }
+                                                                                                  },
+                                                                                                  {
+                                                                                                      "name":  "page",
+                                                                                                      "in":  "query",
+                                                                                                      "description":  "Trang báº¯t Äáº§u tá»« 0",
+                                                                                                      "required":  false,
+                                                                                                      "schema":  {
+                                                                                                                     "type":  "integer",
+                                                                                                                     "format":  "int32",
+                                                                                                                     "default":  0,
+                                                                                                                     "maximum":  10000,
+                                                                                                                     "minimum":  0
+                                                                                                                 },
+                                                                                                      "example":  0
+                                                                                                  },
+                                                                                                  {
+                                                                                                      "name":  "size",
+                                                                                                      "in":  "query",
+                                                                                                      "description":  "Sá» báº£n ghi má»i trang, tá»« 1 Äáº¿n 100",
+                                                                                                      "required":  false,
+                                                                                                      "schema":  {
+                                                                                                                     "type":  "integer",
+                                                                                                                     "format":  "int32",
+                                                                                                                     "default":  20,
+                                                                                                                     "maximum":  100,
+                                                                                                                     "minimum":  1
+                                                                                                                 },
+                                                                                                      "example":  20
+                                                                                                  }
+                                                                                              ],
+                                                                               "responses":  {
+                                                                                                 "200":  {
+                                                                                                             "description":  "ThÃ nh cÃ´ng",
+                                                                                                             "content":  {
+                                                                                                                             "*/*":  {
+                                                                                                                                         "schema":  {
+                                                                                                                                                        "$ref":  "#/components/schemas/EnvelopePageDataApplicationView"
+                                                                                                                                                    }
+                                                                                                                                     }
+                                                                                                                         }
+                                                                                                         },
+                                                                                                 "404":  {
+                                                                                                             "description":  "TÃ i nguyÃªn khÃ´ng tá»n táº¡i hoáº·c khÃ´ng thuá»c pháº¡m vi truy cáº­p",
+                                                                                                             "content":  {
+                                                                                                                             "*/*":  {
+                                                                                                                                         "schema":  {
+                                                                                                                                                        "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                                    }
+                                                                                                                                     }
+                                                                                                                         }
+                                                                                                         },
+                                                                                                 "400":  {
+                                                                                                             "description":  "Dá»¯ liá»u hoáº·c tham sá» khÃ´ng há»£p lá»",
+                                                                                                             "content":  {
+                                                                                                                             "*/*":  {
+                                                                                                                                         "schema":  {
+                                                                                                                                                        "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                                    }
+                                                                                                                                     }
+                                                                                                                         }
+                                                                                                         },
+                                                                                                 "401":  {
+                                                                                                             "description":  "Thiáº¿u access token hoáº·c token khÃ´ng há»£p lá»",
+                                                                                                             "content":  {
+                                                                                                                             "*/*":  {
+                                                                                                                                         "schema":  {
+                                                                                                                                                        "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                                    }
+                                                                                                                                     }
+                                                                                                                         }
+                                                                                                         },
+                                                                                                 "403":  {
+                                                                                                             "description":  "KhÃ´ng Äá»§ vai trÃ² hoáº·c quyá»n application tÆ°Æ¡ng á»©ng",
+                                                                                                             "content":  {
+                                                                                                                             "*/*":  {
+                                                                                                                                         "schema":  {
+                                                                                                                                                        "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                                    }
+                                                                                                                                     }
+                                                                                                                         }
+                                                                                                         },
+                                                                                                 "503":  {
+                                                                                                             "description":  "Dá»ch vá»¥ phá»¥ thuá»c hoáº·c database khÃ´ng sáºµn sÃ ng",
+                                                                                                             "content":  {
+                                                                                                                             "*/*":  {
+                                                                                                                                         "schema":  {
+                                                                                                                                                        "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                                    }
+                                                                                                                                     }
+                                                                                                                         }
+                                                                                                         }
+                                                                                             }
+                                                                           }
+                                                               },
+                  "/api/v1/applications/{id}":  {
+                                                    "get":  {
+                                                                "tags":  [
+                                                                             "Há» sÆ¡ á»©ng tuyá»n"
+                                                                         ],
+                                                                "summary":  "Xem chi tiáº¿t há» sÆ¡ á»©ng tuyá»n",
+                                                                "description":  "Cáº§n CANDIDATE hoáº·c RECRUITER vÃ  application:read hoáº·c application:*. Chá» á»©ng viÃªn sá» há»¯u há» sÆ¡ hoáº·c nhÃ  tuyá»n dá»¥ng cá»§a cÃ´ng ty nháº­n há» sÆ¡ ÄÆ°á»£c xem. id lÃ  ID há» sÆ¡, khÃ´ng pháº£i ID tin.",
+                                                                "operationId":  "detail",
+                                                                "parameters":  [
+                                                                                   {
+                                                                                       "name":  "id",
+                                                                                       "in":  "path",
+                                                                                       "description":  "ID há» sÆ¡ á»©ng tuyá»n; riÃªng API recruiter/jobs dÃ¹ng ID tin tuyá»n dá»¥ng",
+                                                                                       "required":  true,
+                                                                                       "schema":  {
+                                                                                                      "type":  "string",
+                                                                                                      "format":  "uuid"
+                                                                                                  }
+                                                                                   }
+                                                                               ],
+                                                                "responses":  {
+                                                                                  "200":  {
+                                                                                              "description":  "ThÃ nh cÃ´ng",
+                                                                                              "content":  {
+                                                                                                              "*/*":  {
+                                                                                                                          "schema":  {
+                                                                                                                                         "$ref":  "#/components/schemas/EnvelopeApplicationView"
+                                                                                                                                     }
+                                                                                                                      }
+                                                                                                          }
+                                                                                          },
+                                                                                  "404":  {
+                                                                                              "description":  "TÃ i nguyÃªn khÃ´ng tá»n táº¡i hoáº·c khÃ´ng thuá»c pháº¡m vi truy cáº­p",
+                                                                                              "content":  {
+                                                                                                              "*/*":  {
+                                                                                                                          "schema":  {
+                                                                                                                                         "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                     }
+                                                                                                                      }
+                                                                                                          }
+                                                                                          },
+                                                                                  "400":  {
+                                                                                              "description":  "Dá»¯ liá»u hoáº·c tham sá» khÃ´ng há»£p lá»",
+                                                                                              "content":  {
+                                                                                                              "*/*":  {
+                                                                                                                          "schema":  {
+                                                                                                                                         "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                     }
+                                                                                                                      }
+                                                                                                          }
+                                                                                          },
+                                                                                  "401":  {
+                                                                                              "description":  "Thiáº¿u access token hoáº·c token khÃ´ng há»£p lá»",
+                                                                                              "content":  {
+                                                                                                              "*/*":  {
+                                                                                                                          "schema":  {
+                                                                                                                                         "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                     }
+                                                                                                                      }
+                                                                                                          }
+                                                                                          },
+                                                                                  "403":  {
+                                                                                              "description":  "KhÃ´ng Äá»§ vai trÃ² hoáº·c quyá»n application tÆ°Æ¡ng á»©ng",
+                                                                                              "content":  {
+                                                                                                              "*/*":  {
+                                                                                                                          "schema":  {
+                                                                                                                                         "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                     }
+                                                                                                                      }
+                                                                                                          }
+                                                                                          },
+                                                                                  "503":  {
+                                                                                              "description":  "Dá»ch vá»¥ phá»¥ thuá»c hoáº·c database khÃ´ng sáºµn sÃ ng",
+                                                                                              "content":  {
+                                                                                                              "*/*":  {
+                                                                                                                          "schema":  {
+                                                                                                                                         "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                     }
+                                                                                                                      }
+                                                                                                          }
+                                                                                          }
+                                                                              }
+                                                            }
+                                                },
+                  "/api/v1/applications/{id}/resume":  {
+                                                           "get":  {
+                                                                       "tags":  [
+                                                                                    "Há» sÆ¡ á»©ng tuyá»n"
+                                                                                ],
+                                                                       "summary":  "Láº¥y thÃ´ng tin táº£i CV ÄÃ£ ná»p",
+                                                                       "description":  "Quyá»n truy cáº­p giá»ng API chi tiáº¿t. Tráº£ thÃ´ng tin táº£i báº£n sao CV ÄÃ£ lÆ°u khi á»©ng tuyá»n, khÃ´ng tráº£ trá»±c tiáº¿p ná»i dung file.",
+                                                                       "operationId":  "download",
+                                                                       "parameters":  [
+                                                                                          {
+                                                                                              "name":  "id",
+                                                                                              "in":  "path",
+                                                                                              "description":  "ID há» sÆ¡ á»©ng tuyá»n; riÃªng API recruiter/jobs dÃ¹ng ID tin tuyá»n dá»¥ng",
+                                                                                              "required":  true,
+                                                                                              "schema":  {
+                                                                                                             "type":  "string",
+                                                                                                             "format":  "uuid"
+                                                                                                         }
+                                                                                          }
+                                                                                      ],
+                                                                       "responses":  {
+                                                                                         "200":  {
+                                                                                                     "description":  "ThÃ nh cÃ´ng",
+                                                                                                     "content":  {
+                                                                                                                     "*/*":  {
+                                                                                                                                 "schema":  {
+                                                                                                                                                "$ref":  "#/components/schemas/EnvelopeDownload"
+                                                                                                                                            }
+                                                                                                                             }
+                                                                                                                 }
+                                                                                                 },
+                                                                                         "404":  {
+                                                                                                     "description":  "TÃ i nguyÃªn khÃ´ng tá»n táº¡i hoáº·c khÃ´ng thuá»c pháº¡m vi truy cáº­p",
+                                                                                                     "content":  {
+                                                                                                                     "*/*":  {
+                                                                                                                                 "schema":  {
+                                                                                                                                                "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                            }
+                                                                                                                             }
+                                                                                                                 }
+                                                                                                 },
+                                                                                         "400":  {
+                                                                                                     "description":  "Dá»¯ liá»u hoáº·c tham sá» khÃ´ng há»£p lá»",
+                                                                                                     "content":  {
+                                                                                                                     "*/*":  {
+                                                                                                                                 "schema":  {
+                                                                                                                                                "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                            }
+                                                                                                                             }
+                                                                                                                 }
+                                                                                                 },
+                                                                                         "401":  {
+                                                                                                     "description":  "Thiáº¿u access token hoáº·c token khÃ´ng há»£p lá»",
+                                                                                                     "content":  {
+                                                                                                                     "*/*":  {
+                                                                                                                                 "schema":  {
+                                                                                                                                                "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                            }
+                                                                                                                             }
+                                                                                                                 }
+                                                                                                 },
+                                                                                         "403":  {
+                                                                                                     "description":  "KhÃ´ng Äá»§ vai trÃ² hoáº·c quyá»n application tÆ°Æ¡ng á»©ng",
+                                                                                                     "content":  {
+                                                                                                                     "*/*":  {
+                                                                                                                                 "schema":  {
+                                                                                                                                                "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                            }
+                                                                                                                             }
+                                                                                                                 }
+                                                                                                 },
+                                                                                         "503":  {
+                                                                                                     "description":  "Dá»ch vá»¥ phá»¥ thuá»c hoáº·c database khÃ´ng sáºµn sÃ ng",
+                                                                                                     "content":  {
+                                                                                                                     "*/*":  {
+                                                                                                                                 "schema":  {
+                                                                                                                                                "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                            }
+                                                                                                                             }
+                                                                                                                 }
+                                                                                                 }
+                                                                                     }
+                                                                   }
+                                                       },
+                  "/api/v1/applications/{id}/status":  {
+                                                           "patch":  {
+                                                                         "tags":  [
+                                                                                      "NhÃ  tuyá»n dá»¥ng"
+                                                                                  ],
+                                                                         "summary":  "Cáº­p nháº­t tráº¡ng thÃ¡i há» sÆ¡",
+                                                                         "description":  "Cáº§n RECRUITER vÃ  application:update hoáº·c application:*, há» sÆ¡ pháº£i thuá»c cÃ´ng ty cá»§a mÃ¬nh. Luá»ng: submitted â reviewing â shortlisted â interview_scheduled â offered â hired. CÃ³ thá» chuyá»n sang rejected tá»« cÃ¡c bÆ°á»c trÆ°á»c hired. KhÃ´ng nháº£y bÆ°á»c; gá»­i version má»i nháº¥t.",
+                                                                         "operationId":  "update",
+                                                                         "parameters":  [
+                                                                                            {
+                                                                                                "name":  "id",
+                                                                                                "in":  "path",
+                                                                                                "description":  "ID há» sÆ¡ á»©ng tuyá»n; riÃªng API recruiter/jobs dÃ¹ng ID tin tuyá»n dá»¥ng",
+                                                                                                "required":  true,
+                                                                                                "schema":  {
+                                                                                                               "type":  "string",
+                                                                                                               "format":  "uuid"
+                                                                                                           }
+                                                                                            },
+                                                                                            {
+                                                                                                "name":  "X-Correlation-ID",
+                                                                                                "in":  "header",
+                                                                                                "description":  "UUID theo dÃµi yÃªu cáº§u; bá» trá»ng Äá» server tá»± sinh",
+                                                                                                "required":  false,
+                                                                                                "schema":  {
+                                                                                                               "type":  "string",
+                                                                                                               "format":  "uuid"
+                                                                                                           }
+                                                                                            }
+                                                                                        ],
+                                                                         "requestBody":  {
+                                                                                             "content":  {
+                                                                                                             "application/json":  {
+                                                                                                                                      "schema":  {
+                                                                                                                                                     "$ref":  "#/components/schemas/UpdateStatus"
+                                                                                                                                                 }
+                                                                                                                                  }
+                                                                                                         },
+                                                                                             "required":  true
+                                                                                         },
+                                                                         "responses":  {
+                                                                                           "200":  {
+                                                                                                       "description":  "ThÃ nh cÃ´ng",
+                                                                                                       "content":  {
+                                                                                                                       "*/*":  {
+                                                                                                                                   "schema":  {
+                                                                                                                                                  "$ref":  "#/components/schemas/EnvelopeApplicationView"
+                                                                                                                                              }
+                                                                                                                               }
+                                                                                                                   }
+                                                                                                   },
+                                                                                           "404":  {
+                                                                                                       "description":  "TÃ i nguyÃªn khÃ´ng tá»n táº¡i hoáº·c khÃ´ng thuá»c pháº¡m vi truy cáº­p",
+                                                                                                       "content":  {
+                                                                                                                       "*/*":  {
+                                                                                                                                   "schema":  {
+                                                                                                                                                  "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                              }
+                                                                                                                               }
+                                                                                                                   }
+                                                                                                   },
+                                                                                           "409":  {
+                                                                                                       "description":  "Há» sÆ¡ trÃ¹ng, version cÅ© hoáº·c chuyá»n tráº¡ng thÃ¡i khÃ´ng há»£p lá»",
+                                                                                                       "content":  {
+                                                                                                                       "*/*":  {
+                                                                                                                                   "schema":  {
+                                                                                                                                                  "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                              }
+                                                                                                                               }
+                                                                                                                   }
+                                                                                                   },
+                                                                                           "400":  {
+                                                                                                       "description":  "Dá»¯ liá»u hoáº·c tham sá» khÃ´ng há»£p lá»",
+                                                                                                       "content":  {
+                                                                                                                       "*/*":  {
+                                                                                                                                   "schema":  {
+                                                                                                                                                  "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                              }
+                                                                                                                               }
+                                                                                                                   }
+                                                                                                   },
+                                                                                           "401":  {
+                                                                                                       "description":  "Thiáº¿u access token hoáº·c token khÃ´ng há»£p lá»",
+                                                                                                       "content":  {
+                                                                                                                       "*/*":  {
+                                                                                                                                   "schema":  {
+                                                                                                                                                  "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                              }
+                                                                                                                               }
+                                                                                                                   }
+                                                                                                   },
+                                                                                           "403":  {
+                                                                                                       "description":  "KhÃ´ng Äá»§ vai trÃ² hoáº·c quyá»n application tÆ°Æ¡ng á»©ng",
+                                                                                                       "content":  {
+                                                                                                                       "*/*":  {
+                                                                                                                                   "schema":  {
+                                                                                                                                                  "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                              }
+                                                                                                                               }
+                                                                                                                   }
+                                                                                                   },
+                                                                                           "503":  {
+                                                                                                       "description":  "Dá»ch vá»¥ phá»¥ thuá»c hoáº·c database khÃ´ng sáºµn sÃ ng",
+                                                                                                       "content":  {
+                                                                                                                       "*/*":  {
+                                                                                                                                   "schema":  {
+                                                                                                                                                  "$ref":  "#/components/schemas/ErrorBody"
+                                                                                                                                              }
+                                                                                                                               }
+                                                                                                                   }
+                                                                                                   }
+                                                                                       }
+                                                                     }
+                                                       }
+              },
+    "components":  {
+                       "securitySchemes":  {
+                                               "bearerAuth":  {
+                                                                  "type":  "http",
+                                                                  "scheme":  "bearer",
+                                                                  "bearerFormat":  "JWT"
+                                                              }
+                                           },
+                       "schemas":  {
+                                       "ErrorBody":  {
+                                                         "type":  "object",
+                                                         "properties":  {
+                                                                            "error":  {
+                                                                                          "$ref":  "#/components/schemas/Detail"
+                                                                                      }
+                                                                        }
+                                                     },
+                                       "FieldError":  {
+                                                          "type":  "object",
+                                                          "properties":  {
+                                                                             "field":  {
+                                                                                           "type":  "string"
+                                                                                       },
+                                                                             "code":  {
+                                                                                          "type":  "string"
+                                                                                      },
+                                                                             "message":  {
+                                                                                             "type":  "string"
+                                                                                         }
+                                                                         }
+                                                      },
+                                       "EnvelopePageDataApplicationView":  {
+                                                                               "type":  "object",
+                                                                               "properties":  {
+                                                                                                  "success":  {
+                                                                                                                  "type":  "boolean"
+                                                                                                              },
+                                                                                                  "data":  {
+                                                                                                               "$ref":  "#/components/schemas/PageDataApplicationView"
+                                                                                                           }
+                                                                                              }
+                                                                           },
+                                       "Detail":  {
+                                                      "type":  "object",
+                                                      "properties":  {
+                                                                         "code":  {
+                                                                                      "type":  "string"
+                                                                                  },
+                                                                         "message":  {
+                                                                                         "type":  "string"
+                                                                                     },
+                                                                         "timestamp":  {
+                                                                                           "type":  "string",
+                                                                                           "format":  "date-time"
+                                                                                       },
+                                                                         "fieldErrors":  {
+                                                                                             "type":  "array",
+                                                                                             "items":  {
+                                                                                                           "$ref":  "#/components/schemas/FieldError"
+                                                                                                       }
+                                                                                         }
+                                                                     }
+                                                  },
+                                       "PageDataApplicationView":  {
+                                                                       "type":  "object",
+                                                                       "properties":  {
+                                                                                          "items":  {
+                                                                                                        "type":  "array",
+                                                                                                        "items":  {
+                                                                                                                      "$ref":  "#/components/schemas/ApplicationView"
+                                                                                                                  }
+                                                                                                    },
+                                                                                          "page":  {
+                                                                                                       "type":  "integer",
+                                                                                                       "format":  "int32"
+                                                                                                   },
+                                                                                          "size":  {
+                                                                                                       "type":  "integer",
+                                                                                                       "format":  "int32"
+                                                                                                   },
+                                                                                          "totalElements":  {
+                                                                                                                "type":  "integer",
+                                                                                                                "format":  "int64"
+                                                                                                            },
+                                                                                          "totalPages":  {
+                                                                                                             "type":  "integer",
+                                                                                                             "format":  "int32"
+                                                                                                         }
+                                                                                      }
+                                                                   },
+                                       "ApplicationView":  {
+                                                               "type":  "object",
+                                                               "properties":  {
+                                                                                  "id":  {
+                                                                                             "type":  "string",
+                                                                                             "format":  "uuid"
+                                                                                         },
+                                                                                  "jobId":  {
+                                                                                                "type":  "string",
+                                                                                                "format":  "uuid"
+                                                                                            },
+                                                                                  "companyId":  {
+                                                                                                    "type":  "string",
+                                                                                                    "format":  "uuid"
+                                                                                                },
+                                                                                  "applicantId":  {
+                                                                                                      "type":  "string",
+                                                                                                      "format":  "uuid"
+                                                                                                  },
+                                                                                  "resumeId":  {
+                                                                                                   "type":  "string",
+                                                                                                   "format":  "uuid"
+                                                                                               },
+                                                                                  "resumeFileName":  {
+                                                                                                         "type":  "string"
+                                                                                                     },
+                                                                                  "resumeContentType":  {
+                                                                                                            "type":  "string"
+                                                                                                        },
+                                                                                  "resumeSizeBytes":  {
+                                                                                                          "type":  "integer",
+                                                                                                          "format":  "int64"
+                                                                                                      },
+                                                                                  "resumeVersion":  {
+                                                                                                        "type":  "integer",
+                                                                                                        "format":  "int32"
+                                                                                                    },
+                                                                                  "jobSnapshot":  {
+                                                                                                      "type":  "object",
+                                                                                                      "additionalProperties":  {
+
+                                                                                                                               }
+                                                                                                  },
+                                                                                  "applicantSnapshot":  {
+                                                                                                            "type":  "object",
+                                                                                                            "additionalProperties":  {
+
+                                                                                                                                     }
+                                                                                                        },
+                                                                                  "coverLetter":  {
+                                                                                                      "type":  "string"
+                                                                                                  },
+                                                                                  "status":  {
+                                                                                                 "type":  "string",
+                                                                                                 "enum":  [
+                                                                                                              "submitted",
+                                                                                                              "reviewing",
+                                                                                                              "shortlisted",
+                                                                                                              "interview_scheduled",
+                                                                                                              "offered",
+                                                                                                              "rejected",
+                                                                                                              "withdrawn",
+                                                                                                              "hired"
+                                                                                                          ]
+                                                                                             },
+                                                                                  "createdAt":  {
+                                                                                                    "type":  "string",
+                                                                                                    "format":  "date-time"
+                                                                                                },
+                                                                                  "updatedAt":  {
+                                                                                                    "type":  "string",
+                                                                                                    "format":  "date-time"
+                                                                                                },
+                                                                                  "version":  {
+                                                                                                  "type":  "integer",
+                                                                                                  "format":  "int64"
+                                                                                              }
+                                                                              }
+                                                           },
+                                       "EnvelopeApplicationView":  {
+                                                                       "type":  "object",
+                                                                       "properties":  {
+                                                                                          "success":  {
+                                                                                                          "type":  "boolean"
+                                                                                                      },
+                                                                                          "data":  {
+                                                                                                       "$ref":  "#/components/schemas/ApplicationView"
+                                                                                                   }
+                                                                                      }
+                                                                   },
+                                       "Download":  {
+                                                        "type":  "object",
+                                                        "properties":  {
+                                                                           "url":  {
+                                                                                       "type":  "string"
+                                                                                   },
+                                                                           "expiresAt":  {
+                                                                                             "type":  "string",
+                                                                                             "format":  "date-time"
+                                                                                         }
+                                                                       }
+                                                    },
+                                       "EnvelopeDownload":  {
+                                                                "type":  "object",
+                                                                "properties":  {
+                                                                                   "success":  {
+                                                                                                   "type":  "boolean"
+                                                                                               },
+                                                                                   "data":  {
+                                                                                                "$ref":  "#/components/schemas/Download"
+                                                                                            }
+                                                                               }
+                                                            },
+                                       "UpdateStatus":  {
+                                                            "type":  "object",
+                                                            "properties":  {
+                                                                               "status":  {
+                                                                                              "type":  "string",
+                                                                                              "description":  "Tráº¡ng thÃ¡i ÄÃ­ch há»£p lá» theo luá»ng xá»­ lÃ½",
+                                                                                              "enum":  [
+                                                                                                           "submitted",
+                                                                                                           "reviewing",
+                                                                                                           "shortlisted",
+                                                                                                           "interview_scheduled",
+                                                                                                           "offered",
+                                                                                                           "rejected",
+                                                                                                           "withdrawn",
+                                                                                                           "hired"
+                                                                                                       ],
+                                                                                              "example":  "reviewing"
+                                                                                          },
+                                                                               "version":  {
+                                                                                               "type":  "integer",
+                                                                                               "format":  "int64",
+                                                                                               "description":  "Version hiá»n táº¡i láº¥y tá»« API chi tiáº¿t, dÃ¹ng chá»ng cáº­p nháº­t Äá»ng thá»i",
+                                                                                               "example":  0,
+                                                                                               "minimum":  0
+                                                                                           },
+                                                                               "note":  {
+                                                                                            "type":  "string",
+                                                                                            "description":  "Ghi chÃº cá»§a nhÃ  tuyá»n dá»¥ng, tá»i Äa 2000 kÃ½ tá»±",
+                                                                                            "example":  "Chuyá»n há» sÆ¡ sang bÆ°á»c xem xÃ©t.",
+                                                                                            "maxLength":  2000,
+                                                                                            "minLength":  0
+                                                                                        }
+                                                                           },
+                                                            "required":  [
+                                                                             "status",
+                                                                             "version"
+                                                                         ]
+                                                        }
+                                   }
+                   },
+    "security":  [
+                     {
+                         "bearerAuth":  [
+
+                                        ]
+                     }
+                 ]
+}

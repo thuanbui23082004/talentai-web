@@ -3,6 +3,20 @@
 Đăng nhập gửi loại tài khoản đang chọn tới BFF. BFF đối chiếu role Java trả về trước khi đặt cookie;
 sai loại tài khoản trả `403 AUTH_ROLE_MISMATCH`, giữ người dùng ở trang đăng nhập.
 
+## Recruiter — ứng viên theo tin tuyển dụng
+
+Trang `/recruiter/candidates` dùng GET `/recruiter/jobs/{jobId}/applications` qua application-service cổng 3005
+khi `APPLICATION_DATA_MODE=real`. Chọn tin, trạng thái đơn và phân trang theo URL; hiển thị dữ liệu snapshot,
+CV đã nộp và thư giới thiệu. Danh mục tin dùng job-service thật; có lối “Xem ứng viên” từ chi tiết tin.
+BFF xác thực recruiter, chuyển trang 1 → 0, giữ lỗi quyền/không thuộc công ty, kiểm tra jobId của từng hồ sơ;
+không lấy thông tin ứng viên/công ty bằng N+1 hoặc ghép fixture vào dữ liệu thật.
+Card mở chi tiết snapshot qua GET `/applications/{id}`; nút “Xem CV” riêng lấy CV đã nộp qua `/applications/{id}/resume`.
+PDF được BFF đọc từ kho Cloudinary và trả inline để xem trong popup; DOCX có liên kết mở/tải tệp.
+Trang chi tiết mở từ card dùng `?from=job`, giữ luồng chi tiết/sàng lọc cũ cho các trang mock hiện có.
+Các mutation trạng thái/đánh giá/AI cũ chưa được gắn vào chi tiết thật.
+Đã pass 7 unit test trọng tâm và 1 E2E UI. Lượt đọc backend thật chưa nghiệm thu do chưa có tài khoản/tin kiểm thử phù hợp.
+Xem `docs/recruiter-job-applicants-integration.md`. Luồng sàng lọc AI cũ dùng endpoint danh sách mock riêng.
+
 ## Tạo tin recruiter — backend thật
 
 `JOB_DATA_MODE=real` nối form tạo/sửa tin, danh mục, danh sách và chi tiết tới job-posting service.
@@ -158,11 +172,19 @@ kịch bản nhà tuyển dụng cùng sửa workspace mock trong bộ nhớ.
 
 Đã tạo ba tư thế mascot từ nhân vật gốc, dùng WebP nền trong suốt 640×640 (~47–50 KiB/ảnh) tại `public/images/states/`. `FeedbackState`/`EmptyState` dùng chung cho 404 toàn site, không tìm thấy job/công ty, lỗi trang, tìm kiếm việc làm/công ty, việc làm đã lưu, ứng tuyển, CV và thông báo (bản compact). Có CTA quay về/xóa lọc/thử lại, thông điệp lỗi an toàn và reduced-motion. Các lỗi validation/mutation nhỏ vẫn dùng Alert/inline, không thay đổi API, quyền hay dữ liệu. Error boundary dùng `retry()` của Next 16.4 để tải lại nội dung. Xem `/ui/states` và `docs/feedback-states.md`.
 
-## Popup ứng tuyển — CV tài khoản, chưa gửi hồ sơ
+## Popup ứng tuyển — CV tài khoản và API nộp hồ sơ
 
-Popup ở chi tiết việc làm, xem nhanh và dashboard tải CV tài khoản qua hook `useCvs`, dùng chung service/BFF `/cvs` với trang quản lý CV. Chọn CV mặc định khi mở; PDF/DOCX không rỗng tối đa 5 MB được upload ngay khi chọn/kéo thả qua `useCvActions`, sau đó tải lại danh sách và chọn CV vừa upload. Có loading/empty/error/retry, khóa upload trùng và yêu cầu đăng nhập candidate. Cấu hình `PROFILE_DATA_MODE=real` nối profile-service cổng 3002; không dùng CV mẫu trong popup nghiệp vụ. Showcase `/ui/application` vẫn nhận CV minh họa tường minh để kiểm tra giao diện. Chưa gửi hồ sơ ứng tuyển, ghi nhận đồng ý hoặc chạy AI; nút nộp báo rõ chưa gửi. Contract/BFF được tái sử dụng, không thêm endpoint.
+Đã nối POST `/applications` tới application-service cổng 3005 qua service/hook/BFF, payload jobId/resumeId/coverLetter theo Swagger.
+`APPLICATION_DATA_MODE=real`, `APPLICATION_API_URL=http://localhost:3005/api/v1` đã đặt trong `.env.local`.
+Có xác thực candidate, CSRF/Origin, khóa gửi trùng, loading/thành công/lỗi, giữ form khi lỗi và không tự retry POST.
+Form thật bỏ lựa chọn AI/thỏa thuận/địa điểm mong muốn vì API chưa hỗ trợ; địa điểm tin chỉ để hiển thị.
+Mock lưu hồ sơ riêng từng user, kiểm tra CV chính chủ, tin mở và chống trùng; GET mock đọc được hồ sơ vừa nộp.
+Đã kiểm tra thật nhưng backend trả `503 DEPENDENCY_UNAVAILABLE: Job Service is unavailable` từ kết nối gRPC nội bộ;
+chưa nghiệm thu nộp thật thành công. GET danh sách hồ sơ vẫn theo tích hợp cũ. Xem `docs/application-submission-integration.md`.
 
-Một địa điểm được chọn mặc định. UI nhận được danh sách nhiều địa điểm qua prop riêng và yêu cầu chọn đúng danh sách; API JobSummary hiện chỉ có `location`, nên các job API vẫn chỉ có một địa điểm. Showcase `/ui/application` có ba trường hợp một/nhiều địa điểm và chưa có CV. Muốn nối backend phải thống nhất contract cho danh sách/địa điểm đã chọn, sự đồng ý và nội dung thỏa thuận của nhà tuyển dụng.
+Popup tải CV tài khoản qua hook `useCvs`, dùng chung service/BFF `/cvs` với trang quản lý CV. Chọn CV mặc định khi mở; PDF/DOCX không rỗng tối đa 5 MB được upload ngay khi chọn/kéo thả qua `useCvActions`, sau đó tải lại danh sách và chọn CV vừa upload. Có loading/empty/error/retry, khóa upload trùng và yêu cầu đăng nhập candidate. Cấu hình `PROFILE_DATA_MODE=real` nối profile-service cổng 3002; không dùng CV mẫu trong popup nghiệp vụ. Showcase `/ui/application` vẫn nhận CV minh họa tường minh để kiểm tra giao diện.
+
+Form thật hiển thị địa điểm từ tin và chỉ gửi các trường API hỗ trợ. Showcase `/ui/application` giữ ba trường hợp một/nhiều địa điểm và chưa có CV để xem thử giao diện; các ô xác nhận/địa điểm lựa chọn ở showcase chưa được gửi vào hồ sơ thật.
 
 Modal dùng chung luôn có backdrop tối, kể cả khi lồng dưới CandidateShell. Popup xem nhanh job có lớp phủ không chặn chuột; menu header, select, lịch và popup thông báo giữ tương tác riêng, không thêm backdrop tối.
 
@@ -256,3 +278,11 @@ Ví dụ: `curl -H "x-mock-scenario: empty" http://localhost:3000/api/bff/jobs`.
 - Onboarding nhập `companySize` là số nhân viên, không suy diễn từ khoảng `size` của form cài đặt. Website và năm thành lập đều tùy chọn, có validation và lưu thật.
 - Kiểm tra ngày 2026-11-05: lưu thông tin company thành công; gọi trực tiếp cả API upload logo/cover trả `502 IMAGE_UPLOAD_FAILED`. Đã kiểm thử UI xử lý lỗi và hoàn tất không có ảnh; chưa xác nhận upload ảnh thật thành công. Backend cần kiểm tra dịch vụ lưu trữ ảnh/log exception. Xem `docs/company-images-onboarding.md`.
 - Kiểm thử thật: `$env:COMPANY_REAL_E2E='1'; $env:COMPANY_DATA_MODE='real'; npx playwright test tests/e2e/company-onboarding-real.spec.ts`. Test tạo tài khoản/công ty kiểm thử riêng và kiểm tra lưu trực tiếp ở Java, tải lại trang, lỗi trùng mã số thuế.
+
+## Bảng theo dõi ứng viên theo tin (2026-11-06)
+
+- Trang ứng viên dùng dạng thẻ; nút Bảng theo dõi thay nút Danh sách và yêu cầu chọn tin trước khi điều hướng.
+- Bảng `/recruiter/candidates/pipeline?jobId=...` dùng API danh sách theo tin, tải đủ trang và chia 8 trạng thái thật; có select đổi tin.
+- Kéo thả hoặc select trạng thái gửi PATCH `/recruiter/job-applications/{id}/status` qua BFF tới application-service, kèm `status` và `version`. Chỉ chuyển đúng từng bước hoặc từ chối; không retry ghi. Lỗi/xung đột tải lại bảng để đồng bộ.
+- Mock cùng endpoint giữ trạng thái/version trong bộ nhớ và kiểm tra quyền công ty, CSRF, chuyển bước. Không dùng điểm AI giả trên card.
+- Chi tiết luồng và giới hạn kiểm chứng backend thật: `docs/recruiter-job-applicants-integration.md`.
