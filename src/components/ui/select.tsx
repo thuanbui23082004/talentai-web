@@ -52,14 +52,14 @@ function OptionsSelect({
                     alignItemWithTrigger={false}
                     className="z-50"
                 >
-                    <Primitive.Popup className="ui-popup min-w-[var(--anchor-width)] overflow-y-auto">
-                        <Primitive.List>
+                    <Primitive.Popup className="ui-popup max-h-[min(20rem,var(--available-height))] min-w-[var(--anchor-width)] overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+                        <Primitive.List className="space-y-1">
                             {options.map((option) => (
                                 <Primitive.Item
                                     key={option.value}
                                     value={option.value}
                                     disabled={option.disabled}
-                                    className="ui-option"
+                                    className="ui-option min-h-11 data-selected:bg-secondary data-selected:font-medium data-selected:text-primary"
                                 >
                                     <Primitive.ItemText>
                                         {option.label}
@@ -157,13 +157,13 @@ function SelectContent({
           data-slot="select-content"
           data-align-trigger={alignItemWithTrigger}
           className={cn(
-            "cn-menu-target cn-menu-translucent relative isolate z-50 max-h-(--available-height) w-(--anchor-width) min-w-36 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-2 data-[side=inline-end]:slide-in-from-left-2 data-[side=inline-start]:slide-in-from-right-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            "ui-popup relative isolate z-50 max-h-[min(20rem,var(--available-height))] w-(--anchor-width) min-w-36 origin-(--transform-origin) overflow-x-hidden overflow-y-auto overscroll-contain text-popover-foreground [scrollbar-width:thin] duration-100 data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-2 data-[side=inline-end]:slide-in-from-left-2 data-[side=inline-start]:slide-in-from-right-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
             className
           )}
           {...props}
         >
           <SelectScrollUpButton />
-          <Primitive.List>{children}</Primitive.List>
+          <Primitive.List className="space-y-1">{children}</Primitive.List>
           <SelectScrollDownButton />
         </Primitive.Popup>
       </Primitive.Positioner>
@@ -193,12 +193,12 @@ function SelectItem({
     <Primitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        "ui-option min-h-11 w-full select-none data-selected:bg-secondary data-selected:font-medium data-selected:text-primary [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}
     >
-      <Primitive.ItemText className="flex flex-1 shrink-0 gap-2 whitespace-nowrap">
+      <Primitive.ItemText className="flex min-w-0 flex-1 gap-2 break-words leading-6">
         {children}
       </Primitive.ItemText>
       <Primitive.ItemIndicator

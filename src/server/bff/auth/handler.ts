@@ -246,7 +246,16 @@ async function handleRefresh(
 ) {
     if (!cookies.refresh) return missingSession();
 
-    const { tokens } = (await refreshTokens(backend, cookies.refresh)).data;
+    let result;
+    try {
+        result = await refreshTokens(backend, cookies.refresh);
+    } catch (error) {
+        if (error instanceof Response && error.status === 401) {
+            return setAuthCookies(NextResponse.json(await error.clone().json(), { status: 401 }), request);
+        }
+        throw error;
+    }
+    const { tokens } = result.data;
     const body: components["schemas"]["AuthRefreshResponse"] = {
         csrfToken: csrfTokenFor({ refresh: tokens.refreshToken }),
         expiresInSeconds: tokens.expiresInSeconds,

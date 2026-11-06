@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 import { INITIAL_JOB_PREFERENCES as EMPTY_JOB_PREFERENCES, jobPreferencesDraftSchema } from "@/features/profile/schemas/job-preferences";
 import { jobPreferencesPayload, profileToJobPreferences } from "@/features/profile/job-preferences-mapping";
 import profile from "../../contracts/examples/candidate-personal.json";
-const INITIAL_JOB_PREFERENCES = { ...EMPTY_JOB_PREFERENCES, industries: ["it-software"], locations: ["21"], position: "Frontend Engineer", experience: "under-1", salaryMin: "15", salaryMax: "20" };
+const INITIAL_JOB_PREFERENCES = { ...EMPTY_JOB_PREFERENCES, industries: ["it-software"], locations: ["48"], position: "Frontend Engineer", experience: "under-1", salaryMin: "15", salaryMax: "20" };
 
 describe("job preference form and backend mapping", () => {
     it("starts empty and maps all supported backend fields", () => {
         expect(EMPTY_JOB_PREFERENCES.position).toBe("");
         const values = profileToJobPreferences(profile);
-        expect(values).toMatchObject({ industries: ["it-software"], experience: "under-1", locations: ["21", "1"], salaryMin: "15", salaryMax: "25", hybrid: true, thirteenthMonth: true, healthInsurance: false });
+        expect(values).toMatchObject({ industries: ["it-software"], experience: "under-1", locations: ["48", "1"], salaryMin: "15", salaryMax: "25", hybrid: true, thirteenthMonth: true, healthInsurance: false });
         expect(jobPreferencesPayload(values)).toEqual({ desiredJobTitle: profile.desiredJobTitle, desiredIndustries: profile.desiredIndustries, experienceLevel: profile.experienceLevel, minDesiredSalary: 15000000, maxDesiredSalary: 25000000, currency: "VND", salaryNegotiable: false, desiredLocations: profile.desiredLocations, currentSeniorityLevels: profile.currentSeniorityLevels, employmentTypes: profile.employmentTypes, workPreferences: profile.workPreferences });
     });
     it("keeps out-of-list saved choices and does not overwrite salaries when negotiable", () => {

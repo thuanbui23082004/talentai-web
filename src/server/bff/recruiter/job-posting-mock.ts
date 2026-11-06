@@ -7,6 +7,7 @@ import { readRequestIdentity } from '../auth/session';
 import { apiError } from '../responses';
 import { mapRecruiterPosting } from './job-posting-mapper';
 import { getMockCompanies, getRecruiterMockStore } from './mock-store';
+import { toJobLocationIds } from './job-location-ids';
 
 export async function mockJobPostingOptions(request: Request) {
   const identity = await readRequestIdentity(request);
@@ -26,14 +27,15 @@ export function mockPostingJob(body: unknown, company: { id: string; name: strin
   if (!jobPostingCatalogs.categories.some(item => item.categoryId === value.categoryId) || value.skillIds.some(id => !jobPostingCatalogs.skills.some(item => item.skillId === id)))
     throw apiError(422, 'VALIDATION_FAILED', 'Danh mục không hợp lệ.');
   const { province, ward } = resolveLocation(value.workplace ?? '');
-  if (!province) throw apiError(422, 'VALIDATION_FAILED', 'Địa điểm không hợp lệ.');
+  const ids = toJobLocationIds(value.workplace ?? '');
+  if (!province || !ids) throw apiError(422, 'VALIDATION_FAILED', 'Địa điểm không hợp lệ.');
   const now = new Date().toISOString();
   const posting: components['schemas']['JobPostingRecord'] = {
     ...value, jobPostId: previous?.id ?? randomUUID(), companyId: company.id,
     status: previous?.posting?.status ?? 'DRAFT', version: (previous?.posting?.version ?? -1) + 1,
     createdAt: previous?.createdAt ?? now, updatedAt: now,
     location: [value.addressLine, ward?.name, provinceCity(province.name)].filter(Boolean).join(', '),
-    locations: [{ provinceId: Number(province.code), wardId: ward ? Number(ward.code) : undefined, addressLine: value.addressLine }],
+    locations: [{ ...ids, addressLine: value.addressLine }],
   };
   return mapRecruiterPosting(posting, company);
 }

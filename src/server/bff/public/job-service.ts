@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { components } from "@/lib/api/generated/schema";
 import { parseJobSearchParams } from "@/lib/jobs/validation";
+import { toJobLocationIds } from "../recruiter/job-location-ids";
 import { apiError } from "../responses";
 
 const experience = z.enum(["INTERN", "FRESHER", "JUNIOR", "MIDDLE", "SENIOR", "EXPERT"]);
@@ -43,14 +44,19 @@ export async function handleJobService(request: Request, baseUrl: string): Promi
     const query = new URLSearchParams();
     if (path === "jobs") {
         const parsed = parseJobSearchParams(source.searchParams);
-        const allowed = new Set(["q", "city", "categoryId", "companyId", "salaryMin", "salaryMax", "salaryCurrency", "isSalaryNegotiable", "experienceLevel", "jobType", "workMode", "sort", "page", "pageSize"]);
+        const allowed = new Set(["q", "city", "provinceCode", "wardCode", "categoryId", "companyId", "salaryMin", "salaryMax", "salaryCurrency", "isSalaryNegotiable", "experienceLevel", "jobType", "workMode", "sort", "page", "pageSize"]);
         if (!parsed.success || [...source.searchParams.keys()].some(key => !allowed.has(key))) return apiError(422, "VALIDATION_FAILED", "Bộ lọc không hợp lệ hoặc chưa được job-posting hỗ trợ.");
         const filters = parsed.data;
         if (!Object.hasOwn(SORT, filters.sort)) return apiError(422, "VALIDATION_FAILED", "Cách sắp xếp chưa được hỗ trợ.");
         query.set("page", String(filters.page - 1)); query.set("size", String(filters.pageSize));
         query.set("sort", SORT[filters.sort as keyof typeof SORT]);
         if (filters.q) query.set("keyword", filters.q);
-        if (filters.city) query.set("location", filters.city);
+        if (filters.provinceCode) {
+            const ids = toJobLocationIds([filters.provinceCode, filters.wardCode].filter(Boolean).join(":"));
+            if (!ids) return apiError(422, "VALIDATION_FAILED", "Địa điểm không hợp lệ.");
+            query.set("provinceId", String(ids.provinceId));
+            if (ids.wardId !== undefined) query.set("wardId", String(ids.wardId));
+        } else if (filters.city) query.set("location", filters.city);
         for (const key of ["categoryId", "companyId", "salaryMin", "salaryMax", "salaryCurrency", "isSalaryNegotiable", "experienceLevel", "jobType", "workMode"] as const) {
             if (filters[key] !== undefined) query.set(key, String(filters[key]));
         }

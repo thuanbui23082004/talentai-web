@@ -15,6 +15,7 @@ async function setup(page: Page) {
     },
   });
   expect(company.status()).toBe(201);
+  expect(['unverified', 'pending', 'rejected']).toContain((await company.json()).verificationStatus);
   return session.csrfToken as string;
 }
 
@@ -35,8 +36,8 @@ async function fill(page: Page, title: string) {
   await page.keyboard.press('Escape');
   await page.locator('#job-city').click();
   const dialog = page.getByRole('dialog');
-  await dialog.getByRole('button', { name: 'Hà Nội', exact: true }).click();
-  await dialog.getByRole('button', { name: 'Phường Ba Đình', exact: true }).click();
+  await dialog.getByRole('button', { name: 'Điện Biên', exact: true }).click();
+  await dialog.getByRole('button', { name: 'Phường Mường Lay', exact: true }).click();
   await dialog.getByRole('button', { name: 'Chọn địa điểm', exact: true }).click();
   await page.locator('#job-address').fill('12 Hùng Vương');
 }
@@ -71,19 +72,40 @@ test('creates a backend draft, reads it after reload and restores its values for
   try {
   const body = response.request().postDataJSON();
   expect(body).toMatchObject({ categoryId: 1, experienceLevel: 'EXPERT', workMode: 'HYBRID', salaryMin: 15000000, skillIds: [reactId] });
-  expect(saved.posting).toMatchObject({ status: 'DRAFT', version: 0, workplace: '1:00004' });
-  expect(saved.posting.locations[0].wardId).toBeGreaterThan(0);
-  await expect(page).toHaveURL(`/recruiter/jobs/${saved.id}`);
+  expect(saved.posting).toMatchObject({ status: 'DRAFT', version: 0, workplace: '11:03151' });
+  expect(saved.posting.locations[0]).toMatchObject({ provinceId: 1000011, wardId: 3003151 });
+  await expect(page.getByText('đã được tạo thành công!', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Xuất bản', exact: true })).toBeVisible();
+  await page.screenshot({ path: info.outputPath('posting-created-success.png') });
+  await page.locator(`a[href="/recruiter/jobs/${saved.id}"]`).click();
+  await expect(page).toHaveURL(`/recruiter/jobs/${saved.id}`, { timeout: 30000 });
     await page.reload();
     await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
     await expect(page.getByText('Chuyên gia', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Đăng tin', exact: true }).click();
+    const publishResponse = page.waitForResponse(response => response.url().endsWith(`/api/bff/recruiter/jobs/${saved.id}/publish`) && response.request().method() === 'POST');
+    await page.getByRole('button', { name: 'Xác nhận đăng tin', exact: true }).click();
+    const denied = await publishResponse;
+    expect([403, 409]).toContain(denied.status());
+    expect((await denied.json()).error.code).toBe('COMPANY_NOT_VERIFIED');
+    const confirmation = page.locator('.job-management-confirm');
+    await expect(confirmation.getByRole('alert')).toHaveText('Doanh nghiệp chưa được xác thực. Vui lòng hoàn tất xác thực trước khi đăng tin.');
+    await confirmation.screenshot({ path: info.outputPath('company-not-verified-message.png') });
+    await confirmation.getByRole('button', { name: 'Hủy', exact: true }).click();
     const list = await (await page.request.get('/api/bff/recruiter/jobs?pageSize=100')).json();
     expect(list.items.some((job: { id: string }) => job.id === saved.id)).toBe(true);
+    await page.goto('/recruiter/jobs');
+    const filteredResponse = page.waitForResponse(response => response.url().includes('/api/bff/recruiter/jobs?') && new URL(response.url()).searchParams.get('status') === 'DRAFT');
+    await page.getByRole('button', { name: 'Bản nháp', exact: true }).click();
+    expect((await filteredResponse).status()).toBe(200);
+    await expect(page).toHaveURL(/status=DRAFT/);
+    await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+    await page.screenshot({ path: info.outputPath('posting-status-filter.png') });
     await page.goto(`/recruiter/jobs/${saved.id}/edit`);
     await expect(page.locator('#job-title')).toHaveValue(title);
     await expect(page.locator('#job-workMode')).toContainText('Kết hợp');
     await expect(page.locator('#job-experienceLevel')).toContainText('Chuyên gia');
-    await expect(page.locator('#job-city')).toContainText('Phường Ba Đình');
+    await expect(page.locator('#job-city')).toContainText('Phường Mường Lay');
     await expect(page.locator('#job-address')).toHaveValue('12 Hùng Vương');
     await expect(page.locator('#job-salaryMin')).toHaveValue('15');
     await page.screenshot({ path: info.outputPath('posting-edit-desktop.png'), fullPage: true });
@@ -109,7 +131,7 @@ test('mobile form retains entered data after a failed save and can retry', async
   await page.getByRole('button', { name: 'Lưu & tiếp tục', exact: true }).click();
   await expect(page.locator('.submit-error')).toBeVisible();
   await expect(page.locator('#job-title')).toHaveValue('Mobile posting test');
-  await expect(page.locator('#job-city')).toContainText('Phường Ba Đình');
+  await expect(page.locator('#job-city')).toContainText('Phường Mường Lay');
   await page.unroute('**/api/bff/recruiter/jobs');
   const savedResponse = page.waitForResponse(response => response.url().endsWith('/api/bff/recruiter/jobs') && response.request().method() === 'POST');
   await page.getByRole('button', { name: 'Lưu & tiếp tục', exact: true }).click();

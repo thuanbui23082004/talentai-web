@@ -5,7 +5,7 @@ export function toRecruiterJobView(job: RecruiterJob) {
   const money = (value?: number) => value === undefined ? '' : new Intl.NumberFormat('vi', { style: 'currency', currency: job.salary?.currency ?? 'VND', maximumFractionDigits: 0 }).format(value);
   return {
     experienceLabel: job.posting ? JOB_SEARCH_FILTERS.find(filter => filter.key === 'experienceLevel')?.options.find(option => option.value === job.posting?.experienceLevel)?.label ?? 'Chưa cập nhật' : undefined,
-    id: job.id, title: job.title, company: job.company.name, initials: job.company.name.split(' ').slice(-2).map(word => word[0]).join(''),
+    id: job.id, title: job.title, postingStatus: job.posting?.status, company: job.company.name, initials: job.company.name.split(' ').slice(-2).map(word => word[0]).join(''),
     location: job.location.city, salary: job.salary?.negotiable || (job.salary?.min === undefined && job.salary?.max === undefined) ? 'negotiable' : [money(job.salary.min), money(job.salary.max)].filter(Boolean).join(' – '),
     experience: job.minExperienceYears ?? 0, hours: job.updatedAt ? Math.max(0, Math.floor((Date.now() - new Date(job.updatedAt).getTime()) / 3600000)) : 0,
     applicants: job.stats?.applicationCount ?? 0, type: ({ full_time: 'fullTime', part_time: 'partTime', internship: 'internship', contract: 'contract', freelance: 'freelance', remote: 'remote', hybrid: 'hybrid' } as const)[job.workType], status: job.status,

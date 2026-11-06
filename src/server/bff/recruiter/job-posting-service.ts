@@ -1,9 +1,11 @@
 import { z } from 'zod';
+import { recruiterJobFiltersSchema } from '@/lib/jobs/recruiter-filters';
 import { jobPostingInputSchema, jobPostingRecordSchema, postingCategorySchema, postingLocationSchema, postingSkillSchema } from '@/lib/api/job-posting-schemas';
 import { hasValidCsrf, isTrustedOrigin } from '../auth/cookies';
 import { readRequestIdentity } from '../auth/session';
 import { apiError } from '../responses';
 import { mapRecruiterPosting } from './job-posting-mapper';
+import { fromJobLocationIds, toJobLocationIds } from './job-location-ids';
 
 const root = '/api/bff/recruiter/jobs';
 const reply = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'Cache-Control': 'private, no-store' } });
@@ -17,6 +19,12 @@ export function isRecruiterJobPostingRequest(request: Request) {
 }
 
 async function upstreamError(response: Response) {
+  if (response.status === 403) {
+    const body = z.object({ error: z.object({ code: z.string() }) }).safeParse(await response.json().catch(() => null));
+    if (body.success && body.data.error.code === 'COMPANY_NOT_VERIFIED') {
+      return apiError(403, 'COMPANY_NOT_VERIFIED', 'Doanh nghiệp chưa được xác thực. Vui lòng hoàn tất xác thực trước khi đăng tin.');
+    }
+  }
   const codes: Record<number, 'SESSION_EXPIRED' | 'FORBIDDEN' | 'NOT_FOUND' | 'CONFLICT' | 'RATE_LIMITED'> = {
     401: 'SESSION_EXPIRED', 403: 'FORBIDDEN', 404: 'NOT_FOUND', 409: 'CONFLICT', 429: 'RATE_LIMITED',
   };
@@ -101,29 +109,30 @@ export async function handleRecruiterJobPostings(request: Request, baseUrl: stri
       if (match) {
         const job = map(await data(`recruiter/jobs/${match[1]}`));
         const location = job.posting?.locations?.[0];
-        if (location && job.posting) {
-          const province = (await locations()).find(item => item.id === location.provinceId);
-          const ward = location.wardId ? (await locations(location.provinceId)).find(item => item.id === location.wardId) : undefined;
-          job.posting.workplace = province ? `${Number(province.code)}${ward ? `:${ward.code.padStart(5, '0')}` : ''}` : undefined;
+        if (location && location.provinceId !== undefined && job.posting) {
+          job.posting.workplace = fromJobLocationIds(location.provinceId, location.wardId);
           job.posting.addressLine = location.addressLine;
         }
         return reply(job);
       }
-      const query = z.object({ page: z.coerce.number().int().min(1).max(10001).default(1), pageSize: z.coerce.number().int().min(1).max(100).default(20) }).strict().safeParse(Object.fromEntries(source.searchParams));
-      if (!query.success) return apiError(422, 'VALIDATION_FAILED', 'Phân trang không hợp lệ.');
-      const page = z.object({ ...pageShape, items: z.array(z.unknown()) }).parse(await data(`recruiter/jobs?page=${query.data.page - 1}&size=${query.data.pageSize}&sort=createdAt,desc`));
+      const query = recruiterJobFiltersSchema.safeParse(Object.fromEntries(source.searchParams));
+      if (!query.success) return apiError(422, 'VALIDATION_FAILED', 'Bộ lọc hoặc phân trang không hợp lệ.');
+      const params = new URLSearchParams({ page: String(query.data.page - 1), size: String(query.data.pageSize), sort: 'createdAt,desc' });
+      if (query.data.status) params.set('status', query.data.status);
+      const page = z.object({ ...pageShape, items: z.array(z.unknown()) }).parse(await data(`recruiter/jobs?${params}`));
       return reply({ items: page.items.map(map), meta: { page: page.page + 1, pageSize: page.size, totalItems: page.totalElements, totalPages: page.totalPages } });
     }
     if (input) {
       const { workplace, addressLine, ...payload } = input;
       if (!match) delete payload.version;
       if (workplace) {
-        const [provinceCode, wardCode] = workplace.split(':');
-        const province = (await locations()).find(item => item.type === 'PROVINCE' && Number(item.code) === Number(provinceCode));
+        const ids = toJobLocationIds(workplace);
+        if (!ids) return apiError(422, 'VALIDATION_FAILED', 'Vui lòng chọn tỉnh/thành phố và phường/xã hợp lệ.');
+        const province = (await locations()).find(item => item.type === 'PROVINCE' && item.id === ids.provinceId);
         if (!province) return apiError(422, 'VALIDATION_FAILED', 'Tỉnh/thành phố chưa có trong danh mục backend.');
-        const ward = wardCode ? (await locations(province.id)).find(item => item.type === 'WARD' && Number(item.code) === Number(wardCode)) : undefined;
-        if (wardCode && !ward) return apiError(422, 'VALIDATION_FAILED', 'Phường/xã không thuộc tỉnh/thành phố đã chọn.');
-        payload.locations = [{ provinceId: province.id, wardId: ward?.id, addressLine }];
+        const ward = ids.wardId ? (await locations(ids.provinceId)).find(item => item.type === 'WARD' && item.id === ids.wardId && item.parentId === ids.provinceId) : undefined;
+        if (ids.wardId && !ward) return apiError(422, 'VALIDATION_FAILED', 'Phường/xã không thuộc tỉnh/thành phố đã chọn.');
+        payload.locations = [{ ...ids, addressLine }];
         payload.location = [addressLine, ward?.name, province.name].filter(Boolean).join(', ');
         if (payload.location.length > 500) return apiError(422, 'VALIDATION_FAILED', 'Địa chỉ tổng hợp tối đa 500 ký tự.');
       }

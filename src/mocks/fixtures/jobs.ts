@@ -10,7 +10,7 @@ export const mockJobs = [
                     },
         "location":  {
                          "city":  "Đà Nẵng",
-                         "provinceCode":  "21",
+                         "provinceCode":  "48",
                          "wardCode":  "20194",
                          "ward":  "Phường Hải Vân"
                      },
@@ -72,7 +72,7 @@ export const mockJobs = [
                     },
         "location":  {
                          "city":  "TP.HCM",
-                         "provinceCode":  "29",
+                         "provinceCode":  "79",
                          "wardCode":  "25760",
                          "ward":  "Phường Bình Dương"
                      },
@@ -103,7 +103,7 @@ export const mockJobs = [
                     },
         "location":  {
                          "city":  "TP.HCM",
-                         "provinceCode":  "29",
+                         "provinceCode":  "79",
                          "wardCode":  "25747",
                          "ward":  "Phường Thủ Dầu Một"
                      },
@@ -134,7 +134,7 @@ export const mockJobs = [
                     },
         "location":  {
                          "city":  "TP.HCM",
-                         "provinceCode":  "29",
+                         "provinceCode":  "79",
                          "wardCode":  "25750",
                          "ward":  "Phường Phú Lợi"
                      },
@@ -165,7 +165,7 @@ export const mockJobs = [
                     },
         "location":  {
                          "city":  "An Giang",
-                         "provinceCode":  "32",
+                         "provinceCode":  "91",
                          "wardCode":  "30307",
                          "ward":  "Phường Long Xuyên"
                      },
@@ -197,7 +197,7 @@ export const mockJobs = [
                     },
         "location":  {
                          "city":  "TP.HCM",
-                         "provinceCode":  "29",
+                         "provinceCode":  "79",
                          "wardCode":  "25747",
                          "ward":  "Phường Thủ Dầu Một"
                      },
@@ -259,7 +259,7 @@ export const mockJobs = [
                     },
         "location":  {
                          "city":  "Đà Nẵng",
-                         "provinceCode":  "21",
+                         "provinceCode":  "48",
                          "wardCode":  "20200",
                          "ward":  "Phường Hòa Khánh"
                      },
@@ -290,7 +290,7 @@ export const mockJobs = [
                     },
         "location":  {
                          "city":  "TP.HCM",
-                         "provinceCode":  "29",
+                         "provinceCode":  "79",
                          "wardCode":  "25747",
                          "ward":  "Phường Thủ Dầu Một"
                      },
@@ -352,7 +352,7 @@ export const mockJobs = [
                     },
         "location":  {
                          "city":  "Đà Nẵng",
-                         "provinceCode":  "21",
+                         "provinceCode":  "48",
                          "wardCode":  "20200",
                          "ward":  "Phường Hòa Khánh"
                      },
@@ -383,7 +383,7 @@ export const mockJobs = [
                     },
         "location":  {
                          "city":  "TP.HCM",
-                         "provinceCode":  "29",
+                         "provinceCode":  "79",
                          "wardCode":  "25747",
                          "ward":  "Phường Thủ Dầu Một"
                      },
@@ -445,7 +445,7 @@ export const mockJobs = [
                     },
         "location":  {
                          "city":  "Đà Nẵng",
-                         "provinceCode":  "21",
+                         "provinceCode":  "48",
                          "wardCode":  "20200",
                          "ward":  "Phường Hòa Khánh"
                      },
@@ -476,7 +476,7 @@ export const mockJobs = [
                     },
         "location":  {
                          "city":  "TP.HCM",
-                         "provinceCode":  "29",
+                         "provinceCode":  "79",
                          "wardCode":  "25747",
                          "ward":  "Phường Thủ Dầu Một"
                      },
@@ -538,7 +538,7 @@ export const mockJobs = [
                     },
         "location":  {
                          "city":  "Đà Nẵng",
-                         "provinceCode":  "21",
+                         "provinceCode":  "48",
                          "wardCode":  "20200",
                          "ward":  "Phường Hòa Khánh"
                      },

@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
@@ -9,18 +8,18 @@ import {
   Pause, Play, Share2, X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Modal, ModalContent } from '@/components/ui/modal';
 import type { RecruiterJobView } from '@/features/jobs';
-import { SearchBar } from '@/components/shared/search-bar';
-import { JobManagementActions, LocationPicker } from '@/features/jobs';
+import { JobManagementActions } from '@/features/jobs';
 import { RecruiterScreening } from '@/features/matching';
 import { useJobStatus } from '@/features/jobs';
 import { JobRequestError } from '@/features/jobs';
+import './recruiter-job-detail-toolbar.css';
 
 type Action = 'pause' | 'close' | 'reopen';
 
 export function RecruiterJobDetail({ job }: { job: RecruiterJobView }) {
   const t = useTranslations('Recruiter');
-  const router = useRouter();
   const status = job.status;
   const mutation = useJobStatus(job.id);
   const formText = useTranslations('JobForm');
@@ -52,26 +51,12 @@ export function RecruiterJobDetail({ job }: { job: RecruiterJobView }) {
 
   return (
     <div className="jobs-page recruiter-job-detail-page">
-      <section className="mb-6">
-        <SearchBar
-          locations={[]}
-          queryLabel={t('searchPlaceholder')}
-          renderLocation={({ value, onChange }) => <LocationPicker aria-label={t('locationLabel')} value={value} onValueChange={onChange} allowAll />}
-          filters={<Button variant="link" nativeButton={false} render={<Link href="/recruiter/jobs" />}>{t('detailAllFilters')}</Button>}
-          onSearch={({ query, location }) => {
-            const params = new URLSearchParams();
-            if (query.trim()) params.set('q', query.trim());
-            if (location) params.set('location', location);
-            router.push(`/recruiter/jobs?${params.toString()}`);
-          }}
-        />
-      </section>
-      <div className="detail-toolbar">
+      <div className="detail-command-bar">
         <Link href="/recruiter/jobs" className="detail-back">
           <ArrowLeft size={18} />
           <h1>{t('jobDetailHeading')}</h1>
         </Link>
-        <div className="detail-actions">
+        <JobManagementActions job={job}>
           {status === 'open' && (
             <Button variant="outline" disabled={mutation.isPending} onClick={() => openConfirmation('pause')}>
               <Pause size={14} />{t('pauseJob')}
@@ -91,29 +76,29 @@ export function RecruiterJobDetail({ job }: { job: RecruiterJobView }) {
             {shareState === 'copied' ? <Check size={14} /> : <Share2 size={14} />}
             {t(shareState === 'copied' ? 'detailCopied' : 'detailShare')}
           </Button>
-        </div>
+        </JobManagementActions>
       </div>
 
-      <JobManagementActions job={job} />
       <RecruiterScreening jobId={job.id} />
       {saved && <p role="status">{formText('statusSaved')}</p>}
       {shareState === 'copied' && <p role="status">{t('detailCopiedNotice')}</p>}
       {shareState === 'failed' && <p role="alert">{t('detailCopyFailed')}</p>}
 
       {confirmation && (
-        <section className="recruiter-panel detail-confirmation" aria-labelledby="detail-confirm-title">
-          <h2 id="detail-confirm-title">{t('detailConfirmTitle')}</h2>
-          <p>{t('detailConfirmDescription')}</p>
-          {mutation.error && <p className="field-error" role="alert">{formText(`errors.${mutation.error instanceof JobRequestError ? mutation.error.messageKey : 'requestFailed'}`)}</p>}
-          <div className="detail-actions">
-            <Button className="recruiter-primary" disabled={mutation.isPending} onClick={() => void confirmAction()}>
-              {mutation.isPending ? formText('saving') : t('detailConfirm')}
-            </Button>
-            <Button variant="outline" disabled={mutation.isPending} onClick={() => setConfirmation(null)}>
-              {t('cancel')}
-            </Button>
-          </div>
-        </section>
+        <Modal open onOpenChange={open => { if (!open && !mutation.isPending) setConfirmation(null); }}>
+          <ModalContent
+            title={t('detailConfirmTitle')}
+            description={t('detailConfirmDescription')}
+            className="max-w-md"
+            footer={<>
+              <Button variant="outline" disabled={mutation.isPending} onClick={() => setConfirmation(null)}>{t('cancel')}</Button>
+              <Button loading={mutation.isPending} onClick={() => void confirmAction()}>{mutation.isPending ? formText('saving') : t('detailConfirm')}</Button>
+            </>}
+          >
+            <p className="rounded-xl bg-secondary/60 px-4 py-3 text-sm font-medium break-words">{job.title}</p>
+            {mutation.error && <p className="field-error mt-3" role="alert">{formText(`errors.${mutation.error instanceof JobRequestError ? mutation.error.messageKey : 'requestFailed'}`)}</p>}
+          </ModalContent>
+        </Modal>
       )}
 
       <div className="detail-columns">

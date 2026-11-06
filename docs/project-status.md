@@ -9,6 +9,9 @@ sai loại tài khoản trả `403 AUTH_ROLE_MISMATCH`, giữ người dùng ở
 UI đã được người dùng xác nhận: kinh nghiệm theo enum, tách loại hình/chế độ làm việc,
 ngành nghề và kỹ năng dùng ID backend, bỏ cấp bậc riêng, bằng cấp và vòng tuyển dụng.
 Popup tỉnh/xã dùng chung; BFF tra ID địa điểm thật, không gửi mã địa phương thay cho ID.
+Mã tỉnh đã đồng bộ theo danh mục hiện hành cho đủ 34 tỉnh/thành; mã phường/xã giữ 5 chữ số.
+Helper chuyển ID theo nhóm `1000000 + mã tỉnh`, `3000000 + mã phường/xã`, có chiều chuyển
+ngược để sửa tin và kiểm tra tỉnh/phường trước khi ghi; đã đối chiếu đủ 3.321 phường/xã với backend.
 Lương VND đổi triệu đồng → đồng; ngày hết hạn gửi cuối ngày theo múi giờ Việt Nam.
 Đã kiểm tra UI desktop/mobile với backend thật: tạo DRAFT, reload, đọc/sửa/lưu lại,
 giữ dữ liệu khi lỗi và thử lại; xóa các bản nháp trong lần nghiệm thu thành công.
@@ -19,8 +22,10 @@ Tài liệu và thứ tự đọc code: `docs/recruiter-job-posting-integration.
 Đã nối `/jobs`, `/jobs/categories`, `/jobs/{id}` qua BFF với job-posting `localhost:3004/api/v1`.
 `.env.local` bật JOB_DATA_MODE=real; cấu hình độc lập với company/auth và các nghiệp vụ mock khác.
 Bộ lọc dùng experienceLevel, jobType, workMode, categoryId theo Swagger, bỏ số năm kinh nghiệm,
-giới tính, tuyển nhanh và sắp xếp “phù hợp nhất” khỏi form public. Địa điểm gửi chuỗi tỉnh/thành,
-không gửi wardCode/provinceCode. Query cũ không hỗ trợ trả 422 trong real.
+giới tính, tuyển nhanh và sắp xếp “phù hợp nhất” khỏi form public.
+URL cũ dùng city vẫn được hỗ trợ. Bộ lọc địa điểm tái sử dụng popup chọn một tỉnh/thành và tùy chọn phường/xã;
+URL lưu provinceCode/wardCode, BFF kiểm tra quan hệ rồi đổi sang provinceId/wardId giống form tạo tin.
+Query cũ khác không hỗ trợ trả 422 trong real. Backend hiện chưa hỗ trợ tìm nhiều địa điểm.
 Đã kiểm tra với 10 tin công khai của backend. API không trả tên công ty nên UI hiển thị nhãn
 chưa cập nhật, không dùng công ty mock hay gọi N+1. Tài liệu review: `docs/job-posting-integration.md`.
 Các ghi chú mock phía dưới là trạng thái cũ; phần ứng tuyển và thống kê recruiter chưa nằm trong tích hợp job-posting này.
@@ -153,9 +158,9 @@ kịch bản nhà tuyển dụng cùng sửa workspace mock trong bộ nhớ.
 
 Đã tạo ba tư thế mascot từ nhân vật gốc, dùng WebP nền trong suốt 640×640 (~47–50 KiB/ảnh) tại `public/images/states/`. `FeedbackState`/`EmptyState` dùng chung cho 404 toàn site, không tìm thấy job/công ty, lỗi trang, tìm kiếm việc làm/công ty, việc làm đã lưu, ứng tuyển, CV và thông báo (bản compact). Có CTA quay về/xóa lọc/thử lại, thông điệp lỗi an toàn và reduced-motion. Các lỗi validation/mutation nhỏ vẫn dùng Alert/inline, không thay đổi API, quyền hay dữ liệu. Error boundary dùng `retry()` của Next 16.4 để tải lại nội dung. Xem `/ui/states` và `docs/feedback-states.md`.
 
-## Popup ứng tuyển — chỉ giao diện
+## Popup ứng tuyển — CV tài khoản, chưa gửi hồ sơ
 
-Theo lựa chọn của người dùng, nút ứng tuyển ở chi tiết việc làm, popup xem nhanh và dashboard mở giao diện chọn CV/tệp cục bộ, thư giới thiệu, địa điểm và các ô xác nhận. CV mẫu tái sử dụng từ phần CV minh họa; không phải CV trong tài khoản. Chỉ chấp nhận PDF/DOCX không rỗng, tối đa tạm 5 MB, hỗ trợ kéo thả/thay/bỏ tệp; không upload, ghi nhận đồng ý, chạy AI hay tạo hồ sơ. Nút nộp báo rõ chưa gửi. Contract và mock không thay đổi.
+Popup ở chi tiết việc làm, xem nhanh và dashboard tải CV tài khoản qua hook `useCvs`, dùng chung service/BFF `/cvs` với trang quản lý CV. Chọn CV mặc định khi mở; PDF/DOCX không rỗng tối đa 5 MB được upload ngay khi chọn/kéo thả qua `useCvActions`, sau đó tải lại danh sách và chọn CV vừa upload. Có loading/empty/error/retry, khóa upload trùng và yêu cầu đăng nhập candidate. Cấu hình `PROFILE_DATA_MODE=real` nối profile-service cổng 3002; không dùng CV mẫu trong popup nghiệp vụ. Showcase `/ui/application` vẫn nhận CV minh họa tường minh để kiểm tra giao diện. Chưa gửi hồ sơ ứng tuyển, ghi nhận đồng ý hoặc chạy AI; nút nộp báo rõ chưa gửi. Contract/BFF được tái sử dụng, không thêm endpoint.
 
 Một địa điểm được chọn mặc định. UI nhận được danh sách nhiều địa điểm qua prop riêng và yêu cầu chọn đúng danh sách; API JobSummary hiện chỉ có `location`, nên các job API vẫn chỉ có một địa điểm. Showcase `/ui/application` có ba trường hợp một/nhiều địa điểm và chưa có CV. Muốn nối backend phải thống nhất contract cho danh sách/địa điểm đã chọn, sự đồng ý và nội dung thỏa thuận của nhà tuyển dụng.
 

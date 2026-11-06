@@ -13,7 +13,7 @@ export const jobSearchSchema = z.object({
     workMode: z.enum(["ONSITE", "HYBRID", "REMOTE"]).optional(),
     salaryCurrency: z.string().regex(/^[A-Z]{3}$/).optional(),
     isSalaryNegotiable: z.enum(["true", "false"]).transform(value => value === "true").optional(),
-    provinceCode: z.string().regex(/^(?:[1-9]|[12][0-9]|3[0-4])$/).optional(),
+    provinceCode: z.string().regex(/^[1-9]\d?$/).optional(),
     wardCode: z.string().regex(/^\d{5}$/).optional(),
     salaryMin: number, salaryMax: number,
     minExperience: number, maxExperience: number,

@@ -1756,7 +1756,7 @@ export interface paths {
          *     **Quyền:** Nhà tuyển dụng.
          *
          *     **Lỗi nghiệp vụ:**
-         *     - `409 COMPANY_NOT_VERIFIED`: Doanh nghiệp chưa được xác thực.
+         *     - `403 COMPANY_NOT_VERIFIED`: Doanh nghiệp chưa được xác thực; cần hoàn tất xác thực trước khi đăng tin.
          *     - `409 INVALID_STATUS_TRANSITION`: Trạng thái hiện tại không thể đăng.
          */
         post: operations["publishJob"];
@@ -7340,15 +7340,9 @@ export interface operations {
                 city?: string;
                 /** @deprecated */
                 locationId?: string;
-                /**
-                 * @deprecated
-                 * @description ID tỉnh/thành theo danh mục backend từ 1 đến 34, không thêm số 0 đầu.
-                 */
+                /** @description Mã hành chính tỉnh/thành theo danh mục hiện hành, ví dụ Điện Biên 11, Đà Nẵng 48, TP.HCM 79; không phải số thứ tự 1–34 và không thêm số 0 đầu. */
                 provinceCode?: string;
-                /**
-                 * @deprecated
-                 * @description Mã phường/xã/đặc khu hiện hành, gồm 5 chữ số. Phải đi cùng provinceCode và thuộc tỉnh đã chọn.
-                 */
+                /** @description Mã phường/xã/đặc khu hiện hành, gồm 5 chữ số. Phải đi cùng provinceCode và thuộc tỉnh đã chọn. */
                 wardCode?: string;
                 salaryMin?: number;
                 salaryMax?: number;
@@ -8171,7 +8165,7 @@ export interface operations {
     listMyJobs: {
         parameters: {
             query?: {
-                status?: components["schemas"]["JobStatus"][];
+                status?: "DRAFT" | "ACTIVE" | "PAUSED" | "CLOSED" | "EXPIRED";
                 q?: string;
                 sort?: "newest" | "oldest" | "applications_desc" | "deadline";
                 /** @description Trang (từ 1). */

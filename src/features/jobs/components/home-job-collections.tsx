@@ -54,7 +54,7 @@ export function HomeJobCollections({ featuredIds, urgentIds, initialJobs }: { fe
     const featured = select(featuredIds);
     const urgent = select(urgentIds);
     return <div className="space-y-12 sm:space-y-16">
-        <Collection id="featured-jobs" title="Việc làm nổi bật" jobs={featured.length ? featured : data?.items ?? []} />
+        <Collection id="featured-jobs" title="Việc làm nổi bật" jobs={(featured.length ? featured : data?.items ?? []).slice(0, 6)} />
         <Collection id="urgent-jobs" title="Việc làm tuyển gấp" jobs={urgent} />
     </div>;
 }

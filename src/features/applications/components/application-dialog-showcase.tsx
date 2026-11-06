@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui";
 import { ApplicationDialog } from "./application-dialog";
+import { INITIAL_CV_PREVIEWS } from "@/features/cv";
 import type { Application } from "../types";
 
 // Presentation-only examples for the cases the current job API cannot represent.
@@ -22,6 +23,6 @@ export function ApplicationDialogShowcase() {
             <Button variant="outline" onClick={() => setExample("multiple")}>Job nhiều địa điểm</Button>
             <Button variant="outline" onClick={() => setExample("empty")}>Chưa có CV</Button>
         </div>
-        <ApplicationDialog key={example ?? "closed"} job={job} open={!!example} onOpenChange={(open) => { if (!open) setExample(undefined); }} locations={example === "multiple" ? locations : [locations[0]]} cvs={example === "empty" ? [] : undefined} />
+        <ApplicationDialog key={example ?? "closed"} job={job} open={!!example} onOpenChange={(open) => { if (!open) setExample(undefined); }} locations={example === "multiple" ? locations : [locations[0]]} cvs={example === "empty" ? [] : INITIAL_CV_PREVIEWS} />
     </main>;
 }

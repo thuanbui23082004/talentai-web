@@ -5,12 +5,22 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AuthUser } from "../types";
 import { getCurrentUser } from "../services/auth";
 import { authKeys } from "../query-keys";
+import { SESSION_EXPIRED_EVENT } from '@/lib/api/session-fetch';
 
 const SessionContext = createContext<{ user: AuthUser | null; isPending: boolean; isError: boolean } | undefined>(undefined);
 
 export function AuthSessionProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const query = useQuery({ queryKey: authKeys.me, queryFn: getCurrentUser, retry: false, staleTime: 60_000, refetchOnWindowFocus: true, refetchOnReconnect: true });
+
+  useEffect(() => {
+    const expired = () => {
+      queryClient.clear();
+      if (/^\/(candidate|recruiter|admin)(\/|$)/.test(window.location.pathname)) window.location.replace('/login?reason=expired');
+    };
+    window.addEventListener(SESSION_EXPIRED_EVENT, expired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, expired);
+  }, [queryClient]);
 
   useEffect(() => {
     if (!query.isSuccess) return;

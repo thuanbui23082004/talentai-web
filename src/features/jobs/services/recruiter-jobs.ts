@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { RecruiterJobFilters } from '@/lib/jobs/recruiter-filters';
 import { apiClient } from '@/lib/api';
 import { catalogPageSchema, companySchema, recruiterJobPageSchema, recruiterJobSchema } from '@/lib/api/job-schemas';
 import { jobRequestError } from '@/features/jobs/errors';
@@ -36,9 +37,9 @@ export async function createRecruiterJob(input: JobInput | JobPostingInput) {
   if (result.error) throw jobRequestError(result.error, result.response.status);
   return recruiterJobSchema.parse(result.data);
 }
-export async function listRecruiterJobs() {
+export async function listRecruiterJobs(filters: RecruiterJobFilters = {}, signal?: AbortSignal) {
   await csrf();
-  const result = await apiClient.GET('/recruiter/jobs', { params: { query: { pageSize: 100 } } });
+  const result = await apiClient.GET('/recruiter/jobs', { params: { query: { pageSize: 100, ...filters } }, signal });
   if (result.error) throw jobRequestError(result.error, result.response.status);
   return recruiterJobPageSchema.parse(result.data);
 }

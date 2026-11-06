@@ -9,6 +9,25 @@ function mock(body: unknown) { return vi.spyOn(globalThis, "fetch").mockResolved
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });
 
 describe("job-posting adapter", () => {
+    it.each([
+        ["provinceCode=1", { provinceId: "1000001" }],
+        ["provinceCode=11&wardCode=03151", { provinceId: "1000011", wardId: "3003151" }],
+    ])("maps administrative codes to backend IDs: %s", async (query, expected) => {
+        const fetch = mock({ items: [], page: 0, size: 20, totalElements: 0, totalPages: 0 });
+        const response = await handleJobService(request(`?${query}`), "http://localhost:3004/api/v1");
+        expect(response.status).toBe(200);
+        const params = new URL(String(fetch.mock.calls[0][0])).searchParams;
+        expect(Object.fromEntries(params)).toEqual({ ...expected, page: "0", size: "20", sort: "publishedAt,desc" });
+    });
+
+    it("rejects invalid province/ward pairs before calling the backend", async () => {
+        const fetch = mock({});
+        for (const query of ["?provinceCode=99", "?provinceCode=1&wardCode=03151", "?wardCode=03151", "?provinceCode=1&city=Đà+Nẵng"]) {
+            expect((await handleJobService(request(query), "http://localhost:3004/api/v1")).status).toBe(422);
+        }
+        expect(fetch).not.toHaveBeenCalled();
+    });
+
     it("maps only supported filters and paging without changing work mode into job type", async () => {
         const fetch = mock({ items: [job], page: 1, size: 12, totalElements: 13, totalPages: 2 });
         const response = await handleJobService(request("?q=Backend&city=Đà+Nẵng&categoryId=1&experienceLevel=EXPERT&jobType=FULL_TIME&workMode=REMOTE&salaryMin=1000&salaryMax=2000&salaryCurrency=USD&isSalaryNegotiable=false&sort=salary_desc&page=2&pageSize=12"), "http://localhost:3004/api/v1");

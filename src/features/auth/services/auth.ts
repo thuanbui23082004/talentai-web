@@ -1,6 +1,7 @@
 import { apiClient } from "@/lib/api/client";
 import { toApiError } from "@/lib/api/errors";
 import type { components } from "@/lib/api/generated/schema";
+import { sessionFetch } from '@/lib/api/session-fetch';
 
 export async function socialLogin(body: components["schemas"]["SocialLoginRequest"]) {
     const result = await apiClient.POST("/auth/social-login", { body });
@@ -54,31 +55,12 @@ export async function logout() {
         throw toApiError(result.response.status, result.error);
 }
 
-let pendingRefresh: Promise<boolean> | undefined;
 export function refreshSession() {
-    // Concurrent session reads share one rotation, avoiding invalidating each other.
-    pendingRefresh ??= apiClient
-        .POST("/auth/refresh")
-        .then((result) => {
-            if (result.response.status >= 500)
-                throw toApiError(result.response.status, result.error);
-            return !!result.data && !result.error;
-        })
-        .finally(() => {
-            pendingRefresh = undefined;
-        });
-    return pendingRefresh;
+    return sessionFetch.refresh();
 }
 
 export async function getCurrentUser() {
-    let result = await apiClient.GET("/me");
-    if (
-        result.response.status === 401 &&
-        result.error?.error.code === "SESSION_EXPIRED"
-    ) {
-        if (!(await refreshSession())) return null;
-        result = await apiClient.GET("/me");
-    }
+    const result = await apiClient.GET("/me");
     if (result.response.status === 401) return null;
     if (!result.data || result.error)
         throw toApiError(result.response.status, result.error);

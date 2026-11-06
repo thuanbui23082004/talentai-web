@@ -67,6 +67,18 @@ it("does not clear cookies or fake successful logout on backend outage", async (
   await expect(readServerSession(cookie)).rejects.toThrow();
 });
 
+it('clears rejected refresh cookies but preserves them during an auth outage', async () => {
+  const network = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(null, { status: 401 }));
+  const rejected = await request('/auth/refresh', {}, cookie);
+  expect(rejected.status).toBe(401);
+  expect(rejected.headers.getSetCookie()).toHaveLength(2);
+  expect(rejected.headers.getSetCookie().every(value => value.includes('Max-Age=0'))).toBe(true);
+  network.mockRejectedValueOnce(new Error('offline'));
+  const unavailable = await request('/auth/refresh', {}, cookie);
+  expect(unavailable.status).toBe(503);
+  expect(unavailable.headers.getSetCookie()).toEqual([]);
+});
+
 it("returns independent error bodies to concurrent refresh callers", async () => {
   const network = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 401 }));
   const [a, b] = await Promise.all([request("/auth/refresh", {}, cookie), request("/auth/refresh", {}, cookie)]);

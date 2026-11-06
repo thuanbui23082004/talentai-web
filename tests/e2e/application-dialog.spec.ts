@@ -115,7 +115,7 @@ test("hover preview apply survives preview closing and candidate dialogs have a 
     await expect(dialog).toBeHidden();
     await expect(card).toBeFocused();
 
-    expect((await page.request.post("/api/bff/auth/login", { data: { email: "candidate@example.com", password: "TalentAI123!", role: "candidate" } })).ok()).toBe(true);
+    expect((await page.request.post("/api/bff/auth/register", { data: { email: `apply-preview-${crypto.randomUUID()}@example.com`, password: "TalentAI123!", fullName: "Nguyễn Minh Anh", role: "candidate", acceptedPrivacyPolicy: true } })).status()).toBe(201);
     await page.goto("/candidate/dashboard");
     await page.getByRole("button", { name: "Ứng tuyển nhanh", exact: true }).first().click();
     await expect(dialog).toBeVisible();

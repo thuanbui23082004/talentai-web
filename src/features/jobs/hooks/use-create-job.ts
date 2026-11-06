@@ -3,10 +3,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createRecruiterJob, getRecruiterJob, getRecruiterJobOptions, getJobPostingOptions, listRecruiterJobs, updateRecruiterJob, deleteRecruiterJob, publishRecruiterJob, changeRecruiterJobStatus } from '@/features/jobs/services/recruiter-jobs';
 import type { JobInput, JobPostingInput, RecruiterJob } from '@/features/jobs/types';
 import { recruiterJobKeys } from '@/features/jobs/query-keys';
+import type { RecruiterJobFilters } from '@/lib/jobs/recruiter-filters';
 
 export function useJobOptions() { return useQuery({ queryKey: recruiterJobKeys.options(), queryFn: getRecruiterJobOptions, retry: false }); }
 export function useJobPostingOptions() { return useQuery({ queryKey: recruiterJobKeys.postingOptions(), queryFn: getJobPostingOptions, retry: false }); }
-export function useRecruiterJobs() { return useQuery({ queryKey: recruiterJobKeys.lists(), queryFn: listRecruiterJobs, retry: false }); }
+export function useRecruiterJobs(filters: RecruiterJobFilters = {}) {
+  return useQuery({ queryKey: [...recruiterJobKeys.lists(), filters], queryFn: ({ signal }) => listRecruiterJobs(filters, signal), retry: false });
+}
 export function useRecruiterJob(id: string) { return useQuery({ queryKey: recruiterJobKeys.detail(id), queryFn: () => getRecruiterJob(id), retry: false }); }
 export function useSaveJob(id?: string) {
   const client = useQueryClient();

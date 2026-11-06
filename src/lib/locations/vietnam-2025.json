@@ -190,7 +190,7 @@
             { "code": "01807", "name": "Xã Thạch An" },
             { "code": "01822", "name": "Xã Đức Long" }
         ],
-        "code": "2",
+        "code": "4",
         "name": "Tỉnh Cao Bằng"
     },
     {
@@ -320,7 +320,7 @@
             { "code": "02620", "name": "Xã Sơn Thuỷ" },
             { "code": "02623", "name": "Xã Trường Sinh" }
         ],
-        "code": "3",
+        "code": "8",
         "name": "Tỉnh Tuyên Quang"
     },
     {
@@ -371,7 +371,7 @@
             { "code": "03382", "name": "Xã Phình Giàng" },
             { "code": "03385", "name": "Xã Tìa Dình" }
         ],
-        "code": "4",
+        "code": "11",
         "name": "Tỉnh Điện Biên"
     },
     {
@@ -415,7 +415,7 @@
             { "code": "03637", "name": "Xã Mường Kim" },
             { "code": "03640", "name": "Xã Khoen On" }
         ],
-        "code": "5",
+        "code": "12",
         "name": "Tỉnh Lai Châu"
     },
     {
@@ -496,7 +496,7 @@
             { "code": "04240", "name": "Xã Mường Lèo" },
             { "code": "04246", "name": "Xã Mường Lạn" }
         ],
-        "code": "6",
+        "code": "14",
         "name": "Tỉnh Sơn La"
     },
     {
@@ -601,7 +601,7 @@
             { "code": "04744", "name": "Xã Yên Thành" },
             { "code": "04750", "name": "Xã Bảo Ái" }
         ],
-        "code": "7",
+        "code": "15",
         "name": "Tỉnh Lào Cai"
     },
     {
@@ -699,7 +699,7 @@
             { "code": "05941", "name": "Xã Điềm Thụy" },
             { "code": "05953", "name": "Xã Kha Sơn" }
         ],
-        "code": "8",
+        "code": "19",
         "name": "Tỉnh Thái Nguyên"
     },
     {
@@ -770,7 +770,7 @@
             { "code": "06625", "name": "Xã Kiên Mộc" },
             { "code": "06637", "name": "Xã Châu Sơn" }
         ],
-        "code": "9",
+        "code": "20",
         "name": "Tỉnh Lạng Sơn"
     },
     {
@@ -830,7 +830,7 @@
             { "code": "07183", "name": "Phường Phong Cốc" },
             { "code": "07192", "name": "Đặc khu Cô Tô" }
         ],
-        "code": "10",
+        "code": "22",
         "name": "Tỉnh Quảng Ninh"
     },
     {
@@ -935,7 +935,7 @@
             { "code": "09523", "name": "Xã Trung Chính" },
             { "code": "09529", "name": "Xã Lâm Thao" }
         ],
-        "code": "11",
+        "code": "24",
         "name": "Tỉnh Bắc Ninh"
     },
     {
@@ -1089,7 +1089,7 @@
             { "code": "09112", "name": "Xã Thổ Tang" },
             { "code": "09154", "name": "Xã Vĩnh Phú" }
         ],
-        "code": "12",
+        "code": "25",
         "name": "Tỉnh Phú Thọ"
     },
     {
@@ -1209,7 +1209,7 @@
             { "code": "11914", "name": "Đặc khu Cát Hải" },
             { "code": "11948", "name": "Đặc khu Bạch Long Vĩ" }
         ],
-        "code": "13",
+        "code": "31",
         "name": "Thành phố Hải Phòng"
     },
     {
@@ -1319,7 +1319,7 @@
             { "code": "13264", "name": "Xã Thư Vũ" },
             { "code": "13279", "name": "Xã Vũ Tiên" }
         ],
-        "code": "14",
+        "code": "33",
         "name": "Tỉnh Hưng Yên"
     },
     {
@@ -1454,7 +1454,7 @@
             { "code": "14743", "name": "Xã Yên Mạc" },
             { "code": "14746", "name": "Xã Đồng Thái" }
         ],
-        "code": "15",
+        "code": "37",
         "name": "Tỉnh Ninh Bình"
     },
     {
@@ -1626,7 +1626,7 @@
             { "code": "16645", "name": "Phường Hải Bình" },
             { "code": "16654", "name": "Phường Nghi Sơn" }
         ],
-        "code": "16",
+        "code": "38",
         "name": "Tỉnh Thanh Hóa"
     },
     {
@@ -1762,7 +1762,7 @@
             { "code": "18028", "name": "Xã Hưng Nguyên Nam" },
             { "code": "18040", "name": "Xã Lam Thành" }
         ],
-        "code": "17",
+        "code": "40",
         "name": "Tỉnh Nghệ An"
     },
     {
@@ -1837,7 +1837,7 @@
             { "code": "18838", "name": "Xã Kỳ Lạc" },
             { "code": "18844", "name": "Xã Kỳ Thượng" }
         ],
-        "code": "18",
+        "code": "42",
         "name": "Tỉnh Hà Tĩnh"
     },
     {
@@ -1921,7 +1921,7 @@
             { "code": "19741", "name": "Xã Mỹ Thủy" },
             { "code": "19742", "name": "Đặc khu Cồn Cỏ" }
         ],
-        "code": "19",
+        "code": "44",
         "name": "Tỉnh Quảng Trị"
     },
     {
@@ -1967,7 +1967,7 @@
             { "code": "20179", "name": "Xã Nam Đông" },
             { "code": "20182", "name": "Xã Long Quảng" }
         ],
-        "code": "20",
+        "code": "46",
         "name": "Thành phố Huế"
     },
     {
@@ -2067,7 +2067,7 @@
             { "code": "20992", "name": "Xã Tam Hải" },
             { "code": "21004", "name": "Xã Tam Mỹ" }
         ],
-        "code": "21",
+        "code": "48",
         "name": "Thành phố Đà Nẵng"
     },
     {
@@ -2169,7 +2169,7 @@
             { "code": "23538", "name": "Xã Ia Tơi" },
             { "code": "23548", "name": "Xã Ya Ly" }
         ],
-        "code": "22",
+        "code": "51",
         "name": "Tỉnh Quảng Ngãi"
     },
     {
@@ -2310,7 +2310,7 @@
             { "code": "24109", "name": "Xã Uar" },
             { "code": "24112", "name": "Xã Ia Rsai" }
         ],
-        "code": "23",
+        "code": "52",
         "name": "Tỉnh Gia Lai"
     },
     {
@@ -2381,7 +2381,7 @@
             { "code": "22900", "name": "Xã Phước Hà" },
             { "code": "22909", "name": "Xã Cà Ná" }
         ],
-        "code": "24",
+        "code": "56",
         "name": "Tỉnh Khánh Hòa"
     },
     {
@@ -2489,7 +2489,7 @@
             { "code": "24604", "name": "Xã Krông Nô" },
             { "code": "24607", "name": "Xã Nam Ka" }
         ],
-        "code": "25",
+        "code": "66",
         "name": "Tỉnh Đắk Lắk"
     },
     {
@@ -2619,7 +2619,7 @@
             { "code": "25162", "name": "Xã Cát Tiên 3" },
             { "code": "25180", "name": "Xã Cát Tiên 2" }
         ],
-        "code": "26",
+        "code": "68",
         "name": "Tỉnh Lâm Đồng"
     },
     {
@@ -2720,7 +2720,7 @@
             { "code": "26491", "name": "Xã Đại Phước" },
             { "code": "26503", "name": "Xã Phước An" }
         ],
-        "code": "27",
+        "code": "75",
         "name": "Tỉnh Đồng Nai"
     },
     {
@@ -2894,7 +2894,7 @@
             { "code": "27673", "name": "Xã An Thới Đông" },
             { "code": "27676", "name": "Xã Thạnh An" }
         ],
-        "code": "29",
+        "code": "79",
         "name": "Thành phố Hồ Chí Minh"
     },
     {
@@ -2996,7 +2996,7 @@
             { "code": "28225", "name": "Xã Thuận Mỹ" },
             { "code": "28243", "name": "Xã An Lục Long" }
         ],
-        "code": "28",
+        "code": "80",
         "name": "Tỉnh Tây Ninh"
     },
     {
@@ -3104,7 +3104,7 @@
             { "code": "30253", "name": "Xã Tân Nhuận Đông" },
             { "code": "30259", "name": "Xã Tân Phú Trung" }
         ],
-        "code": "30",
+        "code": "82",
         "name": "Tỉnh Đồng Tháp"
     },
     {
@@ -3234,7 +3234,7 @@
             { "code": "29845", "name": "Xã Vĩnh Xuân" },
             { "code": "29857", "name": "Xã Lục Sĩ Thành" }
         ],
-        "code": "31",
+        "code": "86",
         "name": "Tỉnh Vĩnh Long"
     },
     {
@@ -3342,7 +3342,7 @@
             { "code": "31105", "name": "Đặc khu Thổ Châu" },
             { "code": "31108", "name": "Đặc khu Kiên Hải" }
         ],
-        "code": "32",
+        "code": "91",
         "name": "Tỉnh An Giang"
     },
     {
@@ -3451,7 +3451,7 @@
             { "code": "31804", "name": "Phường Vĩnh Phước" },
             { "code": "31810", "name": "Xã Lai Hòa" }
         ],
-        "code": "33",
+        "code": "92",
         "name": "Thành phố Cần Thơ"
     },
     {
@@ -3521,7 +3521,7 @@
             { "code": "32244", "name": "Xã Phan Ngọc Hiển" },
             { "code": "32248", "name": "Xã Đất Mũi" }
         ],
-        "code": "34",
+        "code": "96",
         "name": "Tỉnh Cà Mau"
     }
 ]

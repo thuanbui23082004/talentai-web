@@ -9,6 +9,8 @@ test("matches real search filters, paging, categories and rendered results", asy
         ["page=1&size=2&sort=publishedAt,desc", "page=2&pageSize=2&sort=newest"],
         ["keyword=never-match-987&sort=publishedAt,desc", "q=never-match-987"],
         ["location=Đà Nẵng&sort=publishedAt,desc", "city=Đà Nẵng"],
+        ["provinceId=1000001&sort=publishedAt,desc", "provinceCode=1"],
+        ["provinceId=1000001&wardId=3000004&sort=publishedAt,desc", "provinceCode=1&wardCode=00004"],
         ["categoryId=1&experienceLevel=JUNIOR&jobType=FULL_TIME&workMode=REMOTE&sort=publishedAt,desc", "categoryId=1&experienceLevel=JUNIOR&jobType=FULL_TIME&workMode=REMOTE"],
         ["salaryMin=10000000&salaryMax=30000000&salaryCurrency=VND&isSalaryNegotiable=false&sort=salaryMax,desc", "salaryMin=10000000&salaryMax=30000000&salaryCurrency=VND&isSalaryNegotiable=false&sort=salary_desc"],
     ];

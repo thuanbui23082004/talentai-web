@@ -31,6 +31,14 @@ Thư viện 6 mẫu và editor HTML/CSS được giữ trong `cv-template-studio
 
 ## Bảo mật và mock
 
+Popup ứng tuyển cũng tái sử dụng `useCvs`/`useCvActions`: tải danh sách theo tài khoản,
+chọn CV mặc định, upload ngay khi chọn/kéo thả và chọn CV vừa upload sau khi đọc lại danh sách.
+Không dùng CV mẫu trong popup nghiệp vụ; mẫu chỉ giữ ở showcase `/ui/application`.
+Upload lưu CV vào tài khoản, chưa tạo hồ sơ ứng tuyển hoặc gửi thư giới thiệu tới nhà tuyển dụng.
+Đã kiểm tra popup trên desktop/mobile bằng E2E mock và real: danh sách lỗi/thử lại,
+upload lỗi/thử lại, tự chọn CV vừa upload, mở lại popup và đối chiếu danh sách backend.
+CV kiểm thử của lượt real thành công đã được xóa.
+
 BFF xác thực candidate qua auth-service; ghi kiểm tra Origin và CSRF. Backend kiểm tra quyền sở hữu từng CV. Chỉ GET retry tối đa ba lần; POST/PATCH/DELETE không tự retry. Multipart được tạo mới để fetch sinh boundary, không sao chép Content-Type của trình duyệt. Lỗi backend được chuẩn hóa, không lộ exception hoặc storage metadata.
 
 Client kiểm tra phần mở rộng, MIME, file không trống và tối đa 5 MB. BFF kiểm tra thêm chữ ký PDF, hoặc cấu trúc ZIP có `[Content_Types].xml` và `word/document.xml` cho DOCX. Không giải nén hoặc thực thi nội dung file.

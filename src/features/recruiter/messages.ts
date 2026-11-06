@@ -1,5 +1,6 @@
 export const recruiterMessages = {
   Recruiter: {
+    filterStatus: 'Lọc theo trạng thái', allStatuses: 'Tất cả tin', statusEmptyHint: 'Chưa có tin ở trạng thái này. Chọn trạng thái khác hoặc tạo tin mới.', pageOf: 'Trang {page} / {total}',
     accountMenu: 'Menu tài khoản', logout: 'Đăng xuất',
     searchResults: 'Kết quả tìm kiếm', closeSearch: 'Đóng kết quả tìm kiếm', searchLoading: 'Đang tìm kiếm', searchRetry: 'Thử lại', searchFailed: 'Không thể tải tin tuyển dụng. Vui lòng thử lại.', noCandidateResults: 'Không tìm thấy ứng viên phù hợp.', noJobResults: 'Không tìm thấy tin tuyển dụng phù hợp.',
     expandSidebar: 'Mở rộng sidebar', collapseSidebar: 'Thu gọn sidebar', openMenu: 'Mở menu nhà tuyển dụng', navigationMenu: 'Menu nhà tuyển dụng',

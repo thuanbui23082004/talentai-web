@@ -11,14 +11,15 @@ describe("current Vietnamese administrative locations", () => {
         expect(wards).toHaveLength(3321);
         expect(new Set(provinces.map((province) => province.code)).size).toBe(provinces.length);
         expect(new Set(wards.map((ward) => ward.code)).size).toBe(wards.length);
-        expect(provinces.every((province) => /^(?:[1-9]|[12][0-9]|3[0-4])$/.test(province.code) && province.wards.length > 0)).toBe(true);
+        expect(provinces.every((province) => /^[1-9]\d?$/.test(province.code) && province.wards.length > 0)).toBe(true);
         expect(wards.every((ward) => /^\d{5}$/.test(ward.code) && ward.name)).toBe(true);
-        expect(findProvinceByCity("TP.HCM")?.code).toBe("29");
+        expect(findProvinceByCity("TP.HCM")?.code).toBe("79");
         expect(findProvinceByCity("Hà Nội")?.code).toBe("1");
-        expect(findProvinceByCity("Đà Nẵng")?.code).toBe("21");
-        expect(findProvinceByCity("Tây Ninh")?.code).toBe("28");
-        expect(findProvinceByCity("Cà Mau")?.code).toBe("34");
-        expect(provinces.map((province) => Number(province.code)).sort((a, b) => a - b)).toEqual(Array.from({ length: 34 }, (_, index) => index + 1));
+        expect(findProvinceByCity("Đà Nẵng")?.code).toBe("48");
+        expect(findProvinceByCity("Tây Ninh")?.code).toBe("80");
+        expect(findProvinceByCity("Cà Mau")?.code).toBe("96");
+        expect(findProvinceByCity("Điện Biên")?.code).toBe("11");
+        expect(provinces.map((province) => Number(province.code)).sort((a, b) => a - b)).toEqual([1, 4, 8, 11, 12, 14, 15, 19, 20, 22, 24, 25, 31, 33, 37, 38, 40, 42, 44, 46, 48, 51, 52, 56, 66, 68, 75, 79, 80, 82, 86, 91, 92, 96]);
         expect(normalizeLocation("Đà Nẵng")).toBe("da nang");
     });
 

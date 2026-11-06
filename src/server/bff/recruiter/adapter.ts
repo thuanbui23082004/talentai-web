@@ -1,4 +1,5 @@
 import { readRequestIdentity } from '../auth/session';
+import { recruiterJobFiltersSchema } from '@/lib/jobs/recruiter-filters';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'node:crypto';
 import { jobInputSchema } from '@/lib/api/job-schemas';
@@ -110,10 +111,13 @@ export async function handleRecruiterRequest(request: NextRequest, path: string)
     return NextResponse.json(createMockJob(result.data, session.companyId), { status: 201 });
   }
   if (path === 'recruiter/jobs' && request.method === 'GET') {
-    const q = request.nextUrl.searchParams.get('q')?.toLocaleLowerCase('vi') ?? '';
-    const statuses = request.nextUrl.searchParams.getAll('status');
-    const values = store.jobs.filter(job => !getDeletedJobIds().has(job.id) && job.company.id === session.companyId && job.title.toLocaleLowerCase('vi').includes(q) && (!statuses.length || statuses.includes(job.status)));
-    if (request.nextUrl.searchParams.get('sort') === 'title') values.sort((a, b) => a.title.localeCompare(b.title, 'vi'));
+    const filters = recruiterJobFiltersSchema.safeParse(Object.fromEntries(request.nextUrl.searchParams));
+    if (!filters.success) return mockProblem(422, 'VALIDATION_FAILED');
+    const legacyStatuses = { draft: 'DRAFT', open: 'ACTIVE', paused: 'PAUSED', closed: 'CLOSED' };
+    const values = store.jobs.filter(job => {
+      const status = job.posting?.status ?? legacyStatuses[job.status as keyof typeof legacyStatuses];
+      return !getDeletedJobIds().has(job.id) && job.company.id === session.companyId && (!filters.data.status || status === filters.data.status);
+    }).sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
     return paged(values);
   }
   const match = /^recruiter\/jobs\/([^/]+)$/.exec(path);

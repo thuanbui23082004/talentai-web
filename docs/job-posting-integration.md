@@ -39,7 +39,7 @@ Không mở endpoint recruiter, lưu việc hay ứng tuyển trong lần tích 
 | Kinh nghiệm theo số năm min/max | `experienceLevel`: INTERN, FRESHER, JUNIOR, MIDDLE, SENIOR, EXPERT |
 | Remote/Hybrid lẫn trong workType | Tách `jobType` khỏi `workMode`: ONSITE, HYBRID, REMOTE |
 | Cấp bậc manager/director/lead | Không đưa vào bộ lọc thật vì backend không hỗ trợ |
-| Mã tỉnh/phường | UI chọn tỉnh/thành, gửi chuỗi `location` theo API; không gửi mã phường |
+| Mã tỉnh/phường | Tái sử dụng popup `LocationPicker`, chọn một tỉnh/thành và tùy chọn một phường/xã. URL/BFF nhận `provinceCode`, `wardCode`; BFF kiểm tra quan hệ và chuyển sang `provinceId`, `wardId` theo danh mục backend |
 | industryId UUID | `categoryId` số, lấy từ danh mục job-posting |
 | Sắp xếp phù hợp nhất/matching | Bỏ khỏi UI; mặc định mới nhất |
 | Response `id` | Backend trả `jobPostId`, BFF đổi về id cho thẻ việc làm hiện có |
@@ -55,7 +55,11 @@ Các trường còn lại gửi nguyên tên backend. Bộ lọc lương trên U
 Sort được đổi qua bảng 4 giá trị: newest → publishedAt,desc; salary_desc → salaryMax,desc;
 salary_asc → salaryMin,asc; deadline → deadline,asc.
 
-Các query cũ đã deprecated trong contract vẫn được giữ cho test/mock cũ, không xuất hiện trong UI mới.
+`provinceCode`/`wardCode` là bộ lọc hiện hành, dùng chung danh mục 34 tỉnh/thành và 3.321 phường/xã với form tạo tin.
+BFF dùng cùng helper chuyển mã sang ID của form tạo tin (`1000000 + provinceCode`, `3000000 + wardCode`).
+Không gửi đồng thời chuỗi `location` khi đã có mã tỉnh. URL `city` cũ vẫn hỗ trợ tìm theo chuỗi.
+Swagger hiện chỉ nhận một `provinceId` và một `wardId`, chưa hỗ trợ chọn nhiều địa điểm.
+Các query cũ khác đã deprecated trong contract vẫn được giữ cho test/mock cũ, không xuất hiện trong UI mới.
 Ở chế độ real chúng trả 422 nếu gọi trực tiếp, không bị âm thầm bỏ qua.
 Các thuộc tính salaryRangeValid/salaryCurrencyValid trong Swagger là kết quả validation,
 không được đưa vào form hoặc chuyển thành tham số tìm kiếm.
@@ -76,6 +80,11 @@ Nếu cần hiện tên/logo thật, backend nên bổ sung chúng vào response
 Các số liệu cá nhân hóa isSaved/hasApplied/matchScore cũng không được tự sinh.
 
 ## Kiểm thử
+
+Đợt cập nhật bộ lọc mã địa điểm: typecheck, lint, contract lint, build, 314 unit test,
+8 E2E mock và 1 E2E real pass. E2E kiểm tra tỉnh/phường, reload/Back, xóa lọc,
+desktop/mobile và đối chiếu provinceId/wardId với backend thật. Chạy unit với
+`--testTimeout=30000`, E2E mock với `--timeout=90000` để tránh timeout khi biên dịch lần đầu.
 
 Đã pass typecheck, lint, build, contract lint, 200 unit test, 7 E2E mock và 1 E2E real
 với 10 tin công khai. E2E real đã đối chiếu trang 2 có dữ liệu, các bộ lọc, UI mobile và chi tiết tin.

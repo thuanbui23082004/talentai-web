@@ -4,6 +4,8 @@ import { csrfTokenFor } from '@/server/bff/auth/cookies';
 import { jobPostingDefaults, toJobPostingInput, jobPostingFormSchema } from '@/features/jobs/schemas/job-posting-form';
 import { mapRecruiterPosting } from '@/server/bff/recruiter/job-posting-mapper';
 import { jobPostingRecordSchema } from '@/lib/api/job-posting-schemas';
+import { jobRequestError } from '@/features/jobs/errors';
+import { jobFormMessages } from '@/features/jobs/messages';
 import input from '../../contracts/examples/job-posting-input.json';
 
 const base = 'http://job.test/api/v1';
@@ -84,6 +86,31 @@ describe('recruiter job posting backend', () => {
     expect(fetch.mock.calls.some(([, init]) => init?.method === 'POST')).toBe(false);
   });
 
+  it('creates a job in Muong Lay, Dien Bien using official province code 11', async () => {
+    const fetch = network((url, init) => {
+      if (url.endsWith('/job-locations')) return json([
+        { id: 1000011, code: '11', name: 'Tỉnh Điện Biên', type: 'PROVINCE', parentId: null },
+        { id: 1000004, code: '4', name: 'Tỉnh Cao Bằng', type: 'PROVINCE', parentId: null },
+      ]);
+      if (url.endsWith('/job-locations?parentId=1000011')) return json([{ id: 3003151, code: '3151', name: 'Phường Mường Lay', type: 'WARD', parentId: 1000011 }]);
+      if (url.endsWith('/recruiter/jobs') && init?.method === 'POST') return json({ ...record, locations: [{ provinceId: 1000011, wardId: 3003151 }] }, 201);
+    });
+    const response = await handle(request('POST', '', { ...input, workplace: '11:03151' }));
+    expect(response.status).toBe(201);
+    const write = fetch.mock.calls.find(([, init]) => init?.method === 'POST');
+    expect(JSON.parse(String(write?.[1]?.body)).locations).toEqual([{ provinceId: 1000011, wardId: 3003151, addressLine: input.addressLine }]);
+    expect(fetch.mock.calls.some(([url]) => String(url).endsWith('parentId=1000004'))).toBe(false);
+  });
+
+  it('restores Dien Bien and Muong Lay directly from grouped backend IDs', async () => {
+    const fetch = network((url, init) => url.endsWith(`/recruiter/jobs/${id}`) && init?.method === 'GET'
+      ? json({ ...record, locations: [{ provinceId: 1000011, wardId: 3003151, addressLine: input.addressLine }] }) : undefined);
+    const response = await handle(request('GET', `/${id}`));
+    expect(response.status).toBe(200);
+    expect((await response.json()).posting.workplace).toBe('11:03151');
+    expect(fetch.mock.calls.some(([url]) => String(url).includes('job-locations'))).toBe(false);
+  });
+
   it('does not retry a failed POST or fall back to mock success', async () => {
     const fetch = network((url, init) => url === `${base}/recruiter/jobs` && init?.method === 'POST' ? new Response('private backend details', { status: 500 }) : undefined);
     const response = await handle(request());
@@ -121,6 +148,21 @@ describe('recruiter job posting backend', () => {
     expect((await response.json()).items[0].id).toBe(id);
   });
 
+  it.each(['DRAFT', 'ACTIVE', 'PAUSED', 'CLOSED', 'EXPIRED'])('forwards status %s and pagination to the backend', async status => {
+    const fetch = network();
+    const response = await handle(request('GET', `?status=${status}&page=2&pageSize=8`));
+    expect(response.status).toBe(200);
+    const call = fetch.mock.calls.find(([url]) => String(url).includes('/recruiter/jobs?'));
+    const params = new URL(String(call?.[0])).searchParams;
+    expect(Object.fromEntries(params)).toEqual({ status, page: '1', size: '8', sort: 'createdAt,desc' });
+  });
+
+  it('rejects an unknown status before querying job postings', async () => {
+    const fetch = network();
+    expect((await handle(request('GET', '?status=INVALID'))).status).toBe(422);
+    expect(fetch.mock.calls.some(([url]) => String(url).includes('/recruiter/jobs?'))).toBe(false);
+  });
+
   it('does not expose a draft returned for another company', async () => {
     network((url, init) => url.endsWith('/recruiter/jobs') && init?.method === 'POST' ? json({ ...record, companyId: '223e4567-e89b-42d3-a456-426614174000' }, 201) : undefined);
     expect((await handle(request())).status).toBe(403);
@@ -142,6 +184,28 @@ describe('recruiter job posting backend', () => {
     const calls = fetch.mock.calls.filter(([, init]) => init?.method === 'POST');
     expect(calls).toHaveLength(1);
     expect(JSON.parse(String(calls[0][1]?.body))).toEqual({ version: 0 });
+  });
+
+  it('shows the specific company verification message when publishing is denied', async () => {
+    const fetch = network((url, init) => url.endsWith('/publish') && init?.method === 'POST'
+      ? Response.json({ error: { code: 'COMPANY_NOT_VERIFIED', message: 'internal backend details' } }, { status: 403 }) : undefined);
+    const response = await handle(request('POST', `/${id}/publish`, {}, { 'If-Match': '0' }));
+    expect(response.status).toBe(403);
+    const body = await response.json();
+    expect(body.error.code).toBe('COMPANY_NOT_VERIFIED');
+    expect(JSON.stringify(body)).not.toContain('internal backend details');
+    const error = jobRequestError(body, response.status);
+    expect(error.messageKey).toBe('companyNotVerified');
+    expect(jobFormMessages.JobForm.errors.companyNotVerified).toBe('Doanh nghiệp chưa được xác thực. Vui lòng hoàn tất xác thực trước khi đăng tin.');
+    expect(fetch.mock.calls.filter(([, init]) => init?.method === 'POST')).toHaveLength(1);
+  });
+
+  it('keeps actual authorization failures separate from unverified companies', async () => {
+    network((url, init) => url.endsWith('/publish') && init?.method === 'POST'
+      ? Response.json({ error: { code: 'FORBIDDEN', message: 'private permission details' } }, { status: 403 }) : undefined);
+    const response = await handle(request('POST', `/${id}/publish`, {}, { 'If-Match': '0' }));
+    expect(response.status).toBe(403);
+    expect((await response.json()).error.code).toBe('FORBIDDEN');
   });
 
   it('deletes using the version the user confirmed, without retrying', async () => {
