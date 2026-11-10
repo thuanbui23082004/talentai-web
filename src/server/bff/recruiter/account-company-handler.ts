@@ -2,9 +2,10 @@ import { randomUUID } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { accountPatchSchema, imageFileSchema } from '@/features/account';
 import { companyInputSchema, logoFileSchema, companyImageFileSchema, verificationFilesSchema } from '@/features/company';
-import { recruiterIndustries } from '@/mocks/fixtures/recruiter-catalog';
+import { getCatalogItems } from '@/server/bff/catalog-store';
 import { getMockCompanies, getRecruiterMockStore, type RecruiterContext } from '@/server/bff/recruiter/mock-store';
 import type { components } from '@/lib/api/generated/schema';
+import { getVerificationFiles } from '@/server/bff/company-verification-store';
 
 type User = components['schemas']['User'];
 type AccountRecord = { user: User };
@@ -55,10 +56,10 @@ export async function handleAccountCompany(request: NextRequest, path: string, s
     if (request.method === 'POST' && company) return problem(409, 'CONFLICT');
     if (request.method === 'PUT' && !company) return problem(404, 'NOT_FOUND');
     const parsed = companyInputSchema.safeParse(await request.json().catch(() => null));
-    if (!parsed.success || !parsed.data.industryIds.every(industry => recruiterIndustries.some(item => item.id === industry))) return problem(422, 'VALIDATION_FAILED');
+    if (!parsed.success || !parsed.data.industryIds.every(industry => getCatalogItems('industries').some(item => item.id === industry && (item.isActive || company?.industries?.some(existing => existing.id === industry))))) return problem(422, 'VALIDATION_FAILED');
     const { industryIds, ...fields } = parsed.data;
     const now = new Date().toISOString();
-    const updated: components['schemas']['Company'] = { ...(company ?? { id: randomUUID(), verificationStatus: 'unverified', createdAt: now }), ...fields, industries: recruiterIndustries.filter(item => industryIds.includes(item.id)).map(item => ({ id: item.id, name: item.name })), updatedAt: now };
+    const updated: components['schemas']['Company'] = { ...(company ?? { id: randomUUID(), verificationStatus: 'unverified', createdAt: now }), ...fields, industries: getCatalogItems('industries').filter(item => industryIds.includes(item.id)).map(item => ({ id: item.id, name: item.name })), updatedAt: now };
     companies.set(updated.id, updated); session.companyId = updated.id; account.user.companyId = updated.id;
     syncCompany(updated);
     return response(updated, company ? 200 : 201);
@@ -85,11 +86,14 @@ export async function handleAccountCompany(request: NextRequest, path: string, s
     if (company) { const key = path.endsWith('/cover') ? 'coverImageUrl' : 'logoUrl'; deleteMedia(company[key]); company[key] = url; syncCompany(company); return response(company); }
   }
   if (path === 'recruiter/company/verification-documents' && request.method === 'POST' && company) {
+    if (company.verificationStatus === 'suspended') return problem(403, 'FORBIDDEN');
     const data = await request.formData().catch(() => null);
     const parsed = verificationFilesSchema.safeParse(data?.getAll('files'));
     if (!parsed.success) return problem(422, 'VALIDATION_FAILED');
     for (const file of parsed.data) if (!await validSignature(file)) return problem(422, 'VALIDATION_FAILED');
-    company.verificationDocuments = parsed.data.map((file, index) => ({ id: randomUUID(), fileName: `document-${index + 1}${file.type === 'application/pdf' ? '.pdf' : '.image'}`, mimeType: file.type, sizeBytes: file.size, uploadedAt: new Date().toISOString() }));
+    const files = await Promise.all(parsed.data.map(async (file, index) => ({ id: randomUUID(), fileName: `document-${index + 1}${file.type === 'application/pdf' ? '.pdf' : '.image'}`, mimeType: file.type, sizeBytes: file.size, uploadedAt: new Date().toISOString(), bytes: new Uint8Array(await file.arrayBuffer()) })));
+    for (const previous of company.verificationDocuments ?? []) if (previous.id) getVerificationFiles().delete(previous.id);
+    company.verificationDocuments = files.map(({ bytes, ...info }) => { getVerificationFiles().set(info.id, { companyId: company.id, type: info.mimeType, bytes }); return info; });
     company.verificationStatus = 'pending'; delete company.rejectionReason; delete company.verifiedAt; syncCompany(company);
     return response(company);
   }

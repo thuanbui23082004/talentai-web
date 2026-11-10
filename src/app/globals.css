@@ -2,6 +2,23 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+.admin-app {
+  --admin-bg: #f8f7fd;
+  --admin-surface: #ffffff;
+  --admin-text: #1a1a1a;
+  --admin-muted: #657084;
+  --admin-border: #eeedf5;
+  --admin-primary: #5817ba;
+  --admin-accent: #793fff;
+  --admin-soft: #f3ebff;
+  --admin-danger: #b42344;
+  --admin-shadow: #25204a0a;
+  --admin-font-body: 14px;
+  --admin-font-title: 20px;
+  --admin-font-section: 18px;
+  --admin-font-subheading: 16px;
+}
+
 /* Tokens scoped to the recruiter preview; other role layouts are unaffected. */
 .recruiter-app {
   --recruiter-bg: #f7f8fc;

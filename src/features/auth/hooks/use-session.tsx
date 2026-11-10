@@ -16,7 +16,8 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const expired = () => {
       queryClient.clear();
-      if (/^\/(candidate|recruiter|admin)(\/|$)/.test(window.location.pathname)) window.location.replace('/login?reason=expired');
+      // Admin owns a separate session cookie and server guard/login flow.
+      if (/^\/(candidate|recruiter)(\/|$)/.test(window.location.pathname)) window.location.replace('/login?reason=expired');
     };
     window.addEventListener(SESSION_EXPIRED_EVENT, expired);
     return () => window.removeEventListener(SESSION_EXPIRED_EVENT, expired);
@@ -24,7 +25,7 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!query.isSuccess) return;
-    if (!query.data && /^\/(candidate|recruiter|admin)(\/|$)/.test(window.location.pathname)) {
+    if (!query.data && /^\/(candidate|recruiter)(\/|$)/.test(window.location.pathname)) {
       queryClient.clear();
       window.location.replace("/login?reason=expired");
     } else if (query.data && window.location.pathname === "/login") {

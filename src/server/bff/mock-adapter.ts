@@ -1,3 +1,4 @@
+import { handleAdminMockRequest } from './admin-adapter';
 import { NextRequest } from 'next/server';
 import { handleRecruiterRequest } from './recruiter/adapter';
 export { mockProblem } from './recruiter/adapter';
@@ -18,6 +19,7 @@ const mockJobDetails = createMockJobDetails(mockJobs);
 export async function handleMockRequest(request: Request, _targetPath?: string): Promise<Response> {
   void _targetPath;
   const targetPath = new URL(request.url).pathname.replace('/api/bff/', '');
+  if (targetPath.startsWith('admin/') || request.headers.get('X-TalentAI-Workspace') === 'admin') return handleAdminMockRequest(new NextRequest(request), targetPath);
   if (isAuthRequest(request)) return handleAuthRequest(request);
   if (/^(recruiter\/|catalog\/|analysis-tasks\/|me\/|auth\/change-password)/.test(targetPath) || (targetPath === 'me' && request.method !== 'GET')) {
     return handleRecruiterRequest(new NextRequest(request), targetPath);

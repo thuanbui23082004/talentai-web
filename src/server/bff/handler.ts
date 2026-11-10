@@ -1,3 +1,5 @@
+import { NextRequest } from 'next/server';
+import { handleAdminMockRequest } from './admin-adapter';
 import { getServerEnv } from "@/lib/env";
 import { handleMockRequest } from "./mock-adapter";
 import { proxyRequest } from "./proxy";
@@ -18,6 +20,10 @@ import { handleJobApplicantStatus } from './recruiter/job-applicant-status-servi
 
 export async function handleBffRequest(request: Request): Promise<Response> {
     try {
+        const adminPath = new URL(request.url).pathname.replace('/api/bff/', '');
+        if ((adminPath.startsWith('admin/') || request.headers.get('X-TalentAI-Workspace') === 'admin') && getServerEnv().DATA_MODE === 'mock') {
+            return await handleAdminMockRequest(request instanceof NextRequest ? request : new NextRequest(request.url, { method: request.method, headers: request.headers, body: request.body }), adminPath);
+        }
         if (isAuthRequest(request)) return await handleAuthRequest(request);
         const env = getServerEnv();
         const applicantStatus = new URL(request.url).pathname.match(/^\/api\/bff\/recruiter\/job-applications\/([^/]+)\/status$/);

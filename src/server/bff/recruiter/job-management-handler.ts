@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { jobInputSchema } from '@/lib/api/job-schemas';
 import { mockPostingJob } from './job-posting-mock';
 import { getDeletedJobIds, getMockCompanies, getRecruiterMockStore } from '@/server/bff/recruiter/mock-store';
-import { recruiterIndustries } from '@/mocks/fixtures/recruiter-catalog';
+import { getCatalogItems } from '@/server/bff/catalog-store';
 import { canChangeJobStatus, type JobStatusAction } from '@/features/jobs';
 const problem = (status: number, code: string) => NextResponse.json({ error: { code, message: code } }, { status });
 export async function handleJobManagement(request: NextRequest, path: string, companyId?: string) {
@@ -12,6 +12,7 @@ export async function handleJobManagement(request: NextRequest, path: string, co
   if (!job) return problem(404, 'NOT_FOUND');
   if (['pause', 'reopen', 'close'].includes(match[2]) && request.method === 'POST') {
     const action = match[2] as JobStatusAction;
+    if (action === 'reopen' && companyId && getMockCompanies().get(companyId)?.verificationStatus === 'suspended') return problem(409, 'COMPANY_NOT_VERIFIED');
     if (!canChangeJobStatus(job.status, action)) return problem(409, 'INVALID_STATUS_TRANSITION');
     job.status = action === 'pause' ? 'paused' : action === 'close' ? 'closed' : 'open';
     job.updatedAt = new Date().toISOString();
@@ -33,8 +34,8 @@ export async function handleJobManagement(request: NextRequest, path: string, co
     }
     const parsed = jobInputSchema.safeParse(body);
     if (!parsed.success) return problem(422, 'VALIDATION_FAILED');
-    const industry = recruiterIndustries.find(item => item.id === parsed.data.industryId);
-    if (!industry) return problem(422, 'VALIDATION_FAILED');
+    const industry = getCatalogItems('industries').find(item => item.id === parsed.data.industryId);
+    if (!industry || (!industry.isActive && job.industry?.id !== industry.id)) return problem(422, 'VALIDATION_FAILED');
     const { industryId: _industryId, positionId, skills, ...fields } = parsed.data;
     void _industryId;
     const status = job.status === 'open' ? 'pending_review' : job.status;

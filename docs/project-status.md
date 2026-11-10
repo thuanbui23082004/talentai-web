@@ -1,5 +1,16 @@
 # Trạng thái triển khai
 
+## Admin — Thống kê và báo cáo (2026-11-08)
+
+Đã triển khai giao diện `/admin/statistics`, truy cập từ Hệ thống → Thống kê và báo cáo.
+Tổng quan hiện tại dùng API overview; báo cáo theo khoảng ngày gồm chuỗi hoạt động
+(6 chỉ số, nhóm ngày/tuần/tháng), hồ sơ theo trạng thái/ngành và tuyển dụng theo ngành/doanh nghiệp.
+Chỉ số vận hành dùng ảnh chụp thu thập gần nhất, không áp dụng bộ lọc khoảng ngày.
+Các endpoint `/admin/stats/applications`, `/admin/stats/recruitment`, `/admin/stats/system-metrics`
+và các metric/interval còn lại của `/admin/stats/timeseries` đã có mock theo contract.
+Không thêm endpoint hoặc sửa schema tự sinh. Chưa nghiệm thu backend thật.
+Kết quả kiểm tra và các lỗi nền của dự án được ghi tại `reviews/admin-statistics.md`.
+
 Đăng nhập gửi loại tài khoản đang chọn tới BFF. BFF đối chiếu role Java trả về trước khi đặt cookie;
 sai loại tài khoản trả `403 AUTH_ROLE_MISMATCH`, giữ người dùng ở trang đăng nhập.
 
