@@ -1,0 +1,16 @@
+export const adminPaymentMessages = { AdminPayments: {
+  title: 'Quản lý thanh toán', subtitle: 'Tra cứu đơn hàng, theo dõi giao dịch và ghi nhận đối soát.',
+  search: 'Tìm kiếm đơn hàng', searchHint: 'Mã đơn, mã giao dịch, người mua hoặc doanh nghiệp', status: 'Trạng thái thanh toán', reconciliation: 'Trạng thái đối soát',
+  all: 'Tất cả', from: 'Từ ngày', to: 'Đến ngày', dateOrder: 'Ngày kết thúc phải bằng hoặc sau ngày bắt đầu.', clear: 'Xóa bộ lọc', refresh: 'Làm mới',
+  paid: 'Thành công', pending: 'Chờ thanh toán', failed: 'Thất bại', cancelled: 'Đã hủy', expired: 'Hết hạn', unreviewed: 'Chưa đối soát', verified: 'Đã xác minh', needs_follow_up: 'Cần kiểm tra thêm',
+  paidTotal: 'Tổng đã thanh toán', pendingCount: 'Đơn chờ thanh toán', issueCount: 'Giao dịch lỗi / hết hạn', followUpCount: 'Cần kiểm tra thêm', summaryHint: 'Số liệu theo bộ lọc hiện tại.',
+  order: 'Mã đơn hàng', buyer: 'Người mua / Doanh nghiệp', plan: 'Gói dịch vụ', amount: 'Số tiền', created: 'Ngày tạo', actions: 'Thao tác', view: 'Xem chi tiết',
+  loading: 'Đang tải thanh toán', empty: 'Không có giao dịch phù hợp.', emptyHint: 'Thử xóa bộ lọc hoặc chọn khoảng thời gian khác.', retry: 'Thử lại', previous: 'Trước', next: 'Sau', count: '{count} giao dịch', page: 'Trang {page}/{pages}',
+  back: 'Trở lại danh sách', detail: 'Chi tiết thanh toán', orderInfo: 'Thông tin đơn hàng', transactionInfo: 'Thông tin giao dịch', company: 'Doanh nghiệp', buyerName: 'Người mua', transaction: 'Mã giao dịch', method: 'Phương thức', bank_transfer: 'Chuyển khoản ngân hàng', domestic_card: 'Thẻ nội địa', ewallet: 'Ví điện tử', paidAt: 'Thời điểm thanh toán', absent: 'Chưa có',
+  issue: 'Thông tin giao dịch lỗi', timeout: 'Chưa nhận được kết quả từ cổng thanh toán trong thời gian chờ.', declined: 'Cổng thanh toán từ chối giao dịch mẫu.', issueExpired: 'Đơn hàng hết thời hạn thanh toán.', issueCancelled: 'Người mua đã hủy đơn hàng mẫu.', pendingHint: 'Đơn hàng chưa được ghi nhận thanh toán thành công.',
+  review: 'Ghi nhận đối soát', reviewHint: 'Kiểm tra thông tin đơn hàng và kết quả giao dịch trước khi ghi nhận. Trạng thái thanh toán được giữ theo kết quả hiện có.',
+  outcome: 'Kết quả kiểm tra', verifiedOption: 'Đã xác minh kết quả giao dịch hiện có', followUpOption: 'Cần kiểm tra thêm', note: 'Ghi chú / lý do đối soát', noteRequired: 'Vui lòng nhập ghi chú đối soát.', noteLong: 'Ghi chú không được vượt quá 1.000 ký tự.', continue: 'Tiếp tục', confirm: 'Xác nhận đối soát', confirmHint: 'Kiểm tra lại kết quả và ghi chú trước khi xác nhận.', cancel: 'Hủy', edit: 'Sửa nội dung', saved: 'Đã ghi nhận đối soát và bổ sung nhật ký quản trị.', readOnly: 'Giao dịch này không cần ghi nhận đối soát mới.',
+  history: 'Lịch sử đối soát', noHistory: 'Chưa có lần đối soát nào được ghi nhận.',
+  errors: { generic: 'Không thể tải hoặc cập nhật thanh toán. Vui lòng thử lại.', UNAUTHENTICATED: 'Phiên quản trị không còn hợp lệ. Vui lòng đăng nhập lại.', UNAVAILABLE: 'Chức năng thanh toán hiện chưa sẵn sàng.', NOT_FOUND: 'Không tìm thấy đơn hàng này.', INVALID_INPUT: 'Thông tin đối soát chưa hợp lệ. Vui lòng kiểm tra lại.', CONFLICT: 'Đơn hàng đã được cập nhật. Hãy tải lại thông tin trước khi đối soát.', INVALID_STATE: 'Trạng thái hiện tại không cho phép ghi nhận đối soát mới.' },
+  login: 'Đăng nhập admin',
+} };

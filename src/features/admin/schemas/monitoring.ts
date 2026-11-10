@@ -1,0 +1,15 @@
+import { z } from 'zod';
+export const logLevels = ['debug', 'info', 'warn', 'error', 'fatal'] as const;
+export const anomalyTypes = ['repeated_login_failures', 'suspicious_ip', 'burst_applications', 'burst_registrations', 'abnormal_ai_usage', 'privilege_change', 'other'] as const;
+export const severities = ['low', 'medium', 'high', 'critical'] as const;
+export const anomalyStatuses = ['open', 'reviewed', 'dismissed'] as const;
+export const systemLogSchema = z.object({ id: z.uuid(), occurredAt: z.iso.datetime({ offset: true }), level: z.enum(logLevels), source: z.string().optional(), message: z.string(), requestId: z.string().optional() });
+export const anomalySchema = z.object({ id: z.uuid(), type: z.enum(anomalyTypes), severity: z.enum(severities), status: z.enum(anomalyStatuses), userId: z.uuid().optional(), description: z.string().optional(), reviewNote: z.string().optional(), detectedAt: z.iso.datetime({ offset: true }), evidence: z.object({ eventCount: z.number().int().nonnegative().optional(), windowMinutes: z.number().nonnegative().optional(), source: z.string().optional() }).optional() });
+const meta = z.object({ page: z.number().int().positive(), pageSize: z.number().int().positive(), totalItems: z.number().int().nonnegative(), totalPages: z.number().int().nonnegative() });
+export const systemLogPageSchema = z.object({ items: systemLogSchema.array(), meta });
+export const anomalyPageSchema = z.object({ items: anomalySchema.array(), meta });
+export const anomalyUpdateSchema = z.object({ status: z.enum(['reviewed', 'dismissed']), note: z.string().optional() });
+export const anomalyReviewSchema = anomalyUpdateSchema.extend({ note: z.string().trim().min(1, 'noteRequired').max(1000, 'noteLong') });
+export type SystemLog = z.infer<typeof systemLogSchema>;
+export type Anomaly = z.infer<typeof anomalySchema>;
+export type AnomalyReview = z.infer<typeof anomalyReviewSchema>;

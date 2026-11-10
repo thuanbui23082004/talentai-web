@@ -1,0 +1,13 @@
+import { z } from 'zod';
+import type { components, operations } from '@/lib/api/generated/schema';
+const count = z.number().int().nonnegative();
+const catalog = z.object({ id: z.string(), name: z.string() });
+export const applicationStatsSchema = z.object({ total: count.optional(), byStatus: z.record(z.string(), count).optional(), byIndustry: z.array(z.object({ industry: catalog.optional(), count: count.optional() })).optional() }) satisfies z.ZodType<components['schemas']['ApplicationStats']>;
+export const recruitmentStatsSchema = z.object({ byIndustry: z.array(z.object({ industry: catalog.optional(), jobs: count.optional(), applications: count.optional(), hires: count.optional() })).optional(), topCompanies: z.array(z.object({ company: z.object({ id: z.string(), name: z.string() }).optional(), jobs: count.optional(), applications: count.optional(), hires: count.optional() })).optional(), averageTimeToHireDays: z.number().nonnegative().optional() }) satisfies z.ZodType<components['schemas']['RecruitmentStats']>;
+export const systemMetricsSchema = z.object({ uptimePercent: z.number().min(0).max(100).optional(), apiErrorRate: z.number().nonnegative().optional(), p95LatencyMs: count.optional(), concurrentUsers: count.optional(), aiQueueDepth: count.optional(), aiAverageProcessingMs: count.optional(), lastBackupAt: z.iso.datetime({ offset: true }).optional(), collectedAt: z.iso.datetime({ offset: true }).optional() }) satisfies z.ZodType<components['schemas']['SystemMetrics']>;
+export const statisticsMetrics = ['new_users', 'new_companies', 'jobs_posted', 'applications', 'logins', 'ai_tasks'] as const;
+export const statisticsIntervals = ['day', 'week', 'month'] as const;
+export const statisticsSeriesQuerySchema = z.object({ metric: z.enum(statisticsMetrics), interval: z.enum(statisticsIntervals).default('day') });
+export const statisticsPeriodFormSchema = z.object({ from: z.union([z.literal(''), z.iso.date()]), to: z.union([z.literal(''), z.iso.date()]) }).refine(value => !value.from || !value.to || value.from <= value.to, 'dateOrder');
+export type StatisticsMetric = NonNullable<operations['adminGetTimeseries']['parameters']['query']>['metric'];
+export type StatisticsInterval = NonNullable<NonNullable<operations['adminGetTimeseries']['parameters']['query']>['interval']>;

@@ -1,0 +1,11 @@
+import { Suspense } from 'react';
+import { redirect } from 'next/navigation';
+import { hasAdminSession } from '@/server/bff/admin-session';
+import { AdminShell } from '@/features/admin/components/admin-shell';
+import { AdminLoading } from '@/features/admin/components/admin-loading';
+import { AdminPayments } from '@/features/admin/components/admin-payments';
+export default function AdminPaymentsPage() { return <Suspense fallback={<AdminLoading />}><Content /></Suspense>; }
+async function Content() {
+  if (!await hasAdminSession()) redirect('/admin/login');
+  return <AdminShell><AdminPayments /></AdminShell>;
+}
