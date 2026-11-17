@@ -3292,6 +3292,97 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
+  /candidate/application-tracking:
+    get:
+      tags: [Applications]
+      operationId: listCandidateApplicationTracking
+      summary: Theo dõi hồ sơ ứng tuyển của ứng viên
+      description: BFF chuyển GET /api/v1/applications của application-service; phân trang từ 1 ở trình duyệt sang 0 ở backend.
+      security:
+      - cookieAuth: []
+      x-roles: [candidate]
+      parameters:
+      - name: status
+        in: query
+        schema:
+          $ref: '#/components/schemas/JobApplicantStatus'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Danh sách hồ sơ của tài khoản hiện tại
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateApplicationTrackingPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /candidate/application-tracking/{applicationId}:
+    get:
+      tags: [Applications]
+      operationId: getCandidateApplicationTracking
+      summary: Chi tiết hồ sơ đã ứng tuyển
+      security:
+      - cookieAuth: []
+      x-roles: [candidate]
+      parameters:
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Id'
+      responses:
+        '200':
+          description: Chi tiết hồ sơ thuộc tài khoản hiện tại
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateApplicationTracking'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /candidate/application-tracking/{applicationId}/history:
+    get:
+      tags: [Applications]
+      operationId: getCandidateApplicationTrackingHistory
+      summary: Lịch sử trạng thái của hồ sơ đã ứng tuyển
+      security:
+      - cookieAuth: []
+      x-roles: [candidate]
+      parameters:
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Id'
+      responses:
+        '200':
+          description: Lịch sử theo phiên bản tăng dần
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CandidateApplicationTrackingHistory'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
   /applications/{applicationId}/withdraw:
     post:
       tags:
@@ -10593,6 +10684,64 @@ components:
             $ref: '#/components/schemas/Application'
         meta:
           $ref: '#/components/schemas/PageMeta'
+    CandidateApplicationTracking:
+      type: object
+      required: [id, jobId, resumeId, status, appliedAt, updatedAt, version]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        jobId:
+          $ref: '#/components/schemas/Id'
+        resumeId:
+          $ref: '#/components/schemas/Id'
+        jobTitle:
+          type: string
+        companyName:
+          type: string
+        companyLogoUrl:
+          type: string
+          format: uri
+        resumeFileName:
+          type: string
+        coverLetter:
+          type: string
+        status:
+          $ref: '#/components/schemas/JobApplicantStatus'
+        appliedAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          minimum: 0
+    CandidateApplicationTrackingPage:
+      type: object
+      required: [items, meta]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CandidateApplicationTracking'
+        meta:
+          $ref: '#/components/schemas/PageMeta'
+    CandidateApplicationTrackingHistory:
+      type: object
+      required: [status, changedAt, version]
+      properties:
+        status:
+          $ref: '#/components/schemas/JobApplicantStatus'
+        previousStatus:
+          $ref: '#/components/schemas/JobApplicantStatus'
+        changedAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          minimum: 0
+        note:
+          type: string
     WithdrawRequest:
       type: object
       properties:

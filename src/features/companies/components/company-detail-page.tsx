@@ -138,9 +138,7 @@ export function CompanyDetailPage({
                         name={company.name}
                         description={company.description}
                     />
-                    {company.openJobsCount !== undefined && (
-                        <CompanyJobs companyId={company.id} />
-                    )}
+                    <CompanyJobs companyId={company.id} />
                     <section aria-labelledby="similar-companies-title">
                         <h2
                             id="similar-companies-title"

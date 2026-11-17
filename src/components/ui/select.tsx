@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { Select as Primitive } from "@base-ui/react/select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Input } from "./input";
 
 export type SelectOption = { value: string; label: string; disabled?: boolean };
 export type SelectProps = Omit<
@@ -11,6 +13,7 @@ export type SelectProps = Omit<
 > & {
     options: SelectOption[];
     placeholder?: string;
+    searchable?: boolean;
     className?: string;
     "aria-label"?: string;
     "aria-labelledby"?: string;
@@ -21,6 +24,7 @@ export type SelectProps = Omit<
 function OptionsSelect({
     options,
     placeholder = "Chọn một giá trị",
+    searchable = false,
     className,
     "aria-label": label,
     "aria-labelledby": labelledBy,
@@ -28,8 +32,13 @@ function OptionsSelect({
     "aria-invalid": invalid,
     ...props
 }: SelectProps) {
+    const [search, setSearch] = useState("");
+    const normalizedSearch = search.trim().toLocaleLowerCase("vi").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
+    const visibleOptions = searchable && normalizedSearch
+        ? options.filter(option => option.label.toLocaleLowerCase("vi").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").includes(normalizedSearch))
+        : options;
     return (
-        <Primitive.Root {...props} items={options}>
+        <Primitive.Root {...props} items={options} onOpenChange={(open, details) => { if (!open) setSearch(""); props.onOpenChange?.(open, details); }}>
             <Primitive.Trigger
                 aria-label={label}
                 aria-labelledby={labelledBy}
@@ -53,8 +62,9 @@ function OptionsSelect({
                     className="z-50"
                 >
                     <Primitive.Popup className="ui-popup max-h-[min(20rem,var(--available-height))] min-w-[var(--anchor-width)] overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+                        {searchable && <div className="sticky top-0 z-10 bg-card p-1" onKeyDown={event => { if (event.key.length === 1 || event.key === "Backspace") event.stopPropagation(); }}><Input type="search" aria-label="Tìm tỉnh/thành" placeholder="Gõ tên tỉnh/thành..." value={search} onChange={event => setSearch(event.target.value)} autoFocus /></div>}
                         <Primitive.List className="space-y-1">
-                            {options.map((option) => (
+                            {visibleOptions.map((option) => (
                                 <Primitive.Item
                                     key={option.value}
                                     value={option.value}
@@ -70,6 +80,7 @@ function OptionsSelect({
                                 </Primitive.Item>
                             ))}
                         </Primitive.List>
+                        {visibleOptions.length === 0 && <p className="px-3 py-4 text-sm text-muted-foreground">Không tìm thấy địa điểm</p>}
                     </Primitive.Popup>
                 </Primitive.Positioner>
             </Primitive.Portal>

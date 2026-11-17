@@ -1,13 +1,27 @@
 import { cache } from "react";
 import type { components } from "@/lib/api/generated/schema";
 import { handleBffRequest } from "../handler";
+import { loadCompany } from "./company-detail";
 
 export const loadJobDetail = cache(async (jobId: string) => {
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jobId)) return null;
     const response = await handleBffRequest(new Request(`http://talentai.internal/api/bff/jobs/${encodeURIComponent(jobId)}`));
     if (response.status === 404) return null;
     if (!response.ok) throw new Error("Không thể tải thông tin công việc. Vui lòng thử lại.");
-    return await response.json() as components["schemas"]["JobDetail"];
+    const job = await response.json() as components["schemas"]["JobDetail"];
+    try {
+        const company = await loadCompany(job.company.id);
+        if (company) {
+            return {
+                ...job,
+                company: { ...job.company, name: company.name, logoUrl: company.logoUrl },
+                industry: company.industries?.[0] ?? job.industry,
+            };
+        }
+    } catch {
+        // Company details are optional; keep the job page available if that service fails.
+    }
+    return job;
 });
 
 export async function loadRelatedJobs(job: components["schemas"]["JobDetail"]) {

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { formatDeadline, formatSalaryRange } from "@/lib/utils";
@@ -42,7 +43,7 @@ export function JobCard({
                     data-slot="job-card-logo"
                     className="flex size-16 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-secondary/15 px-1 text-center text-[13px] font-extrabold tracking-tight break-words text-primary sm:size-18"
                 >
-                    {wordmark}
+                    {job.company.logoUrl ? <Image src={job.company.logoUrl} alt="" width={72} height={72} unoptimized className="max-h-full max-w-full object-contain" /> : wordmark}
                 </span>
                 <div className="min-w-0 flex-1">
                     <h3 className="min-w-0 text-[15px] font-semibold leading-5">

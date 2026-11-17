@@ -1,6 +1,7 @@
 import type { ApplicationFilters } from "./types";
 export const applicationKeys = {
     all: ["applications"] as const,
+    tracking: ["candidate-application-tracking"] as const,
     list: (userId: string | undefined, filters: ApplicationFilters) => ["applications", userId, filters] as const,
     interviews: (userId: string | undefined) => ["application-interviews", userId] as const,
 };

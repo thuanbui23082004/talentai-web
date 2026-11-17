@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { NavigationDetails } from "@/components/shared/navigation-details";
-import { BriefcaseBusiness, ChevronDown, Menu } from "lucide-react";
+import { ChevronDown, Menu } from "lucide-react";
 import { AccountLinks } from "@/features/auth";
 import { BrandLogo } from "@/components/shared/brand-logo";
 import { AvailabilityButton } from "@/components/shared/availability-button";
@@ -93,21 +93,9 @@ export function SiteHeader() {
                         </nav>
                         <div className="ml-auto hidden items-center gap-4 lg:flex xl:gap-6">
                             <SiteHeaderActions />
-                            <div className="border-x border-white/20 px-4 text-center">
+                            <div className=" px-4 text-center">
                                 <AccountLinks />
                             </div>
-                            <Link
-                                href="/login?role=recruiter"
-                                className="flex items-center gap-2 text-xs font-semibold"
-                            >
-                                <BriefcaseBusiness className="size-4" />
-                                <span>
-                                    <span className="block text-[10px] font-normal">
-                                        DÀNH CHO
-                                    </span>
-                                    Nhà tuyển dụng
-                                </span>
-                            </Link>
                         </div>
                         <NavigationDetails className="group ml-auto lg:hidden">
                             <summary

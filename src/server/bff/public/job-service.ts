@@ -3,6 +3,7 @@ import type { components } from "@/lib/api/generated/schema";
 import { parseJobSearchParams } from "@/lib/jobs/validation";
 import { toJobLocationIds } from "../recruiter/job-location-ids";
 import { apiError } from "../responses";
+import { handleCompanyService } from "./company-service";
 
 const experience = z.enum(["INTERN", "FRESHER", "JUNIOR", "MIDDLE", "SENIOR", "EXPERT"]);
 const jobType = z.enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP", "FREELANCE"]);
@@ -17,6 +18,7 @@ const pageSchema = z.object({ items: z.array(jobSchema), page: z.number().int().
 const categoriesSchema = z.array(z.object({ categoryId: z.number().int().positive(), categoryName: z.string() }));
 const detailSchema = jobSchema.extend({ description: z.string().nullish(), requirements: z.string().nullish(), benefits: z.string().nullish(), headCount: z.number().int().nullish(), skills: z.array(z.object({ skillName: z.string() })).nullish() });
 const SORT = { newest: "publishedAt,desc", salary_desc: "salaryMax,desc", salary_asc: "salaryMin,asc", deadline: "deadline,asc" } as const;
+const companyCache = new Map<string, { value: components["schemas"]["CompanyPublic"]; expiresAt: number }>();
 
 export function summary(job: z.infer<typeof jobSchema>): components["schemas"]["JobSummary"] {
     return {
@@ -36,7 +38,7 @@ export function isPublicJobRequest(request: Request) {
     return /^\/api\/bff\/jobs(?:\/(?:categories|[0-9a-f-]{36}))?$/i.test(new URL(request.url).pathname);
 }
 
-export async function handleJobService(request: Request, baseUrl: string): Promise<Response> {
+export async function handleJobService(request: Request, baseUrl: string, companyBaseUrl?: string): Promise<Response> {
     if (request.method !== "GET") return apiError(405, "BAD_REQUEST", "Phương thức không được hỗ trợ.");
     const source = new URL(request.url);
     const path = source.pathname.replace("/api/bff/", "");
@@ -78,7 +80,29 @@ export async function handleJobService(request: Request, baseUrl: string): Promi
             if (path === "jobs/categories") result = categoriesSchema.parse(body.data);
             else if (path === "jobs") {
                 const page = pageSchema.parse(body.data);
-                result = { items: page.items.map(summary), meta: { page: page.page + 1, pageSize: page.size, totalItems: page.totalElements, totalPages: page.totalPages } } satisfies components["schemas"]["JobSearchResponse"];
+                const items = page.items.map(summary);
+                if (companyBaseUrl) {
+                    const companyIds = [...new Set(items.map(item => item.company.id))];
+                    const companies = new Map<string, components["schemas"]["CompanyPublic"]>();
+                    for (let index = 0; index < companyIds.length; index += 4) {
+                        await Promise.all(companyIds.slice(index, index + 4).map(async id => {
+                            const cached = companyCache.get(id);
+                            if (cached && cached.expiresAt > Date.now()) { companies.set(id, cached.value); return; }
+                            const response = await handleCompanyService(new Request(`http://talentai.internal/api/bff/companies/${id}`), companyBaseUrl);
+                            if (response.ok) {
+                                const company = await response.json() as components["schemas"]["CompanyPublic"];
+                                companies.set(id, company);
+                                if (companyCache.size >= 500) companyCache.delete(companyCache.keys().next().value!);
+                                companyCache.set(id, { value: company, expiresAt: Date.now() + 5 * 60_000 });
+                            }
+                        }));
+                    }
+                    for (const item of items) {
+                        const company = companies.get(item.company.id);
+                        if (company) item.company = { ...item.company, name: company.name, logoUrl: company.logoUrl };
+                    }
+                }
+                result = { items, meta: { page: page.page + 1, pageSize: page.size, totalItems: page.totalElements, totalPages: page.totalPages } } satisfies components["schemas"]["JobSearchResponse"];
             } else {
                 const job = detailSchema.parse(body.data);
                 result = { ...summary(job), description: job.description ?? "", requirements: job.requirements ?? "", benefits: job.benefits ?? undefined, headcount: job.headCount ?? undefined, skills: job.skills?.map(skill => skill.skillName) } satisfies components["schemas"]["JobDetail"];

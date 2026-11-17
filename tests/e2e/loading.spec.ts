@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { randomUUID } from "node:crypto";
 
 test("loading preview fits mobile and desktop and uses all eight sprite frames", async ({ page }, testInfo) => {
     await page.goto("/ui/loading");
@@ -58,14 +59,14 @@ for (const { path, api, label } of [
     { path: "/jobs", api: "**/api/bff/jobs?*", label: "Đang tải việc làm" },
     { path: "/companies", api: "**/api/bff/companies?*", label: "Đang tải công ty" },
     { path: "/candidate/saved-jobs", api: "**/api/bff/candidate/saved-jobs*", label: "Đang tải việc làm đã lưu" },
-    { path: "/candidate/applications", api: "**/api/bff/applications?*", label: "Đang tải hồ sơ ứng tuyển" },
+    { path: "/candidate/applications", api: "**/api/bff/candidate/application-tracking?*", label: "Đang tải hồ sơ ứng tuyển" },
 ]) {
     test(`${path} shows the mascot while pending and removes it once data arrives`, async ({ page }, testInfo) => {
         if (path.startsWith("/candidate")) {
-            const response = await page.request.post("/api/bff/auth/login", {
-                data: { email: "candidate@example.com", password: "TalentAI123!", role: "candidate" },
+            const response = await page.request.post("/api/bff/auth/register", {
+                data: { email: `loading-${randomUUID()}@example.com`, password: "TalentAI123!", fullName: "Ứng viên kiểm thử", role: "candidate", acceptedPrivacyPolicy: true },
             });
-            expect(response.ok()).toBe(true);
+            expect(response.status()).toBe(201);
         }
         let release = () => {};
         const pending = new Promise<void>((resolve) => { release = resolve; });

@@ -1,5 +1,23 @@
 # Trạng thái triển khai
 
+## Candidate — theo dõi hồ sơ ứng tuyển qua application-service (2026-11-17)
+
+Trang `/candidate/applications` hiện dùng BFF `/candidate/application-tracking` để đọc danh sách,
+chi tiết và lịch sử trạng thái từ GET `/api/v1/applications`, `/{id}` và `/{id}/history` của
+application-service cổng 3005 khi `APPLICATION_DATA_MODE=real`. Backend phân trang từ 0;
+BFF trả trang từ 1 và giữ đủ 8 trạng thái backend. Chỉ hiển thị tiêu đề/công ty nếu có trong
+`jobSnapshot`, không ghép dữ liệu minh họa hoặc lộ snapshot cá nhân. Trang có lọc trạng thái,
+phân trang, làm mới, loading/empty/error và xem lịch sử. Chưa có tìm kiếm/sắp xếp phía backend.
+
+Application-service chưa có API lịch phỏng vấn candidate; trang real không hiển thị lịch mock.
+Mock cũ của `/applications` và `/candidate/interviews` giữ cho các luồng chưa chuyển real;
+BFF tracking mới có mock tương ứng để chạy E2E. Test unit với phản hồi Swagger đã pass;
+GET tracking real trả 200/danh sách rỗng với tài khoản candidate mới. E2E tạo hồ sơ thật
+chưa tới bước POST vì profile-service trả 403 FORBIDDEN khi upload CV của tài khoản test.
+Cần kiểm tra quyền CV ở backend rồi chạy lại để nghiệm thu danh sách có hồ sơ thật.
+Xem `docs/candidate-application-tracking.md`. Ghi chú `/candidate/applications` ở bảng cũ bên dưới
+mô tả màn hình mock trước thay đổi này.
+
 ## Admin — Thống kê và báo cáo (2026-11-08)
 
 Đã triển khai giao diện `/admin/statistics`, truy cập từ Hệ thống → Thống kê và báo cáo.

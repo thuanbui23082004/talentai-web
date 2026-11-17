@@ -1,0 +1,21 @@
+{
+  "items": [
+    {
+      "id": "30000000-0000-4000-8000-000000000201",
+      "jobId": "10000000-0000-4000-8000-000000000101",
+      "resumeId": "20000000-0000-4000-8000-000000000301",
+      "jobTitle": "Chuyên viên tuyển dụng",
+      "resumeFileName": "cv-ung-vien.pdf",
+      "status": "reviewing",
+      "appliedAt": "2026-11-01T08:00:00Z",
+      "updatedAt": "2026-11-02T08:00:00Z",
+      "version": 1
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 6,
+    "totalItems": 1,
+    "totalPages": 1
+  }
+}

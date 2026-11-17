@@ -14,6 +14,7 @@ import { handleCvsRequest, isCvsRequest } from "./candidate/cv-service";
 import { handleRecruiterJobPostings, isRecruiterJobPostingRequest } from './recruiter/job-posting-service';
 import { mockJobPostingOptions } from './recruiter/job-posting-mock';
 import { handleApplicationSubmission } from "./candidate/application-submission";
+import { handleCandidateApplicationTracking, isCandidateApplicationTrackingRequest } from "./candidate/application-tracking";
 import { handleJobApplicants } from './recruiter/job-applicants-service';
 import { handleJobApplicationDetail } from './recruiter/job-application-detail-service';
 import { handleJobApplicantStatus } from './recruiter/job-applicant-status-service';
@@ -26,6 +27,10 @@ export async function handleBffRequest(request: Request): Promise<Response> {
         }
         if (isAuthRequest(request)) return await handleAuthRequest(request);
         const env = getServerEnv();
+        if (isCandidateApplicationTrackingRequest(request)) {
+            const baseUrl = (env.APPLICATION_DATA_MODE ?? env.DATA_MODE) === "real" ? env.APPLICATION_API_URL : undefined;
+            return await handleCandidateApplicationTracking(request, baseUrl);
+        }
         const applicantStatus = new URL(request.url).pathname.match(/^\/api\/bff\/recruiter\/job-applications\/([^/]+)\/status$/);
         if (applicantStatus) return await handleJobApplicantStatus(request, applicantStatus[1], (env.APPLICATION_DATA_MODE ?? env.DATA_MODE) === 'real' ? env.APPLICATION_API_URL : undefined);
         const applicantDetail = new URL(request.url).pathname.match(/^\/api\/bff\/recruiter\/job-applications\/([^/]+)(?:\/(resume|cv))?$/);
@@ -51,7 +56,7 @@ export async function handleBffRequest(request: Request): Promise<Response> {
             return await handleRecruiterCompany(request, env.COMPANY_API_URL);
         }
         if (isPublicJobRequest(request) && (env.JOB_DATA_MODE ?? env.DATA_MODE) === "real") {
-            return await handleJobService(request, env.JOB_API_URL);
+            return await handleJobService(request, env.JOB_API_URL, (env.COMPANY_DATA_MODE ?? env.DATA_MODE) === "real" ? env.COMPANY_API_URL : undefined);
         }
         if (isPublicCompanyRequest(request) && (env.COMPANY_DATA_MODE ?? env.DATA_MODE) === "real") {
             return await handleCompanyService(request, env.COMPANY_API_URL);

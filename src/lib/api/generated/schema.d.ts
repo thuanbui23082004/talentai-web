@@ -1450,6 +1450,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/candidate/application-tracking": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Theo dõi hồ sơ ứng tuyển của ứng viên
+         * @description BFF chuyển GET /api/v1/applications của application-service; phân trang từ 1 ở trình duyệt sang 0 ở backend.
+         */
+        get: operations["listCandidateApplicationTracking"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/candidate/application-tracking/{applicationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Chi tiết hồ sơ đã ứng tuyển */
+        get: operations["getCandidateApplicationTracking"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/candidate/application-tracking/{applicationId}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lịch sử trạng thái của hồ sơ đã ứng tuyển */
+        get: operations["getCandidateApplicationTrackingHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/applications/{applicationId}/withdraw": {
         parameters: {
             query?: never;
@@ -4743,6 +4797,35 @@ export interface components {
             items: components["schemas"]["Application"][];
             meta: components["schemas"]["PageMeta"];
         };
+        CandidateApplicationTracking: {
+            id: components["schemas"]["Id"];
+            jobId: components["schemas"]["Id"];
+            resumeId: components["schemas"]["Id"];
+            jobTitle?: string;
+            companyName?: string;
+            /** Format: uri */
+            companyLogoUrl?: string;
+            resumeFileName?: string;
+            coverLetter?: string;
+            status: components["schemas"]["JobApplicantStatus"];
+            /** Format: date-time */
+            appliedAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            version: number;
+        };
+        CandidateApplicationTrackingPage: {
+            items: components["schemas"]["CandidateApplicationTracking"][];
+            meta: components["schemas"]["PageMeta"];
+        };
+        CandidateApplicationTrackingHistory: {
+            status: components["schemas"]["JobApplicantStatus"];
+            previousStatus?: components["schemas"]["JobApplicantStatus"];
+            /** Format: date-time */
+            changedAt: string;
+            version: number;
+            note?: string;
+        };
         WithdrawRequest: {
             reason?: string;
         };
@@ -7901,6 +7984,88 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Application"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    listCandidateApplicationTracking: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["JobApplicantStatus"];
+                /** @description Trang (từ 1). */
+                page?: components["parameters"]["Page"];
+                /** @description Số phần tử mỗi trang. */
+                pageSize?: components["parameters"]["PageSize"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Danh sách hồ sơ của tài khoản hiện tại */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CandidateApplicationTrackingPage"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["ValidationError"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getCandidateApplicationTracking: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                applicationId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Chi tiết hồ sơ thuộc tài khoản hiện tại */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CandidateApplicationTracking"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getCandidateApplicationTrackingHistory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                applicationId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lịch sử theo phiên bản tăng dần */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CandidateApplicationTrackingHistory"][];
                 };
             };
             401: components["responses"]["Unauthorized"];

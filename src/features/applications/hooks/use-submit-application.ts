@@ -6,5 +6,6 @@ export function useSubmitApplication() {
     const client = useQueryClient();
     return useMutation({ mutationFn: submitApplication, retry: false, onSuccess: () => {
         void client.invalidateQueries({ queryKey: applicationKeys.all });
+        void client.invalidateQueries({ queryKey: applicationKeys.tracking });
     } });
 }

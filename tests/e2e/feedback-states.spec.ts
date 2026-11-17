@@ -1,4 +1,5 @@
 import { expect, test, type Locator } from "@playwright/test";
+import { randomUUID } from "node:crypto";
 
 async function expectLoadedMascot(state: Locator) {
     const image = state.locator("[data-feedback-illustration] img");
@@ -65,10 +66,13 @@ test("failed job requests show a different mascot, hide technical errors and rec
 });
 
 test("candidate empty lists and compact notification popup share the new illustrations", async ({ page }) => {
-    expect((await page.request.post("/api/bff/auth/login", { data: { email: "candidate@example.com", password: "TalentAI123!", role: "candidate" } })).ok()).toBe(true);
+    const registered = await page.request.post("/api/bff/auth/register", {
+        data: { email: `feedback-${randomUUID()}@example.com`, password: "TalentAI123!", fullName: "Ứng viên kiểm thử", role: "candidate", acceptedPrivacyPolicy: true },
+    });
+    expect(registered.status()).toBe(201);
     for (const item of [
         { path: "/candidate/saved-jobs", api: "**/api/bff/candidate/saved-jobs?*", title: "Chưa có việc làm đã lưu" },
-        { path: "/candidate/applications", api: "**/api/bff/applications?*", title: "Chưa có hồ sơ trong mục này" },
+        { path: "/candidate/applications", api: "**/api/bff/candidate/application-tracking?*", title: "Chưa có hồ sơ trong mục này" },
     ]) {
         await page.route(item.api, (route) => route.continue({ headers: { ...route.request().headers(), "x-mock-scenario": "empty" } }));
         await page.goto(item.path);

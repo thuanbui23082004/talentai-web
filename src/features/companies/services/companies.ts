@@ -15,7 +15,7 @@ export async function getCompanies(filters: CompanyFilters, signal?: AbortSignal
 }
 
 export async function getCompanyJobs(companyId: string, page: number, signal?: AbortSignal) {
-    const { data, error, response } = await apiClient.GET("/companies/{companyId}/jobs", { params: { path: { companyId }, query: { page, pageSize: 6 } }, signal });
+    const { data, error, response } = await apiClient.GET("/jobs", { params: { query: { companyId, page, pageSize: 6 } }, signal });
     if (!data || error) throw toApiError(response.status, error);
     return data;
 }

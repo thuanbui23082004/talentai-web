@@ -65,6 +65,7 @@ export function CompanySearch({
                     />
                     <Select
                         aria-label="Địa điểm công ty"
+                        searchable
                         placeholder="Tất cả tỉnh/thành"
                         value={location}
                         options={[

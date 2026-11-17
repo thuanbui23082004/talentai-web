@@ -7,7 +7,7 @@ test("submits the selected account CV once, retains input on errors and prevents
     expect(registered.status()).toBe(201);
     const { csrfToken } = await registered.json();
     const uploaded = await page.request.post("/api/bff/cvs", { headers: { "X-CSRF-Token": csrfToken }, multipart: { file: { name: "application-submit.pdf", mimeType: "application/pdf", buffer: pdfCv() } } });
-    expect(uploaded.status()).toBe(201);
+    expect(uploaded.status(), await uploaded.text()).toBe(201);
     const cv = await uploaded.json();
     const jobs = await (await page.request.get("/api/bff/jobs?pageSize=1")).json();
     expect(jobs.items.length).toBe(1);
@@ -61,6 +61,15 @@ test("submits the selected account CV once, retains input on errors and prevents
     expect(duplicate.status()).toBe(409);
 
     if (process.env.APPLICATION_REAL_E2E === "1") {
+        const tracking = await page.request.get("/api/bff/candidate/application-tracking?page=1&pageSize=6");
+        expect(tracking.status()).toBe(200);
+        expect((await tracking.json()).items).toEqual(expect.arrayContaining([expect.objectContaining({ id: application.id, jobId: job.id, resumeId: cv.id, status: "submitted" })]));
+        const trackedDetail = await page.request.get(`/api/bff/candidate/application-tracking/${application.id}`);
+        expect(trackedDetail.status()).toBe(200);
+        expect(await trackedDetail.json()).toMatchObject({ id: application.id, jobId: job.id, resumeId: cv.id, status: "submitted" });
+        const trackedHistory = await page.request.get(`/api/bff/candidate/application-tracking/${application.id}/history`);
+        expect(trackedHistory.status()).toBe(200);
+        expect(Array.isArray(await trackedHistory.json())).toBe(true);
         const access = (await page.context().cookies()).find(cookie => cookie.name === "access_token")!.value;
         const headers = { Authorization: `Bearer ${access}` };
         const detail = await page.request.get(`http://localhost:3005/api/v1/applications/${application.id}`, { headers });
