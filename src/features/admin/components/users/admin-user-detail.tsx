@@ -13,7 +13,7 @@ import { ApiError } from '@/lib/api';
 import { adminKeys } from '@/features/admin/query-keys';
 import { getManagedUser, getUserActivity, changeUserAccess } from '@/features/admin/services/users';
 import { reasonSchema, type ManagedUser } from '@/features/admin/schemas/users';
-import { UsersState, UserStatus } from '@/features/admin/components/users-shared';
+import { UsersState, UserStatus } from '@/features/admin/components/users/users-shared';
 
 function AccessForm({ user, action, close, saved }: { user: ManagedUser; action: 'lock' | 'unlock'; close: () => void; saved: () => void }) {
   const t = useTranslations('AdminUsers'); const cache = useQueryClient();

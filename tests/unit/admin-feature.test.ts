@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { loginSchema, periodSchema } from '@/features/admin/schemas';
-import { handleAdminRequest } from '@/server/bff/admin-handler';
+import { handleAdminRequest } from '@/server/bff/admin/admin-handler';
 import { getRecruiterMockStore } from '@/server/bff/recruiter/mock-store';
 import { mockAdmin, mockAdminPassword } from '@/mocks/fixtures/admin';
 

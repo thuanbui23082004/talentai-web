@@ -11,7 +11,7 @@ import { getAdminJobs } from '@/features/admin/services/jobs';
 import { jobStatuses } from '@/features/admin/schemas/jobs';
 import { filterAdminJobs } from '@/features/admin/job-rules';
 import { useAdminJobsNotice } from '@/features/admin/jobs-ui-store';
-import { JobState, AdminJobBadge } from '@/features/admin/components/jobs-shared';
+import { JobState, AdminJobBadge } from '@/features/admin/components/jobs/jobs-shared';
 export function AdminJobs() {
   const t = useTranslations('AdminJobs'); const a = useTranslations('Admin'); const f = useFormatter();
   const query = useQuery({ queryKey: adminKeys.jobs, queryFn: ({ signal }) => getAdminJobs(signal), retry: false });

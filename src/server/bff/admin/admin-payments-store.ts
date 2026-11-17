@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { demoPayments } from '@/mocks/fixtures/admin-payments';
 import { paymentDemoSchema, reconciliationSchema, type PaymentDemoRecord, type PaymentDemoResult } from '@/features/admin/schemas/payment-demo';
 import { canReconcilePayment } from '@/features/admin/payment-rules';
-import { getAdminActivity } from '@/server/bff/admin-users-store';
+import { getAdminActivity } from '@/server/bff/admin/admin-users-store';
 
 const shared = globalThis as typeof globalThis & { talentaiPaymentDemo?: Map<string, PaymentDemoRecord> };
 export function paymentDemoStore() {

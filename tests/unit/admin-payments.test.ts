@@ -1,7 +1,7 @@
 import { beforeEach, expect, test } from 'vitest';
 import { demoPayments } from '@/mocks/fixtures/admin-payments';
-import { paymentDemoStore, recordDemoReconciliation } from '@/server/bff/admin-payments-store';
-import { getAdminActivity } from '@/server/bff/admin-users-store';
+import { paymentDemoStore, recordDemoReconciliation } from '@/server/bff/admin/admin-payments-store';
+import { getAdminActivity } from '@/server/bff/admin/admin-users-store';
 import { paymentDemoSchema, reconciliationSchema } from '@/features/admin/schemas/payment-demo';
 import { canReconcilePayment, emptyPaymentFilters, filterPayments, paymentDay } from '@/features/admin/payment-rules';
 const actor = { id: '00000000-0000-4000-8000-000000000901', name: 'Quản trị viên mẫu' };

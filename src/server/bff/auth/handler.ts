@@ -146,7 +146,9 @@ async function upstreamError(upstream: Response, path: string) {
     if (status === 401)
         return apiError(
             401,
-            path === "/auth/login" || path === "/auth/social-login" ? "INVALID_CREDENTIALS" : "SESSION_EXPIRED",
+            path === "/auth/login" || path === "/auth/social-login"
+                ? "INVALID_CREDENTIALS"
+                : "SESSION_EXPIRED",
             "Thông tin xác thực không hợp lệ.",
         );
 
@@ -169,8 +171,15 @@ async function upstreamError(upstream: Response, path: string) {
             "Mật khẩu hiện tại không đúng.",
         );
 
-    if (code === "PASSWORD_RESET_TOKEN_INVALID" && path === "/auth/reset-password")
-        return apiError(400, "INVALID_RESET_TOKEN", "Liên kết không hợp lệ hoặc đã hết hạn.");
+    if (
+        code === "PASSWORD_RESET_TOKEN_INVALID" &&
+        path === "/auth/reset-password"
+    )
+        return apiError(
+            400,
+            "INVALID_RESET_TOKEN",
+            "Liên kết không hợp lệ hoặc đã hết hạn.",
+        );
 
     if (status === 400 || status === 422)
         return apiError(
@@ -251,7 +260,10 @@ async function handleRefresh(
         result = await refreshTokens(backend, cookies.refresh);
     } catch (error) {
         if (error instanceof Response && error.status === 401) {
-            return setAuthCookies(NextResponse.json(await error.clone().json(), { status: 401 }), request);
+            return setAuthCookies(
+                NextResponse.json(await error.clone().json(), { status: 401 }),
+                request,
+            );
         }
         throw error;
     }
@@ -355,7 +367,14 @@ async function handleJsonRoute(
         path === "/auth/register"
             ? toRegisterPayload(body.data as z.infer<typeof registerInput>)
             : path === "/auth/social-login"
-              ? { ...body.data, role: (body.data as z.infer<typeof bodySchemas["/auth/social-login"]>).role.toUpperCase() }
+              ? {
+                    ...body.data,
+                    role: (
+                        body.data as z.infer<
+                            (typeof bodySchemas)["/auth/social-login"]
+                        >
+                    ).role.toUpperCase(),
+                }
               : path === "/auth/login"
                 ? toLoginPayload(body.data as z.infer<typeof loginInput>)
                 : body.data;
@@ -368,8 +387,18 @@ async function handleJsonRoute(
     );
     if (!upstream.ok) return upstreamError(upstream, path);
 
-    if (path === "/auth/login" || path === "/auth/register" || path === "/auth/social-login")
-        return handleLoginOrRegisterSuccess(request, upstream, path, backend, "role" in body.data ? body.data.role : undefined);
+    if (
+        path === "/auth/login" ||
+        path === "/auth/register" ||
+        path === "/auth/social-login"
+    )
+        return handleLoginOrRegisterSuccess(
+            request,
+            upstream,
+            path,
+            backend,
+            "role" in body.data ? body.data.role : undefined,
+        );
 
     if (path === "/auth/forgot-password") {
         const result = passwordResetSchema.parse(await upstream.json());
@@ -417,8 +446,14 @@ async function handleLoginOrRegisterSuccess(
     const tokens = result.data.tokens;
     if (expectedRole && user.role !== expectedRole) {
         // Revoke only the newly issued session; never replace the browser's existing cookies.
-        await callAuth(backend, "logout", { refreshToken: tokens.refreshToken }).catch(() => undefined);
-        return apiError(403, "AUTH_ROLE_MISMATCH", "Tài khoản không thuộc loại tài khoản đang chọn. Vui lòng chọn đúng loại tài khoản để đăng nhập.");
+        await callAuth(backend, "logout", {
+            refreshToken: tokens.refreshToken,
+        }).catch(() => undefined);
+        return apiError(
+            403,
+            "AUTH_ROLE_MISMATCH",
+            "Tài khoản không thuộc loại tài khoản đang chọn. Vui lòng chọn đúng loại tài khoản để đăng nhập.",
+        );
     }
     const session: components["schemas"]["AuthSessionResponse"] = {
         user,
@@ -426,7 +461,13 @@ async function handleLoginOrRegisterSuccess(
         csrfToken: csrfTokenFor({ refresh: tokens.refreshToken }),
         redirectTo: path === "/auth/register" ? "/" : `/${user.role}/dashboard`,
     };
-    return setAuthCookies(NextResponse.json(session, { status: path === "/auth/register" ? 201 : 200 }), request, tokens);
+    return setAuthCookies(
+        NextResponse.json(session, {
+            status: path === "/auth/register" ? 201 : 200,
+        }),
+        request,
+        tokens,
+    );
 }
 
 /* ------------------------------------------------------------------ */

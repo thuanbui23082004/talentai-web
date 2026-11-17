@@ -2,7 +2,7 @@ import { beforeEach, expect, test } from 'vitest';
 import { NextRequest } from 'next/server';
 import { handleMockRequest } from '@/server/bff/mock-adapter';
 import { getRecruiterMockStore } from '@/server/bff/recruiter/mock-store';
-import { getAdminUsers, getAdminActivity } from '@/server/bff/admin-users-store';
+import { getAdminUsers, getAdminActivity } from '@/server/bff/admin/admin-users-store';
 import { mockManagedUsers } from '@/mocks/fixtures/admin-users';
 import { mockAdmin } from '@/mocks/fixtures/admin';
 import { filterUsers } from '@/features/admin/users-filter';

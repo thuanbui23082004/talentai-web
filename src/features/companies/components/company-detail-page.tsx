@@ -8,7 +8,6 @@ import {
     LayoutGrid,
     MapPin,
     Plus,
-    Star,
     UsersRound,
 } from "lucide-react";
 import { AvailabilityButton } from "@/components/shared/availability-button";

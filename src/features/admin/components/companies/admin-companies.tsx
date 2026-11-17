@@ -10,7 +10,7 @@ import { adminKeys } from '@/features/admin/query-keys';
 import { getManagedCompanies } from '@/features/admin/services/companies';
 import { companyStatuses } from '@/features/admin/schemas/companies';
 import { filterCompanies } from '@/features/admin/company-rules';
-import { CompanyState, CompanyBadge } from '@/features/admin/components/companies-shared';
+import { CompanyState, CompanyBadge } from '@/features/admin/components/companies/companies-shared';
 export function AdminCompanies() {
   const t = useTranslations('AdminCompanies'); const a = useTranslations('Admin'); const f = useFormatter();
   const query = useQuery({ queryKey: adminKeys.companies, queryFn: ({ signal }) => getManagedCompanies(signal), retry: false });

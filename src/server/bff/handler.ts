@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { handleAdminMockRequest } from './admin-adapter';
+import { handleAdminMockRequest } from './admin/admin-adapter';
 import { getServerEnv } from "@/lib/env";
 import { handleMockRequest } from "./mock-adapter";
 import { proxyRequest } from "./proxy";

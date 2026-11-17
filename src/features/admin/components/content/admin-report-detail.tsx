@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ApiError } from '@/lib/api';
 import { getReport, updateReport } from '@/features/admin/services/content';
 import { allowedReportActions, resolutionSchema, reportSchema } from '@/features/admin/schemas/content';
-import { ContentState } from '@/features/admin/components/content-shared';
+import { ContentState } from '@/features/admin/components/content/content-shared';
 export function AdminReportDetail({ reportId }: { reportId: string }) {
   const t = useTranslations('AdminContent'), f = useFormatter(), cache = useQueryClient(); const [notice, setNotice] = useState(false);
   const query = useQuery({ queryKey: ['admin', 'reports', reportId], queryFn: ({ signal }) => getReport(reportId, signal), retry: false });

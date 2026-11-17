@@ -10,7 +10,7 @@ import { adminKeys } from '@/features/admin/query-keys';
 import { getPaymentDemo } from '@/features/admin/services/payment-demo';
 import { paymentStatuses, reconciliationStates, paymentFiltersSchema, type PaymentFilters } from '@/features/admin/schemas/payment-demo';
 import { emptyPaymentFilters, filterPayments } from '@/features/admin/payment-rules';
-import { PaymentState, PaymentStatus } from '@/features/admin/components/payments-shared';
+import { PaymentState, PaymentStatus } from '@/features/admin/components/payments/payments-shared';
 import { formatVND } from '@/lib/utils';
 
 export function AdminPayments() {

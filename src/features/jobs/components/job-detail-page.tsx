@@ -92,7 +92,9 @@ export function JobDetailPage({
         {
             Icon: BriefcaseBusiness,
             label: "Cấp bậc",
-            value: job.experienceLevel ? experienceLabel(job) : JOB_LEVEL_LABELS[job.level],
+            value: job.experienceLevel
+                ? experienceLabel(job)
+                : JOB_LEVEL_LABELS[job.level],
         },
         {
             Icon: Clock3,
@@ -247,7 +249,9 @@ export function JobDetailPage({
                             <div className="mt-3 flex flex-wrap gap-2">
                                 {[
                                     WORK_TYPE_LABELS[job.workType],
-                                    job.experienceLevel ? experienceLabel(job) : JOB_LEVEL_LABELS[job.level],
+                                    job.experienceLevel
+                                        ? experienceLabel(job)
+                                        : JOB_LEVEL_LABELS[job.level],
                                     ...(job.skills ?? []),
                                 ].map((tag) => (
                                     <Badge key={tag} variant="outline">

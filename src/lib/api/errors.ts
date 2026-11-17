@@ -1,14 +1,21 @@
 import type { components } from "./generated/schema";
 
 export class ApiError extends Error {
+  public readonly code: components["schemas"]["ErrorCode"];
+  public readonly data?: components["schemas"]["ApiError"];
+  public readonly fieldErrors?: components["schemas"]["FieldError"][];
+
   constructor(
     message: string,
     public status: number,
-    public code: components["schemas"]["ErrorCode"] = "INTERNAL_ERROR",
-    public fieldErrors?: components["schemas"]["FieldError"][]
+    codeOrBody: components["schemas"]["ErrorCode"] | components["schemas"]["ApiError"] = "INTERNAL_ERROR",
+    fieldErrors?: components["schemas"]["FieldError"][]
   ) {
     super(message);
     this.name = "ApiError";
+    this.data = typeof codeOrBody === "string" ? undefined : codeOrBody;
+    this.code = typeof codeOrBody === "string" ? codeOrBody : codeOrBody.error.code;
+    this.fieldErrors = fieldErrors ?? this.data?.error.fieldErrors;
   }
 }
 

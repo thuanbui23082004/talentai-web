@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getAdminActivity } from '@/server/bff/admin-users-store';
+import { getAdminActivity } from '@/server/bff/admin/admin-users-store';
 const querySchema = z.object({
   userId: z.uuid().optional(), role: z.enum(['admin', 'candidate', 'recruiter']).optional(), action: z.string().optional(), targetType: z.string().optional(), result: z.enum(['success', 'failure']).optional(),
   from: z.iso.datetime({ offset: true }).optional(), to: z.iso.datetime({ offset: true }).optional(),

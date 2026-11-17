@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ApiError } from '@/lib/api';
 import { catalogTypes, catalogInputSchema, type CatalogType, type CatalogItem } from '@/features/admin/schemas/content';
 import { getCatalog, saveCatalog, deleteCatalog } from '@/features/admin/services/content';
-import { ContentState, ContentPagination } from '@/features/admin/components/content-shared';
+import { ContentState, ContentPagination } from '@/features/admin/components/content/content-shared';
 
 export function AdminCatalog() {
   const t = useTranslations('AdminContent'), cache = useQueryClient();

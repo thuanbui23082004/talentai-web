@@ -2,14 +2,15 @@ import { beforeEach, expect, test } from 'vitest';
 import { NextRequest } from 'next/server';
 import { handleMockRequest } from '@/server/bff/mock-adapter';
 import { catalogStore, getCatalogItems } from '@/server/bff/catalog-store';
-import { reportStore } from '@/server/bff/admin-reports-handler';
+import { reportStore } from '@/server/bff/admin/admin-reports-handler';
 import { getRecruiterMockStore, getDeletedJobIds } from '@/server/bff/recruiter/mock-store';
-import { getAdminActivity, getAdminUsers } from '@/server/bff/admin-users-store';
-import { adminJobs } from '@/server/bff/admin-jobs-store';
+import { getAdminActivity, getAdminUsers } from '@/server/bff/admin/admin-users-store';
+import { adminJobs } from '@/server/bff/admin/admin-jobs-store';
 import { mockReports } from '@/mocks/fixtures/admin-content';
-import { mockJobs } from '@/mocks/fixtures/jobs';
+import { mockJobs } from '@/mocks/fixtures/recruiter-jobs';
 import { mockAdmin } from '@/mocks/fixtures/admin';
 import { allowedReportActions } from '@/features/admin/schemas/content';
+import { createMockRecruiterSession } from '../support/auth-fixtures';
 const snapshot = structuredClone([...catalogStore().values()]);
 beforeEach(() => {
   catalogStore().clear(); for (const row of structuredClone(snapshot)) catalogStore().set(row.id, row);
@@ -25,8 +26,10 @@ test('catalog CRUD, duplicate protection, active public choices and audit', asyn
   const created = await call('admin/catalog/skills', 'POST', { name: 'Kỹ năng thử nghiệm', aliases: ['Demo'], isActive: true }); expect(created.status).toBe(201); const item = await created.json();
   expect((await call('admin/catalog/skills', 'POST', { name: 'kỹ năng thử nghiệm', isActive: true })).status).toBe(409);
   expect((await call(`admin/catalog/skills/${item.id}`, 'PUT', { name: item.name, isActive: false })).status).toBe(200);
-  const session = getRecruiterMockStore().sessions; session.set('public-content', { role: 'recruiter', csrf: 'public-csrf' });
-  const choices = await call('catalog/skills', 'GET', undefined, 'public-csrf', 'talentai_mock_session=public-content'); expect((await choices.json()).items.some((row: { id: string }) => row.id === item.id)).toBe(false);
+  const recruiter = createMockRecruiterSession();
+  const choices = await call('catalog/skills', 'GET', undefined, recruiter.session.csrf, `access_token=${recruiter.id}`);
+  expect(choices.status).toBe(200);
+  expect((await choices.json()).items.some((row: { id: string }) => row.id === item.id)).toBe(false);
   expect((await call(`admin/catalog/skills/${item.id}`, 'DELETE')).status).toBe(204); expect(getAdminActivity()).toHaveLength(count + 3);
 });
 test('catalog usage blocks delete, rename preserves job references, parent cycles rejected', async () => {

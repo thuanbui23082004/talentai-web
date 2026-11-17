@@ -1,9 +1,9 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { hasAdminSession } from '@/server/bff/admin-session';
+import { hasAdminSession } from '@/server/bff/admin/admin-session';
 import { AdminShell } from '@/features/admin/components/admin-shell';
 import { AdminLoading } from '@/features/admin/components/admin-loading';
-import { AdminJobDetail } from '@/features/admin/components/admin-job-detail';
+import { AdminJobDetail } from '@/features/admin/components/jobs/admin-job-detail';
 export default function AdminJobPage({ params }: { params: Promise<{ jobId: string }> }) { return <Suspense fallback={<AdminLoading />}><Content params={params} /></Suspense>; }
 async function Content({ params }: { params: Promise<{ jobId: string }> }) {
   if (!await hasAdminSession()) redirect('/admin/login');

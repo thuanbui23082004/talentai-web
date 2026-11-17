@@ -9,9 +9,9 @@ import { adminKeys } from '@/features/admin/query-keys';
 import { getManagedCompany } from '@/features/admin/services/companies';
 import { companyActions, type CompanyAction } from '@/features/admin/schemas/companies';
 import { canModerateCompany } from '@/features/admin/company-rules';
-import { CompanyState, CompanyBadge } from '@/features/admin/components/companies-shared';
-import { CompanyDocuments } from '@/features/admin/components/company-documents';
-import { CompanyModerationForm } from '@/features/admin/components/company-moderation-form';
+import { CompanyState, CompanyBadge } from '@/features/admin/components/companies/companies-shared';
+import { CompanyDocuments } from '@/features/admin/components/companies/company-documents';
+import { CompanyModerationForm } from '@/features/admin/components/companies/company-moderation-form';
 export function AdminCompanyDetail({ companyId }: { companyId: string }) {
   const t = useTranslations('AdminCompanies'); const f = useFormatter();
   const query = useQuery({ queryKey: adminKeys.company(companyId), queryFn: ({ signal }) => getManagedCompany(companyId, signal), retry: false });

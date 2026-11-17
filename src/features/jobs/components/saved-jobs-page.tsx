@@ -281,57 +281,69 @@ export function SavedJobsPage() {
                 </div>
                 <TabsContent key={tab} value={tab}>
                     {query.isPending ? (
-                        <LoadingState title="Đang tải việc làm đã lưu" description="TalentAI đang mở lại những cơ hội bạn đã quan tâm." />
+                        <LoadingState
+                            title="Đang tải việc làm đã lưu"
+                            description="TalentAI đang mở lại những cơ hội bạn đã quan tâm."
+                        />
                     ) : query.isError ? (
                         <FeedbackState
                             kind="error"
                             title="Không thể tải việc làm đã lưu"
                             description="Danh sách của bạn vẫn được giữ lại. Vui lòng thử tải lại."
-                            action={<Button
-                                variant="outline"
-                                onClick={() => query.refetch()}
-                            >
-                                Thử lại
-                            </Button>}
+                            action={
+                                <Button
+                                    variant="outline"
+                                    onClick={() => query.refetch()}
+                                >
+                                    Thử lại
+                                </Button>
+                            }
                         />
                     ) : !visible.length ? (
-                        <EmptyState headingAs="h2"
-                            title={!items.length
+                        <EmptyState
+                            headingAs="h2"
+                            title={
+                                !items.length
                                     ? "Chưa có việc làm đã lưu"
                                     : q || city
                                       ? "Không tìm thấy việc làm phù hợp"
                                       : tab === "expiring"
                                         ? "Chưa có việc làm sắp hết hạn"
-                                        : "Chưa có việc làm trong mục này"}
-                            description={!items.length
+                                        : "Chưa có việc làm trong mục này"
+                            }
+                            description={
+                                !items.length
                                     ? "Nhấn trái tim trên thẻ việc làm để lưu những vị trí bạn yêu thích và xem lại tại đây."
                                     : q || city
                                       ? "Thử từ khóa khác hoặc xóa bộ lọc để xem lại các việc làm đã lưu."
-                                      : "Bạn có thể xem tất cả việc đã lưu hoặc khám phá thêm các cơ hội mới."}
-                            action={<>
-                                {!!items.length && (
+                                      : "Bạn có thể xem tất cả việc đã lưu hoặc khám phá thêm các cơ hội mới."
+                            }
+                            action={
+                                <>
+                                    {!!items.length && (
+                                        <Button
+                                            variant="outline"
+                                            onClick={() =>
+                                                update({
+                                                    q: "",
+                                                    city: "",
+                                                    tab: "all",
+                                                    page: "",
+                                                })
+                                            }
+                                        >
+                                            Xem tất cả đã lưu
+                                        </Button>
+                                    )}
                                     <Button
-                                        variant="outline"
-                                        onClick={() =>
-                                            update({
-                                                q: "",
-                                                city: "",
-                                                tab: "all",
-                                                page: "",
-                                            })
-                                        }
+                                        nativeButton={false}
+                                        render={<Link href="/jobs" />}
                                     >
-                                        Xem tất cả đã lưu
+                                        Khám phá việc làm
+                                        <ArrowRight />
                                     </Button>
-                                )}
-                                <Button
-                                    nativeButton={false}
-                                    render={<Link href="/jobs" />}
-                                >
-                                    Khám phá việc làm
-                                    <ArrowRight />
-                                </Button>
-                            </>}
+                                </>
+                            }
                         />
                     ) : (
                         <>
@@ -340,7 +352,11 @@ export function SavedJobsPage() {
                                     <JobCard
                                         key={entry.job.id}
                                         job={entry.job}
-                                        variant={entry.job.status === "open" ? "default" : "saved"}
+                                        variant={
+                                            entry.job.status === "open"
+                                                ? "default"
+                                                : "saved"
+                                        }
                                         onUnsave={() => setRemoved(entry)}
                                     />
                                 ))}

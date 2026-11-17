@@ -1,11 +1,11 @@
 import { expect, test } from 'vitest';
 import { NextRequest } from 'next/server';
-import { handleAdminRequest } from '@/server/bff/admin-handler';
-import { statisticsBucket } from '@/server/bff/admin-statistics-handler';
+import { handleAdminRequest } from '@/server/bff/admin/admin-handler';
+import { statisticsBucket } from '@/server/bff/admin/admin-statistics-handler';
 import { statisticsIndustries } from '@/mocks/fixtures/admin-statistics';
 import { applicationStatsSchema, recruitmentStatsSchema, systemMetricsSchema, statisticsPeriodFormSchema } from '@/features/admin/schemas/statistics';
 import { statisticsShare } from '@/features/admin/statistics-rules';
-import { handleAdminMockRequest } from '@/server/bff/admin-adapter';
+import { handleAdminMockRequest } from '@/server/bff/admin/admin-adapter';
 import { mockAdmin, mockAdminPassword } from '@/mocks/fixtures/admin';
 const session = { role: 'admin' as const, csrf: 'statistics-test' };
 test('admin mock login supplies an isolated session for statistics', async () => {

@@ -22,10 +22,11 @@ export const architectureRule = {
       if (file.startsWith("features/") && target.startsWith("app/")) report(node, "Feature không được import app.");
       if ((file.startsWith("lib/") || file.startsWith("components/ui/")) && /^(features|app)\//.test(target)) report(node, "Lib và UI dùng chung không được phụ thuộc feature/app.");
       const importedFeature = target.match(/^features\/([^/]+)(.*)$/);
-      if (importedFeature && importedFeature[1] !== currentFeature && !["", "/index", "/index.ts"].includes(importedFeature[2])) report(node, "Import feature khác qua public index.");
+      if (currentFeature && importedFeature && importedFeature[1] !== currentFeature && !["", "/index", "/index.ts"].includes(importedFeature[2])) report(node, "Import feature khác qua public index.");
       const serverFacade = file === "lib/auth/session.ts" || file === "proxy.ts";
       const serverPage = file.startsWith("app/") && !client;
-      if (/^(server\/|mocks\/|lib\/env(?:\.|$))/.test(target) && !file.startsWith("server/") && !(file.startsWith("mocks/") && target.startsWith("mocks/")) && !serverPage && !serverFacade) report(node, "Server/env/fixture chỉ được truy cập bởi server, server page và session facade.");
+      const serverAction = context.sourceCode.ast.body.some((item) => item.directive === "use server");
+      if (/^(server\/|mocks\/|lib\/env(?:\.|$))/.test(target) && !file.startsWith("server/") && !(file.startsWith("mocks/") && target.startsWith("mocks/")) && !serverPage && !serverAction && !serverFacade) report(node, "Server/env/fixture chỉ được truy cập bởi server, server page, server action và session facade.");
       if (client && /^(server\/|lib\/auth\/(session|require-role))/.test(target)) report(node, "Client Component không được import module session/server.");
     }
     return {

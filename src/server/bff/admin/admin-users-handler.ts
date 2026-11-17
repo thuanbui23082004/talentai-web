@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getAdminUsers, getAdminActivity } from '@/server/bff/admin-users-store';
+import { getAdminUsers, getAdminActivity } from '@/server/bff/admin/admin-users-store';
 import { getMockAccounts } from '@/server/bff/recruiter/account-company-handler';
 import { getRecruiterMockStore, type MockSession } from '@/server/bff/recruiter/mock-store';
 import { mockAdmin } from '@/mocks/fixtures/admin';
@@ -24,8 +24,8 @@ export async function handleAdminUsers(request: NextRequest, path: string, sessi
     function page<T>(items: T[]) { const rows = empty ? [] : items; return response({ items: rows.slice((q.page - 1) * q.pageSize, q.page * q.pageSize), meta: { page: q.page, pageSize: q.pageSize, totalItems: rows.length, totalPages: Math.ceil(rows.length / q.pageSize) } }); }
     if (!match[1]) {
       const needle = q.q?.toLocaleLowerCase('vi');
-      const rows = [...users.values()].filter(item => (!q.role || item.role === q.role) && (!q.status || item.status === q.status) && (!needle || item.fullName.toLocaleLowerCase('vi').includes(needle) || item.email.toLocaleLowerCase('vi').includes(needle)) && (!q.createdFrom || item.createdAt.slice(0, 10) >= q.createdFrom) && (!q.createdTo || item.createdAt.slice(0, 10) <= q.createdTo));
-      rows.sort((a, b) => q.sort === 'name' ? a.fullName.localeCompare(b.fullName, 'vi') : q.sort === 'oldest' ? a.createdAt.localeCompare(b.createdAt) : b.createdAt.localeCompare(a.createdAt));
+      const rows = [...users.values()].filter(item => (!q.role || item.role === q.role) && (!q.status || item.status === q.status) && (!needle || item.fullName.toLocaleLowerCase('vi').includes(needle) || item.email.toLocaleLowerCase('vi').includes(needle)) && (!q.createdFrom || (item.createdAt ?? '').slice(0, 10) >= q.createdFrom) && (!q.createdTo || (item.createdAt ?? '').slice(0, 10) <= q.createdTo));
+      rows.sort((a, b) => q.sort === 'name' ? a.fullName.localeCompare(b.fullName, 'vi') : q.sort === 'oldest' ? (a.createdAt ?? '').localeCompare(b.createdAt ?? '') : (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
       return page(rows);
     }
     if (match[2] === 'activity') return page(getAdminActivity().filter(log => (log.targetId === user?.id || log.actorId === user?.id) && (!q.from || log.occurredAt.slice(0, 10) >= q.from) && (!q.to || log.occurredAt.slice(0, 10) <= q.to)));

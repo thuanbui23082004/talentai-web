@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { adminKeys } from '@/features/admin/query-keys';
 import { getManagedUsers } from '@/features/admin/services/users';
 import { filterUsers } from '@/features/admin/users-filter';
-import { UsersState, UserStatus } from '@/features/admin/components/users-shared';
+import { UsersState, UserStatus } from '@/features/admin/components/users/users-shared';
 
 export function AdminUsers() {
   const t = useTranslations('AdminUsers'); const a = useTranslations('Admin'); const f = useFormatter();

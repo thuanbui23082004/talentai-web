@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getReports } from '@/features/admin/services/content';
 import { reportStatuses, reportCategories, targetTypes } from '@/features/admin/schemas/content';
-import { ContentState, ContentPagination } from '@/features/admin/components/content-shared';
+import { ContentState, ContentPagination } from '@/features/admin/components/content/content-shared';
 export function AdminReports() {
   const t = useTranslations('AdminContent'), f = useFormatter();
   const query = useQuery({ queryKey: ['admin', 'reports'], queryFn: ({ signal }) => getReports(signal), retry: false });

@@ -12,7 +12,7 @@ import { adminKeys } from '@/features/admin/query-keys';
 import { getPaymentDemoDetail, savePaymentDemoReview } from '@/features/admin/services/payment-demo';
 import { reconciliationSchema, type PaymentDemoRecord, type ReconciliationInput } from '@/features/admin/schemas/payment-demo';
 import { canReconcilePayment } from '@/features/admin/payment-rules';
-import { PaymentState, PaymentStatus } from '@/features/admin/components/payments-shared';
+import { PaymentState, PaymentStatus } from '@/features/admin/components/payments/payments-shared';
 import { paymentErrorKey } from '@/features/admin/errors';
 import { formatVND } from '@/lib/utils';
 

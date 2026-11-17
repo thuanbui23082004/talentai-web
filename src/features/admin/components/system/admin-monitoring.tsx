@@ -14,7 +14,7 @@ import { adminKeys } from '@/features/admin/query-keys';
 import { getSystemLogs, getAnomalies, reviewAnomaly } from '@/features/admin/services/monitoring';
 import { anomalyTypes, anomalyStatuses, logLevels, severities, anomalyReviewSchema, type Anomaly, type AnomalyReview } from '@/features/admin/schemas/monitoring';
 import { filterSystemLogs, filterAnomalies, monitoringPeriodSchema } from '@/features/admin/monitoring-rules';
-import { ContentState } from '@/features/admin/components/content-shared';
+import { ContentState } from '@/features/admin/components/content/content-shared';
 
 const initialFilters = { search: '', level: '', source: '', from: '', to: '', type: '', status: '', severity: '' };
 export function AdminMonitoring() {

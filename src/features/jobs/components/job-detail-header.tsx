@@ -28,52 +28,49 @@ export function JobDetailHeader({ job }: { job: JobDetail }) {
         },
     ];
     return (
-            <section
-                aria-labelledby="job-title"
-                className="flex min-w-0 flex-col rounded-2xl border border-border/50 bg-card p-4 shadow-card sm:p-5"
+        <section
+            aria-labelledby="job-title"
+            className="flex min-w-0 flex-col rounded-2xl border border-border/50 bg-card p-4 shadow-card sm:p-5"
+        >
+            <h1
+                id="job-title"
+                className="text-lg leading-snug font-bold sm:text-xl"
             >
-                <h1
-                    id="job-title"
-                    className="text-lg leading-snug font-bold sm:text-xl"
-                >
-                    {job.title}
-                </h1>
-                <p
-                    aria-label="Mức lương"
-                    className="mt-3 text-xl leading-snug font-bold text-primary"
-                >
-                    {formatSalaryRange(job.salary, true)}
-                </p>
-                <dl className="my-5 grid gap-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)]">
-                    {facts.map(({ Icon, label, value }) => (
-                        <div
-                            key={label}
-                            className="flex min-w-0 items-start gap-3"
-                        >
-                            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary/60 text-primary">
-                                <Icon aria-hidden="true" className="size-6" />
-                            </span>
-                            <div className="min-w-0 text-sm">
-                                <dt className="text-xs text-muted-foreground">
-                                    {label}
-                                </dt>
-                                <dd className="mt-1 leading-5 font-medium">
-                                    {value}
-                                </dd>
-                            </div>
+                {job.title}
+            </h1>
+            <p
+                aria-label="Mức lương"
+                className="mt-3 text-xl leading-snug font-bold text-primary"
+            >
+                {formatSalaryRange(job.salary, true)}
+            </p>
+            <dl className="my-5 grid gap-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)]">
+                {facts.map(({ Icon, label, value }) => (
+                    <div key={label} className="flex min-w-0 items-start gap-3">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary/60 text-primary">
+                            <Icon aria-hidden="true" className="size-6" />
+                        </span>
+                        <div className="min-w-0 text-sm">
+                            <dt className="text-xs text-muted-foreground">
+                                {label}
+                            </dt>
+                            <dd className="mt-1 leading-5 font-medium">
+                                {value}
+                            </dd>
                         </div>
-                    ))}
-                </dl>
-                <div className="mt-auto flex gap-2.5">
-                    <ApplicationButton
-                        job={job}
-                        className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-deep"
-                    >
-                        <Send className="size-4" />
-                        {job.hasApplied ? "Đã ứng tuyển" : "Ứng tuyển ngay"}
-                    </ApplicationButton>
-                    <SaveJobButton job={job} showLabel />
-                </div>
-            </section>
+                    </div>
+                ))}
+            </dl>
+            <div className="mt-auto flex gap-2.5">
+                <ApplicationButton
+                    job={job}
+                    className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-deep"
+                >
+                    <Send className="size-4" />
+                    {job.hasApplied ? "Đã ứng tuyển" : "Ứng tuyển ngay"}
+                </ApplicationButton>
+                <SaveJobButton job={job} showLabel />
+            </div>
+        </section>
     );
 }

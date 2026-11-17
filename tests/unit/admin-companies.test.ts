@@ -1,14 +1,15 @@
 import { beforeEach, expect, test } from 'vitest';
 import { NextRequest } from 'next/server';
 import { handleMockRequest } from '@/server/bff/mock-adapter';
-import { adminCompanies, companyHistories, previousCompanyStatuses } from '@/server/bff/admin-companies-store';
+import { adminCompanies, companyHistories, previousCompanyStatuses } from '@/server/bff/admin/admin-companies-store';
 import { getVerificationFiles } from '@/server/bff/company-verification-store';
-import { getRecruiterMockStore, getMockCompanies, createMockRecruiterSession } from '@/server/bff/recruiter/mock-store';
+import { getRecruiterMockStore, getMockCompanies } from '@/server/bff/recruiter/mock-store';
 import { syntheticCompanyDocument } from '@/mocks/fixtures/company-verification-document';
 import { mockAdminCompanies } from '@/mocks/fixtures/admin-companies';
 import { mockAdmin } from '@/mocks/fixtures/admin';
 import { recruiterCompany } from '@/mocks/fixtures/recruiter-company';
-import { mockJobs } from '@/mocks/fixtures/jobs';
+import { mockJobs } from '@/mocks/fixtures/recruiter-jobs';
+import { createMockRecruiterSession } from '../support/auth-fixtures';
 import { canModerateCompany, filterCompanies } from '@/features/admin/company-rules';
 import { managedCompanySchema, companyReasonSchema } from '@/features/admin/schemas/companies';
 const target = mockAdminCompanies[0].id;
@@ -87,12 +88,12 @@ test('admin reads the exact verification file submitted by recruiter and sees th
   const auth = createMockRecruiterSession(); const bytes = syntheticCompanyDocument(); const form = new FormData();
   form.append('files', new File([new Uint8Array(bytes)], 'verification.pdf', { type: 'application/pdf' }));
   const path = 'recruiter/company/verification-documents';
-  const upload = await handleMockRequest(new NextRequest(`http://localhost/api/bff/${path}`, { method: 'POST', headers: { cookie: `talentai_mock_session=${auth.id}`, 'X-CSRF-Token': auth.session.csrf }, body: form }), path);
+  const upload = await handleMockRequest(new NextRequest(`http://localhost/api/bff/${path}`, { method: 'POST', headers: { cookie: `access_token=${auth.id}`, 'X-CSRF-Token': auth.session.csrf }, body: form }), path);
   expect(upload.status).toBe(200); const company = await upload.json();
   const file = await call(`admin/companies/${recruiterCompany.id}/documents/${company.verificationDocuments[0].id}`);
   expect(new Uint8Array(await file.arrayBuffer())).toEqual(bytes);
   expect((await call(`admin/companies/${recruiterCompany.id}/verify`, 'POST', { note: 'Giấy tờ mẫu hợp lệ' })).status).toBe(200);
-  const own = await handleMockRequest(new NextRequest('http://localhost/api/bff/recruiter/company', { headers: { cookie: `talentai_mock_session=${auth.id}` } }), 'recruiter/company');
+  const own = await handleMockRequest(new NextRequest('http://localhost/api/bff/recruiter/company', { headers: { cookie: `access_token=${auth.id}` } }), 'recruiter/company');
   expect((await own.json()).verificationStatus).toBe('verified');
 });
 test('recruiter cannot reopen paused jobs while its company is suspended', async () => {
@@ -100,11 +101,11 @@ test('recruiter cannot reopen paused jobs while its company is suspended', async
   const job = { ...structuredClone(store.jobs[0]), id: '00000000-0000-4000-8000-000000007002', company: { id: recruiterCompany.id, name: recruiterCompany.name }, status: 'paused' as const }; store.jobs.push(job);
   await call(`admin/companies/${recruiterCompany.id}/suspend`, 'POST', { reason: 'Doanh nghiệp đang bị kiểm tra' });
   const path = `recruiter/jobs/${job.id}/reopen`;
-  const reopen = () => handleMockRequest(new NextRequest(`http://localhost/api/bff/${path}`, { method: 'POST', headers: { cookie: `talentai_mock_session=${auth.id}`, 'X-CSRF-Token': auth.session.csrf } }), path);
+  const reopen = () => handleMockRequest(new NextRequest(`http://localhost/api/bff/${path}`, { method: 'POST', headers: { cookie: `access_token=${auth.id}`, 'X-CSRF-Token': auth.session.csrf } }), path);
   expect((await reopen()).status).toBe(409);
   const uploadPath = 'recruiter/company/verification-documents'; const form = new FormData();
   form.append('files', new File([syntheticCompanyDocument()], 'example.pdf', { type: 'application/pdf' }));
-  const upload = await handleMockRequest(new NextRequest(`http://localhost/api/bff/${uploadPath}`, { method: 'POST', headers: { cookie: `talentai_mock_session=${auth.id}`, 'X-CSRF-Token': auth.session.csrf }, body: form }), uploadPath);
+  const upload = await handleMockRequest(new NextRequest(`http://localhost/api/bff/${uploadPath}`, { method: 'POST', headers: { cookie: `access_token=${auth.id}`, 'X-CSRF-Token': auth.session.csrf }, body: form }), uploadPath);
   expect(upload.status).toBe(403);
   expect(getMockCompanies().get(recruiterCompany.id)?.verificationStatus).toBe('suspended');
   await call(`admin/companies/${recruiterCompany.id}/restore`, 'POST', { note: 'Đã xử lý' });

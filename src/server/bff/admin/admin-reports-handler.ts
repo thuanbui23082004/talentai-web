@@ -5,12 +5,12 @@ import type { components } from '@/lib/api/generated/schema';
 import { mockReports } from '@/mocks/fixtures/admin-content';
 import { mockAdmin } from '@/mocks/fixtures/admin';
 import { allowedReportActions, reportStatuses, reportCategories, targetTypes, resolutionSchema } from '@/features/admin/schemas/content';
-import { getAdminActivity, getAdminUsers } from '@/server/bff/admin-users-store';
-import { handleAdminUsers } from '@/server/bff/admin-users-handler';
-import { handleAdminCompanies } from '@/server/bff/admin-companies-handler';
-import { handleAdminJobs } from '@/server/bff/admin-jobs-handler';
-import { adminJobs } from '@/server/bff/admin-jobs-store';
-import { adminCompanies } from '@/server/bff/admin-companies-store';
+import { getAdminActivity, getAdminUsers } from '@/server/bff/admin/admin-users-store';
+import { handleAdminUsers } from '@/server/bff/admin/admin-users-handler';
+import { handleAdminCompanies } from '@/server/bff/admin/admin-companies-handler';
+import { handleAdminJobs } from '@/server/bff/admin/admin-jobs-handler';
+import { adminJobs } from '@/server/bff/admin/admin-jobs-store';
+import { adminCompanies } from '@/server/bff/admin/admin-companies-store';
 import type { MockSession } from '@/server/bff/recruiter/mock-store';
 const shared = globalThis as typeof globalThis & { talentaiReports?: Map<string, components['schemas']['AdminReportDetail']>; talentaiReportsBusy?: Set<string> };
 export function reportStore() { return shared.talentaiReports ??= new Map(structuredClone(mockReports).map(row => [row.id, row])); }

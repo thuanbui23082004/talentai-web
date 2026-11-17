@@ -4,7 +4,7 @@ import { z } from 'zod';
 import type { components } from '@/lib/api/generated/schema';
 import { mockSystemLogs, mockAnomalies } from '@/mocks/fixtures/admin-monitoring';
 import { logLevels, anomalyTypes, anomalyStatuses, severities, anomalyUpdateSchema } from '@/features/admin/schemas/monitoring';
-import { getAdminActivity } from '@/server/bff/admin-users-store';
+import { getAdminActivity } from '@/server/bff/admin/admin-users-store';
 import { mockAdmin } from '@/mocks/fixtures/admin';
 import type { MockSession } from '@/server/bff/recruiter/mock-store';
 const shared = globalThis as typeof globalThis & { talentaiAnomalies?: Map<string, components['schemas']['Anomaly']> };

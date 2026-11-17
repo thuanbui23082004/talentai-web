@@ -1,9 +1,9 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { hasAdminSession } from '@/server/bff/admin-session';
+import { hasAdminSession } from '@/server/bff/admin/admin-session';
 import { AdminShell } from '@/features/admin/components/admin-shell';
 import { AdminLoading } from '@/features/admin/components/admin-loading';
-import { AdminMonitoring } from '@/features/admin/components/admin-monitoring';
+import { AdminMonitoring } from '@/features/admin/components/system/admin-monitoring';
 export default function AdminMonitoringPage() { return <Suspense fallback={<AdminLoading />}><Content /></Suspense>; }
 async function Content() {
   if (!await hasAdminSession()) redirect('/admin/login');

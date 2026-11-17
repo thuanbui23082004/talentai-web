@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { mockProblem } from '@/server/bff/mock-adapter';
 import { ADMIN_MOCK_COOKIE, getRecruiterMockStore } from '@/server/bff/recruiter/mock-store';
-import { handleAdminRequest } from '@/server/bff/admin-handler';
+import { handleAdminRequest } from '@/server/bff/admin/admin-handler';
 
 export async function handleAdminMockRequest(request: NextRequest, path: string): Promise<Response> {
   const scenario = request.headers.get('x-mock-scenario');

@@ -102,7 +102,9 @@ export function JobHoverPreview({
                                         className="size-4"
                                         aria-hidden="true"
                                     />
-                                    {job.experienceLevel ? experienceLabel(job) : JOB_LEVEL_LABELS[job.level]}
+                                    {job.experienceLevel
+                                        ? experienceLabel(job)
+                                        : JOB_LEVEL_LABELS[job.level]}
                                 </span>
                                 {job.applicationDeadline && (
                                     <span className="inline-flex items-center gap-1.5">
@@ -153,7 +155,10 @@ export function JobHoverPreview({
                                         {WORK_TYPE_LABELS[job.workType]}
                                     </p>
                                     <p className="mt-1">
-                                        Cấp bậc: {job.experienceLevel ? experienceLabel(job) : JOB_LEVEL_LABELS[job.level]}
+                                        Cấp bậc:{" "}
+                                        {job.experienceLevel
+                                            ? experienceLabel(job)
+                                            : JOB_LEVEL_LABELS[job.level]}
                                     </p>
                                 </section>
                                 <section>

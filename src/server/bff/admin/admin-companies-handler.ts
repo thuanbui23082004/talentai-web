@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminCompanies, adminCompanyDetail, companyHistories, previousCompanyStatuses } from '@/server/bff/admin-companies-store';
+import { adminCompanies, adminCompanyDetail, companyHistories, previousCompanyStatuses } from '@/server/bff/admin/admin-companies-store';
 import { getVerificationFiles } from '@/server/bff/company-verification-store';
 import { getRecruiterMockStore, type MockSession } from '@/server/bff/recruiter/mock-store';
 import { getMockAccounts } from '@/server/bff/recruiter/account-company-handler';
-import { getAdminActivity } from '@/server/bff/admin-users-store';
+import { getAdminActivity } from '@/server/bff/admin/admin-users-store';
 import { mockAdmin } from '@/mocks/fixtures/admin';
 import { companyStatuses, companyActions, companyReasonSchema, type CompanyAction } from '@/features/admin/schemas/companies';
 import { canModerateCompany } from '@/features/admin/company-rules';

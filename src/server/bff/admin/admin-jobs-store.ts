@@ -1,6 +1,6 @@
 import type { components } from '@/lib/api/generated/schema';
 import { getRecruiterMockStore, getDeletedJobIds, getMockCompanies } from '@/server/bff/recruiter/mock-store';
-import { adminCompanies } from '@/server/bff/admin-companies-store';
+import { adminCompanies } from '@/server/bff/admin/admin-companies-store';
 import { mockAdminJobs } from '@/mocks/fixtures/admin-jobs';
 import { jobStatuses } from '@/lib/api/job-schemas';
 const shared = globalThis as typeof globalThis & { talentaiJobHistory?: Map<string, components['schemas']['ModerationEntry'][]> };

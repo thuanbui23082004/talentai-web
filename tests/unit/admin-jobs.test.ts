@@ -1,10 +1,11 @@
-﻿import { beforeEach, expect, test, vi } from 'vitest';
+import { beforeEach, expect, test, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { handleMockRequest } from '@/server/bff/mock-adapter';
-import { adminJobs, jobHistories } from '@/server/bff/admin-jobs-store';
-import { getRecruiterMockStore, getDeletedJobIds, getMockCompanies, createMockRecruiterSession } from '@/server/bff/recruiter/mock-store';
-import { getAdminActivity } from '@/server/bff/admin-users-store';
-import { mockJobs } from '@/mocks/fixtures/jobs';
+import { adminJobs, jobHistories } from '@/server/bff/admin/admin-jobs-store';
+import { getRecruiterMockStore, getDeletedJobIds, getMockCompanies } from '@/server/bff/recruiter/mock-store';
+import { getAdminActivity } from '@/server/bff/admin/admin-users-store';
+import { mockJobs } from '@/mocks/fixtures/recruiter-jobs';
+import { createMockRecruiterSession } from '../support/auth-fixtures';
 import { mockAdminJobs } from '@/mocks/fixtures/admin-jobs';
 import { mockAdmin } from '@/mocks/fixtures/admin';
 import { recruiterCompany } from '@/mocks/fixtures/recruiter-company';
@@ -80,7 +81,7 @@ test('recruiter reads the same status and moderation reason after admin approval
   const auth = createMockRecruiterSession(); const job = getRecruiterMockStore().jobs[0]; job.status = 'pending_review';
   await call(`admin/jobs/${job.id}/approve`, 'POST', { note: 'Nội dung mẫu đã được duyệt' });
   const path = `recruiter/jobs/${job.id}`;
-  const result = await handleMockRequest(new NextRequest(`http://localhost/api/bff/${path}`, { headers: { cookie: `talentai_mock_session=${auth.id}` } }), path);
+  const result = await handleMockRequest(new NextRequest(`http://localhost/api/bff/${path}`, { headers: { cookie: `access_token=${auth.id}` } }), path);
   expect(result.status).toBe(200); const data = await result.json(); expect(data.status).toBe('open'); expect(data.moderation.reason).toBe('Nội dung mẫu đã được duyệt');
 });
 

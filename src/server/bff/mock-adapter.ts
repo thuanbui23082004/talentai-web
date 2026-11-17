@@ -1,4 +1,4 @@
-import { handleAdminMockRequest } from './admin-adapter';
+import { handleAdminMockRequest } from './admin/admin-adapter';
 import { NextRequest } from 'next/server';
 import { handleRecruiterRequest } from './recruiter/adapter';
 export { mockProblem } from './recruiter/adapter';

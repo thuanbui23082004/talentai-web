@@ -10,8 +10,8 @@ import { adminKeys } from '@/features/admin/query-keys';
 import { getAdminJob } from '@/features/admin/services/jobs';
 import { jobActions, type JobAction } from '@/features/admin/schemas/jobs';
 import { canModerateJob } from '@/features/admin/job-rules';
-import { JobState, AdminJobBadge } from '@/features/admin/components/jobs-shared';
-import { JobModerationForm } from '@/features/admin/components/job-moderation-form';
+import { JobState, AdminJobBadge } from '@/features/admin/components/jobs/jobs-shared';
+import { JobModerationForm } from '@/features/admin/components/jobs/job-moderation-form';
 export function AdminJobDetail({ jobId }: { jobId: string }) {
   const t = useTranslations('AdminJobs'); const f = useFormatter();
   const query = useQuery({ queryKey: adminKeys.job(jobId), queryFn: ({ signal }) => getAdminJob(jobId, signal), retry: false });

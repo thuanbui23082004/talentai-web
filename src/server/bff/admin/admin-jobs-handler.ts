@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminJobs, adminJobDetail, jobHistories } from '@/server/bff/admin-jobs-store';
+import { adminJobs, adminJobDetail, jobHistories } from '@/server/bff/admin/admin-jobs-store';
 import { getDeletedJobIds, getMockCompanies, type MockSession } from '@/server/bff/recruiter/mock-store';
-import { getAdminActivity } from '@/server/bff/admin-users-store';
+import { getAdminActivity } from '@/server/bff/admin/admin-users-store';
 import { mockAdmin } from '@/mocks/fixtures/admin';
 import { jobStatuses, jobReasonSchema, deleteJobReasonSchema, type JobAction } from '@/features/admin/schemas/jobs';
 import { canModerateJob } from '@/features/admin/job-rules';

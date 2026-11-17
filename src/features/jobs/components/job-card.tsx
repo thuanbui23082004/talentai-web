@@ -21,15 +21,16 @@ export function JobCard({
     onUnsave?: () => void;
     className?: string;
 }) {
-    const wordmark = variant === "recruiter"
-        ? job.company.name
-            .replace(/^Công ty(?: mẫu)?\s*/i, "")
-            .split(/\s+/)
-            .slice(-2)
-            .map(word => word[0])
-            .join("")
-            .toLocaleUpperCase("vi")
-        : job.company.name.replace("Công ty mẫu ", "");
+    const wordmark =
+        variant === "recruiter"
+            ? job.company.name
+                  .replace(/^Công ty(?: mẫu)?\s*/i, "")
+                  .split(/\s+/)
+                  .slice(-2)
+                  .map((word) => word[0])
+                  .join("")
+                  .toLocaleUpperCase("vi")
+            : job.company.name.replace("Công ty mẫu ", "");
     const card = (
         <article
             data-job-card-variant={variant}
@@ -51,7 +52,11 @@ export function JobCard({
                             </span>
                         ) : (
                             <Link
-                                href={variant === "recruiter" ? `/recruiter/jobs/${job.id}` : `/jobs/${job.id}`}
+                                href={
+                                    variant === "recruiter"
+                                        ? `/recruiter/jobs/${job.id}`
+                                        : `/jobs/${job.id}`
+                                }
                                 className="block w-full truncate text-left hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                                 title={job.title}
                             >
@@ -66,7 +71,10 @@ export function JobCard({
                     >
                         {job.company.name}
                     </p>
-                    <div data-slot="job-card-salary-location" className="mt-1.5 flex items-center gap-x-2 text-[13px] leading-5 font-medium text-primary">
+                    <div
+                        data-slot="job-card-salary-location"
+                        className="mt-1.5 flex items-center gap-x-2 text-[13px] leading-5 font-medium text-primary"
+                    >
                         <span
                             className="shrink-0"
                             title={formatSalaryRange(job.salary)}
@@ -92,19 +100,28 @@ export function JobCard({
             <div
                 className={`flex items-end justify-between gap-3 ${variant === "default" ? "mt-auto" : ""}`}
             >
-                <div data-slot="job-card-tags" className="flex min-w-0 flex-wrap gap-1.5 text-xs leading-4 text-muted-foreground">
+                <div
+                    data-slot="job-card-tags"
+                    className="flex min-w-0 flex-wrap gap-1.5 text-xs leading-4 text-muted-foreground"
+                >
                     <span className="rounded-lg bg-muted px-2 py-1">
                         {WORK_TYPE_LABELS[job.workType]}
                     </span>
                     <span className="rounded-lg bg-muted px-2 py-1">
                         {experienceLabel(job)}
                     </span>
-                    {job.workMode && <span className="rounded-lg bg-muted px-2 py-1">{WORK_MODE_LABELS[job.workMode]}</span>}
+                    {job.workMode && (
+                        <span className="rounded-lg bg-muted px-2 py-1">
+                            {WORK_MODE_LABELS[job.workMode]}
+                        </span>
+                    )}
                     <span className="rounded-lg bg-muted px-2 py-1">
                         {formatDeadline(job.applicationDeadline)}
                     </span>
                 </div>
-                {variant !== "recruiter" && <SaveJobButton job={job} onUnsave={onUnsave} />}
+                {variant !== "recruiter" && (
+                    <SaveJobButton job={job} onUnsave={onUnsave} />
+                )}
             </div>
             {footer}
         </article>

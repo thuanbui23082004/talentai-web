@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { hasAdminSession } from '@/server/bff/admin-session';
+import { hasAdminSession } from '@/server/bff/admin/admin-session';
 import { AdminLogin } from '@/features/admin/components/admin-login';
 import { Suspense } from 'react';
 import { AdminLoading } from '@/features/admin/components/admin-loading';

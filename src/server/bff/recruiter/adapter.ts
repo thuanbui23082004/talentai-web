@@ -8,6 +8,7 @@ import { getMockCompanies } from './mock-store';
 import { matchesLocationName } from '@/features/jobs';
 import { handleAccountCompany, getMockAccounts } from '@/server/bff/recruiter/account-company-handler';
 import { recruiterIndustries, recruiterLocations } from '@/mocks/fixtures/recruiter-catalog';
+import { getCatalogItems } from '@/server/bff/catalog-store';
 import { createMockJob, getDeletedJobIds, getRecruiterMockStore } from '@/server/bff/recruiter/mock-store';
 import { handleJobManagement } from '@/server/bff/recruiter/job-management-handler';
 import { handleRecruiterAnalysis } from '@/server/bff/recruiter/analysis-handler';
@@ -88,8 +89,9 @@ export async function handleRecruiterRequest(request: NextRequest, path: string)
   }
   if (request.method === 'GET' && path.startsWith('catalog/')) {
     const catalog = path.split('/')[1];
-    if (!['industries', 'locations', 'skills', 'positions'].includes(catalog)) return mockProblem(404, 'NOT_FOUND');
-    const items = catalog === 'industries' ? recruiterIndustries : catalog === 'locations' ? recruiterLocations : [];
+    const type = (['industries', 'locations', 'skills', 'positions'] as const).find(value => value === catalog);
+    if (!type) return mockProblem(404, 'NOT_FOUND');
+    const items = getCatalogItems(type);
     return paged(items.filter(item => item.isActive && matchesLocationName(item.name, request.nextUrl.searchParams.get('q') ?? '')));
   }
   if (path === 'recruiter/jobs' && request.method === 'POST') {
