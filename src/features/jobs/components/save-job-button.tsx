@@ -2,7 +2,7 @@
 
 import { Heart, LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useSession } from "@/features/auth";
+import { CandidateAction, useSession } from "@/features/auth";
 import { useToast } from "@/components/ui";
 import { useSavedJobActions, useSavedJobPending, useSavedJobs } from "../hooks/use-saved-jobs";
 import type { Job } from "../types";
@@ -22,8 +22,8 @@ export function SaveJobButton({ job, onUnsave, showLabel = false }: { job: Job; 
     });
     const label = `${saved ? "Bỏ lưu" : "Lưu"} ${job.title}`;
     const disabled = sessionPending || pending || (!!user && !candidate) || (candidate && query.isPending);
-    return <button type="button" aria-label={label} aria-pressed={saved} aria-busy={pending || undefined} disabled={disabled}
-        title={user && !candidate ? "Lưu việc dành cho tài khoản ứng viên" : label}
+    return <CandidateAction><button type="button" aria-label={label} aria-pressed={saved} aria-busy={pending || undefined} disabled={disabled}
+        title={label}
         className={`flex shrink-0 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${showLabel ? "min-h-11 gap-2 border border-primary px-4 py-2.5 text-sm font-medium text-primary" : "size-11"} ${saved ? "bg-secondary text-primary hover:bg-secondary-hover" : showLabel ? "hover:bg-secondary" : "bg-muted text-muted-foreground hover:bg-secondary hover:text-primary"}`}
         onClick={() => {
             if (!user) { router.push("/login"); return; }
@@ -32,5 +32,5 @@ export function SaveJobButton({ job, onUnsave, showLabel = false }: { job: Job; 
         }}>
         {pending ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" /> : <Heart aria-hidden="true" className={`size-4 ${saved ? "fill-current" : ""}`} />}
         {showLabel && (saved ? "Đã lưu" : "Lưu tin")}
-    </button>;
+    </button></CandidateAction>;
 }

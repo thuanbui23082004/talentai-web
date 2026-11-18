@@ -8,11 +8,17 @@ import { ToastProvider } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <ThemeProvider>
-      <QueryProvider><SessionProvider><TooltipProvider delay={300}><ToastProvider>{children}</ToastProvider></TooltipProvider></SessionProvider></QueryProvider>
-    </ThemeProvider>
-  );
+    return (
+        <ThemeProvider>
+            <QueryProvider>
+                <SessionProvider>
+                    <TooltipProvider delay={300}>
+                        <ToastProvider>{children}</ToastProvider>
+                    </TooltipProvider>
+                </SessionProvider>
+            </QueryProvider>
+        </ThemeProvider>
+    );
 }
 
 export * from "./query-provider";

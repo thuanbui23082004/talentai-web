@@ -5,7 +5,7 @@ import Link from "next/link";
 import { CheckCircle2, FileText, FolderOpen, Info, MapPin, Send, UploadCloud, X } from "lucide-react";
 import { Alert, Button, Checkbox, Modal, ModalContent, Select } from "@/components/ui";
 import { useCvs, useCvActions, validateCvSelection, type CvPreviewDraft } from "@/features/cv";
-import { useSession } from "@/features/auth";
+import { CandidateAction, useSession } from "@/features/auth";
 import { ApiError } from "@/lib/api/errors";
 import { cn, formatDate } from "@/lib/utils";
 import type { Application } from "../types";
@@ -32,12 +32,12 @@ export function ApplicationButton({ job, children, className, variant = "primary
     const [open, setOpen] = useState(false);
     const [applied, setApplied] = useState(false);
     const triggerRef = useRef<HTMLButtonElement>(null);
-    return <>
+    return <CandidateAction>
         <Button ref={triggerRef} variant={variant} className={className} disabled={job.status !== "open" || job.hasApplied || applied} onClick={() => setOpen(true)}>
             {applied ? "Đã ứng tuyển" : children ?? <><Send className="size-4" />{job.hasApplied ? "Đã ứng tuyển" : job.status !== "open" ? "Đã ngừng tuyển" : "Ứng tuyển"}</>}
         </Button>
         <ApplicationDialog job={job} open={open} onOpenChange={setOpen} finalFocus={triggerRef} onApplied={() => setApplied(true)} />
-    </>;
+    </CandidateAction>;
 }
 
 export function ApplicationDialog({ job, open, onOpenChange, locations = [job.location], cvs, finalFocus, onApplied }: ApplicationDialogProps) {

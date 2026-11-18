@@ -10,7 +10,6 @@ import { createMockJobDetails } from "@/mocks/fixtures/job-details";
 import { mockJobs } from "@/mocks/fixtures/jobs";
 import { jobCategories } from "@/mocks/fixtures/job-categories";
 import { searchMockCompanies, getMockCompany, getMockCompanyJobs, getMockCompanyCatalogs } from "./public/mock-companies";
-import { handleMockNotifications } from "./candidate/mock-notifications";
 import { handleMockApplications } from "./candidate/mock-applications";
 import { handleMockSavedJobs } from "./candidate/mock-saved-jobs";
 
@@ -24,8 +23,6 @@ export async function handleMockRequest(request: Request, _targetPath?: string):
   if (/^(recruiter\/|catalog\/|analysis-tasks\/|me\/|auth\/change-password)/.test(targetPath) || (targetPath === 'me' && request.method !== 'GET')) {
     return handleRecruiterRequest(new NextRequest(request), targetPath);
   }
-  const notifications = await handleMockNotifications(request);
-  if (notifications) return notifications;
   const applications = await handleMockApplications(request);
   if (applications) return applications;
   const savedJobs = await handleMockSavedJobs(request);

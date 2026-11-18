@@ -5361,10 +5361,6 @@ paths:
         in: query
         schema:
           type: boolean
-      - name: type
-        in: query
-        schema:
-          $ref: '#/components/schemas/NotificationType'
       - $ref: '#/components/parameters/Page'
       - $ref: '#/components/parameters/PageSize'
       responses:
@@ -7805,6 +7801,12 @@ components:
     NotificationType:
       type: string
       enum:
+      - recruiter_new_application
+      - payment_completed
+      - payment_failed
+      - subscription_expiring
+      - auth_otp_requested
+      - password_changed
       - application_submitted
       - application_status_changed
       - application_withdrawn

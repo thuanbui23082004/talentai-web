@@ -51,7 +51,10 @@ export function JobSearchBar({
     renderLocation,
 }: JobSearchBarProps) {
     const [selected, setSelected] = useState(initialValues?.filters ?? {});
-    const [searchValues, setSearchValues] = useState({ query: initialValues?.query ?? "", location: initialValues?.location ?? "" });
+    const [searchValues, setSearchValues] = useState({
+        query: initialValues?.query ?? "",
+        location: initialValues?.location ?? "",
+    });
     const [quickRecruitment, setQuickRecruitment] = useState(
         initialValues?.quickRecruitment ?? false,
     );
@@ -59,7 +62,14 @@ export function JobSearchBar({
     return (
         <SearchBar
             renderLocation={renderLocation}
-            onLocationChange={(values) => { if (stickyFilters) onSearch({ ...values, quickRecruitment, filters: selected }); }}
+            onLocationChange={(values) => {
+                if (stickyFilters)
+                    onSearch({
+                        ...values,
+                        quickRecruitment,
+                        filters: selected,
+                    });
+            }}
             onValuesChange={setSearchValues}
             stickyFilters={stickyFilters}
             heading={heading}
@@ -111,9 +121,17 @@ export function JobSearchBar({
                                 ),
                             ]}
                             onValueChange={(value) => {
-                                const next = { ...selected, [filter.key]: value ?? "" };
+                                const next = {
+                                    ...selected,
+                                    [filter.key]: value ?? "",
+                                };
                                 setSelected(next);
-                                if (stickyFilters) onSearch({ ...searchValues, quickRecruitment, filters: next });
+                                if (stickyFilters)
+                                    onSearch({
+                                        ...searchValues,
+                                        quickRecruitment,
+                                        filters: next,
+                                    });
                             }}
                             className="w-full text-sm font-medium sm:w-auto sm:min-w-36"
                         />

@@ -3470,7 +3470,7 @@ export interface components {
         /** @enum {string} */
         ReportTargetType: "job" | "company" | "user" | "application" | "system";
         /** @enum {string} */
-        NotificationType: "application_submitted" | "application_status_changed" | "application_withdrawn" | "interview_invited" | "interview_updated" | "interview_cancelled" | "interview_response" | "interview_result" | "job_recommended" | "job_moderated" | "company_verification" | "account_locked" | "report_update" | "ai_task_completed" | "system";
+        NotificationType: "recruiter_new_application" | "payment_completed" | "payment_failed" | "subscription_expiring" | "auth_otp_requested" | "password_changed" | "application_submitted" | "application_status_changed" | "application_withdrawn" | "interview_invited" | "interview_updated" | "interview_cancelled" | "interview_response" | "interview_result" | "job_recommended" | "job_moderated" | "company_verification" | "account_locked" | "report_update" | "ai_task_completed" | "system";
         /** @enum {string} */
         Gender: "male" | "female" | "other";
         /**
@@ -9481,7 +9481,6 @@ export interface operations {
         parameters: {
             query?: {
                 isRead?: boolean;
-                type?: components["schemas"]["NotificationType"];
                 /** @description Trang (từ 1). */
                 page?: components["parameters"]["Page"];
                 /** @description Số phần tử mỗi trang. */

@@ -2,6 +2,7 @@ import { experienceLabel } from "../labels";
 import { CalendarDays, Clock3, MapPin, Send } from "lucide-react";
 import { SaveJobButton } from "./save-job-button";
 import { ApplicationButton } from "@/features/applications";
+import { CandidateAction } from "@/features/auth";
 import { formatDate, formatSalaryRange } from "@/lib/utils";
 import type { JobDetail } from "../types";
 
@@ -61,7 +62,7 @@ export function JobDetailHeader({ job }: { job: JobDetail }) {
                     </div>
                 ))}
             </dl>
-            <div className="mt-auto flex gap-2.5">
+            <CandidateAction><div className="mt-auto flex gap-2.5">
                 <ApplicationButton
                     job={job}
                     className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-deep"
@@ -70,7 +71,7 @@ export function JobDetailHeader({ job }: { job: JobDetail }) {
                     {job.hasApplied ? "Đã ứng tuyển" : "Ứng tuyển ngay"}
                 </ApplicationButton>
                 <SaveJobButton job={job} showLabel />
-            </div>
+            </div></CandidateAction>
         </section>
     );
 }

@@ -7,6 +7,7 @@ export { RegisterForm } from "./components/register-form";
 export { RegistrationNotice } from "./components/registration-notice";
 export { LogoutPanel } from "./components/logout-panel";
 export { AuthSessionProvider, useSession } from "./hooks/use-session";
+export { CandidateAction } from "./components/candidate-action";
 export { DashboardWelcome } from "./components/dashboard-welcome";
 export { AccountLinks } from "./components/account-links";
 export type { AuthUser } from "./types";

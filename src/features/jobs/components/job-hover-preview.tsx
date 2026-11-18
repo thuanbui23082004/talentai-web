@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Badge, Button } from "@/components/ui";
 import { ApplicationDialog } from "@/features/applications";
+import { CandidateAction } from "@/features/auth";
 import { formatDate, formatDeadline, formatSalaryRange } from "@/lib/utils";
 import { JOB_LEVEL_LABELS, WORK_TYPE_LABELS, experienceLabel } from "../labels";
 import type { Job } from "../types";
@@ -128,7 +129,7 @@ export function JobHoverPreview({
                                 >
                                     Xem chi tiết
                                 </Button>
-                                <Button
+                                <CandidateAction><Button
                                     variant="outline"
                                     disabled={
                                         job.status !== "open" || job.hasApplied
@@ -143,7 +144,7 @@ export function JobHoverPreview({
                                         : job.status !== "open"
                                           ? "Đã ngừng tuyển"
                                           : "Ứng tuyển"}
-                                </Button>
+                                </Button></CandidateAction>
                             </div>
                             <div className="mt-5 space-y-4 border-t border-border pt-5 text-sm leading-relaxed">
                                 <section>
@@ -196,12 +197,12 @@ export function JobHoverPreview({
                     </PreviewCard.Positioner>
                 </PreviewCard.Portal>
             </PreviewCard.Root>
-            <ApplicationDialog
+            <CandidateAction><ApplicationDialog
                 job={job}
                 open={applying}
                 onOpenChange={setApplying}
                 finalFocus={triggerRef}
-            />
+            /></CandidateAction>
         </>
     );
 }

@@ -11,6 +11,7 @@ import {
     UsersRound,
 } from "lucide-react";
 import { AvailabilityButton } from "@/components/shared/availability-button";
+import { CandidateAction } from "@/features/auth";
 import { CompanyCard } from "@/components/shared/company-card";
 import { LocationMap } from "@/components/shared/location-map";
 import { AppDownloadBanner } from "@/components/shared/app-download-banner";
@@ -119,15 +120,15 @@ export function CompanyDetailPage({
                             )}
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 sm:self-end">
-                        <AvailabilityButton
+                    <div className="flex flex-wrap gap-2 sm:self-end">
+                        <CandidateAction><AvailabilityButton
                             title="Theo dõi công ty"
                             description="Tính năng theo dõi công ty đang được hoàn thiện. Bạn có thể xem các vị trí đang tuyển ngay trên trang này."
                             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-white hover:bg-brand-deep"
                         >
                             <Plus className="size-4" />
                             Theo dõi
-                        </AvailabilityButton>
+                        </AvailabilityButton></CandidateAction>
                         <CompanyShare name={company.name} compact />
                     </div>
                 </div>

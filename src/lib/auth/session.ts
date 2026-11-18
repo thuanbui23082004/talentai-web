@@ -4,14 +4,16 @@ import { cache } from "react";
 import { readServerSession } from "@/server/bff/auth/session";
 
 export type Session = {
-  userId: string;
-  role: components["schemas"]["Role"];
-  user: components["schemas"]["User"];
+    userId: string;
+    role: components["schemas"]["Role"];
+    user: components["schemas"]["User"];
 };
 
 export const getSession = cache(async (): Promise<Session | null> => {
-  const cookieStore = await cookies();
-  const header = ["access_token", "refresh_token"].map((name) => `${name}=${cookieStore.get(name)?.value ?? ""}`).join("; ");
-  const user = await readServerSession(header);
-  return user ? { userId: user.id, role: user.role, user } : null;
+    const cookieStore = await cookies();
+    const header = ["access_token", "refresh_token"]
+        .map((name) => `${name}=${cookieStore.get(name)?.value ?? ""}`)
+        .join("; ");
+    const user = await readServerSession(header);
+    return user ? { userId: user.id, role: user.role, user } : null;
 });

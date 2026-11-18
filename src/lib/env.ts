@@ -72,6 +72,14 @@ export const envSchema = z
                 );
             }, "AUTH_API_URL phải là URL HTTP(S) hợp lệ")
             .default("http://localhost:3001/api/v1"),
+        NOTIFICATION_API_URL: z
+            .url()
+            .refine((value) => {
+                const url = new URL(value);
+                return ["http:", "https:"].includes(url.protocol) &&
+                    !url.username && !url.password && !url.search && !url.hash;
+            }, "NOTIFICATION_API_URL phải là URL HTTP(S) hợp lệ")
+            .default("http://localhost:3007/api/v1"),
         BACKEND_API_URL: z
             .url()
             .refine((value) => {
@@ -113,6 +121,7 @@ export function getServerEnv() {
         JOB_API_URL: process.env.JOB_API_URL || undefined,
         COMPANY_API_URL: process.env.COMPANY_API_URL || undefined,
         AUTH_API_URL: process.env.AUTH_API_URL || undefined,
+        NOTIFICATION_API_URL: process.env.NOTIFICATION_API_URL || undefined,
         BACKEND_API_URL: process.env.BACKEND_API_URL || undefined,
     });
 }

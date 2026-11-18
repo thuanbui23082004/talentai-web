@@ -6,15 +6,23 @@ import { getJobs, getJobCategories } from "../services/jobs";
 import type { JobFilters, JobSearchResponse } from "../types";
 
 export function useJobCategories() {
-  return useQuery({ queryKey: jobKeys.categories, queryFn: ({ signal }) => getJobCategories(signal), staleTime: 60000 });
+    return useQuery({
+        queryKey: jobKeys.categories,
+        queryFn: ({ signal }) => getJobCategories(signal),
+        staleTime: 60000,
+    });
 }
 
-export function useJobs(filters: JobFilters, initialData?: JobSearchResponse, enabled = true) {
-  return useQuery({
-    queryKey: jobKeys.list(filters),
-    queryFn: ({ signal }) => getJobs(filters, signal),
-    placeholderData: keepPreviousData,
-    initialData,
-    enabled,
-  });
+export function useJobs(
+    filters: JobFilters,
+    initialData?: JobSearchResponse,
+    enabled = true,
+) {
+    return useQuery({
+        queryKey: jobKeys.list(filters),
+        queryFn: ({ signal }) => getJobs(filters, signal),
+        placeholderData: keepPreviousData,
+        initialData,
+        enabled,
+    });
 }

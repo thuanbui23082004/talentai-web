@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { NextIntlClientProvider, useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { Bell, BriefcaseBusiness, CalendarDays, ChevronLeft, ChevronRight, CircleHelp, ContactRound, LayoutDashboard, Menu, MessageCircle, ShoppingBasket, UsersRound } from 'lucide-react';
+import { BriefcaseBusiness, CalendarDays, ChevronLeft, ChevronRight, CircleHelp, ContactRound, LayoutDashboard, Menu, MessageCircle, ShoppingBasket, UsersRound } from 'lucide-react';
 import { RecruiterAccountMenu } from './recruiter-account-menu';
 import { RecruiterHeaderSearch } from '@/features/recruiter/components/recruiter-header-search';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,7 @@ import { recruiterStatsMessages } from '@/features/recruiter-stats';
 import { recruiterServiceMessages } from '@/features/recruiter-services';
 import { recruiterHelpMessages } from '@/features/recruiter-help';
 import { inboxMessages } from '@/features/inbox';
+import { RecruiterNotificationButton } from '@/features/notifications';
 import './recruiter.css';
 import './recruiter-layout.css';
 
@@ -48,7 +49,6 @@ function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const helpActive = pathname === '/recruiter/help';
   return <Modal open={mobileOpen} onOpenChange={setMobileOpen}><div className="recruiter-app" data-sidebar={sidebarExpanded ? 'expanded' : 'collapsed'}>
     <header className="recruiter-header">
@@ -63,7 +63,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       <div className="header-spacer" />
       <RecruiterHeaderSearch />
       <Link className="header-message-icon" href="/recruiter/inbox" aria-label={t('messages')} aria-current={pathname === '/recruiter/inbox' ? 'page' : undefined}><MessageCircle size={15} /></Link>
-      <div className="notification-wrap"><Button variant="outline" size="icon" aria-label={t('notifications')} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen(!notificationsOpen)}><Bell size={17} /><span className="notification-dot" /></Button>{notificationsOpen && <div className="notification-popover">{t('noNotifications')}</div>}</div>
+      <RecruiterNotificationButton />
       <RecruiterAccountMenu />
     </header>
     <div className="recruiter-body">

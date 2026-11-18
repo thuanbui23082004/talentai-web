@@ -1,63 +1,83 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { handleBffRequest } from "@/server/bff/handler";
-import { getAuthStore, issueSession, resetMockAuth, type MockSession } from "../support/auth-fixtures";
-import { resetMockNotifications } from "@/server/bff/candidate/mock-notifications";
-import { mockNotifications } from "@/mocks/fixtures/notifications";
-import example from "../../contracts/examples/notifications.json";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { csrfTokenFor } from "@/server/bff/auth/cookies";
+import { handleNotifications } from "@/server/bff/notifications/service";
 
-describe("notifications BFF", () => {
-    let session: MockSession;
-    beforeEach(() => {
-        vi.stubEnv("DATA_MODE", "mock");
-        resetMockAuth(); resetMockNotifications();
-        session = issueSession(getAuthStore().accounts.get("candidate@example.com")!.user);
-        vi.useFakeTimers();
+const session = vi.hoisted(() => ({ role: "candidate", signedIn: true }));
+vi.mock("@/server/bff/auth/session", () => ({
+    readRequestIdentity: async () => session.signedIn ? {
+        user: { id: "user-1", role: session.role, status: "active" },
+        access: "test-access-token",
+    } : null,
+}));
+
+const backendUrl = "http://localhost:3007/api/v1";
+const notification = {
+    id: "notification-1",
+    type: "recruiter_new_application",
+    subject: "Có ứng viên mới",
+    body: "Một ứng viên vừa nộp hồ sơ.",
+    metadata: { jobId: "job-1" },
+    read: false,
+    createdAt: "2026-11-18T08:00:00Z",
+};
+
+function request(path = "", method = "GET", csrf = "") {
+    return new Request(`http://localhost/api/bff/notifications${path}`, {
+        method,
+        headers: { cookie: "access_token=test-access-token", ...(csrf ? { "x-csrf-token": csrf } : {}) },
     });
-    afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs(); resetMockAuth(); resetMockNotifications(); });
-    async function call(path = "", method = "GET", headers: Record<string, string> = {}, account = session) {
-        const pending = handleBffRequest(new Request(`http://localhost/api/bff/notifications${path}`, { method, headers: { cookie: `access_token=${account.access}`, ...headers } }));
-        await vi.runAllTimersAsync();
-        return pending;
-    }
-    it("serves contract examples and filters before pagination", async () => {
-        expect(mockNotifications).toEqual(example.items);
-        const response = await call();
-        expect(response.headers.get("cache-control")).toBe("no-store");
-        expect(await response.json()).toEqual(example);
-        const filtered = await (await call("?isRead=false&pageSize=1&page=2")).json();
-        expect(filtered.items[0].id).toBe(mockNotifications[1].id);
-        expect(filtered.meta).toEqual({ page: 2, pageSize: 1, totalItems: 3, totalPages: 3 });
-        expect((await (await call("?type=system")).json()).items).toHaveLength(1);
-        for (const path of ["?isRead=bad", "?type=invalid", "?page=0", "?pageSize=101", "?unsupported=true"]) expect((await call(path)).status).toBe(422);
+}
+
+afterEach(() => {
+    vi.restoreAllMocks();
+    session.role = "candidate";
+    session.signedIn = true;
+});
+
+describe("real notification BFF", () => {
+    it("maps backend pagination, notification fields and bearer token", async () => {
+        const fetcher = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({
+            success: true,
+            data: { items: [notification], totalItems: 21, totalPages: 3, currentPage: 1, unreadCount: 4 },
+        }));
+        session.role = "recruiter";
+        const response = await handleNotifications(request("?page=2&pageSize=10&isRead=false"), backendUrl);
+        expect(response.status).toBe(200);
+        expect(await response.json()).toEqual({
+            items: [{ id: "notification-1", type: "recruiter_new_application", title: "Có ứng viên mới", body: "Một ứng viên vừa nộp hồ sơ.", data: { jobId: "job-1" }, isRead: false, createdAt: notification.createdAt }],
+            meta: { page: 2, pageSize: 10, totalItems: 21, totalPages: 3 },
+            unreadCount: 4,
+        });
+        expect(String(fetcher.mock.calls[0][0])).toBe(`${backendUrl}/notifications?page=1&size=10&unreadOnly=true`);
+        expect(new Headers(fetcher.mock.calls[0][1]?.headers).get("Authorization")).toBe("Bearer test-access-token");
     });
-    it("checks sessions and rejects missing CSRF and cross-site mutations", async () => {
-        expect((await call("", "GET", { cookie: "" })).status).toBe(401);
-        expect((await call("/read-all", "POST")).status).toBe(403);
-        expect((await call("/read-all", "POST", { "x-csrf-token": session.csrf, origin: "https://evil.example" })).status).toBe(403);
-        expect((await call("/read-all", "POST", { "x-csrf-token": session.csrf, "sec-fetch-site": "cross-site" })).status).toBe(403);
-        expect((await (await call("/unread-count")).json()).count).toBe(3);
+
+    it("maps unread count and both read actions", async () => {
+        const fetcher = vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+            const path = String(input);
+            if (path.endsWith("unread-count")) return Response.json({ success: true, data: { unreadCount: 3 } });
+            if (path.endsWith("read-all")) return Response.json({ success: true, data: { markedCount: 3 } });
+            return Response.json({ success: true, data: { ...notification, read: true } });
+        });
+        expect(await (await handleNotifications(request("/unread-count"), backendUrl)).json()).toEqual({ count: 3 });
+        const csrf = csrfTokenFor({ access: "test-access-token" });
+        expect((await (await handleNotifications(request("/notification-1/read", "PATCH", csrf), backendUrl)).json()).isRead).toBe(true);
+        expect((await handleNotifications(request("/read-all", "POST", csrf), backendUrl)).status).toBe(204);
+        expect(fetcher.mock.calls[2][1]?.method).toBe("PATCH");
     });
-    it("persists read mutations and isolates accounts", async () => {
-        const second = issueSession(getAuthStore().accounts.get("recruiter@example.com")!.user);
-        const headers = { "x-csrf-token": session.csrf };
-        const read = await call(`/${mockNotifications[0].id}/read`, "PATCH", headers);
-        expect(read.status).toBe(200);
-        expect((await read.json()).isRead).toBe(true);
-        expect((await (await call("/unread-count")).json()).count).toBe(2);
-        expect((await (await call("/unread-count", "GET", {}, second)).json()).count).toBe(3);
-        expect((await call("/read-all", "POST", headers)).status).toBe(204);
-        expect((await (await call("?isRead=false")).json()).items).toEqual([]);
-        expect((await (await call("/unread-count")).json()).count).toBe(0);
-        expect((await call("/90000000-0000-4000-8000-999999999999/read", "PATCH", headers)).status).toBe(404);
+
+    it("rejects missing session and CSRF before calling the backend", async () => {
+        const fetcher = vi.spyOn(globalThis, "fetch");
+        session.signedIn = false;
+        expect((await handleNotifications(request(), backendUrl)).status).toBe(401);
+        session.signedIn = true;
+        expect((await handleNotifications(request("/read-all", "POST"), backendUrl)).status).toBe(403);
+        expect(fetcher).not.toHaveBeenCalled();
     });
-    it("supports empty, slow and failed requests without changing state", async () => {
-        expect((await (await call("", "GET", { "x-mock-scenario": "empty" })).json()).items).toEqual([]);
-        expect((await call("", "GET", { "x-mock-scenario": "slow" })).status).toBe(200);
-        expect((await call("/read-all", "POST", { "x-csrf-token": session.csrf, "x-mock-scenario": "error" })).status).toBe(500);
-        expect((await (await call("/unread-count")).json()).count).toBe(3);
-    });
-    it("keeps real private proxy closed until session integration is available", async () => {
-        vi.stubEnv("DATA_MODE", "real"); vi.stubEnv("BACKEND_API_URL", "https://backend.example");
-        expect((await call()).status).toBe(503);
+
+    it("does not log out a valid session when the notification service rejects its token", async () => {
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 401 }));
+        const response = await handleNotifications(request(), backendUrl);
+        expect(response.status).toBe(503);
     });
 });
