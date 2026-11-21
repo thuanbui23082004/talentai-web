@@ -29,7 +29,7 @@ Java quản lý mật khẩu, token, role, expiry, refresh rotation và revocati
 BFF không có store phiên, cached identity, idle timeout hoặc thu hồi riêng.
 Guard không decode JWT để tin role. JSON không bao giờ trả JWT cho React.
 
-AUTH_API_URL cấu hình auth riêng, DATA_MODE chỉ áp dụng nghiệp vụ.
+Auth đi qua `BACKEND_API_URL` của gateway, độc lập với `DATA_MODE` của nghiệp vụ.
 Workspace mock lưu dữ liệu theo user ID, không lưu JWT làm khóa phiên.
 
 Chi tiết luồng, giới hạn tích hợp và cấu hình: docs/auth-flow.md.

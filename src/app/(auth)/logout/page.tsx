@@ -8,14 +8,9 @@ export const metadata: Metadata = {
     robots: { index: false },
 };
 
-// GET renders confirmation only. The client must POST with CSRF to revoke a session.
+// Legacy URL immediately revokes the session on the client with CSRF.
 export default async function LogoutPage() {
     const session = await getSession();
     if (!session) redirect("/login?reason=logged-out");
-    return (
-        <LogoutPanel
-            fullName={session.user.fullName}
-            dashboard={`/${session.role}/dashboard`}
-        />
-    );
+    return <LogoutPanel />;
 }

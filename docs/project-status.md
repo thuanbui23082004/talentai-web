@@ -1,5 +1,21 @@
 # Trạng thái triển khai
 
+## Auth — đăng xuất và khôi phục mật khẩu (2026-11-22)
+
+Menu ứng viên/nhà tuyển dụng đăng xuất trực tiếp về `/login`, không còn màn hình xác nhận.
+`/logout` cũ tự gửi yêu cầu thu hồi phiên và có nút thử lại nếu lỗi. Hai trang
+`/forgot-password`, `/reset-password` dùng liên kết gửi qua email và POST thẳng
+`/auth/reset-password`; backend kiểm tra token khi lưu. Form không hiển thị token, BFF không tiết lộ token
+trong phản hồi yêu cầu quên mật khẩu. Chưa nghiệm thu email và API trên backend thật.
+
+## Cấu hình gateway hiện tại (2026-11-21)
+
+BFF dùng duy nhất `BACKEND_API_URL=http://localhost:3000/api/v1` cho mọi request thật,
+kể cả auth và thông báo. Các biến `*_API_URL` riêng từng service trong ghi chú lịch sử
+bên dưới không còn được dùng. Frontend mặc định chạy ở `http://localhost:3000`;
+gateway phải chuyển sang cổng host khác và cập nhật `BACKEND_API_URL` để chạy đồng thời.
+Chế độ mock/real theo từng nhóm vẫn được giữ.
+
 ## Candidate — theo dõi hồ sơ ứng tuyển qua application-service (2026-11-17)
 
 Trang `/candidate/applications` hiện dùng BFF `/candidate/application-tracking` để đọc danh sách,

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { handleAdminMockRequest } from "./admin/admin-adapter";
-import { getServerEnv } from "@/lib/env";
+import { getGatewayApiUrl, getServerEnv } from "@/lib/env";
 import { handleMockRequest } from "./mock-adapter";
 import { proxyRequest } from "./proxy";
 import { apiError } from "./responses";
@@ -62,12 +62,13 @@ export async function handleBffRequest(request: Request): Promise<Response> {
         }
         if (isAuthRequest(request)) return await handleAuthRequest(request);
         const env = getServerEnv();
+        const gatewayApiUrl = getGatewayApiUrl(env.BACKEND_API_URL);
         if (isNotificationRequest(request))
-            return await handleNotifications(request, env.NOTIFICATION_API_URL);
+            return await handleNotifications(request, gatewayApiUrl);
         if (isCandidateApplicationTrackingRequest(request)) {
             const baseUrl =
                 (env.APPLICATION_DATA_MODE ?? env.DATA_MODE) === "real"
-                    ? env.APPLICATION_API_URL
+                    ? gatewayApiUrl
                     : undefined;
             return await handleCandidateApplicationTracking(request, baseUrl);
         }
@@ -79,7 +80,7 @@ export async function handleBffRequest(request: Request): Promise<Response> {
                 request,
                 applicantStatus[1],
                 (env.APPLICATION_DATA_MODE ?? env.DATA_MODE) === "real"
-                    ? env.APPLICATION_API_URL
+                    ? gatewayApiUrl
                     : undefined,
             );
         const applicantDetail = new URL(request.url).pathname.match(
@@ -95,7 +96,7 @@ export async function handleBffRequest(request: Request): Promise<Response> {
                       ? "resume"
                       : "detail",
                 (env.APPLICATION_DATA_MODE ?? env.DATA_MODE) === "real"
-                    ? env.APPLICATION_API_URL
+                    ? gatewayApiUrl
                     : undefined,
             );
         const applicantsJobId = new URL(request.url).pathname.match(
@@ -106,7 +107,7 @@ export async function handleBffRequest(request: Request): Promise<Response> {
                 request,
                 applicantsJobId,
                 (env.APPLICATION_DATA_MODE ?? env.DATA_MODE) === "real"
-                    ? env.APPLICATION_API_URL
+                    ? gatewayApiUrl
                     : undefined,
             );
         if (
@@ -116,7 +117,7 @@ export async function handleBffRequest(request: Request): Promise<Response> {
             return await handleApplicationSubmission(
                 request,
                 (env.APPLICATION_DATA_MODE ?? env.DATA_MODE) === "real"
-                    ? env.APPLICATION_API_URL
+                    ? gatewayApiUrl
                     : undefined,
             );
         }
@@ -124,8 +125,8 @@ export async function handleBffRequest(request: Request): Promise<Response> {
             if ((env.JOB_DATA_MODE ?? env.DATA_MODE) === "real")
                 return await handleRecruiterJobPostings(
                     request,
-                    env.JOB_API_URL,
-                    env.COMPANY_API_URL,
+                    gatewayApiUrl,
+                    gatewayApiUrl,
                 );
             if (
                 new URL(request.url).pathname ===
@@ -138,14 +139,14 @@ export async function handleBffRequest(request: Request): Promise<Response> {
             return await handleCvsRequest(
                 request,
                 (env.PROFILE_DATA_MODE ?? env.DATA_MODE) === "real"
-                    ? env.PROFILE_API_URL
+                    ? gatewayApiUrl
                     : undefined,
             );
         if (isProfileRequest(request)) {
             return await handleProfileRequest(
                 request,
                 (env.PROFILE_DATA_MODE ?? env.DATA_MODE) === "real"
-                    ? env.PROFILE_API_URL
+                    ? gatewayApiUrl
                     : undefined,
             );
         }
@@ -153,13 +154,13 @@ export async function handleBffRequest(request: Request): Promise<Response> {
             isSavedJobsRequest(request) &&
             (env.JOB_DATA_MODE ?? env.DATA_MODE) === "real"
         ) {
-            return await handleSavedJobs(request, env.JOB_API_URL);
+            return await handleSavedJobs(request, gatewayApiUrl);
         }
         if (
             isRecruiterCompanyRequest(request) &&
             (env.COMPANY_DATA_MODE ?? env.DATA_MODE) === "real"
         ) {
-            return await handleRecruiterCompany(request, env.COMPANY_API_URL);
+            return await handleRecruiterCompany(request, gatewayApiUrl);
         }
         if (
             isPublicJobRequest(request) &&
@@ -167,9 +168,9 @@ export async function handleBffRequest(request: Request): Promise<Response> {
         ) {
             return await handleJobService(
                 request,
-                env.JOB_API_URL,
+                gatewayApiUrl,
                 (env.COMPANY_DATA_MODE ?? env.DATA_MODE) === "real"
-                    ? env.COMPANY_API_URL
+                    ? gatewayApiUrl
                     : undefined,
             );
         }
@@ -177,11 +178,11 @@ export async function handleBffRequest(request: Request): Promise<Response> {
             isPublicCompanyRequest(request) &&
             (env.COMPANY_DATA_MODE ?? env.DATA_MODE) === "real"
         ) {
-            return await handleCompanyService(request, env.COMPANY_API_URL);
+            return await handleCompanyService(request, gatewayApiUrl);
         }
         return env.DATA_MODE === "mock"
             ? await handleMockRequest(request)
-            : await proxyRequest(request, env.BACKEND_API_URL!);
+            : await proxyRequest(request, gatewayApiUrl);
     } catch {
         return apiError(
             503,

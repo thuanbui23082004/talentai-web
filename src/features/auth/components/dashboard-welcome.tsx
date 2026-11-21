@@ -14,6 +14,7 @@ import {
     CardContent,
 } from "@/components/ui";
 import type { AuthUser } from "../types";
+import { LogoutButton } from "./logout-button";
 
 const roleLabels = {
     candidate: "Ứng viên",
@@ -37,15 +38,13 @@ export function DashboardWelcome({ user, embedded = false }: { user: AuthUser; e
                         <span className="hidden text-sm text-muted-foreground sm:inline">
                             {user.fullName}
                         </span>
-                        <Button
+                        <LogoutButton
                             variant="outline"
-                            size="sm"
-                            nativeButton={false}
-                            render={<Link href="/logout" />}
+                            className="h-9 rounded-lg px-3 text-xs"
                         >
                             <LogOut />
                             Đăng xuất
-                        </Button>
+                        </LogoutButton>
                     </div>
                 </div>
             </header>}

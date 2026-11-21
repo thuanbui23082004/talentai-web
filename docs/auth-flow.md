@@ -1,17 +1,22 @@
 # Auth — BFF mỏng, Java quản lý xác thực
 
-Auth luôn gọi Java qua AUTH_API_URL, độc lập DATA_MODE. Không có tài khoản
+Auth luôn gọi Java qua gateway `BACKEND_API_URL`, độc lập DATA_MODE. Không có tài khoản
 mock trong runtime. Test double chỉ nằm trong tests/support.
 
 ## Cấu hình
 
 ```dotenv
 DATA_MODE=mock
-AUTH_API_URL=http://localhost:3001/api/v1
+BACKEND_API_URL=http://localhost:3000/api/v1
 ```
 
-DATA_MODE và BACKEND_API_URL chỉ áp dụng dữ liệu nghiệp vụ. Auth không đọc
-DATA_MODE để chọn nguồn danh tính.
+DATA_MODE chỉ áp dụng dữ liệu nghiệp vụ. Auth không đọc DATA_MODE để chọn nguồn danh tính.
+
+Đăng xuất từ menu gửi POST có CSRF rồi chuyển thẳng về `/login`; URL `/logout` cũ
+tự thực hiện thao tác này và chỉ hiện nút thử lại khi backend lỗi. Khôi phục mật khẩu:
+`/forgot-password` gửi email → người dùng mở `/reset-password?token=...` từ thư,
+nhập mật khẩu mới; BFF gửi token ngầm tới `/auth/reset-password`. Form không hiển thị
+token. Backend kiểm tra token khi lưu; BFF không trả token trong phản hồi quên mật khẩu.
 
 ## Trách nhiệm
 
@@ -97,12 +102,11 @@ quyền API cuối cùng do Java quyết định.
 ## Phần chưa tích hợp
 
 Forgot/reset-password đã nối Java theo Swagger: forgot nhận `{email}`, trả 200;
-reset nhận `{token,newPassword,confirmPassword}`. Chỉ development trả `resetToken`
-Java cấp để UI hiển thị liên kết thử nghiệm `/reset-password?token=...`; production
-loại bỏ token. Không lưu token vào localStorage/sessionStorage, không prefetch liên kết.
-Token một lần/hạn 15 phút do Java kiểm tra. Mật khẩu reset dài 8–100 ký tự.
-Java `PASSWORD_RESET_TOKEN_INVALID` → BFF `400 INVALID_RESET_TOKEN`.
-Backend chưa gửi email; giao diện không tuyên bố đã gửi thư.
+reset nhận `{token,newPassword,confirmPassword}`. Backend gửi liên kết qua email;
+BFF không trả token. Trang lấy token từ liên kết, xóa query khỏi thanh địa chỉ và
+không lưu vào localStorage/sessionStorage. Token một lần/hạn 15 phút do Java kiểm tra.
+Mật khẩu reset dài 8–100 ký tự. Java `PASSWORD_RESET_TOKEN_INVALID` → BFF
+`400 INVALID_RESET_TOKEN`. Backend thật và email chưa nghiệm thu trong repo này.
 
 ## Đăng nhập Google/Facebook
 

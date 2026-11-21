@@ -76,17 +76,15 @@ Auth **luôn dùng auth service thật**, độc lập với chế độ mock/re
 
 ## Mock và backend thật
 
-`DATA_MODE=mock` là mặc định cho dữ liệu nghiệp vụ. Có thể bật real theo từng nhóm bằng `JOB_DATA_MODE`, `COMPANY_DATA_MODE`, `PROFILE_DATA_MODE` và `APPLICATION_DATA_MODE`; khi không đặt, nhóm đó dùng `DATA_MODE`. URL dịch vụ tương ứng nằm trong các biến `*_API_URL`. `AUTH_API_URL` cấu hình xác thực riêng.
+`DATA_MODE=mock` là mặc định cho dữ liệu nghiệp vụ. Có thể bật real theo từng nhóm bằng `JOB_DATA_MODE`, `COMPANY_DATA_MODE`, `PROFILE_DATA_MODE` và `APPLICATION_DATA_MODE`; khi không đặt, nhóm đó dùng `DATA_MODE`. Mọi request backend đi từ BFF đến gateway qua một biến server-only `BACKEND_API_URL`. Auth và thông báo vẫn dùng gateway khi dữ liệu nghiệp vụ ở chế độ mock.
 
 Ví dụ chỉ nối việc làm và công ty với backend thật trong `.env.local`:
 
 ```dotenv
 DATA_MODE=mock
 JOB_DATA_MODE=real
-JOB_API_URL=http://localhost:3004/api/v1
 COMPANY_DATA_MODE=real
-COMPANY_API_URL=http://localhost:3003/api/v1
-AUTH_API_URL=http://localhost:3001/api/v1
+BACKEND_API_URL=http://localhost:3000/api/v1
 ```
 
 Bật real cho một dịch vụ không có nghĩa mọi màn hình liên quan đã tích hợp thật. Một số luồng còn mock, một số màn hình là bản xem trước. Xem [docs/project-status.md](docs/project-status.md) và tài liệu tích hợp trong `docs/` trước khi demo. Riêng trang chủ, danh sách việc làm/công ty đi qua BFF, nhưng số việc làm, số ứng viên, thẻ ngành và bài cẩm nang vẫn có nội dung minh họa từ `src/mocks/fixtures/home.ts`.
@@ -101,7 +99,7 @@ Copy-Item .env.example .env.local
 npm.cmd run dev
 ```
 
-Mở `http://localhost:3000`. Trang tìm việc ở `/jobs`; bộ UI dùng chung ở `/ui`. Dữ liệu nghiệp vụ mock không cần Prism hoặc backend nghiệp vụ, nhưng **đăng nhập/đăng ký vẫn cần auth service** tại `AUTH_API_URL`. Khi đổi cấu hình trong `.env.local`, khởi động lại Next.js. Không commit file môi trường cá nhân. Nếu PowerShell cho phép chạy `npm.ps1`, có thể dùng `npm` thay `npm.cmd`.
+Mở `http://localhost:3000`. Trang tìm việc ở `/jobs`; bộ UI dùng chung ở `/ui`. Dữ liệu nghiệp vụ mock không cần backend nghiệp vụ, nhưng **đăng nhập/đăng ký vẫn cần gateway và auth service**. FE và gateway phải dùng hai cổng host khác nhau; nếu FE dùng 3000, chuyển cổng host của gateway và cập nhật `BACKEND_API_URL` tương ứng. Khi đổi cấu hình trong `.env.local`, khởi động lại Next.js. Không commit file môi trường cá nhân. Nếu PowerShell cho phép chạy `npm.ps1`, có thể dùng `npm` thay `npm.cmd`.
 
 ## Cấu trúc thư mục
 

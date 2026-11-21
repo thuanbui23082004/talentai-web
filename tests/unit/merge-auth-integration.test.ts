@@ -18,11 +18,11 @@ function request(path: string, body?: unknown, cookies = "", token?: string) {
   }));
 }
 const cookies = (response: Response) => response.headers.getSetCookie().map(value => value.split(";")[0]).join("; ");
-beforeEach(() => { vi.stubEnv("AUTH_API_URL", "http://auth.test/api/v1"); });
+beforeEach(() => { vi.stubEnv("BACKEND_API_URL", "http://gateway.test/api/v1"); });
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); vi.useRealTimers(); });
 
 it.each(["mock", "real"])("uses Java auth independently of DATA_MODE=%s", async mode => {
-  vi.stubEnv("DATA_MODE", mode); vi.stubEnv("BACKEND_API_URL", "http://business.test/api");
+  vi.stubEnv("DATA_MODE", mode);
   const network = vi.spyOn(globalThis, "fetch").mockImplementation(async (url, init) => {
     if (String(url).endsWith("/login")) return authResult();
     if (String(url).endsWith("/me")) {
@@ -45,7 +45,7 @@ it.each(["mock", "real"])("uses Java auth independently of DATA_MODE=%s", async 
   expect(await readServerSession(cookies(logout))).toBeNull();
   // Java documents that an old access JWT remains valid until its own expiry.
   expect((await readServerSession(cookie))?.email).toBe(user.email);
-  expect(network.mock.calls.every(([url]) => String(url).startsWith("http://auth.test/api/v1/auth/"))).toBe(true);
+  expect(network.mock.calls.every(([url]) => String(url).startsWith("http://gateway.test/api/v1/auth/"))).toBe(true);
 });
 
 it("deduplicates in-flight refresh HTTP calls without keeping a BFF session", async () => {
@@ -187,16 +187,15 @@ it("binds browser-CSRF to the refresh cookie without storing a second session", 
   expect(network).not.toHaveBeenCalled();
 });
 
-it.each(["development", "production"])("forwards recovery to Java and restricts test tokens in %s", async mode => {
-  vi.stubEnv("NODE_ENV", mode);
-  const network = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ success: true, message: "upstream text", resetToken: "java-reset-token" }));
+it("forwards recovery to Java without exposing OTP", async () => {
+  const network = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ success: true, message: "upstream text" }));
   const response = await request("/auth/forgot-password", { email: user.email, role: "ADMIN" });
   expect(response.status).toBe(200);
   expect(response.headers.get("Cache-Control")).toBe("no-store");
   const body = await response.json();
-  expect(body).toEqual({ message: "Yêu cầu khôi phục mật khẩu đã được tiếp nhận.", ...(mode === "development" ? { resetToken: "java-reset-token" } : {}) });
+  expect(body).toEqual({ message: "Yêu cầu khôi phục mật khẩu đã được tiếp nhận." });
   expect(network).toHaveBeenCalledTimes(1);
-  expect(network.mock.calls[0][0]).toBe("http://auth.test/api/v1/auth/forgot-password");
+  expect(network.mock.calls[0][0]).toBe("http://gateway.test/api/v1/auth/forgot-password");
   expect(JSON.parse(String(network.mock.calls[0][1]?.body))).toEqual({ email: user.email });
   expect(new Headers(network.mock.calls[0][1]?.headers).has("Authorization")).toBe(false);
 });
@@ -216,7 +215,7 @@ it("delegates password reset to Java and maps its used/expired token error", asy
   const success = await request("/auth/reset-password", body);
   expect(success.status).toBe(200);
   expect(await success.json()).toEqual({ message: "Đặt lại mật khẩu thành công." });
-  expect(network.mock.calls[0][0]).toBe("http://auth.test/api/v1/auth/reset-password");
+  expect(network.mock.calls[0][0]).toBe("http://gateway.test/api/v1/auth/reset-password");
   expect(JSON.parse(String(network.mock.calls[0][1]?.body))).toEqual(body);
   network.mockResolvedValueOnce(Response.json({ error: { code: "PASSWORD_RESET_TOKEN_INVALID", message: "internal info" } }, { status: 400 }));
   const used = await request("/auth/reset-password", body);
@@ -228,7 +227,7 @@ it.each(["GOOGLE", "FACEBOOK"])("exchanges %s provider tokens for HttpOnly Java 
   const network = vi.spyOn(globalThis, "fetch").mockResolvedValue(authResult());
   const response = await request("/auth/social-login", { provider, token: "provider-test-token", role: "candidate" });
   expect(response.status).toBe(200);
-  expect(network.mock.calls[0][0]).toBe("http://auth.test/api/v1/auth/social-login");
+  expect(network.mock.calls[0][0]).toBe("http://gateway.test/api/v1/auth/social-login");
   expect(JSON.parse(String(network.mock.calls[0][1]?.body))).toEqual({ provider, token: "provider-test-token", role: "CANDIDATE" });
   expect(response.headers.getSetCookie().every(value => value.includes("HttpOnly"))).toBe(true);
   expect(cookies(response)).toBe(cookie);
@@ -249,7 +248,7 @@ it.each(["GOOGLE", "FACEBOOK"])("rejects %s login when Java returns a different 
   expect(response.status).toBe(403);
   expect((await response.json()).error.code).toBe("AUTH_ROLE_MISMATCH");
   expect(response.headers.has("set-cookie")).toBe(false);
-  expect(network.mock.calls[1][0]).toBe("http://auth.test/api/v1/auth/logout");
+  expect(network.mock.calls[1][0]).toBe("http://gateway.test/api/v1/auth/logout");
 });
 
 it("rejects social admin/local inputs and cross-origin requests before contacting Java", async () => {

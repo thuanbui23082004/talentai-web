@@ -162,9 +162,8 @@ export interface paths {
         put?: never;
         /**
          * Yêu cầu khôi phục mật khẩu
-         * @description Chuyển yêu cầu tới Java POST /api/v1/auth/forgot-password. Backend hiện chưa gửi email.
-         *     Trả 200 dù email có tồn tại hay không. Khi chạy development, có thể trả resetToken
-         *     do Java cấp để thử reset-password; production luôn loại bỏ token khỏi response.
+         * @description Chuyển yêu cầu tới Java POST /api/v1/auth/forgot-password. Backend gửi mã khôi phục
+         *     qua email nếu tài khoản hợp lệ. Trả cùng một thông báo dù email có tồn tại hay không.
          *
          *     **Quyền:** công khai (không cần đăng nhập).
          */
@@ -186,8 +185,7 @@ export interface paths {
         put?: never;
         /**
          * Đặt lại mật khẩu bằng token
-         * @description Đặt mật khẩu mới từ token khôi phục do Java cấp. Token dùng một lần, hạn 15 phút.
-         *     Hiện Java trả token qua forgot-password để thử nghiệm, chưa gửi email.
+         * @description Đặt mật khẩu mới bằng mã khôi phục nhận qua email. Mã dùng một lần, hạn 15 phút.
          *
          *     **Quyền:** công khai (không cần đăng nhập).
          *
@@ -3708,11 +3706,9 @@ export interface components {
         };
         ForgotPasswordResponse: {
             message: string;
-            /** @description Chỉ trả trong development nếu Java cấp token. Dùng một lần, hạn 15 phút; không lưu vào storage. */
-            resetToken?: string;
         };
         ResetPasswordRequest: {
-            /** @description Token do Java forgot-password cấp, dùng một lần, hạn 15 phút. */
+            /** @description Mã khôi phục nhận qua email, dùng một lần, hạn 15 phút. */
             token: string;
             /** @description Quy tắc reset-password của Java; không áp dụng PasswordRules đăng ký. */
             newPassword: string;

@@ -32,9 +32,6 @@ export const messageSchema = z.object({
     success: z.literal(true),
     message: z.string(),
 });
-export const passwordResetSchema = messageSchema.extend({
-    resetToken: z.string().min(1).optional(),
-});
 
 export function mapUser(
     value: z.infer<typeof userSchema>,

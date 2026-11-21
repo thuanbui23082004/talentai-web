@@ -19,7 +19,8 @@ export default async function LoginPage({
     const reason =
         query.reason === "expired" ||
         query.reason === "logged-out" ||
-        query.reason === "registered"
+        query.reason === "registered" ||
+        query.reason === "password-reset"
             ? query.reason
             : undefined;
     return (

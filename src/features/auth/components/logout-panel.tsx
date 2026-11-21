@@ -1,57 +1,28 @@
 "use client";
 
-import Link from "next/link";
-import { LogOut } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { Alert, Button } from "@/components/ui";
 import { useLogout } from "../hooks/use-auth";
 
-export function LogoutPanel({
-    fullName,
-    dashboard,
-}: {
-    fullName: string;
-    dashboard: string;
-}) {
+// Keep the old /logout URL working without showing a confirmation page.
+export function LogoutPanel() {
     const mutation = useLogout();
+    const started = useRef(false);
+    useEffect(() => {
+        if (started.current) return;
+        started.current = true;
+        mutation.mutate();
+    }, [mutation]);
+
     return (
-        <div className="space-y-6">
-            <span className="flex size-14 items-center justify-center rounded-2xl bg-secondary text-primary">
-                <LogOut className="size-6" />
-            </span>
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight">
-                    Đăng xuất tài khoản
-                </h1>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                    Bạn đang đăng nhập với tên{" "}
-                    <strong className="font-medium text-foreground">
-                        {fullName}
-                    </strong>
-                    . Bạn có muốn kết thúc phiên làm việc này?
-                </p>
-            </div>
+        <div role="status" className="space-y-5">
+            <h1 className="text-2xl font-bold tracking-tight">Đang đăng xuất…</h1>
             {mutation.isError && (
-                <Alert variant="error" title="Chưa thể đăng xuất">
-                    {mutation.error.message} Bạn có thể thử lại.
-                </Alert>
+                <>
+                    <Alert variant="error" title="Chưa thể đăng xuất">Phiên của bạn chưa được kết thúc. Vui lòng thử lại.</Alert>
+                    <Button className="w-full" onClick={() => mutation.mutate()} loading={mutation.isPending}>Thử lại</Button>
+                </>
             )}
-            <Button
-                className="w-full"
-                loading={mutation.isPending}
-                onClick={() => mutation.mutate()}
-            >
-                {mutation.isPending ? "Đang đăng xuất…" : "Đăng xuất"}
-            </Button>
-            <Button
-                variant="outline"
-                role="link"
-                className="w-full"
-                disabled={mutation.isPending}
-                nativeButton={false}
-                render={<Link href={dashboard} />}
-            >
-                Quay lại
-            </Button>
         </div>
     );
 }

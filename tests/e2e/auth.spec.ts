@@ -127,12 +127,9 @@ test("rejects wrong passwords and locked accounts", async ({ page }) => {
   await expect(page.getByText("Tài khoản đang bị khóa hoặc tạm khóa.", { exact: false })).toBeVisible();
 });
 
-test("GET logout preserves the session, confirmation revokes it and private routes close", async ({ page, context }) => {
+test("opening the legacy logout URL revokes the session and goes straight to login", async ({ page, context }) => {
   await login(page);
   await page.goto("/logout");
-  await expect(page.getByRole("heading", { name: "Đăng xuất tài khoản" })).toBeVisible();
-  expect((await context.request.get("/api/bff/me")).status()).toBe(200);
-  await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
   expect((await context.cookies()).filter((cookie) => ["access_token", "refresh_token"].includes(cookie.name))).toHaveLength(0);
   expect((await context.request.get("/api/bff/me")).status()).toBe(401);
@@ -152,14 +149,13 @@ test("refreshes expired access once and preserves the authenticated page", async
 
 test("a failed logout shows retry and does not discard a valid session", async ({ page, context }) => {
   await login(page);
-  await page.goto("/logout");
   await page.route("**/api/bff/auth/logout", (route) => route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ error: { code: "INTERNAL_ERROR", message: "secret database failure" } }) }));
-  await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
+  await page.goto("/logout");
   await expect(page.getByText("Chưa thể đăng xuất", { exact: true })).toBeVisible();
   await expect(page.getByText("secret database failure")).toHaveCount(0);
   expect((await context.request.get("/api/bff/me")).status()).toBe(200);
   await page.unroute("**/api/bff/auth/logout");
-  await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
+  await page.getByRole("button", { name: "Thử lại", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
 });
 

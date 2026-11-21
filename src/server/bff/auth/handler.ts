@@ -8,7 +8,6 @@ import {
     callAuth,
     mapUser,
     messageSchema,
-    passwordResetSchema,
     profileSchema,
     refreshSchema,
 } from "./backend";
@@ -178,7 +177,7 @@ async function upstreamError(upstream: Response, path: string) {
         return apiError(
             400,
             "INVALID_RESET_TOKEN",
-            "Liên kết không hợp lệ hoặc đã hết hạn.",
+            "Mã xác thực không hợp lệ hoặc đã hết hạn.",
         );
 
     if (status === 400 || status === 422)
@@ -401,14 +400,9 @@ async function handleJsonRoute(
         );
 
     if (path === "/auth/forgot-password") {
-        const result = passwordResetSchema.parse(await upstream.json());
+        messageSchema.parse(await upstream.json());
         const response: components["schemas"]["ForgotPasswordResponse"] = {
             message: "Yêu cầu khôi phục mật khẩu đã được tiếp nhận.",
-            // Java currently returns a test token instead of sending email.
-            // Only expose that development flow when running `next dev`.
-            ...(process.env.NODE_ENV === "development" && result.resetToken
-                ? { resetToken: result.resetToken }
-                : {}),
         };
         return NextResponse.json(response, { headers: NO_STORE });
     }

@@ -31,6 +31,7 @@ export function toApiError(status: number, body?: components["schemas"]["ApiErro
     EMAIL_ALREADY_EXISTS: "Email này đã được sử dụng. Vui lòng đăng nhập hoặc dùng email khác.",
     ACCOUNT_LOCKED: "Tài khoản đang bị khóa hoặc tạm khóa. Vui lòng thử lại sau 15 phút hoặc liên hệ quản trị viên.",
     SESSION_EXPIRED: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+    INVALID_RESET_TOKEN: "Mã xác thực không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu mã mới.",
     CSRF_TOKEN_INVALID: "Phiên thao tác không hợp lệ. Vui lòng tải lại trang rồi thử lại.",
     SERVICE_UNAVAILABLE: "Dịch vụ chưa sẵn sàng. Vui lòng thử lại sau.",
     RATE_LIMITED: "Bạn thao tác quá nhanh. Vui lòng thử lại sau.",

@@ -6,6 +6,7 @@ import { ChevronDown, ContactRound, LogOut } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { NavigationDetails } from '@/components/shared/navigation-details';
 import { useAccount } from '@/features/account';
+import { LogoutButton } from '@/features/auth';
 
 export function RecruiterAccountMenu() {
   const t = useTranslations('Recruiter');
@@ -23,7 +24,7 @@ export function RecruiterAccountMenu() {
     </summary>
     <nav aria-label={t('accountMenu')} className="absolute top-full right-0 z-50 mt-2 w-56 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-card p-2 text-foreground shadow-float">
       <Link href="/recruiter/account" className="flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm hover:bg-secondary hover:text-primary focus-visible:bg-secondary"><ContactRound size={16} aria-hidden="true" />{t('account')}</Link>
-      <Link href="/logout" className="flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm hover:bg-secondary hover:text-primary focus-visible:bg-secondary"><LogOut size={16} aria-hidden="true" />{t('logout')}</Link>
+      <LogoutButton className="min-h-11 w-full justify-start rounded-lg px-3 text-sm text-foreground hover:bg-secondary hover:text-primary focus-visible:bg-secondary"><LogOut size={16} aria-hidden="true" />{t('logout')}</LogoutButton>
     </nav>
   </NavigationDetails>;
 }

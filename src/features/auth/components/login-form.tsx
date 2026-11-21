@@ -18,16 +18,16 @@ export function LoginForm({
     reason,
 }: {
     initialRole?: RegistrationRole;
-    reason?: "expired" | "logged-out" | "registered";
+    reason?: "expired" | "logged-out" | "registered" | "password-reset";
 }) {
     const [role, setRole] = useState(initialRole);
     const [noticeDismissed, setNoticeDismissed] = useState(false);
     const mutation = useLogin();
     useEffect(() => {
-        if (reason !== "logged-out") return;
+        if (reason !== "logged-out" && reason !== "password-reset") return;
         // Consume this one-time notice without navigating or clearing other parameters.
         const url = new URL(window.location.href);
-        if (url.searchParams.get("reason") === "logged-out") {
+        if (url.searchParams.get("reason") === reason) {
             url.searchParams.delete("reason");
             window.history.replaceState(
                 null,
@@ -77,11 +77,15 @@ export function LoginForm({
                                 ? "Phiên đăng nhập đã hết hạn"
                                 : reason === "registered"
                                   ? "Đăng ký thành công"
+                                  : reason === "password-reset"
+                                    ? "Đặt lại mật khẩu thành công"
                                   : "Bạn đã đăng xuất"
                         }
                         variant={reason === "expired" ? "warning" : "success"}
                     >
-                        {reason === "registered"
+                        {reason === "password-reset"
+                            ? "Vui lòng đăng nhập bằng mật khẩu mới."
+                            : reason === "registered"
                             ? "Vui lòng đăng nhập bằng tài khoản vừa tạo."
                             : "Đăng nhập để tiếp tục sử dụng TalentAI."}
                     </Alert>
@@ -92,7 +96,9 @@ export function LoginForm({
                 className="mt-6 space-y-5"
                 onSubmitCapture={() => setNoticeDismissed(true)}
                 onSubmit={handleSubmit(async (values) => {
-                    await mutation.mutateAsync({ ...values, role }).catch(() => undefined);
+                    await mutation
+                        .mutateAsync({ ...values, role })
+                        .catch(() => undefined);
                 })}
             >
                 <FormField label="Email" error={errors.email?.message}>
@@ -150,14 +156,6 @@ export function LoginForm({
                 </Link>
             </p>
             <SocialLogin role={role} disabled={mutation.isPending} />
-            <div className="mt-6 text-center">
-                <Link
-                    href="/jobs"
-                    className="text-xs text-muted-foreground hover:text-primary"
-                >
-                    Tiếp tục khám phá việc làm
-                </Link>
-            </div>
         </div>
     );
 }

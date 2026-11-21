@@ -175,19 +175,23 @@ export function HomeCompanies({
                     <ArrowRight className="size-3.5" />
                 </Link>
             </div>
-            {status ? <div className="mt-7 text-sm text-white">{status}</div> : <div className="mt-7 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-                {companies.map((company, index) => (
-                    <CompanyCard
-                        key={company.id}
-                        name={company.name}
-                        wordmark={company.wordmark}
-                        logo={company.logo}
-                        count={company.count}
-                        href={`/companies/${company.id}`}
-                        tone={index}
-                    />
-                ))}
-            </div>}
+            {status ? (
+                <div className="mt-7 text-sm text-white">{status}</div>
+            ) : (
+                <div className="mt-7 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+                    {companies.map((company, index) => (
+                        <CompanyCard
+                            key={company.id}
+                            name={company.name}
+                            wordmark={company.wordmark}
+                            logo={company.logo}
+                            count={company.count}
+                            href={`/companies/${company.id}`}
+                            tone={index}
+                        />
+                    ))}
+                </div>
+            )}
         </section>
     );
 }

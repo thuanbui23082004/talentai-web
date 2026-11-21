@@ -88,14 +88,11 @@ test("mobile sidebar opens, navigates and closes with Escape", async ({ page }, 
     }
 });
 
-test("candidate account menu uses the session and existing logout confirmation", async ({ page }) => {
+test("candidate account menu logs out directly", async ({ page }) => {
     await loginCandidate(page);
     await page.getByLabel("Tài khoản Nguyễn Minh Anh", { exact: true }).click();
     await expect(page.getByRole("banner").getByText("candidate@example.com", { exact: true })).toBeVisible();
-    await page.getByRole("banner").getByRole("link", { name: "Đăng xuất", exact: true }).click();
-    await expect(page).toHaveURL(/\/logout$/);
-    await expect(page.getByRole("heading", { name: "Đăng xuất tài khoản", exact: true })).toBeVisible();
-    await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
+    await page.getByRole("banner").getByRole("button", { name: "Đăng xuất", exact: true }).click();
     await expect(page).toHaveURL(/\/login$/);
     await page.goto("/candidate/cv");
     await expect(page).toHaveURL(/\/login$/);

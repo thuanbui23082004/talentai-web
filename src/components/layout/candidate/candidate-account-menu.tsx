@@ -5,7 +5,7 @@ import { ChevronDown, House, LayoutDashboard, LogOut, Settings } from "lucide-re
 import { Avatar } from "@/components/ui";
 import { NavigationDetails } from "@/components/shared/navigation-details";
 import { AvailabilityButton } from "@/components/shared/availability-button";
-import type { AuthUser } from "@/features/auth";
+import { LogoutButton, type AuthUser } from "@/features/auth";
 
 export function CandidateAccountMenu({ user }: { user: AuthUser }) {
     return <NavigationDetails className="group relative">
@@ -15,7 +15,7 @@ export function CandidateAccountMenu({ user }: { user: AuthUser }) {
             <Link href="/" className="mt-1 flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm hover:bg-secondary hover:text-primary"><House aria-hidden="true" className="size-4" />Trang chủ</Link>
             <Link href="/candidate/dashboard" className="flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm hover:bg-secondary hover:text-primary"><LayoutDashboard className="size-4" />Tổng quan</Link>
             <AvailabilityButton title="Cài đặt tài khoản" description="Trang cài đặt tài khoản đang được hoàn thiện." className="flex min-h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm hover:bg-secondary hover:text-primary"><Settings className="size-4" />Cài đặt tài khoản</AvailabilityButton>
-            <Link href="/logout" className="flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm hover:bg-secondary hover:text-primary"><LogOut className="size-4" />Đăng xuất</Link>
+            <LogoutButton className="min-h-11 w-full justify-start rounded-lg px-3 text-sm text-foreground hover:bg-secondary hover:text-primary"><LogOut className="size-4" />Đăng xuất</LogoutButton>
         </div>
     </NavigationDetails>;
 }

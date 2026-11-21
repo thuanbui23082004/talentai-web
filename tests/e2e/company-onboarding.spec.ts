@@ -143,10 +143,7 @@ test("registers a representative, creates a separate company, and resumes saved 
     await page.setViewportSize({ width: 1280, height: 960 });
     await accountMenu.click();
     await page.screenshot({ path: testInfo.outputPath("recruiter-account-menu-desktop.png"), fullPage: true });
-    await accountNavigation.getByRole("link", { name: "Đăng xuất", exact: true }).click();
-    await expect(page).toHaveURL(/\/logout$/);
-    await expect(page.getByRole("heading", { name: "Đăng xuất tài khoản" })).toBeVisible();
-    await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
+    await accountNavigation.getByRole("button", { name: "Đăng xuất", exact: true }).click();
     await expect(page).toHaveURL(/\/login(?:\?reason=logged-out)?$/);
     expect((await page.context().cookies()).filter(cookie => ["access_token", "refresh_token"].includes(cookie.name))).toHaveLength(0);
     await page.goto("/recruiter/dashboard");
