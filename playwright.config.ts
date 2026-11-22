@@ -12,7 +12,7 @@ export default defineConfig({
     baseURL: "http://127.0.0.1:3100",
     trace: "on-first-retry",
   },
-  webServer: {
+  webServer: process.env.PLAYWRIGHT_REUSE_SERVER === "1" ? undefined : {
     command: "npm run dev -- --hostname 127.0.0.1 --port 3100",
     url: "http://127.0.0.1:3100/jobs",
     reuseExistingServer: false,

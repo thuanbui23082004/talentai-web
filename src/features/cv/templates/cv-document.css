@@ -1,0 +1,46 @@
+.cv-document { position: relative; box-sizing: border-box; width: 210mm; min-height: 297mm; padding: 14mm; background: white; color: #282431; font-family: var(--font-inter), system-ui, sans-serif; font-size: 10pt; line-height: 1.5; box-shadow: 0 12px 32px #22153c1a; overflow-wrap: anywhere; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+.cv-document * { box-sizing: border-box; }
+.cv-document-tinted::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(var(--cv-bg-angle), #fff 45%, var(--cv-bg-color)); }
+.cv-document > * { position: relative; z-index: 1; }
+.cv-document-header { display: flex; align-items: center; gap: 8mm; min-height: 33mm; padding-bottom: 5mm; border-bottom: 2px solid var(--cv-primary); }
+.cv-document-header h1 { margin: 0; color: var(--cv-primary); font-size: 24pt; line-height: 1.15; }
+.cv-document-title { margin: 2mm 0 0; font-size: 12pt; }
+.cv-document-avatar { width: 27mm; height: 27mm; flex: none; border-radius: 50%; object-fit: cover; }
+.cv-document-body { display: grid; grid-template-columns: 57mm minmax(0, 1fr); gap: 8mm; padding-top: 5mm; }
+.cv-document section { margin-bottom: 6mm; }
+.cv-document h2 { margin: 0 0 2mm; padding-bottom: 1mm; border-bottom: 1px solid var(--cv-primary); color: var(--cv-primary); font-size: 11pt; text-transform: uppercase; }
+.cv-document p { margin: 1mm 0; white-space: pre-wrap; }
+.cv-document-entry { margin: 0 0 4mm; break-inside: avoid; }
+.cv-document-entry strong { display: block; }
+.cv-document-entry small { color: #615b68; }
+.cv-document-skill { height: 1.2mm; margin-bottom: 2mm; background: #e9e5ed; }
+.cv-document-skill i { display: block; height: 100%; background: var(--cv-primary); }
+.cv-document-modern-1 { padding: 0; }
+.cv-document-modern-1 .cv-document-header { padding: 12mm 12mm 7mm; color: white; background: #30363b; border-bottom: 0; }
+.cv-document-modern-1 .cv-document-header h1, .cv-document-modern-1 h2 { color: var(--cv-primary); }
+.cv-document-modern-1 .cv-document-body { gap: 0; padding: 0; grid-template-columns: 65mm minmax(0, 1fr); }
+.cv-document-modern-1 .cv-document-aside { min-height: 238mm; padding: 8mm 7mm; color: white; background: #30363b; }
+.cv-document-modern-1 .cv-document-main { padding: 8mm; }
+.cv-document-modern-2 { padding: 0 12mm 12mm; }
+.cv-document-modern-2 .cv-document-header { flex-direction: row-reverse; justify-content: space-between; border-color: #745444; }
+.cv-document-modern-2 .cv-document-header h1 { color: #745444; }
+.cv-document-modern-2 .cv-document-aside { padding: 5mm; color: white; background: #745444; }
+.cv-document-modern-2 .cv-document-aside h2 { color: white; border-color: #ffffff88; }
+.cv-document-modern-3 .cv-document-header { padding: 6mm; border: 0; border-radius: 18mm 0 18mm 0; background: #e9f4ff; }
+.cv-document-modern-3 .cv-document-header h1, .cv-document-modern-3 h2 { color: var(--cv-primary); }
+.cv-document-modern-3 .cv-document-header .cv-document-avatar { border: 3px solid white; }
+.cv-document-modern-3 h2 { padding: 1mm 3mm; border: 0; border-radius: 8mm; background: #e9f4ff; }
+.cv-document-modern-4 .cv-document-header { flex-direction: row-reverse; justify-content: space-between; border: 0; border-radius: 0 0 20mm 0; background: #edf5ff; padding: 6mm; }
+.cv-document-modern-4 .cv-document-body { grid-template-columns: minmax(0, 1fr); }
+.cv-document-modern-4 .cv-document-aside { display: flex; flex-wrap: wrap; gap: 4mm; }
+.cv-document-modern-4 .cv-document-aside section { flex: 1 1 35mm; border-radius: 3mm; padding: 3mm; background: #f5f8fc; }
+.cv-document-modern-5 { border: 2mm solid #e1efea; }
+.cv-document-modern-5 .cv-document-header { justify-content: space-between; color: white; background: #344252; padding: 5mm; border: 0; }
+.cv-document-modern-5 .cv-document-header h1 { color: white; }
+.cv-document-modern-5 h2 { background: #e1efea; border: 0; padding: 1mm 2mm; }
+.cv-document-modern-5 .cv-document-body { grid-template-columns: 50mm minmax(0, 1fr); }
+.cv-document-modern-6 .cv-document-header { justify-content: center; text-align: center; border-color: var(--cv-primary); }
+.cv-document-modern-6 .cv-document-body { grid-template-columns: 60mm minmax(0, 1fr); }
+.cv-document-modern-6 .cv-document-aside { padding: 5mm; background: #eef4ee; }
+.cv-document-modern-6 h2 { text-align: center; background: #d7e8d8; border: 0; padding: 1mm; }
+@media print { @page { size: A4; margin: 0; } body:has(.cv-print-root) > *:not(.cv-print-root) { display: none !important; } .cv-print-root { display: block !important; } .cv-document { box-shadow: none; break-after: page; } }

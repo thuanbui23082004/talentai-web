@@ -332,3 +332,6 @@ Ví dụ: `curl -H "x-mock-scenario: empty" http://localhost:3000/api/bff/jobs`.
 - Kéo thả hoặc select trạng thái gửi PATCH `/recruiter/job-applications/{id}/status` qua BFF tới application-service, kèm `status` và `version`. Chỉ chuyển đúng từng bước hoặc từ chối; không retry ghi. Lỗi/xung đột tải lại bảng để đồng bộ.
 - Mock cùng endpoint giữ trạng thái/version trong bộ nhớ và kiểm tra quyền công ty, CSRF, chuyển bước. Không dùng điểm AI giả trên card.
 - Chi tiết luồng và giới hạn kiểm chứng backend thật: `docs/recruiter-job-applicants-integration.md`.
+# CV mẫu từ hồ sơ (2026-11-22)
+
+Thư viện 6 mẫu cho ứng viên mở editor 2 cột, tự điền từ GET profile/experience/education/skills/certificates. Dữ liệu dự án và ngoại ngữ chưa có endpoint profile tương ứng nên bắt đầu rỗng để nhập trong editor. Bản nháp lưu qua POST `/api/bff/cv` (alias `/api/cv`), chỉ là mock trong bộ nhớ tiến trình theo user với session/CSRF; backend thật chưa nhận payload này. Xuất PDF phía trình duyệt bằng html2pdf.js; schema đề xuất ở `docs/cv-template-payload.md`. CV tải lên trong tài khoản vẫn là luồng riêng.

@@ -1,6 +1,7 @@
 "use client";
 
 import { CandidatePageTitle } from "@/components/layout/candidate/candidate-page-title";
+import { useJobCategories } from "@/features/jobs";
 
 import { useState, type ReactNode } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -30,7 +31,6 @@ import {
 } from "../schemas/job-preferences";
 import {
     PREFERENCE_EXPERIENCE,
-    PREFERENCE_INDUSTRIES,
     PREFERENCE_LEVELS,
     PREFERENCE_LOCATIONS,
     PREFERENCE_WORK_TYPES,
@@ -69,6 +69,7 @@ function FieldLabel({
 
 export function JobPreferencesPage({ userId }: { userId: string }) {
     const profile = usePersonalProfile(userId);
+    const categories = useJobCategories();
     return (
         <div className="candidate-page">
             <header className="mb-5">
@@ -78,19 +79,19 @@ export function JobPreferencesPage({ userId }: { userId: string }) {
                     AI
                 </p>
             </header>
-            {profile.isPending ? (
+            {profile.isPending || categories.isPending ? (
                 <LoadingState title="Đang tải tiêu chí tìm việc" />
-            ) : profile.isError ? (
+            ) : profile.isError || categories.isError ? (
                 <Alert variant="error" title="Không tải được tiêu chí tìm việc">
                     <Button
                         variant="outline"
-                        onClick={() => void profile.refetch()}
+                        onClick={() => { void profile.refetch(); void categories.refetch(); }}
                     >
                         Thử lại
                     </Button>
                 </Alert>
             ) : (
-                <JobPreferencesForm userId={userId} profile={profile.data} />
+                <JobPreferencesForm userId={userId} profile={profile.data} industries={categories.data.map(item => ({ value: item.categoryName, label: item.categoryName }))} />
             )}
         </div>
     );
@@ -99,9 +100,11 @@ export function JobPreferencesPage({ userId }: { userId: string }) {
 function JobPreferencesForm({
     userId,
     profile,
+    industries,
 }: {
     userId: string;
     profile: PersonalProfile;
+    industries: { value: string; label: string }[];
 }) {
     const [advanced, setAdvanced] = useState(true);
     const [saved, setSaved] = useState<JobPreferencesDraft>(() =>
@@ -256,7 +259,7 @@ function JobPreferencesForm({
                         "industries",
                         "Ngành nghề làm việc",
                         optionsWithSavedValues(
-                            PREFERENCE_INDUSTRIES,
+                            industries,
                             selections.industries ?? [],
                         ),
                         3,

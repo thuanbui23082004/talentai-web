@@ -91,6 +91,29 @@ tags:
 security:
 - cookieAuth: []
 paths:
+  /cv:
+    post:
+      tags: [CV]
+      operationId: saveCvTemplateDraft
+      summary: Lưu bản nháp CV từ mẫu (mock)
+      security:
+      - cookieAuth: []
+        csrfToken: []
+      x-roles: [candidate]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CVPayload' }
+      responses:
+        '201':
+          description: Đã lưu
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CVPayload' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
   /auth/register:
     post:
       tags:
@@ -7605,6 +7628,91 @@ components:
           schema:
             type: integer
   schemas:
+    CVPayload:
+      type: object
+      required: [templateId, theme, data, updatedAt]
+      properties:
+        templateId: { type: string }
+        theme:
+          type: object
+          required: [primaryColor, backgroundId]
+          properties:
+            primaryColor: { type: string }
+            backgroundId: { type: string }
+        data:
+          type: object
+          required: [basics, education, experience, skills, projects, certificates, languages]
+          properties:
+            basics:
+              type: object
+              required: [fullName, title, email, phone, address, avatarUrl, summary]
+              properties:
+                fullName: { type: string }
+                title: { type: string }
+                email: { type: string }
+                phone: { type: string }
+                address: { type: string }
+                avatarUrl: { type: string }
+                summary: { type: string }
+            education:
+              type: array
+              items:
+                type: object
+                required: [school, degree, startDate, endDate, description]
+                properties:
+                  school: { type: string }
+                  degree: { type: string }
+                  startDate: { type: string }
+                  endDate: { type: string }
+                  description: { type: string }
+            experience:
+              type: array
+              items:
+                type: object
+                required: [company, position, startDate, endDate, current, description]
+                properties:
+                  company: { type: string }
+                  position: { type: string }
+                  startDate: { type: string }
+                  endDate: { type: string }
+                  current: { type: boolean }
+                  description: { type: string }
+            skills:
+              type: array
+              items:
+                type: object
+                required: [name, level]
+                properties:
+                  name: { type: string }
+                  level: { type: number }
+            projects:
+              type: array
+              items:
+                type: object
+                required: [name, role, link, description]
+                properties:
+                  name: { type: string }
+                  role: { type: string }
+                  link: { type: string }
+                  description: { type: string }
+            certificates:
+              type: array
+              items:
+                type: object
+                required: [name, issuer, date]
+                properties:
+                  name: { type: string }
+                  issuer: { type: string }
+                  date: { type: string }
+            languages:
+              type: array
+              items:
+                type: object
+                required: [name, level]
+                properties:
+                  name: { type: string }
+                  level: { type: string }
+        updatedAt: { type: string, format: date-time }
     Role:
       type: string
       enum:

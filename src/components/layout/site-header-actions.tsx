@@ -19,30 +19,7 @@ export function SiteHeaderActions() {
                 aria-label="Đang tải tiện ích tài khoản"
             />
         );
-    if (!user)
-        return (
-            <NavigationDetails className="group relative text-xs">
-                <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1 [&::-webkit-details-marker]:hidden">
-                    Miền Nam
-                    <ChevronDown className="size-3" />
-                </summary>
-                <div className="absolute top-full right-0 w-48 rounded-xl border border-border bg-card p-2 text-foreground shadow-float">
-                    {[
-                        ["TP.HCM", "Miền Nam · TP.HCM"],
-                        ["Đà Nẵng", "Miền Trung · Đà Nẵng"],
-                        ["Hà Nội", "Miền Bắc · Hà Nội"],
-                    ].map(([city, label]) => (
-                        <Link
-                            key={city}
-                            href={`/jobs?city=${encodeURIComponent(city)}`}
-                            className="block rounded-lg p-3 hover:bg-secondary"
-                        >
-                            {label}
-                        </Link>
-                    ))}
-                </div>
-            </NavigationDetails>
-        );
+    if (!user) return <></>;
     return (
         <div
             className="flex shrink-0 items-center gap-1 rounded-full border border-white/15 bg-white/10 p-1"

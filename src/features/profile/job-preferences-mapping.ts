@@ -1,6 +1,6 @@
 import type { PersonalProfile, PersonalProfileInput } from "./types";
 import { INITIAL_JOB_PREFERENCES, type JobPreferencesDraft } from "./schemas/job-preferences";
-import { PREFERENCE_INDUSTRIES, PREFERENCE_LEVELS, PREFERENCE_LOCATIONS, PREFERENCE_WORK_TYPES } from "./job-preference-options";
+import { PREFERENCE_LEVELS, PREFERENCE_LOCATIONS, PREFERENCE_WORK_TYPES } from "./job-preference-options";
 
 type Option = { value: string; label: string };
 const EXPERIENCE_CODES: Record<string, string> = {
@@ -20,7 +20,7 @@ export function profileToJobPreferences(profile: PersonalProfile): JobPreference
     return {
         ...INITIAL_JOB_PREFERENCES,
         position: profile.desiredJobTitle ?? "",
-        industries: keys(profile.desiredIndustries ?? [], PREFERENCE_INDUSTRIES),
+        industries: profile.desiredIndustries ?? [],
         experience: Object.entries(EXPERIENCE_CODES).find(([, code]) => code === profile.experienceLevel)?.[0] ?? profile.experienceLevel ?? "",
         salaryMin: profile.minDesiredSalary == null ? "" : String(profile.minDesiredSalary / 1000000),
         salaryMax: profile.maxDesiredSalary == null ? "" : String(profile.maxDesiredSalary / 1000000),
@@ -37,7 +37,7 @@ export function profileToJobPreferences(profile: PersonalProfile): JobPreference
 export function jobPreferencesPayload(values: JobPreferencesDraft): PersonalProfileInput {
     return {
         desiredJobTitle: values.position,
-        desiredIndustries: labels(values.industries, PREFERENCE_INDUSTRIES),
+        desiredIndustries: values.industries,
         experienceLevel: EXPERIENCE_CODES[values.experience] ?? values.experience,
         salaryNegotiable: values.negotiable,
         // The backend ignores null. Keep the previous range when negotiable, without sending it again.

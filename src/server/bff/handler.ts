@@ -23,6 +23,7 @@ import {
     isProfileRequest,
 } from "./candidate/profile-service";
 import { handleCvsRequest, isCvsRequest } from "./candidate/cv-service";
+import { handleCvTemplateDraft } from "./candidate/cv-template-draft";
 import {
     handleRecruiterJobPostings,
     isRecruiterJobPostingRequest,
@@ -40,6 +41,8 @@ import { handleNotifications, isNotificationRequest } from "./notifications/serv
 
 export async function handleBffRequest(request: Request): Promise<Response> {
     try {
+        if (new URL(request.url).pathname === "/api/bff/cv" && request.method === "POST")
+            return handleCvTemplateDraft(request);
         const adminPath = new URL(request.url).pathname.replace(
             "/api/bff/",
             "",

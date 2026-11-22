@@ -3,7 +3,6 @@
 import {
     AtSign,
     CalendarDays,
-    CircleAlert,
     MapPin,
     Pencil,
     Phone,
@@ -61,7 +60,7 @@ export function ProfilePersonalInfo({ user }: { user: AuthUser }) {
                 />
                 <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                        <h2 className="min-w-0 break-words text-lg font-semibold">
+                        <h2 className="min-w-0 break-words text-xl font-semibold">
                             {personal.name}
                         </h2>
                         <ProfileAction
@@ -75,42 +74,37 @@ export function ProfilePersonalInfo({ user }: { user: AuthUser }) {
                         </ProfileAction>
                     </div>
 
-                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
-                        <span className="inline-flex min-w-0 items-center gap-1.5 break-all">
+                    <div className="mt-2 flex flex-wrap gap-2 text-sm text-muted-foreground">
+                        <span className="inline-flex min-w-0 items-center gap-2 rounded-lg bg-secondary/40 px-2.5 py-1.5 break-all">
                             <AtSign className="size-3.5 shrink-0" />
                             {personal.email}
                         </span>
                         {personal.phone && (
-                            <span className="inline-flex items-center gap-1.5">
+                            <span className="inline-flex items-center gap-2 rounded-lg bg-secondary/40 px-2.5 py-1.5">
                                 <Phone className="size-3.5" />
                                 {personal.phone}
                             </span>
                         )}
-                        <span className="inline-flex items-center gap-1.5 text-warning-foreground">
-                            <CircleAlert className="size-3.5" />
-                            Xác thực ngay
-                        </span>
                     </div>
                     {personal.headline && (
                         <p className="mt-2 break-words text-sm text-muted-foreground">
                             {personal.headline}
                         </p>
                     )}
-                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs">
+                    <div className="mt-2 flex flex-wrap gap-2 text-sm">
                         <ProfileAction
                             section="personal"
-                            className="inline-flex min-h-11 items-center gap-1.5 text-left text-primary hover:underline"
+                            className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-secondary/40 px-2.5 text-left text-primary hover:bg-secondary hover:underline"
                         >
                             <MapPin className="size-3.5 shrink-0" />
                             <span className="break-words">
-                                {personalAddressPayload(
-                                    personal.location,
-                                ).address || "Thêm địa chỉ hiện tại"}
+                                {personalAddressPayload(personal.location)
+                                    .address || "Thêm địa chỉ hiện tại"}
                             </span>
                         </ProfileAction>
                         <ProfileAction
                             section="personal"
-                            className="inline-flex min-h-11 items-center gap-1.5 text-primary hover:underline"
+                            className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-secondary/40 px-2.5 text-primary hover:bg-secondary hover:underline"
                         >
                             <CalendarDays className="size-3.5" />
                             {personal.birthDate
@@ -118,8 +112,11 @@ export function ProfilePersonalInfo({ user }: { user: AuthUser }) {
                                 : "Thêm ngày sinh"}
                         </ProfileAction>
                         {personal.gender && (
-                            <span className="inline-flex min-h-11 items-center gap-1.5 text-muted-foreground">
-                                <UserRound className="size-3.5 shrink-0" aria-hidden="true" />
+                            <span className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-secondary/40 px-2.5 text-muted-foreground">
+                                <UserRound
+                                    className="size-3.5 shrink-0"
+                                    aria-hidden="true"
+                                />
                                 {{ MALE: "Nam", FEMALE: "Nữ", OTHER: "Khác" }[
                                     personal.gender
                                 ] ?? personal.gender}

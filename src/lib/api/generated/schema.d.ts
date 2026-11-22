@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/cv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Lưu bản nháp CV từ mẫu (mock) */
+        post: operations["saveCvTemplateDraft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/register": {
         parameters: {
             query?: never;
@@ -3378,6 +3395,60 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        CVPayload: {
+            templateId: string;
+            theme: {
+                primaryColor: string;
+                backgroundId: string;
+            };
+            data: {
+                basics: {
+                    fullName: string;
+                    title: string;
+                    email: string;
+                    phone: string;
+                    address: string;
+                    avatarUrl: string;
+                    summary: string;
+                };
+                education: {
+                    school: string;
+                    degree: string;
+                    startDate: string;
+                    endDate: string;
+                    description: string;
+                }[];
+                experience: {
+                    company: string;
+                    position: string;
+                    startDate: string;
+                    endDate: string;
+                    current: boolean;
+                    description: string;
+                }[];
+                skills: {
+                    name: string;
+                    level: number;
+                }[];
+                projects: {
+                    name: string;
+                    role: string;
+                    link: string;
+                    description: string;
+                }[];
+                certificates: {
+                    name: string;
+                    issuer: string;
+                    date: string;
+                }[];
+                languages: {
+                    name: string;
+                    level: string;
+                }[];
+            };
+            /** Format: date-time */
+            updatedAt: string;
+        };
         /**
          * @description Vai trò. Khi đăng ký chỉ được chọn candidate hoặc recruiter.
          * @enum {string}
@@ -5486,6 +5557,33 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    saveCvTemplateDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CVPayload"];
+            };
+        };
+        responses: {
+            /** @description Đã lưu */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CVPayload"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["ValidationError"];
+        };
+    };
     register: {
         parameters: {
             query?: never;

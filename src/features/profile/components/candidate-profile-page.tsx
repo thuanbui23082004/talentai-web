@@ -59,8 +59,7 @@ function SectionCard({
     const remote = personal || isCareerSection(section);
     const hasContent = !!entries[section]?.length;
     const timeline = section === "experience" || section === "education";
-    const edit =
-        hasContent && ["introduction", "skills"].includes(section);
+    const edit = hasContent && ["introduction", "skills"].includes(section);
     return (
         <section
             aria-label={title}
@@ -68,14 +67,21 @@ function SectionCard({
         >
             <div className="flex items-start justify-between gap-3 border-b border-border/70 pb-4">
                 <div className="flex min-w-0 items-start gap-3">
-                    {!timeline && <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary [&_svg]:size-4.5">
-                        {icon}
-                    </span>}
+                    {!timeline && (
+                        <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary [&_svg]:size-4.5">
+                            {icon}
+                        </span>
+                    )}
                     <div>
                         <div className="flex flex-wrap items-center gap-2">
                             <h2 className="text-base font-semibold">{title}</h2>
                             {badge && (
-                                <Badge variant="new" className="rounded-full font-medium">{badge}</Badge>
+                                <Badge
+                                    variant="new"
+                                    className="rounded-full font-medium"
+                                >
+                                    {badge}
+                                </Badge>
                             )}
                         </div>
                         <p className="mt-1.5 text-xs leading-5 text-muted-foreground">
@@ -136,39 +142,14 @@ function CandidateProfileContent({ user }: { user: AuthUser }) {
                 className="mb-5 rounded-xl border border-info/20 bg-info-soft px-4 py-3 text-xs leading-5 text-info-foreground"
             >
                 Thông tin cá nhân, giới thiệu, kinh nghiệm, học vấn, kỹ năng và
-                chứng chỉ được lưu vào hồ sơ. Dự án và CV đang ở chế
-                độ xem trước.
+                chứng chỉ được lưu vào hồ sơ. Dự án và CV đang ở chế độ xem
+                trước.
             </p>
             <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
                 <div className="min-w-0 space-y-4">
                     <ProfilePersonalInfo user={user} />
                     <ProfileCvUpload />
-                    <section className="rounded-2xl border border-border/80 bg-card p-5 shadow-card sm:p-6">
-                        <h2 className="font-semibold">Tổng quan hồ sơ</h2>
-                        <div className="mt-4 flex gap-3 rounded-xl border border-warning/35 bg-warning-soft p-4 text-xs leading-5 text-warning-foreground">
-                            <CircleAlert className="mt-0.5 size-4 shrink-0" />
-                            <p>
-                                Hoàn thiện các mục dưới đây để tăng cơ hội được
-                                nhà tuyển dụng chú ý và liên hệ.
-                            </p>
-                        </div>
-                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                            <ProfileAction
-                                section="experience"
-                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-info/35 text-xs font-medium text-info-foreground hover:bg-info-soft"
-                            >
-                                <BriefcaseBusiness className="size-4" />
-                                Thêm kinh nghiệm làm việc
-                            </ProfileAction>
-                            <ProfileAction
-                                section="education"
-                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-info/35 text-xs font-medium text-info-foreground hover:bg-info-soft"
-                            >
-                                <GraduationCap className="size-4" />
-                                Thêm thông tin học vấn
-                            </ProfileAction>
-                        </div>
-                    </section>
+
                     <SectionCard
                         section="introduction"
                         title="Giới thiệu bản thân"

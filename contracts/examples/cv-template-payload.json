@@ -1,0 +1,22 @@
+{
+  "templateId": "modern-1",
+  "theme": { "primaryColor": "#EC8F00", "backgroundId": "bg-03" },
+  "data": {
+    "basics": {
+      "fullName": "Nguyễn Văn A",
+      "title": "Frontend Developer",
+      "email": "a@example.com",
+      "phone": "0901234567",
+      "address": "Hà Nội",
+      "avatarUrl": "",
+      "summary": "Xây dựng giao diện web."
+    },
+    "education": [{ "school": "Đại học Bách khoa", "degree": "Kỹ sư CNTT", "startDate": "2019-09-01", "endDate": "2023-06-30", "description": "" }],
+    "experience": [{ "company": "Công ty ABC", "position": "Frontend Developer", "startDate": "2023-07-01", "endDate": "", "current": true, "description": "Phát triển ứng dụng React." }],
+    "skills": [{ "name": "React", "level": 80 }],
+    "projects": [{ "name": "Trang tuyển dụng", "role": "Frontend", "link": "", "description": "" }],
+    "certificates": [{ "name": "IELTS", "issuer": "British Council", "date": "2024-01-01" }],
+    "languages": [{ "name": "Tiếng Anh", "level": "Khá" }]
+  },
+  "updatedAt": "2026-11-22T00:00:00.000Z"
+}

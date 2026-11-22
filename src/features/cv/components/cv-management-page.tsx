@@ -96,9 +96,11 @@ export function CvManagementPage({ userId }: { userId: string }) {
 
             <div className="grid gap-5 md:grid-cols-2">
                 <CvUploadPanel userId={userId} />
-                <section
+                <button
+                    type="button"
+                    onClick={library}
                     aria-labelledby="cv-create-heading"
-                    className="flex flex-col rounded-2xl border border-primary/25 bg-card p-5 shadow-card"
+                    className="flex flex-col rounded-2xl border border-primary/25 bg-card p-5 text-left shadow-card transition-colors hover:bg-secondary/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 >
                     <div className="flex gap-4">
                         <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary text-white">
@@ -106,12 +108,12 @@ export function CvManagementPage({ userId }: { userId: string }) {
                         </span>
                         <div>
                             <div className="flex flex-wrap items-center gap-2">
-                                <h2
+                                <span
                                     id="cv-create-heading"
                                     className="text-sm font-semibold"
                                 >
                                     Tạo CV mới từ mẫu
-                                </h2>
+                                </span>
                                 <span className="rounded-full bg-secondary px-2 py-1 text-xs text-primary">
                                     6 mẫu nổi bật
                                 </span>
@@ -125,9 +127,7 @@ export function CvManagementPage({ userId }: { userId: string }) {
                         <p className="text-xs text-muted-foreground">
                             Bản nháp từ mẫu chưa được lưu vào tài khoản.
                         </p>
-                        <button
-                            type="button"
-                            onClick={library}
+                        <span
                             className="inline-flex min-h-11 items-center gap-1 text-xs font-semibold text-primary"
                         >
                             Khám phá mẫu ngay{" "}
@@ -135,9 +135,9 @@ export function CvManagementPage({ userId }: { userId: string }) {
                                 className="size-3.5"
                                 aria-hidden="true"
                             />
-                        </button>
+                        </span>
                     </div>
-                </section>
+                </button>
             </div>
 
             <UploadedCvs userId={userId} />

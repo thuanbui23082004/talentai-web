@@ -1,12 +1,5 @@
 import { provinces, provinceCity } from "@/lib/locations/vietnam";
 
-export const PREFERENCE_INDUSTRIES = [
-    { value: "it-hardware", label: "IT Phần cứng - Mạng" }, { value: "it-software", label: "IT Phần mềm" },
-    { value: "banking", label: "Ngân hàng" }, { value: "marketing", label: "Marketing / Truyền thông" },
-    { value: "sales", label: "Kinh doanh / Bán hàng" }, { value: "finance", label: "Tài chính / Kế toán" },
-    { value: "hr", label: "Nhân sự" }, { value: "design", label: "Thiết kế / Sáng tạo" },
-    { value: "education", label: "Giáo dục / Đào tạo" }, { value: "logistics", label: "Vận tải / Logistics" },
-];
 export const PREFERENCE_EXPERIENCE = [
     { value: "no-experience", label: "Chưa có kinh nghiệm" }, { value: "under-1", label: "Dưới 1 năm" },
     { value: "1-2", label: "1–2 năm" }, { value: "2-3", label: "2–3 năm" }, { value: "3-5", label: "3–5 năm" },

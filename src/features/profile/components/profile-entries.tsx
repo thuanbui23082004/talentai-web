@@ -2,7 +2,9 @@
 
 import { FileText, Pencil, Upload } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
+import Image from "next/image";
 import { formatMonthYear } from "@/lib/utils";
+import { Modal, ModalContent, ModalTrigger } from "@/components/ui";
 import { type ProfileDraftEntry, type ProfileEditorSection } from "../schemas/profile-editor";
 import { useProfileDraft } from "./profile-draft-provider";
 import { ProfileAction } from "./profile-action";
@@ -67,14 +69,25 @@ function ProfileTimelineEntry({ section, entry }: { section: "experience" | "edu
 function ProfileCertificateEntry({ entry }: { entry: ProfileDraftEntry }) {
     const value = entry.values;
     const hasFile = /^https?:\/\//i.test(value.attachmentUrl) || value.attachmentUrl.startsWith("/api/mock-media/");
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [imageSize, setImageSize] = useState({ width: 800, height: 800 });
+    const isImage = value.attachmentContentType.startsWith("image/") || /\.(png|jpe?g|webp|gif)(?:\?|$)/i.test(value.attachmentUrl);
     return <article className="rounded-xl border border-border bg-card p-4">
         <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
                 <h3 className="break-words font-semibold">{value.name}</h3>
-                {hasFile ? <a href={value.attachmentUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex min-h-11 items-center gap-2 text-sm text-primary hover:underline">
-                    <FileText aria-hidden="true" className="size-4 shrink-0" />
-                    <span className="break-all">{value.attachmentFileName || "Xem file chứng chỉ"}</span>
-                </a> : <ProfileAction section="certificates" entry={entry} className="mt-2 inline-flex min-h-11 items-center gap-2 text-sm text-primary hover:underline"><Upload className="size-4" />Tải file chứng chỉ</ProfileAction>}
+                {hasFile ? <Modal open={previewOpen} onOpenChange={setPreviewOpen}>
+                    <ModalTrigger render={<button type="button" className="mt-2 inline-flex min-h-11 items-center gap-2 text-left text-sm text-primary hover:underline" />}>
+                        <FileText aria-hidden="true" className="size-4 shrink-0" />
+                        <span className="break-words">Xem chứng chỉ {value.name}</span>
+                    </ModalTrigger>
+                    {value.attachmentFileName && <p className="break-all text-xs text-muted-foreground">{value.attachmentFileName}</p>}
+                    <ModalContent title={value.name} className={isImage ? "w-fit max-w-[calc(100vw-2rem)] overflow-hidden" : "flex h-[min(90dvh,56rem)] max-w-5xl flex-col overflow-hidden"} bodyClassName={isImage ? "w-fit max-w-full" : "min-h-0 flex-1"}>
+                        {previewOpen && (isImage
+                            ? <Image src={value.attachmentUrl} alt={`Chứng chỉ ${value.name}`} width={imageSize.width} height={imageSize.height} unoptimized onLoad={(event) => setImageSize({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })} className="block h-auto max-h-[calc(100dvh-10rem)] w-auto max-w-full object-contain" />
+                            : <iframe src={value.attachmentUrl} title={`Nội dung chứng chỉ ${value.name}`} className="size-full rounded-lg border border-border bg-white" />)}
+                    </ModalContent>
+                </Modal> : <ProfileAction section="certificates" entry={entry} className="mt-2 inline-flex min-h-11 items-center gap-2 text-sm text-primary hover:underline"><Upload className="size-4" />Tải file chứng chỉ</ProfileAction>}
             </div>
             <DeleteProfileEntry section="certificates" id={entry.id} title={value.name} />
         </div>
