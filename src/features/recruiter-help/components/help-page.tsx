@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ArrowRight, Search } from 'lucide-react';
+import { ArrowRight, BookOpenText, ChevronDown, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import './help.css';
@@ -28,5 +28,22 @@ export function HelpPage() {
   const [category, setCategory] = useState<typeof categories[number]>('all');
   const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLocaleLowerCase('vi').trim();
   const visible = guides.filter(guide => (category === 'all' || guide.category === category) && normalize(`${t(`guides.${guide.id}.title`)} ${t(`guides.${guide.id}.question`)} ${t(`guides.${guide.id}.answer`)}`).includes(normalize(search)));
-  return <div className="recruiter-help"><header className="help-heading"><h1>{t('title')}</h1><p>{t('subtitle')}</p><div className="help-search"><Search size={18} aria-hidden="true" /><Input aria-label={t('search')} placeholder={t('placeholder')} value={search} onChange={event => setSearch(event.target.value)} type="search" /></div></header><nav className="help-categories" aria-label={t('title')}>{categories.map(key => <Button key={key} variant={category === key ? 'default' : 'outline'} aria-pressed={category === key} onClick={() => setCategory(key)}>{key === 'all' ? t('all') : t(`categories.${key}`)}</Button>)}</nav><div className="help-guides">{visible.map(guide => <article key={guide.id}><span className="help-category">{t(`categories.${guide.category}`)}</span><h2>{t(`guides.${guide.id}.title`)}</h2><details><summary>{t(`guides.${guide.id}.question`)}</summary><p>{t(`guides.${guide.id}.answer`)}</p></details><Link href={guide.href}>{t('open')}<ArrowRight size={15} aria-hidden="true" /></Link></article>)}</div>{visible.length === 0 && <div className="help-empty" role="status"><p>{t('empty')}</p><Button variant="outline" onClick={() => { setSearch(''); setCategory('all'); }}>{t('reset')}</Button></div>}</div>;
+  return <div className="recruiter-help">
+    <header className="help-heading">
+      <span className="help-heading-icon"><BookOpenText size={22} aria-hidden="true" /></span>
+      <div className="help-heading-content"><h1>{t('title')}</h1><p>{t('subtitle')}</p></div>
+      <div className="help-search"><Search size={18} aria-hidden="true" /><Input aria-label={t('search')} placeholder={t('placeholder')} value={search} onChange={event => setSearch(event.target.value)} type="search" /></div>
+    </header>
+    <nav className="help-categories" aria-label={t('title')}>
+      {categories.map(key => <Button key={key} variant={category === key ? 'default' : 'outline'} aria-pressed={category === key} onClick={() => setCategory(key)}>{key === 'all' ? t('all') : t(`categories.${key}`)}</Button>)}
+    </nav>
+    {visible.length > 0 ? <div className="help-guides">
+      {visible.map(guide => <article key={guide.id}>
+        <span className="help-category">{t(`categories.${guide.category}`)}</span>
+        <h2>{t(`guides.${guide.id}.title`)}</h2>
+        <details><summary><span>{t(`guides.${guide.id}.question`)}</span><ChevronDown size={16} aria-hidden="true" /></summary><p>{t(`guides.${guide.id}.answer`)}</p></details>
+        <Link href={guide.href}>{t('open')}<ArrowRight size={16} aria-hidden="true" /></Link>
+      </article>)}
+    </div> : <div className="help-empty" role="status"><p>{t('empty')}</p><Button variant="outline" onClick={() => { setSearch(''); setCategory('all'); }}>{t('reset')}</Button></div>}
+  </div>;
 }

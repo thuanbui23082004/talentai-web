@@ -39,6 +39,7 @@ export async function handleAdminCatalog(request: NextRequest, path: string, ses
     const input = parsed.data;
     if (getCatalogItems(type).some(row => row.id !== item?.id && row.name.toLocaleLowerCase('vi') === input.name.toLocaleLowerCase('vi'))) return problem(item ? 422 : 409, 'CONFLICT');
     if (input.industryId && store.get(input.industryId)?.type !== 'industries') return problem(422, 'VALIDATION_FAILED');
+    if (type === 'industries' && input.parentId) return problem(422, 'VALIDATION_FAILED');
     if (input.parentId) {
       let parent = store.get(input.parentId); const seen = new Set<string>(item ? [item.id] : []);
       if (!parent || parent.type !== type) return problem(422, 'VALIDATION_FAILED');

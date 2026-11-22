@@ -22,12 +22,17 @@
     min-height: 440px;
 }
 .recruiter-app .job-pipeline-board .pipeline-column-heading h2 { white-space: normal; }
-.recruiter-app .job-pipeline-board .pipeline-card { cursor: default; border-radius: 14px; }
+.recruiter-app .job-pipeline-board .pipeline-card { cursor: default; border-radius: 14px; padding: 16px; }
+.recruiter-app .job-pipeline-board .pipeline-card-header { align-items: center; gap: 10px; }
 .recruiter-app .job-pipeline-board .pipeline-card-header > div { flex: 1; min-width: 0; }
+.recruiter-app .job-pipeline-board .pipeline-candidate-name,
+.recruiter-app .job-pipeline-board .pipeline-card-header p { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recruiter-app .job-pipeline-board .pipeline-card-header p { margin-top: 2px; font-size: 12px; }
 .recruiter-app .job-pipeline-board .job-pipeline-grip { cursor: grab; touch-action: none; flex-shrink: 0; }
-.job-pipeline-position { margin-block: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.job-pipeline-position { margin-block: 14px; line-height: 1.5; overflow-wrap: anywhere; font-size: 13px; }
 .job-pipeline-board .pipeline-card > button { margin-top: 10px; width: 100%; }
-.job-pipeline-board .pipeline-card-meta { justify-content: space-between; flex-wrap: wrap; border-top: 1px solid var(--recruiter-border); padding-top: 8px; }
+.job-pipeline-board .pipeline-card-meta { justify-content: space-between; flex-wrap: nowrap; align-items: center; border-top: 1px solid var(--recruiter-border); padding-top: 10px; }
+.job-pipeline-board .pipeline-card-meta > span { white-space: nowrap; font-size: 12px; }
 @media (max-width: 640px) {
     .pipeline-page-heading { flex-wrap: wrap; }
     .recruiter-app .pipeline-board.job-pipeline-board { grid-template-columns: repeat(8, 285px); }

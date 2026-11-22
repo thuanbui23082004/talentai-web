@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { z } from 'zod';
@@ -135,6 +135,10 @@ export function RecruiterPipeline() {
     page: jobPage,
     pageSize: 100
   });
+  useEffect(() => {
+    if (jobId || !jobs.isSuccess || !jobs.data.items.length) return;
+    router.replace(`/recruiter/candidates/pipeline?jobId=${jobs.data.items[0].id}`, { scroll: false });
+  }, [jobId, jobs.isSuccess, jobs.data, router]);
   const valid = z.uuid().safeParse(jobId).success;
   const options = [{
     value: '',

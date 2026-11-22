@@ -40,7 +40,7 @@ export const passwordInputSchema = z
         newPassword: z
             .string()
             .min(8, "passwordRules")
-            .max(64, "passwordRules")
+            .max(100, "passwordRules")
             .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "passwordRules"),
         confirmPassword: z.string().min(1, "required"),
     })

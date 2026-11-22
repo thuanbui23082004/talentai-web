@@ -335,3 +335,11 @@ Ví dụ: `curl -H "x-mock-scenario: empty" http://localhost:3000/api/bff/jobs`.
 # CV mẫu từ hồ sơ (2026-11-22)
 
 Thư viện 6 mẫu cho ứng viên mở editor 2 cột, tự điền từ GET profile/experience/education/skills/certificates. Dữ liệu dự án và ngoại ngữ chưa có endpoint profile tương ứng nên bắt đầu rỗng để nhập trong editor. Bản nháp lưu qua POST `/api/bff/cv` (alias `/api/cv`), chỉ là mock trong bộ nhớ tiến trình theo user với session/CSRF; backend thật chưa nhận payload này. Xuất PDF phía trình duyệt bằng html2pdf.js; schema đề xuất ở `docs/cv-template-payload.md`. CV tải lên trong tài khoản vẫn là luồng riêng.
+
+## Cài đặt tài khoản ứng viên (2026-11-22)
+
+`/candidate/settings` hiển thị email đăng nhập và trạng thái từ `/me`, đổi mật khẩu qua BFF `/auth/change-password`, rồi hướng đăng nhập lại vì backend thu hồi refresh token. Liên kết quên mật khẩu dùng luồng khôi phục hiện có. Trang không lặp lại họ tên, số điện thoại, địa chỉ và ảnh của hồ sơ ứng viên. Auth Swagger hiện chưa có endpoint sửa email/xác minh số điện thoại; chưa hiển thị hành động giả cho các mục đó.
+
+## Thống kê đầu trang tổng quan ứng viên (2026-11-22)
+
+Số hồ sơ đã ứng tuyển lấy từ `GET /candidate/application-tracking` (`meta.totalItems`); lời mời chờ phản hồi lấy từ `GET /candidate/interviews` (trạng thái `scheduled` và `pending`). Có trạng thái tải, lỗi và thử lại. Swagger profile-service hiện chưa có API dashboard/lượt xem hồ sơ; ô lượt xem hiển thị chưa có dữ liệu. Bỏ các số minh họa 12/148/3 và câu 18 việc làm phù hợp 90%+; các thẻ gợi ý phía dưới vẫn ghi rõ là minh họa.

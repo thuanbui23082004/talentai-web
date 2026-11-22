@@ -1,4 +1,5 @@
 .recruiter-job-card-link {
+  align-items: flex-start;
   color: inherit;
   text-decoration: none;
   cursor: pointer;
@@ -107,3 +108,13 @@
   .recruiter-job-filters h2 { gap: 6px; padding-right: 12px; font-size: 13px; }
   .recruiter-job-filter-options .ui-button { min-width: 88px; padding-inline: 12px; }
 }
+
+.recruiter-app .jobs-page h1 { font-size: 18px; }
+.recruiter-app .jobs-page-heading p { font-size: 13px; }
+.recruiter-app .recruiter-job-filters h2 { font-size: 13px; }
+.recruiter-app .recruiter-job-filter-options .ui-button { font-size: 12px; }
+.recruiter-app .job-card-title h2 { font-size: 15px; }
+.recruiter-app .job-card .company-name,
+.recruiter-app .job-card .job-card-meta,
+.recruiter-app .job-card .job-card-footer,
+.recruiter-app .job-card .job-status { font-size: 12px; }

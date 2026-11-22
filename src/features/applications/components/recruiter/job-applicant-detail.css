@@ -1,0 +1,56 @@
+.recruiter-app .job-applicant-detail { font-size: 13px; }
+.recruiter-app .job-applicant-detail .candidate-detail-back { margin-bottom: 14px; font-size: 13px; }
+.recruiter-app .job-applicant-detail .candidate-detail-grid { grid-template-columns: 245px minmax(0, 1fr) 250px; gap: 12px; }
+.recruiter-app .job-applicant-detail .candidate-detail-center,
+.recruiter-app .job-applicant-detail .candidate-detail-right { gap: 12px; }
+.recruiter-app .job-applicant-detail .candidate-detail-right { grid-column: auto; grid-template-columns: minmax(0, 1fr); }
+.recruiter-app .job-applicant-detail .candidate-personal-panel { position: static; max-height: none; overflow: visible; scrollbar-gutter: auto; }
+.recruiter-app .job-applicant-detail .candidate-detail-panel,
+.recruiter-app .job-applicant-detail .candidate-personal-panel,
+.recruiter-app .job-applicant-detail .candidate-detail-right > .candidate-detail-panel { padding: 14px; border-radius: 10px; }
+.recruiter-app .job-applicant-detail .candidate-detail-avatar { width: 56px; height: 56px; margin-bottom: 8px; font-size: 18px; }
+.recruiter-app .job-applicant-detail .candidate-personal-intro h1 { margin-bottom: 4px; font-size: 17px; }
+.recruiter-app .job-applicant-detail .candidate-personal-intro .candidate-status { display: inline-flex; margin: 0 0 8px; padding: 3px 7px; font-size: 12px; }
+.recruiter-app .job-applicant-detail .candidate-personal-intro > p { font-size: 13px; line-height: 1.45; }
+.job-applicant-headline { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 9px; border-radius: 9px; background: var(--recruiter-bg); color: var(--recruiter-text); font-size: 12px; font-weight: 600; line-height: 1.4; }
+.job-applicant-headline svg { flex-shrink: 0; color: var(--recruiter-muted); }
+.job-applicant-intro-meta { display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 12px; color: var(--recruiter-muted); font-size: 12px; text-align: center; }
+.job-applicant-quick-actions { margin-top: 12px; }
+.job-applicant-quick-actions > button { width: 100%; min-height: 34px; font-size: 13px; }
+.recruiter-app .job-applicant-detail .candidate-resume-section { padding: 14px 0; }
+.recruiter-app .job-applicant-detail .candidate-resume-section h2,
+.recruiter-app .job-applicant-detail .candidate-panel-title h2,
+.recruiter-app .job-applicant-detail .candidate-detail-right h2 { margin-bottom: 8px; font-size: 14px; line-height: 1.4; }
+.recruiter-app .job-applicant-detail .candidate-personal-fields { gap: 10px; }
+.recruiter-app .job-applicant-detail .candidate-personal-fields dt,
+.recruiter-app .job-applicant-detail .candidate-personal-fields dd { font-size: 13px; line-height: 1.45; }
+.job-applicant-personal-fields { display: grid; gap: 10px; margin: 0; }
+.job-applicant-personal-fields > div { display: flex; align-items: flex-start; gap: 9px; min-width: 0; }
+.job-applicant-personal-fields > div > div { min-width: 0; }
+.job-applicant-field-icon { display: grid; flex: 0 0 26px; width: 26px; height: 26px; place-items: center; border-radius: 6px; background: var(--recruiter-bg); color: var(--recruiter-muted); }
+.job-applicant-personal-fields dt { color: var(--recruiter-muted); font-size: 11px; line-height: 1.3; }
+.job-applicant-personal-fields dd { margin: 2px 0 0; color: var(--recruiter-text); font-size: 12px; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+.job-applicant-personal-empty { margin: 0; color: var(--recruiter-muted); font-size: 12px; }
+.recruiter-app .job-applicant-detail .candidate-pipeline ol { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; }
+.recruiter-app .job-applicant-detail .candidate-pipeline li { min-height: 36px; padding: 5px 3px; font-size: 11px; line-height: 1.3; }
+.recruiter-app .job-applicant-detail .candidate-panel-title { margin-bottom: 10px; }
+.job-applicant-status-control { max-width: 220px; margin-top: 10px; }
+.job-applicant-status-control > button { width: 100%; min-height: 34px; font-size: 13px; }
+.recruiter-app .job-applicant-detail .job-applicant-profile { padding-block: 0; }
+.job-applicant-profile .candidate-resume-section:first-child { border-top: 0; }
+.job-applicant-profile .candidate-resume-section p { color: var(--recruiter-muted); font-size: 13px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.job-applicant-empty { padding: 9px; border-radius: 8px; background: var(--recruiter-bg); color: var(--recruiter-muted); font-size: 13px; line-height: 1.5; }
+.job-applicant-side-panel { min-height: 110px; }
+.job-applicant-job-heading { display: flex; align-items: center; gap: 9px; min-width: 0; margin-bottom: 12px; }
+.job-applicant-job-heading > div { min-width: 0; }
+.job-applicant-job-heading strong { display: block; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
+.job-applicant-job-heading small { display: block; margin-top: 2px; color: var(--recruiter-muted); font-size: 11px; }
+.job-applicant-job-icon { display: grid; flex: 0 0 30px; height: 30px; place-items: center; border-radius: 8px; background: var(--recruiter-soft); color: var(--recruiter-primary); }
+.job-applicant-job-fact { display: flex; align-items: center; gap: 6px; margin: 0 0 10px !important; color: var(--recruiter-muted); font-size: 11px; }
+.job-applicant-job-salary { margin: 0 0 10px !important; padding-top: 10px; border-top: 1px solid var(--recruiter-border); font-size: 12px; font-weight: 700; }
+.job-applicant-job-link { display: inline-flex; padding: 5px 9px; border-radius: 7px; background: var(--recruiter-soft); color: var(--recruiter-primary); font-weight: 600; }
+.recruiter-app .job-applicant-detail .candidate-detail-right a { font-size: 13px; }
+.recruiter-app .job-applicant-detail .job-applicant-attachment-panel button { width: 100%; justify-content: flex-start; overflow: hidden; background: var(--recruiter-bg); font-size: 12px; }
+.recruiter-app .job-applicant-detail .job-applicant-attachment-panel button span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 1050px) { .recruiter-app .job-applicant-detail .candidate-detail-grid { grid-template-columns: 230px minmax(0, 1fr); } }
+@media (max-width: 760px) { .recruiter-app .job-applicant-detail .candidate-detail-grid { grid-template-columns: 1fr; } .recruiter-app .job-applicant-detail .candidate-pipeline ol { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

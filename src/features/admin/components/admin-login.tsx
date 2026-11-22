@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl';
 import { ArrowRight, Eye, EyeOff, ShieldCheck, LoaderCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Alert } from '@/components/ui/alert';
 import { loginSchema } from '@/features/admin/schemas';
 import { loginAdmin } from '@/features/admin/services';
 import { adminErrorKey } from '@/features/admin/errors';
@@ -21,8 +22,8 @@ export function AdminLogin() {
   return <main className="admin-login"><header className="admin-login-header"><span className="admin-logo"><Image src="/logo/image%201.png" width={180} height={181} alt={t('brand')} priority /></span><span className="admin-login-header-label"><ShieldCheck size={16} />{t('workspace')}</span></header>
     <section className="admin-login-form"><div className="admin-login-box"><span className="admin-login-icon"><ShieldCheck size={28} /></span><h1>{t('loginTitle')}</h1><p>{t('loginSubtitle')}</p><form onSubmit={submit} noValidate>
       <div className="admin-field"><label htmlFor="admin-email">{t('email')}</label><Input id="admin-email" type="email" autoComplete="username" placeholder={t('emailPlaceholder')} {...register('email')} aria-invalid={!!errors.email} aria-describedby={errors.email ? 'admin-email-error' : undefined} />{errors.email && <p id="admin-email-error" className="admin-error" role="alert">{t('errors.email')}</p>}</div>
-      <div className="admin-field"><label htmlFor="admin-password">{t('password')}</label><div className="admin-password"><Input id="admin-password" type={visible ? 'text' : 'password'} autoComplete="current-password" placeholder={t('passwordPlaceholder')} {...register('password')} aria-invalid={!!errors.password} aria-describedby={errors.password ? 'admin-password-error' : undefined} /><Button type="button" variant="ghost" size="icon" aria-label={t(visible ? 'hidePassword' : 'showPassword')} aria-pressed={visible} onClick={() => setVisible(value => !value)}>{visible ? <EyeOff size={18} /> : <Eye size={18} />}</Button></div>{errors.password && <p id="admin-password-error" className="admin-error" role="alert">{t('errors.required')}</p>}</div>
-      {error && <p className="admin-error admin-error-box" role="alert">{error}</p>}<Button type="submit" className="admin-login-submit" disabled={isSubmitting}>{isSubmitting ? <LoaderCircle className="animate-spin" /> : null}{t(isSubmitting ? 'loggingIn' : 'login')}<ArrowRight size={18} /></Button>
+      <div className="admin-field"><label htmlFor="admin-password">{t('password')}</label><div className="admin-password"><input id="admin-password" className="ui-input" data-slot="input" type={visible ? 'text' : 'password'} autoComplete="current-password" placeholder={t('passwordPlaceholder')} {...register('password')} aria-invalid={!!errors.password} aria-describedby={errors.password ? 'admin-password-error' : undefined} /><Button type="button" variant="ghost" size="icon" aria-label={t(visible ? 'hidePassword' : 'showPassword')} aria-pressed={visible} onClick={() => setVisible(value => !value)}>{visible ? <EyeOff size={18} /> : <Eye size={18} />}</Button></div>{errors.password && <p id="admin-password-error" className="admin-error" role="alert">{t('errors.required')}</p>}</div>
+      {error && <Alert variant="error" title="Không thể đăng nhập">{error}</Alert>}<Button type="submit" className="admin-login-submit" disabled={isSubmitting}>{isSubmitting ? <LoaderCircle className="animate-spin" /> : null}{t(isSubmitting ? 'loggingIn' : 'login')}<ArrowRight size={18} /></Button>
     </form><p className="admin-login-restricted"><ShieldCheck size={16} />{t('restricted')}</p></div></section><footer className="admin-login-footer">{t('copyright')}</footer></main>;
 }
 

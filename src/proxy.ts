@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { handleAuthRequest } from '@/server/bff/auth/handler';
 import { readServerSession } from '@/server/bff/auth/session';
+import { getServerEnv } from '@/lib/env';
 
 // Renew cookies before Server Components run. Role guards still verify the user.
 export async function proxy(request: NextRequest) {
+  // Admin mock uses its own session; stale real auth cookies must not block /admin/login.
+  if (request.nextUrl.pathname.startsWith('/admin/') && getServerEnv().DATA_MODE === 'mock')
+    return NextResponse.next();
   if (!request.cookies.has('refresh_token')) return NextResponse.next();
   try {
     if (await readServerSession(request.headers.get('cookie'))) return NextResponse.next();

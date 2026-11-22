@@ -38,7 +38,12 @@ describe('admin authentication and dashboard mock', () => {
     const call = (csrf: string) => handleAdminRequest(new NextRequest('http://localhost/api/bff/auth/logout', { method: 'POST', headers: { cookie: 'talentai_mock_admin_session=test', 'X-CSRF-Token': csrf } }), 'auth/logout', session);
     expect((await call('wrong'))?.status).toBe(403);
     expect(store.sessions.has('test')).toBe(true);
-    expect((await call('fake'))?.status).toBe(204);
+    const logout = await call('fake');
+    expect(logout?.status).toBe(204);
+    const clearedCookies = logout?.headers.getSetCookie().join('; ') ?? '';
+    expect(clearedCookies).toContain('talentai_mock_admin_session=');
+    expect(clearedCookies).toContain('access_token=');
+    expect(clearedCookies).toContain('refresh_token=');
     expect(store.sessions.has('test')).toBe(false);
   });
 });

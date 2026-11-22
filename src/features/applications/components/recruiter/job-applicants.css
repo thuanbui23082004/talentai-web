@@ -9,12 +9,13 @@
     flex-wrap: wrap;
 }
 .job-applicants-page .candidates-page-heading h1 {
-    font-size: 24px;
+    font-size: 20px;
     letter-spacing: -0.6px;
 }
 .job-applicants-page .candidates-page-heading p {
     margin-top: 6px;
     line-height: 1.6;
+    font-size: 13px;
 }
 .job-applicants-filter {
     padding: 20px 24px;
@@ -29,7 +30,7 @@
     gap: 8px;
     margin-bottom: 18px;
     color: var(--recruiter-text);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
 }
 .job-applicants-filter-title svg {
@@ -76,7 +77,7 @@
 }
 .job-applicants-results-heading h2 {
     margin: 0;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
 }
 .job-applicants-results-heading h2 {
@@ -221,7 +222,7 @@
     color: var(--recruiter-primary);
 }
 .job-applicant-card .candidate-identity h2 {
-    font-size: 19px;
+    font-size: 16px;
     font-weight: 650;
     line-height: 1.4;
     overflow-wrap: anywhere;
@@ -256,7 +257,7 @@
     align-items: baseline;
     gap: 16px;
     min-width: 0;
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1.6;
 }
 .job-applicant-card-info dt {
@@ -273,7 +274,7 @@
 }
 .job-applicant-card-info .job-applicant-position-name {
     font-weight: 650;
-    font-size: 14px;
+    font-size: 13px;
 }
 .job-applicant-reference {
     font-family: ui-monospace, monospace;
@@ -290,7 +291,7 @@
     border: 0;
     background: transparent;
     color: var(--recruiter-accent);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     border-radius: 5px;

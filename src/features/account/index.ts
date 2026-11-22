@@ -1,4 +1,5 @@
 export { RecruiterAccount } from './components/recruiter-account';
+export { CandidateAccountSettings } from './components/candidate-account-settings';
 export { settingsMessages } from './messages';
 export { useAccount } from './hooks/use-account';
 export { accountPatchSchema } from './schemas/account';

@@ -114,10 +114,9 @@
 .admin-field [data-slot=input] { height: 44px; padding-inline: 12px; }
 .admin-password { position: relative; }
 .admin-password input { padding-right: 48px !important; }
-.admin-password>button { position: absolute; right: 3px; top: 2px; color: var(--admin-muted); }
+.admin-password>button { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); min-height: 36px; width: 36px; color: var(--admin-muted); }
 .admin-login-submit { width: 100%; min-height: 44px !important; margin-top: 4px; }
 .admin-login-restricted { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 24px !important; padding-top: 20px; border-top: 1px solid var(--admin-border); }
-.admin-error-box { padding: 12px; border: 1px solid var(--admin-danger); border-radius: 7px; }
 .admin-login-footer { color: var(--admin-muted); text-align: center; padding: 20px; }
 @keyframes admin-pulse { 50% { opacity: .5; } }
 @media(prefers-reduced-motion:reduce) { .admin-skeleton span { animation: none; } }

@@ -2,13 +2,13 @@ import { z } from 'zod';
 import type { components } from '@/lib/api/generated/schema';
 import { apiClient, ApiError } from '@/lib/api';
 import { adminWorkspaceHeaders } from '@/lib/api/workspace';
-import { loginSchema, sessionSchema, overviewSchema, seriesSchema, logsSchema, periodSchema, type Period, type Metric } from '@/features/admin/schemas';
+import { loginSchema, overviewSchema, seriesSchema, logsSchema, periodSchema, type Period, type Metric } from '@/features/admin/schemas';
 
 function failure(body: components['schemas']['ApiError'], status: number) { return new ApiError('ADMIN_REQUEST_FAILED', status, body.error.code); }
 export async function loginAdmin(input: z.infer<typeof loginSchema>) {
-  const result = await apiClient.POST('/auth/login', { body: loginSchema.parse(input), headers: adminWorkspaceHeaders });
+  const result = await apiClient.POST('/auth/login', { body: { ...loginSchema.parse(input), role: 'admin' }, headers: adminWorkspaceHeaders });
   if (result.error) throw failure(result.error, result.response.status);
-  const session = sessionSchema.parse(result.data);
+  const session = result.data;
   if (session.user.role !== 'admin') { await logoutAdmin(); throw new ApiError('ADMIN_REQUEST_FAILED', 403, 'FORBIDDEN'); }
 }
 export async function logoutAdmin() {

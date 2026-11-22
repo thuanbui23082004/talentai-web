@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import { createElement, type ComponentType } from "react";
 import type { CVData } from "../types/cv";
 import { CvDocument } from "./cv-document";
 
@@ -7,7 +7,7 @@ type CvTemplate = { id: string; name: string; thumbnail: string; component: Comp
 
 function template(id: string, name: string, thumbnail: string): CvTemplate {
     function Template({ data, theme, background }: CvTemplateProps) {
-        return <CvDocument data={data} theme={theme} background={background} design={id} />;
+        return createElement(CvDocument, { data, theme, background, design: id });
     }
     Template.displayName = `CvTemplate${id}`;
     return { id, name, thumbnail, component: Template };

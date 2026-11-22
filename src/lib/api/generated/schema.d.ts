@@ -3787,7 +3787,7 @@ export interface components {
         };
         ChangePasswordRequest: {
             currentPassword: string;
-            newPassword: components["schemas"]["PasswordRules"];
+            newPassword: string;
             confirmPassword: string;
         };
         UpdateMeRequest: {

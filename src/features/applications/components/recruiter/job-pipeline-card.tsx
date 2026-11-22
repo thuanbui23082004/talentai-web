@@ -34,8 +34,8 @@ export function JobPipelineCard({
         <header className="pipeline-card-header">
             <span className="pipeline-avatar" aria-hidden="true">{name.trim().split(/\s+/).slice(-2).map(word => word[0]).join('')}</span>
             <div>
-                <Link className="pipeline-candidate-name" href={`/recruiter/candidates/${item.id}?from=job`}>{name}</Link>
-                <p>{item.email || 'Chưa cung cấp email'}</p>
+                <Link className="pipeline-candidate-name" title={name} href={`/recruiter/candidates/${item.id}?from=job`}>{name}</Link>
+                <p title={item.email || undefined}>{item.email || 'Chưa cung cấp email'}</p>
             </div>
             {!!targets.length && <Button variant="ghost" size="icon-sm" className="job-pipeline-grip" {...attributes} {...listeners} disabled={disabled} aria-label={`Kéo thẻ của ${name}`}><GripVertical size={16} /></Button>}
         </header>

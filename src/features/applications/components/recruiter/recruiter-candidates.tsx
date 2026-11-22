@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { z } from "zod";
@@ -131,6 +131,12 @@ export function RecruiterCandidates() {
     const [jobPage, setJobPage] = useState(1);
     const [activeCv, setActiveCv] = useState<JobApplicant | null>(null);
     const jobs = useRecruiterJobs({ page: jobPage, pageSize: 100 });
+    useEffect(() => {
+        if (jobId || !jobs.isSuccess || !jobs.data.items.length) return;
+        const next = new URLSearchParams(params);
+        next.set("jobId", jobs.data.items[0].id);
+        router.replace(`/recruiter/candidates?${next}`, { scroll: false });
+    }, [jobId, jobs.isSuccess, jobs.data, params, router]);
     const applications = useJobApplicants(jobId, query, valid);
     const data = applications.data;
     const page = query.page;

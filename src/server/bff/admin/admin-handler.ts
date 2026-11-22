@@ -7,6 +7,7 @@ import {
 } from "@/server/bff/admin/admin-reports-handler";
 import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { setAuthCookies } from "@/server/bff/auth/cookies";
 import { loginSchema, periodSchema } from "@/features/admin";
 import {
     mockAdmin,
@@ -84,7 +85,7 @@ export async function handleAdminRequest(
                 ? ADMIN_MOCK_COOKIE
                 : "talentai_mock_session";
         store.sessions.delete(request.cookies.get(cookie)?.value ?? "");
-        const result = new NextResponse(null, { status: 204 });
+        const result = setAuthCookies(new NextResponse(null, { status: 204 }), request);
         result.cookies.delete(cookie);
         return result;
     }

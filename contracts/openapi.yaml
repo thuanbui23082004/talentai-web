@@ -8400,7 +8400,9 @@ components:
         currentPassword:
           type: string
         newPassword:
-          $ref: '#/components/schemas/PasswordRules'
+          type: string
+          minLength: 8
+          maxLength: 100
         confirmPassword:
           type: string
     UpdateMeRequest:

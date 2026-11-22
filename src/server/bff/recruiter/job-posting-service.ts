@@ -71,7 +71,7 @@ export async function handleRecruiterJobPostings(request: Request, baseUrl: stri
     const locations = async (parentId?: number) => z.array(postingLocationSchema).parse(await data(`job-locations${parentId ? `?parentId=${parentId}` : ''}`));
     async function currentCompany() {
       const response = await call('recruiter/company', 'GET', undefined, companyApiUrl);
-      return z.object({ id: z.uuid(), name: z.string() }).parse(envelope.parse(await response.json()).data);
+      return z.object({ id: z.uuid(), name: z.string(), logoUrl: z.string().nullish() }).parse(envelope.parse(await response.json()).data);
     }
 
     if (suffix === '/options') {

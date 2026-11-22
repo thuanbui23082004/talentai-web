@@ -1,5 +1,7 @@
 // Public API của feature
 export { ApplicationsPage } from "./components/applications-page";
+export { useCandidateTracking } from "./hooks/use-candidate-tracking";
+export { useInterviews } from "./hooks/use-applications";
 export { CandidateApplicationDetail } from "./components/candidate-application-detail";
 export { ApplicationButton, ApplicationDialog } from "./components/application-dialog";
 export { ApplicationDialogShowcase } from "./components/application-dialog-showcase";
