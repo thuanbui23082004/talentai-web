@@ -126,6 +126,8 @@ export async function handleJobService(
             "city",
             "provinceCode",
             "wardCode",
+            "provinceCodes",
+            "wardCodes",
             "categoryId",
             "companyId",
             "salaryMin",
@@ -159,7 +161,17 @@ export async function handleJobService(
         query.set("size", String(filters.pageSize));
         query.set("sort", SORT[filters.sort as keyof typeof SORT]);
         if (filters.q) query.set("keyword", filters.q);
-        if (filters.provinceCode) {
+        if (filters.provinceCodes?.length) {
+            const provinceIds = filters.provinceCodes.map((code) => toJobLocationIds(code)!.provinceId);
+            query.set("provinceIds", provinceIds.join(","));
+            if (filters.wardCodes?.length) {
+                const wardIds = filters.wardCodes.map((code) => {
+                    const province = filters.provinceCodes!.find((provinceCode) => toJobLocationIds(`${provinceCode}:${code}`));
+                    return toJobLocationIds(`${province}:${code}`)!.wardId!;
+                });
+                query.set("wardIds", wardIds.join(","));
+            }
+        } else if (filters.provinceCode) {
             const ids = toJobLocationIds(
                 [filters.provinceCode, filters.wardCode]
                     .filter(Boolean)

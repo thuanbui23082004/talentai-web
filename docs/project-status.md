@@ -249,7 +249,7 @@ không phụ thuộc vào backend chạy local. Không coi tên thư mục, page
 | GET `/companies` | Mock 18 doanh nghiệp minh họa; lọc trước phân trang; hỗ trợ empty/slow/error. Contract thêm size/isVerified/hiringOnly; chưa tích hợp backend thật |
 | Bộ UI dùng chung | Có 18 nhóm component, token tím/trắng, Inter local; đặc tả tại `docs/ui-spec.md` |
 | `/ui` | Trang xem thử biến thể, trạng thái và tương tác; dữ liệu tuyển dụng ở đây chỉ để minh họa |
-| GET `/jobs` | 18 tin mẫu; tìm từ khóa, tỉnh/thành, phường/xã, lương, kinh nghiệm, cấp bậc, loại hình, phân trang và sắp xếp |
+| GET `/jobs` | 18 tin mẫu; tìm từ khóa, nhiều tỉnh/thành và phường/xã bằng checkbox, lương, kinh nghiệm, cấp bậc, loại hình, phân trang và sắp xếp. BFF chuyển `provinceCodes`/`wardCodes` sang `provinceIds`/`wardIds` của Job Posting Service; BE ghép các tỉnh theo OR, các phường/xã theo OR và hai nhóm theo AND. |
 | GET `/health` | Mock trả `status: ok` |
 | `/jobs` | Tìm kiếm qua URL; 12 card/trang; bộ lọc sticky tự cập nhật; loading, empty, error, thử lại |
 | `/jobs/[jobId]` | Trang chi tiết SSR và metadata; tái sử dụng JobSearch, JobCard, header/footer; mô tả, yêu cầu, quyền lợi, sidebar, chia sẻ, tin cùng địa điểm; loading/error/404 |

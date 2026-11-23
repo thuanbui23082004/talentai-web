@@ -7711,6 +7711,10 @@ export interface operations {
                 provinceCode?: string;
                 /** @description Mã phường/xã/đặc khu hiện hành, gồm 5 chữ số. Phải đi cùng provinceCode và thuộc tỉnh đã chọn. */
                 wardCode?: string;
+                /** @description Danh sách mã tỉnh/thành để tìm nhiều địa điểm; dùng dấu phẩy phân tách. */
+                provinceCodes?: string[];
+                /** @description Danh sách mã phường/xã thuộc các tỉnh đã chọn; dùng dấu phẩy phân tách. */
+                wardCodes?: string[];
                 salaryMin?: number;
                 salaryMax?: number;
                 /**

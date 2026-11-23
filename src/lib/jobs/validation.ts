@@ -43,6 +43,8 @@ export const jobSearchSchema = z
             .string()
             .regex(/^\d{5}$/)
             .optional(),
+        provinceCodes: list(z.string().regex(/^[1-9]\d?$/)),
+        wardCodes: list(z.string().regex(/^\d{5}$/)),
         salaryMin: number,
         salaryMax: number,
         minExperience: number,
@@ -98,6 +100,13 @@ export const jobSearchSchema = z
         { message: "Khoảng kinh nghiệm không hợp lệ." },
     )
     .superRefine((value, context) => {
+        const selectedProvinces = new Set(value.provinceCodes ?? []);
+        if (value.provinceCodes?.some((code) => !provinces.some((province) => province.code === code)))
+            context.addIssue({ code: "custom", path: ["provinceCodes"], message: "Tỉnh/thành không tồn tại." });
+        if (value.wardCodes?.some((code) => !provinces.some((province) => selectedProvinces.has(province.code) && province.wards.some((ward) => ward.code === code))))
+            context.addIssue({ code: "custom", path: ["wardCodes"], message: "Phường/xã phải thuộc tỉnh/thành đã chọn." });
+        if ((value.provinceCodes?.length || value.wardCodes?.length) && (value.provinceCode || value.wardCode || value.city))
+            context.addIssue({ code: "custom", path: ["provinceCodes"], message: "Không trộn bộ lọc địa điểm đơn và nhiều lựa chọn." });
         const province = provinces.find(
             (item) => item.code === value.provinceCode,
         );
@@ -130,7 +139,7 @@ export const jobSearchSchema = z
 
 export function parseJobSearchParams(params: URLSearchParams) {
     const input: Record<string, unknown> = Object.fromEntries(params);
-    for (const key of ["level", "workType"])
+    for (const key of ["level", "workType", "provinceCodes", "wardCodes"])
         if (params.has(key))
             input[key] = params
                 .getAll(key)

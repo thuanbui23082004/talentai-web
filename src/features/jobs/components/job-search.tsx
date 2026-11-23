@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { Alert, Button } from "@/components/ui";
 import { JobSearchBar } from "@/components/shared/job-search-bar";
-import { LocationPicker } from "@/components/shared/location-picker";
-import { findProvinceByCity, resolveLocation } from "@/lib/locations/vietnam";
+import { JobLocationMultiPicker, decodeJobLocations, encodeJobLocations } from "@/components/shared/job-location-multi-picker";
+import { findProvinceByCity } from "@/lib/locations/vietnam";
 import { JOB_LOCATIONS, JOB_SEARCH_FILTERS } from "../search-options";
 import { useJobCategories } from "../hooks/use-jobs";
 import type { JobFilters } from "../types";
@@ -28,6 +28,8 @@ export function JobSearch({
         city,
         provinceCode,
         wardCode,
+        provinceCodes,
+        wardCodes,
         salaryMin,
         salaryMax,
         experienceLevel,
@@ -40,7 +42,7 @@ export function JobSearch({
             <JobSearchBar
                 stickyFilters={stickyFilters}
                 heading={heading}
-                renderLocation={(props) => <LocationPicker {...props} />}
+                renderLocation={(props) => <JobLocationMultiPicker {...props} />}
                 key={JSON.stringify(initialFilters)}
                 locations={JOB_LOCATIONS}
                 filters={[
@@ -58,9 +60,7 @@ export function JobSearch({
                 queryLabel={queryLabel}
                 initialValues={{
                     query: q ?? "",
-                    location: provinceCode
-                        ? [provinceCode, wardCode].filter(Boolean).join(":")
-                        : (findProvinceByCity(city)?.code ?? city ?? ""),
+                    location: encodeJobLocations(provinceCodes ?? (provinceCode ? [provinceCode] : city && findProvinceByCity(city) ? [findProvinceByCity(city)!.code] : []), wardCodes ?? (wardCode ? [wardCode] : [])),
                     filters: {
                         salary:
                             salaryMin === undefined && salaryMax === undefined
@@ -82,11 +82,9 @@ export function JobSearch({
                     if (initialFilters.companyId)
                         params.set("companyId", initialFilters.companyId);
                     if (query) params.set("q", query);
-                    const { province, ward } = resolveLocation(location);
-                    if (province) {
-                        params.set("provinceCode", province.code);
-                        if (ward) params.set("wardCode", ward.code);
-                    } else if (location) params.set("city", location);
+                    const selectedLocations = decodeJobLocations(location);
+                    if (selectedLocations.provinceCodes.length) params.set("provinceCodes", selectedLocations.provinceCodes.join(","));
+                    if (selectedLocations.wardCodes.length) params.set("wardCodes", selectedLocations.wardCodes.join(","));
                     const [lower, upper] = (filters.salary ?? "").split(":");
                     if (lower) params.set("salaryMin", lower);
                     if (upper) params.set("salaryMax", upper);

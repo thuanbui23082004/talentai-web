@@ -2770,6 +2770,26 @@ paths:
         schema:
           type: string
           pattern: '^[0-9]{5}$'
+      - name: provinceCodes
+        in: query
+        description: Danh sách mã tỉnh/thành để tìm nhiều địa điểm; dùng dấu phẩy phân tách.
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            pattern: '^[1-9][0-9]?$'
+      - name: wardCodes
+        in: query
+        description: Danh sách mã phường/xã thuộc các tỉnh đã chọn; dùng dấu phẩy phân tách.
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            pattern: '^[0-9]{5}$'
       - name: salaryMin
         in: query
         schema:

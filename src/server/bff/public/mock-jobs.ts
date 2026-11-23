@@ -3,7 +3,7 @@ import type { components } from "@/lib/api/generated/schema";
 import { mockJobs } from "@/mocks/fixtures/jobs";
 import { apiError } from "../responses";
 
-const supported = new Set(["q", "city", "provinceCode", "wardCode", "page", "pageSize", "sort", "salaryMin", "salaryMax", "minExperience", "maxExperience", "level", "workType", "experienceLevel", "jobType", "workMode", "categoryId", "companyId", "salaryCurrency", "isSalaryNegotiable"]);
+const supported = new Set(["q", "city", "provinceCode", "wardCode", "provinceCodes", "wardCodes", "page", "pageSize", "sort", "salaryMin", "salaryMax", "minExperience", "maxExperience", "level", "workType", "experienceLevel", "jobType", "workMode", "categoryId", "companyId", "salaryCurrency", "isSalaryNegotiable"]);
 
 export function searchMockJobs(params: URLSearchParams, empty = false): Response {
   // Explicitly reject filters not implemented yet instead of silently ignoring them.
@@ -12,7 +12,7 @@ export function searchMockJobs(params: URLSearchParams, empty = false): Response
   }
   const parsed = parseJobSearchParams(params);
   if (!parsed.success) return apiError(422, "VALIDATION_FAILED", "Bộ lọc hoặc phân trang không hợp lệ.");
-  const { q, city, provinceCode, wardCode, page, pageSize, sort, salaryMin, salaryMax, minExperience, maxExperience, level, workType } = parsed.data;
+  const { q, city, provinceCode, wardCode, provinceCodes, wardCodes, page, pageSize, sort, salaryMin, salaryMax, minExperience, maxExperience, level, workType } = parsed.data;
   const { experienceLevel, jobType, workMode, categoryId, companyId, salaryCurrency, isSalaryNegotiable } = parsed.data;
   if (sort === "match_score") return apiError(401, "UNAUTHENTICATED", "Vui lòng đăng nhập để sử dụng tính năng này.");
   const normalize = (text: string) => text.toLocaleLowerCase("vi").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
@@ -28,6 +28,8 @@ export function searchMockJobs(params: URLSearchParams, empty = false): Response
     && (isSalaryNegotiable === undefined || job.salary?.negotiable === isSalaryNegotiable)
     && (!provinceCode || job.location.provinceCode === provinceCode)
     && (!wardCode || job.location.wardCode === wardCode)
+    && (!provinceCodes?.length || provinceCodes.includes(job.location.provinceCode ?? ""))
+    && (!wardCodes?.length || wardCodes.includes(job.location.wardCode ?? ""))
     && (salaryMin === undefined || (job.salary?.max ?? -1) >= salaryMin)
     && (salaryMax === undefined || (job.salary?.min ?? Infinity) <= salaryMax)
     && (minExperience === undefined || job.minExperienceYears >= minExperience)

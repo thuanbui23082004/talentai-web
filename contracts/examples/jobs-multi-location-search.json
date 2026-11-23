@@ -1,0 +1,14 @@
+{
+  "query": {
+    "provinceCodes": ["1", "79"],
+    "wardCodes": ["25760"],
+    "page": 1,
+    "pageSize": 12
+  },
+  "backendQuery": {
+    "provinceIds": [1000001, 1000079],
+    "wardIds": [3025760],
+    "page": 0,
+    "size": 12
+  }
+}
