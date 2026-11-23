@@ -25,6 +25,10 @@ export async function readCvFile(request: Request): Promise<File | undefined> {
     const bytes = Buffer.from(await file.arrayBuffer());
     if (bytes.length < 5) return;
     const pdf = file.name.toLowerCase().endsWith(".pdf");
-    if (pdf ? bytes.toString("ascii", 0, 5) !== "%PDF-" : !isDocx(bytes)) return;
+    // PDF readers accept a header after leading whitespace (some exporters add a newline).
+    const pdfHeader = bytes.indexOf("%PDF-");
+    const validPdfHeader = pdfHeader >= 0 && pdfHeader < 1024 &&
+        /^[\x09\x0a\x0c\x0d\x20]*$/.test(bytes.toString("ascii", 0, pdfHeader));
+    if (pdf ? !validPdfHeader : !isDocx(bytes)) return;
     return new File([bytes], file.name, { type: pdf ? "application/pdf" : CV_DOCX_TYPE });
 }

@@ -2,6 +2,7 @@
 
 import { useRef, useState, type ReactElement } from "react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import { PreviewCard } from "@base-ui/react/preview-card";
 import {
     BriefcaseBusiness,
@@ -15,16 +16,21 @@ import { CandidateAction } from "@/features/auth";
 import { formatDate, formatDeadline, formatSalaryRange } from "@/lib/utils";
 import { JOB_LEVEL_LABELS, WORK_TYPE_LABELS, experienceLabel } from "../labels";
 import type { Job } from "../types";
+import { getJobDetail } from "../services/jobs";
+import { TextList } from "./job-text-list";
 
 export function JobHoverPreview({
     job,
     children,
+    inModal = false,
 }: {
     job: Job;
     children: ReactElement;
+    inModal?: boolean;
 }) {
     const [applying, setApplying] = useState(false);
     const [previewOpen, setPreviewOpen] = useState(false);
+    const detail = useQuery({ queryKey: ["jobs", "detail", job.id], queryFn: ({ signal }) => getJobDetail(job.id, signal), enabled: previewOpen, staleTime: 60_000 });
     const triggerRef = useRef<HTMLAnchorElement>(null);
     return (
         <>
@@ -63,7 +69,7 @@ export function JobHoverPreview({
                             align: "shift",
                             fallbackAxisSide: "end",
                         }}
-                        className="z-40 max-w-[calc(100vw-2rem)]"
+                        className={`${inModal ? "z-[60]" : "z-40"} max-w-[calc(100vw-2rem)]`}
                     >
                         <PreviewCard.Arrow
                             data-job-preview-arrow
@@ -166,9 +172,9 @@ export function JobHoverPreview({
                                     <h3 className="text-base font-semibold">
                                         Kỹ năng
                                     </h3>
-                                    {job.skills?.length ? (
+                                    {(detail.data?.skills ?? job.skills)?.length ? (
                                         <div className="mt-2 flex flex-wrap gap-2">
-                                            {job.skills.map((skill) => (
+                                            {(detail.data?.skills ?? job.skills)?.map((skill) => (
                                                 <Badge
                                                     key={skill}
                                                     variant="outline"
@@ -187,11 +193,9 @@ export function JobHoverPreview({
                                     <h3 className="text-base font-semibold">
                                         Mô tả công việc
                                     </h3>
-                                    <p className="mt-2 text-muted-foreground">
-                                        Chưa có mô tả chi tiết cho tin tuyển
-                                        dụng này.
-                                    </p>
+                                    {detail.data?.description ? <div className="mt-2 text-muted-foreground"><TextList text={detail.data.description} heading="Mô tả công việc" /></div> : <p className="mt-2 text-muted-foreground">{detail.isPending ? "Đang tải mô tả…" : detail.isError ? "Không tải được mô tả công việc." : "Chưa có mô tả chi tiết."}</p>}
                                 </section>
+                                {detail.data?.requirements && <section><h3 className="text-base font-semibold">Yêu cầu ứng viên</h3><div className="mt-2 text-muted-foreground"><TextList text={detail.data.requirements} heading="Yêu cầu ứng viên" /></div></section>}
                             </div>
                         </PreviewCard.Popup>
                     </PreviewCard.Positioner>

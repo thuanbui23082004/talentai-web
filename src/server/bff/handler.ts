@@ -38,6 +38,7 @@ import { handleJobApplicants } from "./recruiter/job-applicants-service";
 import { handleJobApplicationDetail } from "./recruiter/job-application-detail-service";
 import { handleJobApplicantStatus } from "./recruiter/job-applicant-status-service";
 import { handleNotifications, isNotificationRequest } from "./notifications/service";
+import { handleMatchingPreview } from "./candidate/matching-preview";
 
 export async function handleBffRequest(request: Request): Promise<Response> {
     try {
@@ -66,6 +67,12 @@ export async function handleBffRequest(request: Request): Promise<Response> {
         if (isAuthRequest(request)) return await handleAuthRequest(request);
         const env = getServerEnv();
         const gatewayApiUrl = getGatewayApiUrl(env.BACKEND_API_URL);
+        if (new URL(request.url).pathname === "/api/bff/matching/previews") {
+            const matchingMode = env.MATCHING_DATA_MODE ??
+                ((env.PROFILE_DATA_MODE ?? env.DATA_MODE) === "real" &&
+                (env.JOB_DATA_MODE ?? env.DATA_MODE) === "real" ? "real" : "mock");
+            return await handleMatchingPreview(request, matchingMode === "real" ? gatewayApiUrl : undefined);
+        }
         if (isNotificationRequest(request))
             return await handleNotifications(request, gatewayApiUrl);
         if (isCandidateApplicationTrackingRequest(request)) {

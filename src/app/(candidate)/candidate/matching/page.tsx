@@ -1,5 +1,7 @@
-import { CandidatePageTitle } from "@/components/layout/candidate/candidate-page-title";
+import { CandidateMatchingPageContent } from "@/features/matching";
+import { requireRole } from "@/lib/auth/require-role";
 
-export default function CandidateMatchingPage() {
-  return <section className="candidate-page"><CandidatePageTitle>AI Job Matching</CandidatePageTitle><p className="mt-3 text-sm text-muted-foreground">Khu vực đối sánh CV và gợi ý việc làm đang được hoàn thiện.</p></section>;
+export default async function CandidateMatchingPage() {
+  const session = await requireRole("candidate");
+  return <CandidateMatchingPageContent userId={session.userId} />;
 }

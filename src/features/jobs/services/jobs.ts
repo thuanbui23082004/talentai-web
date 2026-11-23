@@ -18,3 +18,9 @@ export async function getJobs(filters: JobFilters = {}, signal?: AbortSignal) {
     if (!data || error) throw toApiError(response.status, error);
     return data;
 }
+
+export async function getJobDetail(jobId: string, signal?: AbortSignal) {
+    const { data, error, response } = await apiClient.GET("/jobs/{jobId}", { params: { path: { jobId } }, signal });
+    if (!data || error) throw toApiError(response.status, error);
+    return data;
+}

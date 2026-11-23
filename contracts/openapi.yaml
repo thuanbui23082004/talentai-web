@@ -2446,6 +2446,36 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
+  /matching/previews:
+    post:
+      tags: [AI Matching]
+      operationId: previewCandidateMatching
+      summary: Chấm CV của ứng viên với một tin tuyển dụng
+      security:
+      - cookieAuth: []
+        csrfToken: []
+      x-roles: [candidate]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchingPreviewRequest'
+      responses:
+        '200':
+          description: Kết quả chấm hoặc lỗi AI trong nội dung phản hồi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchingPreview'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
   /matching:
     post:
       tags:
@@ -9696,6 +9726,76 @@ components:
       properties:
         versionId:
           $ref: '#/components/schemas/Id'
+    MatchingPreviewRequest:
+      type: object
+      required: [cvId, jobId]
+      additionalProperties: false
+      properties:
+        cvId:
+          $ref: '#/components/schemas/Id'
+        jobId:
+          $ref: '#/components/schemas/Id'
+    MatchingPreview:
+      type: object
+      required: [matchId, cvId, jobId, jobVersion, status]
+      properties:
+        matchId:
+          $ref: '#/components/schemas/Id'
+        cvId:
+          $ref: '#/components/schemas/Id'
+        jobId:
+          $ref: '#/components/schemas/Id'
+        jobVersion:
+          type: integer
+        status:
+          type: string
+          enum: [SCORED, FAILED]
+        score:
+          type: number
+          minimum: 0
+          maximum: 100
+        semantic_score:
+          type: number
+          minimum: 0
+          maximum: 100
+        skill_score:
+          type: number
+          minimum: 0
+          maximum: 100
+        matched_skills:
+          type: array
+          items:
+            type: string
+        missing_skills:
+          type: array
+          items:
+            type: string
+        explanation:
+          type: string
+        field_scores:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/MatchingPreviewFieldScore'
+        errorCode:
+          type: string
+          enum: [AI_UNAVAILABLE]
+    MatchingPreviewFieldScore:
+      type: object
+      required: [score, reason, status, evidence, requirement]
+      properties:
+        score:
+          type: number
+          minimum: 0
+        reason:
+          type: string
+        status:
+          type: string
+        evidence:
+          type: string
+        requirement:
+          type: string
+        model:
+          type: string
     MatchingRequest:
       type: object
       required:

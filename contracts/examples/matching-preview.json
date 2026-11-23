@@ -1,0 +1,24 @@
+{
+  "request": { "cvId": "00000000-0000-4000-8000-000000000010", "jobId": "00000000-0000-4000-8000-000000000020" },
+  "response": {
+    "matchId": "00000000-0000-4000-8000-000000000001",
+    "cvId": "00000000-0000-4000-8000-000000000010",
+    "jobId": "00000000-0000-4000-8000-000000000020",
+    "jobVersion": 1,
+    "status": "SCORED",
+    "score": 75,
+    "semantic_score": 70,
+    "skill_score": 80,
+    "matched_skills": ["TypeScript"],
+    "missing_skills": ["React"],
+    "explanation": "CV phù hợp một phần với vị trí được chọn.",
+    "field_scores": {
+      "roles": { "score": 15, "reason": "Vai trò trong CV gần với vị trí tuyển dụng.", "status": "partial", "evidence": "", "requirement": "" },
+      "education": { "score": 10, "reason": "Đáp ứng yêu cầu học vấn.", "status": "met", "evidence": "", "requirement": "" },
+      "languages": { "score": 5, "reason": "JD không nêu yêu cầu ngoại ngữ.", "status": "not_required", "evidence": "", "requirement": "" },
+      "locations": { "score": 5, "reason": "Địa điểm phù hợp.", "status": "met", "evidence": "", "requirement": "" },
+      "experience": { "score": 15, "reason": "Kinh nghiệm đáp ứng một phần.", "status": "partial", "evidence": "", "requirement": "" },
+      "skills": { "score": 25, "reason": "Có kỹ năng phù hợp và kỹ năng cần bổ sung.", "status": "partial", "evidence": "TypeScript", "requirement": "TypeScript; React" }
+    }
+  }
+}

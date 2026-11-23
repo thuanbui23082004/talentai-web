@@ -1073,6 +1073,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/matching/previews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Chấm CV của ứng viên với một tin tuyển dụng */
+        post: operations["previewCandidateMatching"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/matching": {
         parameters: {
             query?: never;
@@ -4390,6 +4407,37 @@ export interface components {
         CvAnalysisRequest: {
             versionId?: components["schemas"]["Id"];
         };
+        MatchingPreviewRequest: {
+            cvId: components["schemas"]["Id"];
+            jobId: components["schemas"]["Id"];
+        };
+        MatchingPreview: {
+            matchId: components["schemas"]["Id"];
+            cvId: components["schemas"]["Id"];
+            jobId: components["schemas"]["Id"];
+            jobVersion: number;
+            /** @enum {string} */
+            status: "SCORED" | "FAILED";
+            score?: number;
+            semantic_score?: number;
+            skill_score?: number;
+            matched_skills?: string[];
+            missing_skills?: string[];
+            explanation?: string;
+            field_scores?: {
+                [key: string]: components["schemas"]["MatchingPreviewFieldScore"];
+            };
+            /** @enum {string} */
+            errorCode?: "AI_UNAVAILABLE";
+        };
+        MatchingPreviewFieldScore: {
+            score: number;
+            reason: string;
+            status: string;
+            evidence: string;
+            requirement: string;
+            model?: string;
+        };
         MatchingRequest: {
             cvId: components["schemas"]["Id"];
             cvVersionId?: components["schemas"]["Id"];
@@ -7445,6 +7493,34 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             500: components["responses"]["InternalError"];
+        };
+    };
+    previewCandidateMatching: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MatchingPreviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Kết quả chấm hoặc lỗi AI trong nội dung phản hồi */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MatchingPreview"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     startMatching: {

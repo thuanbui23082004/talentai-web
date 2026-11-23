@@ -14,12 +14,14 @@ export function JobCard({
     variant = "default",
     footer,
     onUnsave,
+    onSelect,
     className = "",
 }: {
     job: Job;
     variant?: "default" | "application" | "saved" | "recruiter";
     footer?: ReactNode;
     onUnsave?: () => void;
+    onSelect?: () => void;
     className?: string;
 }) {
     const wordmark =
@@ -34,8 +36,12 @@ export function JobCard({
             : job.company.name.replace("Công ty mẫu ", "");
     const card = (
         <article
+            role={onSelect ? "button" : undefined}
+            tabIndex={onSelect ? 0 : undefined}
+            onClick={onSelect}
+            onKeyDown={onSelect ? (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(); } } : undefined}
             data-job-card-variant={variant}
-            className={`group flex min-w-0 flex-col gap-3 rounded-xl border border-border/60 bg-card p-3.5 shadow-card transition hover:border-primary/30 hover:shadow-float ${variant !== "default" ? "h-full" : ""} ${className}`}
+            className={`group flex min-w-0 flex-col gap-3 rounded-xl border border-border/60 bg-card p-3.5 shadow-card transition hover:border-primary/30 hover:shadow-float ${variant !== "default" ? "h-full" : ""} ${onSelect ? "cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" : ""} ${className}`}
         >
             <div className="flex min-w-0 items-start gap-3">
                 <span
@@ -47,7 +53,7 @@ export function JobCard({
                 </span>
                 <div className="min-w-0 flex-1">
                     <h3 className="min-w-0 text-[15px] font-semibold leading-5">
-                        {variant === "saved" && job.status !== "open" ? (
+                        {onSelect || (variant === "saved" && job.status !== "open") ? (
                             <span className="block truncate" title={job.title}>
                                 {job.title}
                             </span>
@@ -120,7 +126,7 @@ export function JobCard({
                         {formatDeadline(job.applicationDeadline)}
                     </span>
                 </div>
-                {variant !== "recruiter" && (
+                {variant !== "recruiter" && !onSelect && (
                     <SaveJobButton job={job} onUnsave={onUnsave} />
                 )}
             </div>
@@ -130,6 +136,6 @@ export function JobCard({
     return variant !== "default" ? (
         card
     ) : (
-        <JobHoverPreview job={job}>{card}</JobHoverPreview>
+        <JobHoverPreview job={job} inModal={!!onSelect}>{card}</JobHoverPreview>
     );
 }

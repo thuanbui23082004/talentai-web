@@ -5,7 +5,7 @@ export { JobCard } from "./components/job-card";
 export { SavedJobsPage } from "./components/saved-jobs-page";
 export { JobDetailPage } from "./components/job-detail-page";
 export { HomeJobCollections } from "./components/home-job-collections";
-export { useJobCategories } from "./hooks/use-jobs";
+export { useJobCategories, useJobs } from "./hooks/use-jobs";
 export type { Job, JobFilters, JobSearchResponse } from "./types";
 
 export { CreateJobForm } from './components/recruiter/job-posting-form';

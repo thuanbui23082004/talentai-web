@@ -38,6 +38,11 @@ describe("candidate CV BFF", () => {
         expect((await handleCvsRequest(request("", "POST", new File([bytes], name, { type })), base)).status).toBe(201);
         expect(fetch).toHaveBeenCalledTimes(2);
     });
+    it("accepts a PDF with a leading newline from an exporter", async () => {
+        network(() => Response.json({ success: true, data: example }, { status: 201 }));
+        const file = new File(["\n", pdfCv()], "exported.pdf", { type: "application/pdf" });
+        expect((await handleCvsRequest(request("", "POST", file), base)).status).toBe(201);
+    });
     it("rejects invalid and oversized files before contacting the CV backend", async () => {
         const fetch = network(() => Response.json({}));
         for (const file of [new File(["html"], "cv.pdf", { type: "application/pdf" }), new File(["PK fake zip"], "cv.docx", { type: CV_DOCX_TYPE }), new File([], "cv.pdf", { type: "application/pdf" }), new File([new Uint8Array(5 * 1024 * 1024 + 1)], "large.pdf", { type: "application/pdf" })]) {
