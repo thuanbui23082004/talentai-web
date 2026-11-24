@@ -165,6 +165,7 @@ export const jobFormMessages = {
             salaryOrder:
                 "Mức lương tối đa phải lớn hơn hoặc bằng mức tối thiểu.",
             date: "Vui lòng nhập ngày hợp lệ.",
+            futureDate: "Hạn nộp hồ sơ đã qua. Vui lòng chọn ngày trong tương lai trước khi lưu tin.",
             city: "Vui lòng chọn tỉnh/thành phố.",
             headcount: "Số lượng tuyển phải là số nguyên từ 1 trở lên.",
             contentLength: "Nội dung vượt quá giới hạn cho phép.",

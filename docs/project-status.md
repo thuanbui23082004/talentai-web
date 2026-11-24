@@ -356,6 +356,8 @@ Ví dụ: `curl -H "x-mock-scenario: empty" http://localhost:3000/api/bff/jobs`.
 
 ## Bảng theo dõi ứng viên theo tin (2026-11-06)
 
+- Chi tiết hồ sơ mở từ tin tuyển dụng hiển thị kỹ năng, kinh nghiệm, học vấn và chứng chỉ từ `applicantSnapshot` của application-service, tức dữ liệu tại lúc nộp hồ sơ. Hồ sơ cũ không có snapshot chi tiết hiển thị trạng thái trống; mock và contract đã bổ sung các trường này.
+
 - Trang ứng viên dùng dạng thẻ; nút Bảng theo dõi thay nút Danh sách và yêu cầu chọn tin trước khi điều hướng.
 - Bảng `/recruiter/candidates/pipeline?jobId=...` dùng API danh sách theo tin, tải đủ trang và chia 8 trạng thái thật; có select đổi tin.
 - Kéo thả hoặc select trạng thái gửi PATCH `/recruiter/job-applications/{id}/status` qua BFF tới application-service, kèm `status` và `version`. Chỉ chuyển đúng từng bước hoặc từ chối; không retry ghi. Lỗi/xung đột tải lại bảng để đồng bộ.

@@ -5101,10 +5101,46 @@ export interface components {
             jobTitle?: string;
             resumeFileName?: string;
             coverLetter?: string;
+            applicantSnapshot?: components["schemas"]["JobApplicantSnapshot"];
             status: components["schemas"]["JobApplicantStatus"];
             version: number;
             /** Format: date-time */
             appliedAt: string;
+        };
+        /** @description Thông tin ứng viên được lưu tại thời điểm ứng tuyển. */
+        JobApplicantSnapshot: {
+            skills?: string[];
+            yearsOfExperience?: number;
+            educations?: components["schemas"]["JobApplicantEducation"][];
+            experiences?: components["schemas"]["JobApplicantExperience"][];
+            certificates?: components["schemas"]["JobApplicantCertificate"][];
+        };
+        JobApplicantEducation: {
+            id?: string;
+            school?: string;
+            degree?: string;
+            fieldOfStudy?: string;
+            description?: string;
+            startDate?: string;
+            endDate?: string;
+            isStudying?: boolean;
+        };
+        JobApplicantExperience: {
+            id?: string;
+            company?: string;
+            title?: string;
+            location?: string;
+            description?: string;
+            startDate?: string;
+            endDate?: string;
+            current?: boolean;
+        };
+        JobApplicantCertificate: {
+            id?: string;
+            name?: string;
+            issuer?: string;
+            issuedAt?: string;
+            expiresAt?: string;
         };
         JobApplicantStatusUpdate: {
             status: components["schemas"]["JobApplicantStatus"];

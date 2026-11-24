@@ -11,11 +11,18 @@ export const jobApplicantQuerySchema = z.object({
 }).strict();
 
 const snapshot = z.object({ fullName: z.string().nullish(), headline: z.string().nullish(), title: z.string().nullish(), email: z.string().nullish(), phone: z.string().nullish(), employmentType: z.string().nullish() });
+const applicantSnapshot = snapshot.extend({
+    skills: z.array(z.string()).nullish(),
+    yearsOfExperience: z.number().nullish(),
+    educations: z.array(z.object({ id: z.string().nullish(), school: z.string().nullish(), degree: z.string().nullish(), fieldOfStudy: z.string().nullish(), description: z.string().nullish(), startDate: z.string().nullish(), endDate: z.string().nullish(), isStudying: z.boolean().nullish() })).nullish(),
+    experiences: z.array(z.object({ id: z.string().nullish(), company: z.string().nullish(), title: z.string().nullish(), location: z.string().nullish(), description: z.string().nullish(), startDate: z.string().nullish(), endDate: z.string().nullish(), current: z.boolean().nullish() })).nullish(),
+    certificates: z.array(z.object({ id: z.string().nullish(), name: z.string().nullish(), issuer: z.string().nullish(), issuedAt: z.string().nullish(), expiresAt: z.string().nullish() })).nullish(),
+});
 export const upstreamJobApplicantSchema = z.object({
     id: z.uuid(), jobId: z.uuid(), applicantId: z.uuid(), resumeId: z.uuid(),
     resumeFileName: z.string().nullish(), coverLetter: z.string().nullish(),
     resumeContentType: z.string().nullish(),
-    jobSnapshot: snapshot.nullish(), applicantSnapshot: snapshot.nullish(),
+    jobSnapshot: snapshot.nullish(), applicantSnapshot: applicantSnapshot.nullish(),
     status: z.enum(jobApplicantStatuses), version: z.number().int().nonnegative(), createdAt: z.iso.datetime({ offset: true }),
 });
 export const applicationResumeDownloadSchema = z.object({

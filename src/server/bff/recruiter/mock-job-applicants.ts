@@ -21,6 +21,13 @@ export function mockJobApplicants(user: components['schemas']['User'], jobId: st
         id: item.id, jobId: item.jobId, applicantId: item.candidate.id, resumeId: item.cvId!,
         fullName: item.candidate.fullName, headline: item.candidate.headline, jobTitle: item.jobTitle,
         email: item.profile?.email, resumeFileName: 'candidate-cv.pdf', resumeContentType: 'application/pdf',
+        applicantSnapshot: {
+            skills: item.profile?.skills?.map(skill => skill.name) ?? [],
+            yearsOfExperience: item.profile?.totalYearsExperience,
+            educations: item.profile?.educations?.map(education => ({ id: education.id, school: education.school, degree: education.degree, fieldOfStudy: education.major, description: education.description, startDate: education.startDate, endDate: education.endDate, isStudying: education.isCurrent })) ?? [],
+            experiences: item.profile?.experiences?.map(experience => ({ id: experience.id, company: experience.company, title: experience.position, location: experience.location, description: experience.description, startDate: experience.startDate, endDate: experience.endDate, current: experience.isCurrent })) ?? [],
+            certificates: item.profile?.certificates?.map(certificate => ({ id: certificate.id, name: certificate.name, issuer: certificate.issuer, issuedAt: certificate.issuedDate })) ?? [],
+        },
         employmentType: store.jobs.find(job => job.id === jobId)?.workType,
         status: item.status === 'interview' ? 'interview_scheduled' : item.status, version: 0, appliedAt: item.appliedAt,
         ...updates.get(item.id),

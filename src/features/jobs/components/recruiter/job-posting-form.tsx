@@ -445,6 +445,11 @@ export function CreateJobForm({ job }: { job?: RecruiterJob }) {
                                                 />
                                             )}
                                         />
+                                        {form.formState.errors.applicationDeadline && (
+                                            <p role="alert" className="field-error">
+                                                {t(`validation.${form.formState.errors.applicationDeadline.message === "futureDate" ? "futureDate" : "date"}`)}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                                 <fieldset className="salary-group">

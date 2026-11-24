@@ -1,0 +1,17 @@
+{
+  "id": "b0000000-0000-4000-8000-000000000001",
+  "jobId": "10000000-0000-4000-8000-000000000001",
+  "applicantId": "c0000000-0000-4000-8000-000000000001",
+  "resumeId": "a0000000-0000-4000-8000-000000000001",
+  "fullName": "Ứng viên kiểm thử",
+  "applicantSnapshot": {
+    "skills": ["React", "TypeScript"],
+    "yearsOfExperience": 2,
+    "educations": [{ "id": "education-1", "school": "Đại học Công nghệ", "degree": "Cử nhân", "fieldOfStudy": "Công nghệ thông tin", "startDate": "2020-09-01", "endDate": "2024-06-01", "isStudying": false }],
+    "experiences": [{ "id": "experience-1", "company": "Công ty ABC", "title": "Frontend Developer", "startDate": "2024-07-01", "current": true }],
+    "certificates": [{ "id": "certificate-1", "name": "AWS Cloud Practitioner", "issuer": "AWS", "issuedAt": "2025-01-01" }]
+  },
+  "status": "submitted",
+  "version": 0,
+  "appliedAt": "2026-11-25T08:00:00Z"
+}

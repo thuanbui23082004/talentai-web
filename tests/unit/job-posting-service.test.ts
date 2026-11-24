@@ -216,6 +216,12 @@ describe('recruiter job posting backend', () => {
 });
 
 describe('job posting form mapping', () => {
+  it('asks for a future deadline before saving an expired posting', () => {
+    const value = { ...jobPostingDefaults(), title: 'Frontend Developer', categoryId: '1', description: 'Build UI', requirements: 'React', workplace: '1:00004', applicationDeadline: '2020-01-01' };
+    const parsed = jobPostingFormSchema.safeParse(value);
+    expect(parsed.success).toBe(false);
+    if (!parsed.success) expect(parsed.error.issues).toContainEqual(expect.objectContaining({ path: ['applicationDeadline'], message: 'futureDate' }));
+  });
   it('converts salary units, selected skill IDs and a Vietnamese end-of-day deadline', () => {
     const value = { ...jobPostingDefaults(), title: input.title, description: input.description, requirements: input.requirements,
       categoryId: '1', skillIds: ['2', '3'], salaryMin: '15', salaryMax: '25', applicationDeadline: '2026-12-31', workplace: '1:00004' };

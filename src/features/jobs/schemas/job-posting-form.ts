@@ -14,6 +14,9 @@ export const jobPostingFormSchema = z.object({
   applicationDeadline: z.string().refine(value => !value || z.iso.date().safeParse(value).success, 'date'),
   workplace: z.string().min(1, 'city'), address: z.string().max(500, 'contentLength'),
 }).superRefine((value, context) => {
+  if (value.applicationDeadline && z.iso.date().safeParse(value.applicationDeadline).success &&
+      new Date(`${value.applicationDeadline}T23:59:59+07:00`).getTime() <= Date.now())
+    context.addIssue({ code: 'custom', path: ['applicationDeadline'], message: 'futureDate' });
   if (!value.isSalaryNegotiable && value.salaryMin && value.salaryMax && Number(value.salaryMin) > Number(value.salaryMax))
     context.addIssue({ code: 'custom', path: ['salaryMax'], message: 'salaryOrder' });
   const scale = value.salaryCurrency === 'VND' ? 1000000 : 1;

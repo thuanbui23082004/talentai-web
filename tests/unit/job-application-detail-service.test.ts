@@ -1,6 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { handleJobApplicationDetail } from '@/server/bff/recruiter/job-application-detail-service';
 import example from '../../contracts/examples/job-applicants.json';
+import detailExample from '../../contracts/examples/job-applicant-detail.json';
 import { pdfCv } from '../support/cv-files';
 
 const item = example.items[0];
@@ -22,6 +23,15 @@ it('loads the owned application through the detail API and strips storage metada
     expect(await response.json()).toEqual(item);
     expect(String(fetch.mock.calls.at(-1)![0])).toBe(`${base}/applications/${item.id}`);
     expect(response.headers.get('cache-control')).toBe('private, no-store');
+});
+
+it('returns captured profile sections from the application snapshot', async () => {
+    network({ ...detailExample, createdAt: detailExample.appliedAt, applicantSnapshot: { ...detailExample.applicantSnapshot, fullName: detailExample.fullName, privateField: 'hidden' } });
+    const response = await handleJobApplicationDetail(request, item.id, 'detail', base);
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.applicantSnapshot).toEqual(detailExample.applicantSnapshot);
+    expect(JSON.stringify(body)).not.toContain('privateField');
 });
 
 it('returns only a valid unexpired resume URL from the application resume endpoint', async () => {

@@ -42,6 +42,7 @@ function ApplicantContent({ id }: { id: string }) {
     if (query.isPending) return <div className="candidate-detail-skeleton" aria-busy="true"><span /><span /><span /></div>;
     if (query.isError) return <section className="candidate-detail-error" role="alert"><h1>Không thể tải hồ sơ ứng viên</h1><p>Hồ sơ không tồn tại, không thuộc công ty hoặc dịch vụ chưa sẵn sàng.</p><Button variant="outline" onClick={() => void query.refetch()}>Thử lại</Button><Link href="/recruiter/candidates">Quay lại danh sách ứng viên</Link></section>;
     const item = query.data;
+    const snapshot = item.applicantSnapshot;
     const name = item.fullName || "Không có dữ liệu";
     const initials = name.trim().split(/\s+/).slice(-2).map(word => word[0]).join("");
     const targets = JOB_APPLICANT_TRANSITIONS[item.status];
@@ -75,10 +76,10 @@ function ApplicantContent({ id }: { id: string }) {
                 </section>
                 <article className="candidate-detail-panel job-applicant-profile">
                     <section className="candidate-resume-section"><h2>Tổng quan</h2><p>{item.coverLetter || item.headline || "Không có dữ liệu"}</p></section>
-                    <section className="candidate-resume-section"><h2>Kinh nghiệm làm việc</h2><p>Không có dữ liệu</p></section>
-                    <section className="candidate-resume-section"><h2>Học vấn</h2><p>Không có dữ liệu</p></section>
-                    <section className="candidate-resume-section"><h2>Kỹ năng chuyên môn</h2><p>Không có dữ liệu</p></section>
-                    <section className="candidate-resume-section"><h2>Chứng chỉ</h2><p>Không có dữ liệu</p></section>
+                    <section className="candidate-resume-section"><h2>Kinh nghiệm làm việc</h2>{snapshot?.experiences?.length ? <ul className="job-applicant-snapshot-list">{snapshot.experiences.map((experience, index) => <li key={experience.id ?? index}><strong>{experience.title || "Vị trí chưa cập nhật"}</strong>{experience.company && <span>{experience.company}</span>}{(experience.startDate || experience.endDate || experience.current) && <small>{experience.startDate || "—"} – {experience.current ? "Hiện tại" : experience.endDate || "—"}</small>}{experience.description && <p>{experience.description}</p>}</li>)}</ul> : <p>Không có dữ liệu</p>}</section>
+                    <section className="candidate-resume-section"><h2>Học vấn</h2>{snapshot?.educations?.length ? <ul className="job-applicant-snapshot-list">{snapshot.educations.map((education, index) => <li key={education.id ?? index}><strong>{education.school || "Trường chưa cập nhật"}</strong>{(education.degree || education.fieldOfStudy) && <span>{[education.degree, education.fieldOfStudy].filter(Boolean).join(" · ")}</span>}{(education.startDate || education.endDate || education.isStudying) && <small>{education.startDate || "—"} – {education.isStudying ? "Hiện tại" : education.endDate || "—"}</small>}{education.description && <p>{education.description}</p>}</li>)}</ul> : <p>Không có dữ liệu</p>}</section>
+                    <section className="candidate-resume-section"><h2>Kỹ năng chuyên môn</h2>{snapshot?.skills?.length ? <ul className="job-applicant-skill-list">{snapshot.skills.map((skill, index) => <li key={`${skill}-${index}`}>{skill}</li>)}</ul> : <p>Không có dữ liệu</p>}</section>
+                    <section className="candidate-resume-section"><h2>Chứng chỉ</h2>{snapshot?.certificates?.length ? <ul className="job-applicant-snapshot-list">{snapshot.certificates.map((certificate, index) => <li key={certificate.id ?? index}><strong>{certificate.name || "Chứng chỉ chưa cập nhật"}</strong>{certificate.issuer && <span>{certificate.issuer}</span>}{certificate.issuedAt && <small>Cấp ngày {certificate.issuedAt}</small>}</li>)}</ul> : <p>Không có dữ liệu</p>}</section>
                 </article>
             </div>
             <aside className="candidate-detail-right">

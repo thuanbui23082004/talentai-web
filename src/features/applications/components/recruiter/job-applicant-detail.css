@@ -39,6 +39,12 @@
 .recruiter-app .job-applicant-detail .job-applicant-profile { padding-block: 0; }
 .job-applicant-profile .candidate-resume-section:first-child { border-top: 0; }
 .job-applicant-profile .candidate-resume-section p { color: var(--recruiter-muted); font-size: 13px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.job-applicant-snapshot-list { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.job-applicant-snapshot-list li { display: grid; gap: 3px; }
+.job-applicant-snapshot-list strong { font-size: 13px; }
+.job-applicant-snapshot-list span, .job-applicant-snapshot-list small { color: var(--recruiter-muted); }
+.job-applicant-skill-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.job-applicant-skill-list li { padding: 5px 9px; border-radius: 7px; background: var(--recruiter-soft); color: var(--recruiter-primary); }
 .job-applicant-empty { padding: 9px; border-radius: 8px; background: var(--recruiter-bg); color: var(--recruiter-muted); font-size: 13px; line-height: 1.5; }
 .job-applicant-side-panel { min-height: 110px; }
 .job-applicant-job-heading { display: flex; align-items: center; gap: 9px; min-width: 0; margin-bottom: 12px; }

@@ -11223,6 +11223,8 @@ components:
           type: string
         coverLetter:
           type: string
+        applicantSnapshot:
+          $ref: '#/components/schemas/JobApplicantSnapshot'
         status:
           $ref: '#/components/schemas/JobApplicantStatus'
         version:
@@ -11231,6 +11233,57 @@ components:
         appliedAt:
           type: string
           format: date-time
+    JobApplicantSnapshot:
+      type: object
+      description: Thông tin ứng viên được lưu tại thời điểm ứng tuyển.
+      properties:
+        skills:
+          type: array
+          items: { type: string }
+        yearsOfExperience:
+          type: number
+        educations:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobApplicantEducation'
+        experiences:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobApplicantExperience'
+        certificates:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobApplicantCertificate'
+    JobApplicantEducation:
+      type: object
+      properties:
+        id: { type: string }
+        school: { type: string }
+        degree: { type: string }
+        fieldOfStudy: { type: string }
+        description: { type: string }
+        startDate: { type: string }
+        endDate: { type: string }
+        isStudying: { type: boolean }
+    JobApplicantExperience:
+      type: object
+      properties:
+        id: { type: string }
+        company: { type: string }
+        title: { type: string }
+        location: { type: string }
+        description: { type: string }
+        startDate: { type: string }
+        endDate: { type: string }
+        current: { type: boolean }
+    JobApplicantCertificate:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        issuer: { type: string }
+        issuedAt: { type: string }
+        expiresAt: { type: string }
     JobApplicantStatusUpdate:
       type: object
       additionalProperties: false
