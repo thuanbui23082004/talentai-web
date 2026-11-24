@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
-import { ArrowLeft, LockKeyhole } from "lucide-react";
+import { ArrowLeft, KeyRound, LockKeyhole, ShieldCheck } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
@@ -11,7 +10,7 @@ import { ApiError } from "@/lib/api/errors";
 import { useResetPassword } from "../hooks/use-password-recovery";
 import { resetPasswordSchema } from "../schemas/password-recovery";
 
-export function ResetPasswordForm({ token }: { token?: string }) {
+export function ResetPasswordForm() {
     const mutation = useResetPassword();
     const {
         register,
@@ -22,14 +21,11 @@ export function ResetPasswordForm({ token }: { token?: string }) {
         resolver: zodResolver(resetPasswordSchema),
         mode: "onTouched",
         defaultValues: {
+            token: "",
             newPassword: "",
             confirmPassword: "",
         },
     });
-
-    useEffect(() => {
-        if (token) window.history.replaceState(null, "", "/reset-password");
-    }, [token]);
 
     const invalidToken =
         mutation.error instanceof ApiError &&
@@ -40,32 +36,29 @@ export function ResetPasswordForm({ token }: { token?: string }) {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-                Tạo lại mật khẩu của bạn
-            </h1>
+            <div className="mb-5 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <ShieldCheck aria-hidden="true" className="size-6" />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight">Xác nhận mã OTP</h1>
             <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground">
-                Tạo mật khẩu mới để tiếp tục sử dụng tài khoản TalentAI của bạn.
+                Nhập mã 6 chữ số từ email và tạo mật khẩu mới cho tài khoản TalentAI.
             </p>
-            {!token || invalidToken ? (
-                <div className="mt-6 space-y-4">
-                    <Alert variant="warning" title="Liên kết không hợp lệ hoặc đã hết hạn">
-                        Vui lòng mở liên kết trong email khôi phục hoặc yêu cầu email mới.
-                    </Alert>
-                    <Link href="/forgot-password" className="flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary-hover">
-                        Yêu cầu email mới
-                    </Link>
-                </div>
-            ) : (
+            {invalidToken && (
+                <Alert variant="error" title="Mã OTP không hợp lệ hoặc đã hết hạn">
+                    Kiểm tra lại mã hoặc yêu cầu gửi mã mới.
+                </Alert>
+            )}
                 <form
                     noValidate
                     className="mt-6 space-y-5"
                     onSubmit={handleSubmit((values) => {
-                        mutation.mutate({ token, ...values }, {
+                        mutation.mutate(values, {
                             onSuccess: () => window.location.replace("/login?reason=password-reset"),
                             onError: (error) => {
                                 if (!(error instanceof ApiError)) return;
                                 for (const field of error.fieldErrors ?? []) {
                                     if (
+                                        field.field === "token" ||
                                         field.field === "newPassword" ||
                                         field.field === "confirmPassword"
                                     )
@@ -78,6 +71,27 @@ export function ResetPasswordForm({ token }: { token?: string }) {
                         });
                     })}
                 >
+                    <FormField
+                        label="Mã OTP"
+                        required
+                        error={errors.token?.message}
+                        description="Mã gồm 6 chữ số, có hiệu lực trong 15 phút."
+                    >
+                        {(field) => (
+                            <Input
+                                {...field}
+                                {...register("token")}
+                                type="text"
+                                inputMode="numeric"
+                                autoComplete="one-time-code"
+                                maxLength={6}
+                                placeholder="Nhập mã OTP"
+                                leadingIcon={<KeyRound aria-hidden="true" />}
+                                className="text-center text-lg font-semibold tracking-[0.25em]"
+                                disabled={mutation.isPending}
+                            />
+                        )}
+                    </FormField>
                     <FormField
                         label="Mật khẩu mới"
                         required
@@ -131,7 +145,9 @@ export function ResetPasswordForm({ token }: { token?: string }) {
                             : "Đặt lại mật khẩu"}
                     </Button>
                 </form>
-            )}
+            <Link href="/forgot-password" className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-primary hover:underline">
+                Chưa nhận được mã? Gửi lại OTP
+            </Link>
             <div className="mt-6 flex items-center justify-between gap-2 text-xs sm:text-sm">
                 <Link href="/login" className="inline-flex min-h-11 items-center gap-1 font-semibold whitespace-nowrap text-primary hover:underline">
                     <ArrowLeft aria-hidden="true" className="size-4 shrink-0" /> Quay lại đăng nhập

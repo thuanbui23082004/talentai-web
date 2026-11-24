@@ -1,8 +1,8 @@
 "use client";
 
 import { ExternalLink } from "lucide-react";
-import { useEffect, useState } from "react";
 import { Alert, Button, Modal, ModalContent } from "@/components/ui";
+import { CvFilePreview } from "@/components/shared/cv-file-preview";
 import {
     useJobApplicantCv,
     useJobApplicantResume,
@@ -49,7 +49,7 @@ export function JobApplicantCvDialog({
                         </Button>
                     </Alert>
                 ) : pdf && cv.data ? (
-                    <PdfFrame blob={cv.data} name={item.fullName} />
+                    <CvFilePreview blob={cv.data} fileName={item.resumeFileName || "candidate-cv.pdf"} />
                 ) : (
                     download.data && (
                         <>
@@ -72,37 +72,5 @@ export function JobApplicantCvDialog({
                 )}
             </ModalContent>
         </Modal>
-    );
-}
-
-function PdfFrame({ blob, name }: { blob: Blob; name?: string }) {
-    const [url, setUrl] = useState("");
-    useEffect(() => {
-        const objectUrl = URL.createObjectURL(blob);
-        const frame = requestAnimationFrame(() => setUrl(objectUrl));
-        return () => {
-            cancelAnimationFrame(frame);
-            URL.revokeObjectURL(objectUrl);
-        };
-    }, [blob]);
-    return url ? (
-        <>
-            <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary"
-            >
-                <ExternalLink size={16} aria-hidden="true" />
-                Mở CV ở tab mới
-            </a>
-            <iframe
-                title={`CV của ${name || "ứng viên"}`}
-                src={url}
-                className="h-[65dvh] min-h-80 w-full rounded-lg border border-border bg-muted"
-            />
-        </>
-    ) : (
-        <p role="status">Đang hiển thị CV…</p>
     );
 }

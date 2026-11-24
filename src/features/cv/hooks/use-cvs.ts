@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteCv, getCv, listCvs, setDefaultCv, uploadCv } from "../services/cvs";
+import { deleteCv, getCv, getCvFile, listCvs, setDefaultCv, uploadCv } from "../services/cvs";
 import { cvKeys } from "../query-keys";
 
 export function useCvs(userId: string) {
@@ -8,6 +8,10 @@ export function useCvs(userId: string) {
 
 export function useCvDetail(userId: string, id: string) {
     return useQuery({ queryKey: cvKeys.detail(userId, id), queryFn: ({ signal }) => getCv(id, signal), enabled: !!id, retry: false });
+}
+
+export function useCvFile(userId: string, id: string, enabled: boolean) {
+    return useQuery({ queryKey: [...cvKeys.detail(userId, id), "file"], queryFn: ({ signal }) => getCvFile(id, signal), enabled, retry: false, gcTime: 0 });
 }
 
 export function useCvActions(userId: string) {

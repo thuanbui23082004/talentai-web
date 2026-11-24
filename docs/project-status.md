@@ -1,12 +1,12 @@
-# Trạng thái triển khai
+﻿# Trạng thái triển khai
 
 ## Auth — đăng xuất và khôi phục mật khẩu (2026-11-22)
 
 Menu ứng viên/nhà tuyển dụng đăng xuất trực tiếp về `/login`, không còn màn hình xác nhận.
 `/logout` cũ tự gửi yêu cầu thu hồi phiên và có nút thử lại nếu lỗi. Hai trang
-`/forgot-password`, `/reset-password` dùng liên kết gửi qua email và POST thẳng
-`/auth/reset-password`; backend kiểm tra token khi lưu. Form không hiển thị token, BFF không tiết lộ token
-trong phản hồi yêu cầu quên mật khẩu. Chưa nghiệm thu email và API trên backend thật.
+`/forgot-password` yêu cầu mã OTP, `/reset-password` cho nhập mã và mật khẩu mới.
+BFF gửi mã trong trường `token` tới `/auth/reset-password`; backend kiểm tra mã khi lưu.
+Chưa nghiệm thu email OTP và API trên backend thật.
 
 ## Cấu hình gateway hiện tại (2026-11-21)
 
@@ -140,17 +140,8 @@ hiện chọn, hủy popup không gửi request, lỗi hiển thị và mobile k
 
 ## Giao diện khôi phục mật khẩu
 
-Đã thêm `/forgot-password` và `/reset-password?token=...`, dùng chung AuthFrame,
-input, button, màu sắc và thông báo lỗi của auth. Có liên kết từ trang đăng nhập,
-validation tại trường, trạng thái đang gửi, thành công và liên kết thiếu/hết hạn.
-Form gọi BFF theo contract; reset chuyển token trong URL qua POST, không lưu vào storage.
-BFF đã nối POST `/api/v1/auth/forgot-password` và `/api/v1/auth/reset-password` theo
-Swagger Java. Forgot trả 200; chỉ khi `NODE_ENV=development` mới chuyển `resetToken`
-đến UI để tạo liên kết thử nghiệm (không prefetch). Production loại bỏ token, không
-báo đã gửi thư. Backend chưa gửi email; token dùng một lần/hạn 15 phút do Java quản lý.
-Reset chấp nhận 8–100 ký tự theo Java, ánh xạ `PASSWORD_RESET_TOKEN_INVALID` sang
-`INVALID_RESET_TOKEN` để hiển thị liên kết hết hạn. Chưa có luồng email thực tế.
-Đã kiểm thử thật qua UI/BFF/Java với tài khoản test riêng: forgot lấy token → reset
+Trang `/forgot-password` hướng người dùng nhập OTP tại `/reset-password`, không đưa mã vào URL. Form OTP có validation, trạng thái đang gửi và lỗi mã hết hạn. BFF nối POST `/api/v1/auth/forgot-password` và `/api/v1/auth/reset-password`; payload reset vẫn dùng trường `token` theo Java. Swagger backend hiện mô tả email dạng liên kết, nên luồng OTP qua email cần được backend xác nhận trước khi nghiệm thu tích hợp thật.
+Lần kiểm thử cũ với tài khoản test riêng: forgot lấy token → reset
 → đăng nhập bằng mật khẩu mới; dùng lại token trả 400; email không tồn tại trả 200
 không có token. Không dùng response giả lập cho lần nghiệm thu này.
 
@@ -343,3 +334,4 @@ Thư viện 6 mẫu cho ứng viên mở editor 2 cột, tự điền từ GET p
 ## Thống kê đầu trang tổng quan ứng viên (2026-11-22)
 
 Số hồ sơ đã ứng tuyển lấy từ `GET /candidate/application-tracking` (`meta.totalItems`); lời mời chờ phản hồi lấy từ `GET /candidate/interviews` (trạng thái `scheduled` và `pending`). Có trạng thái tải, lỗi và thử lại. Swagger profile-service hiện chưa có API dashboard/lượt xem hồ sơ; ô lượt xem hiển thị chưa có dữ liệu. Bỏ các số minh họa 12/148/3 và câu 18 việc làm phù hợp 90%+; các thẻ gợi ý phía dưới vẫn ghi rõ là minh họa.
+

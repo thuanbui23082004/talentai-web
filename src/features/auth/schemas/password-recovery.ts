@@ -5,6 +5,7 @@ export const forgotPasswordSchema = loginSchema.pick({ email: true });
 
 export const resetPasswordSchema = z
     .object({
+        token: z.string().trim().regex(/^\d{6}$/, "Vui lòng nhập mã OTP gồm 6 chữ số."),
         newPassword: z.string()
             .min(8, "Mật khẩu cần ít nhất 8 ký tự.")
             .max(100, "Mật khẩu không được quá 100 ký tự."),

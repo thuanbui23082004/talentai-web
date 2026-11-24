@@ -211,7 +211,7 @@ it("accepts recovery without a token for unknown emails and rejects invalid upst
 
 it("delegates password reset to Java and maps its used/expired token error", async () => {
   const network = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json({ success: true, message: "ok" }));
-  const body = { token: "java-reset-token", newPassword: "abcdefgh", confirmPassword: "abcdefgh" };
+  const body = { token: "123456", newPassword: "abcdefgh", confirmPassword: "abcdefgh" };
   const success = await request("/auth/reset-password", body);
   expect(success.status).toBe(200);
   expect(await success.json()).toEqual({ message: "Đặt lại mật khẩu thành công." });

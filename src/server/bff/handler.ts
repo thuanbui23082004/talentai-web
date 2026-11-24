@@ -164,7 +164,13 @@ export async function handleBffRequest(request: Request): Promise<Response> {
             isSavedJobsRequest(request) &&
             (env.JOB_DATA_MODE ?? env.DATA_MODE) === "real"
         ) {
-            return await handleSavedJobs(request, gatewayApiUrl);
+            return await handleSavedJobs(
+                request,
+                gatewayApiUrl,
+                (env.COMPANY_DATA_MODE ?? env.DATA_MODE) === "real"
+                    ? gatewayApiUrl
+                    : undefined,
+            );
         }
         if (
             isRecruiterCompanyRequest(request) &&

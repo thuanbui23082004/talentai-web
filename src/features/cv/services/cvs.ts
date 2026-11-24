@@ -15,6 +15,12 @@ export async function getCv(cvId: string, signal?: AbortSignal) {
     return uploadedCvSchema.parse(result.data);
 }
 
+export async function getCvFile(cvId: string, signal?: AbortSignal) {
+    const result = await apiClient.GET("/cvs/{cvId}/file", { params: { path: { cvId }, query: { disposition: "inline" } }, signal, parseAs: "blob" });
+    if (result.error || !result.data) throw toApiError(result.response.status, result.error);
+    return result.data;
+}
+
 export async function uploadCv(file: File) {
     cvUploadSchema.parse(file);
     const body = new FormData();

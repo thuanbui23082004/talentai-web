@@ -179,7 +179,7 @@ export interface paths {
         put?: never;
         /**
          * Yêu cầu khôi phục mật khẩu
-         * @description Chuyển yêu cầu tới Java POST /api/v1/auth/forgot-password. Backend gửi mã khôi phục
+         * @description Chuyển yêu cầu tới Java POST /api/v1/auth/forgot-password. Backend gửi mã OTP khôi phục
          *     qua email nếu tài khoản hợp lệ. Trả cùng một thông báo dù email có tồn tại hay không.
          *
          *     **Quyền:** công khai (không cần đăng nhập).
@@ -201,13 +201,13 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Đặt lại mật khẩu bằng token
-         * @description Đặt mật khẩu mới bằng mã khôi phục nhận qua email. Mã dùng một lần, hạn 15 phút.
+         * Đặt lại mật khẩu bằng mã OTP
+         * @description Đặt mật khẩu mới bằng mã OTP nhận qua email, gửi trong trường `token` theo API Java. Mã dùng một lần, hạn 15 phút.
          *
          *     **Quyền:** công khai (không cần đăng nhập).
          *
          *     **Lỗi nghiệp vụ:**
-         *     - `400 INVALID_RESET_TOKEN`: Token không hợp lệ hoặc đã hết hạn.
+         *     - `400 INVALID_RESET_TOKEN`: Mã OTP không hợp lệ hoặc đã hết hạn.
          */
         post: operations["resetPassword"];
         delete?: never;
@@ -3796,7 +3796,7 @@ export interface components {
             message: string;
         };
         ResetPasswordRequest: {
-            /** @description Mã khôi phục nhận qua email, dùng một lần, hạn 15 phút. */
+            /** @description Mã OTP nhận qua email, dùng một lần, hạn 15 phút. Tên trường `token` theo API Java. */
             token: string;
             /** @description Quy tắc reset-password của Java; không áp dụng PasswordRules đăng ký. */
             newPassword: string;

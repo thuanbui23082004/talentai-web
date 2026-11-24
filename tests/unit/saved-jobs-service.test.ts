@@ -24,6 +24,18 @@ function network(reply: () => Response | Promise<Response>, role = "CANDIDATE") 
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); vi.useRealTimers(); });
 
 describe("real saved jobs adapter", () => {
+    it("loads the company name and logo for saved job cards", async () => {
+        const fetch = vi.spyOn(globalThis, "fetch").mockImplementation(async url => {
+            const path = String(url);
+            if (path.endsWith("/auth/me")) return Response.json({ success: true, data: { profile: { id, email: "saved@example.com", displayName: "Ứng viên", status: "ACTIVE", roles: ["CANDIDATE"] } } });
+            if (path.includes("/saved-jobs?")) return Response.json({ code: 200, data: page });
+            return Response.json({ data: { id, name: "Công ty thử nghiệm", logoUrl: "https://example.com/logo.png" } });
+        });
+        const response = await handleSavedJobs(request(), base, base);
+        expect(response.status).toBe(200);
+        expect((await response.json()).items[0].job.company).toMatchObject({ name: "Công ty thử nghiệm", logoUrl: "https://example.com/logo.png" });
+        expect(fetch.mock.calls.some(([url]) => String(url).endsWith(`/companies/${id}`))).toBe(true);
+    });
     it("forwards the verified bearer token, converts pagination and maps jobs without inventing company details", async () => {
         const fetch = network(() => Response.json({ code: 200, data: page }));
         const response = await handleSavedJobs(request("?page=2&pageSize=2"), base);

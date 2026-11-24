@@ -212,42 +212,6 @@ export function JobList() {
                     aria-label="Thông tin dành cho người tìm việc"
                     className="space-y-5"
                 >
-                    <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-card">
-                        <div className="mb-3 flex items-center gap-2 text-primary">
-                            <Sparkles className="size-4" />
-                            <h2 className="font-semibold text-foreground">
-                                Trạng thái tìm việc
-                            </h2>
-                        </div>
-                        <p className="text-xs leading-5 text-muted-foreground">
-                            Cập nhật trạng thái để nhận cơ hội việc làm phù hợp
-                            với bạn.
-                        </p>
-                        <ul className="mt-4 space-y-3 text-sm">
-                            {[
-                                "Sẵn sàng đi làm",
-                                "Đang xem xét cơ hội",
-                                "Chưa định chuyển việc",
-                            ].map((label) => (
-                                <li
-                                    key={label}
-                                    className="flex items-center gap-2"
-                                >
-                                    <span
-                                        aria-hidden="true"
-                                        className="size-3 rounded-full border border-border"
-                                    />
-                                    {label}
-                                </li>
-                            ))}
-                        </ul>
-                        <Link
-                            href="/login"
-                            className="mt-4 inline-flex min-h-11 items-center text-xs font-semibold text-primary hover:underline"
-                        >
-                            Đăng nhập để cập nhật trạng thái →
-                        </Link>
-                    </div>
                     <Image
                         src={sidebarBanner}
                         alt="TalentAI — Ứng tuyển một chạm, mọi lúc mọi nơi"

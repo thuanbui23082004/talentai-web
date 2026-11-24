@@ -15,7 +15,7 @@ function request(path = "", method = "GET", file?: File, headers: Record<string,
 }
 function network(reply: (url: string, init?: RequestInit) => Response | Promise<Response>, role = "CANDIDATE", userId = "10000000-0000-4000-8000-000000000001") {
     return vi.spyOn(globalThis, "fetch").mockImplementation(async (url, init) => {
-        expect(new Headers(init?.headers).get("Authorization")).toBe(`Bearer ${token}`);
+        if (!String(url).startsWith("https://res.cloudinary.com/")) expect(new Headers(init?.headers).get("Authorization")).toBe(`Bearer ${token}`);
         if (String(url).endsWith("/auth/me")) return Response.json({ success: true, data: { profile: { id: userId, email: "cv@example.com", displayName: "CV Test", status: "ACTIVE", roles: [role] } } });
         return reply(String(url), init);
     });
@@ -29,10 +29,15 @@ describe("candidate CV BFF", () => {
         expect(await (await handleCvsRequest(request("/cv-upload-1"), base)).json()).toEqual(example);
     });
     it.each([["resume.pdf", "application/pdf", pdfCv()], ["resume.docx", CV_DOCX_TYPE, docxCv()]] as const)("uploads valid %s once with a new multipart boundary", async (name, type, bytes) => {
-        const fetch = network((url, init) => {
+        const fetch = network(async (url, init) => {
             expect(url).toBe(`${base}/cvs`);
             expect(init?.body).toBeInstanceOf(FormData);
             expect(new Headers(init?.headers).has("Content-Type")).toBe(false);
+            const forwarded = (init?.body as FormData).get("file");
+            expect(forwarded).toBeInstanceOf(File);
+            expect((forwarded as File).name).toBe(name);
+            expect((forwarded as File).type).toBe(type);
+            expect(Buffer.from(await (forwarded as File).arrayBuffer())).toEqual(bytes);
             return Response.json({ success: true, data: example }, { status: 201 });
         });
         expect((await handleCvsRequest(request("", "POST", new File([bytes], name, { type })), base)).status).toBe(201);
@@ -42,6 +47,31 @@ describe("candidate CV BFF", () => {
         network(() => Response.json({ success: true, data: example }, { status: 201 }));
         const file = new File(["\n", pdfCv()], "exported.pdf", { type: "application/pdf" });
         expect((await handleCvsRequest(request("", "POST", file), base)).status).toBe(201);
+    });
+    it("serves an owned mock PDF inline and as an attachment", async () => {
+        network(() => Response.json({}));
+        const bytes = Buffer.from("\n%PDF-1.7 sample");
+        const uploaded = await handleCvsRequest(request("", "POST", new File([bytes], "resume.pdf", { type: "application/pdf" })));
+        const cv = await uploaded.json();
+        const inline = await handleCvsRequest(request(`/${cv.id}/file`));
+        expect(inline.status).toBe(200);
+        expect(inline.headers.get("content-type")).toBe("application/pdf");
+        expect(inline.headers.get("content-disposition")).toContain("inline");
+        expect(Buffer.from(await inline.arrayBuffer())).toEqual(bytes);
+        const attachment = await handleCvsRequest(request(`/${cv.id}/file?disposition=attachment`));
+        expect(attachment.headers.get("content-disposition")).toContain("attachment");
+    });
+    it("fetches a real CV through the BFF without forwarding the bearer token to storage", async () => {
+        const bytes = Buffer.from("\n%PDF-1.7 sample");
+        network((url, init) => {
+            if (url.endsWith("/cvs/cv-upload-1")) return Response.json({ success: true, data: { ...example, fileUrl: "https://res.cloudinary.com/demo/raw/upload/resume.pdf" } });
+            expect(url).toBe("https://res.cloudinary.com/demo/raw/upload/resume.pdf");
+            expect(new Headers(init?.headers).has("Authorization")).toBe(false);
+            return new Response(bytes, { headers: { "Content-Type": "application/pdf" } });
+        });
+        const response = await handleCvsRequest(request("/cv-upload-1/file"), base);
+        expect(response.status).toBe(200);
+        expect(Buffer.from(await response.arrayBuffer())).toEqual(bytes);
     });
     it("rejects invalid and oversized files before contacting the CV backend", async () => {
         const fetch = network(() => Response.json({}));
@@ -68,11 +98,9 @@ describe("candidate CV BFF", () => {
         expect((await handleCvsRequest(request("/id", "DELETE"), base)).status).toBe(503);
     });
     it("keeps mock files and defaults consistent and isolates accounts", async () => {
-        vi.useFakeTimers();
         network(() => Response.json({}));
         async function call(path = "", method = "GET", file?: File) {
-            const promise = handleCvsRequest(request(path, method, file));
-            await vi.runAllTimersAsync(); return promise;
+            return handleCvsRequest(request(path, method, file));
         }
         const first = await (await call("", "POST", new File([pdfCv()], "first.pdf", { type: "application/pdf" }))).json();
         const second = await (await call("", "POST", new File([pdfCv()], "second.pdf", { type: "application/pdf" }))).json();

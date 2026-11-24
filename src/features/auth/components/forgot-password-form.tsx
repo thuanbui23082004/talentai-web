@@ -37,9 +37,8 @@ export function ForgotPasswordForm() {
                         className="mt-0.5 size-5 shrink-0 text-primary"
                     />
                     <p className="leading-relaxed">
-                        Hãy kiểm tra email của bạn. Nếu email đã đăng ký, chúng
-                        tôi đã gửi liên kết đặt lại mật khẩu. Liên kết có hiệu
-                        lực 15 phút.
+                        Nếu email đã đăng ký, mã OTP đã được gửi đến hộp thư của bạn.
+                        Mã có hiệu lực trong 15 phút.
                     </p>
                 </div>
             ) : (
@@ -91,6 +90,11 @@ export function ForgotPasswordForm() {
                           : "Yêu cầu đặt lại mật khẩu"}
                 </Button>
             </form>
+            {mutation.isSuccess && (
+                <Link href="/reset-password" className="mt-4 flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary-hover">
+                    Nhập mã OTP
+                </Link>
+            )}
             <div className="mt-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm">
                 <Link
                     href="/login"

@@ -4,9 +4,10 @@ import { hasValidCsrf, isTrustedOrigin } from "../auth/cookies";
 import { readRequestIdentity } from "../auth/session";
 import { apiError } from "../responses";
 import { readCvFile } from "./cv-file";
+import { downloadCandidateCv } from "./cv-download";
 import { mockCvsRequest } from "./mock-cvs";
 
-const route = /^\/api\/bff\/cvs(?:\/([^/]+))?(?:\/(default))?$/;
+const route = /^\/api\/bff\/cvs(?:\/([^/]+))?(?:\/(default|file))?$/;
 const envelope = z.object({ success: z.literal(true), data: z.unknown() });
 const unavailable = () => apiError(503, "SERVICE_UNAVAILABLE", "Không thể kết nối dịch vụ CV. Vui lòng thử lại.");
 export function isCvsRequest(request: Request) { return route.test(new URL(request.url).pathname); }
@@ -16,16 +17,19 @@ export async function handleCvsRequest(request: Request, baseUrl?: string): Prom
     if (!match) return apiError(404, "NOT_FOUND", "Không tìm thấy chức năng CV.");
     const id = match[1];
     const isDefault = !!match[2];
+    const isFile = match[2] === "file";
     if (id && !/^[a-zA-Z0-9_-]{1,200}$/.test(id)) return apiError(404, "NOT_FOUND", "Không tìm thấy CV.");
-    const methods = isDefault ? ["PATCH"] : id ? ["GET", "DELETE"] : ["GET", "POST"];
+    const methods = isFile ? ["GET"] : isDefault ? ["PATCH"] : id ? ["GET", "DELETE"] : ["GET", "POST"];
     if (!methods.includes(request.method)) return apiError(405, "BAD_REQUEST", "Thao tác CV này chưa được hỗ trợ.");
     if (request.method !== "GET" && (!isTrustedOrigin(request) || !hasValidCsrf(request))) return apiError(403, "CSRF_TOKEN_INVALID", "Phiên thao tác không hợp lệ.");
     try {
         const identity = await readRequestIdentity(request);
         if (!identity) return apiError(401, "UNAUTHENTICATED", "Vui lòng đăng nhập.");
         if (identity.user.role !== "candidate") return apiError(403, "FORBIDDEN", "Chức năng dành cho ứng viên.");
+        if (isFile && id) return downloadCandidateCv(id, identity.userId, identity.access, baseUrl, new URL(request.url).searchParams.get("disposition") === "attachment" ? "attachment" : "inline");
         const file = request.method === "POST" ? await readCvFile(request) : undefined;
         if (request.method === "POST" && !file) return Response.json({ error: { code: "VALIDATION_FAILED", message: "Tệp CV không hợp lệ.", fieldErrors: [{ field: "file", code: "VALIDATION_FAILED", message: "Chọn tệp PDF/DOCX hợp lệ, không trống và tối đa 5MB." }] } }, { status: 422, headers: { "Cache-Control": "private, no-store" } });
+        if (file) console.info("[CV upload] Request", { fileName: file.name, sizeBytes: file.size, contentType: file.type, mode: baseUrl ? "real" : "mock" });
         if (!baseUrl) return await mockCvsRequest(identity.userId, request.method, id, isDefault, file, request.headers.get("x-mock-scenario"));
         const body = file ? new FormData() : undefined;
         if (file) body!.set("file", file);
@@ -40,6 +44,7 @@ export async function handleCvsRequest(request: Request, baseUrl?: string): Prom
             if (attempt < attempts - 1) await new Promise(resolve => setTimeout(resolve, 1000));
         }
         if (!response) return unavailable();
+        if (file) console.info("[CV upload] Upstream response", { status: response.status });
         if (response.status === 401) return apiError(401, "SESSION_EXPIRED", "Phiên đăng nhập đã hết hạn.");
         if (response.status === 403) return apiError(403, "FORBIDDEN", "Bạn không có quyền truy cập CV này.");
         if (response.status === 404) return apiError(404, "NOT_FOUND", "CV không tồn tại hoặc đã bị xóa.");

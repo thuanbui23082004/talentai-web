@@ -245,7 +245,37 @@ export async function handleCompanyService(
                 "VALIDATION_FAILED",
                 "Khoảng quy mô không hợp lệ.",
             );
-        const body = companyPage.parse(await get("companies", query));
+        let body = companyPage.parse(await get("companies", query));
+        if (filters.q && body.content.length === 0) {
+            const fallbackQuery = new URLSearchParams(query);
+            fallbackQuery.delete("name");
+            fallbackQuery.set("page", "0");
+            fallbackQuery.set("size", "100");
+            try {
+                const allBody = companyPage.parse(await get("companies", fallbackQuery));
+                const normQuery = normalizeLocation(filters.q);
+                const queryNoSpaces = normQuery.replace(/\s+/g, "");
+                const tokens = normQuery.split(/\s+/).filter(Boolean);
+                const filtered = allBody.content.filter((item) => {
+                    const normName = normalizeLocation(item.name);
+                    return normName.includes(normQuery)
+                        || normName.replace(/\s+/g, "").includes(queryNoSpaces)
+                        || (tokens.length > 0 && tokens.every((token) => normName.includes(token)));
+                });
+                const page = filters.page;
+                const pageSize = filters.pageSize;
+                const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
+                body = {
+                    content: paged,
+                    number: page - 1,
+                    size: pageSize,
+                    totalElements: filtered.length,
+                    totalPages: Math.max(1, Math.ceil(filtered.length / pageSize)),
+                };
+            } catch {
+                // Giữ nguyên kết quả rỗng nếu fallback gặp lỗi
+            }
+        }
         const result: components["schemas"]["CompanyPage"] = {
             items: body.content.map((item) => publicCompany(item, refs)),
             meta: {

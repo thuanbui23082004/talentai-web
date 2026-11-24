@@ -121,45 +121,7 @@ export function JobDetailPage({
             <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
                 <div className="min-w-0 space-y-6">
                     <JobDetailHeader job={job} />
-                    <section
-                        className="rounded-2xl border border-primary/10 bg-gradient-to-br from-secondary to-card p-5 shadow-card sm:p-6"
-                        aria-labelledby="match-title"
-                    >
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                            <h2
-                                id="match-title"
-                                className="flex items-center gap-2 font-bold text-primary"
-                            >
-                                <Sparkles className="size-5" />
-                                Bạn phù hợp với công việc này?
-                            </h2>
-                            <Badge variant="outline">Gợi ý từ AI</Badge>
-                        </div>
-                        <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                            Chưa có kết quả phân tích CV của bạn. Tham khảo các
-                            kỹ năng trong tin tuyển dụng để chuẩn bị hồ sơ phù
-                            hợp.
-                        </p>
-                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                            {(job.skills ?? []).slice(0, 4).map((skill) => (
-                                <div
-                                    key={skill}
-                                    className="flex items-start gap-2 rounded-lg border border-primary/10 bg-card p-3"
-                                >
-                                    <CircleHelp className="mt-0.5 size-4 shrink-0 text-primary" />
-                                    <div>
-                                        <p className="font-medium">{skill}</p>
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            Kỹ năng nhà tuyển dụng quan tâm
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <p className="mt-4 text-xs text-muted-foreground">
-                            Phân tích mức độ phù hợp từ CV: sắp ra mắt.
-                        </p>
-                    </section>
+
                     <article className={`${surface} space-y-8`}>
                         <ContentSection title="Mô tả công việc">
                             {/<[a-z][^>]*>/i.test(job.description) ? (
@@ -274,47 +236,7 @@ export function JobDetailPage({
                             ))}
                         </dl>
                     </section>
-                    <section className="rounded-2xl bg-secondary/60 p-5 sm:p-6">
-                        <h2 className="text-lg font-bold">
-                            Liên hệ nhà tuyển dụng
-                        </h2>
-                        <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                            Tính năng liên hệ đang được hoàn thiện.
-                        </p>
-                        <fieldset disabled className="mt-5 space-y-4">
-                            <Input
-                                aria-label="Họ và tên"
-                                placeholder="Họ và tên"
-                            />
-                            <Input
-                                type="email"
-                                aria-label="Địa chỉ email"
-                                placeholder="Địa chỉ email"
-                            />
-                            <Input
-                                type="tel"
-                                aria-label="Số điện thoại"
-                                placeholder="Số điện thoại"
-                            />
-                            <label className="block">
-                                <span className="sr-only">
-                                    Nội dung liên hệ
-                                </span>
-                                <textarea
-                                    disabled
-                                    placeholder="Nội dung liên hệ"
-                                    className="min-h-32 w-full resize-none rounded-xl border border-border bg-card p-3 text-sm disabled:opacity-60"
-                                />
-                            </label>
-                            <button
-                                disabled
-                                type="button"
-                                className="min-h-11 w-full rounded-lg bg-primary px-4 font-semibold text-white opacity-60"
-                            >
-                                Gửi liên hệ · Sắp ra mắt
-                            </button>
-                        </fieldset>
-                    </section>
+
                 </aside>
             </div>
             <section aria-labelledby="related-title" className="pt-5">

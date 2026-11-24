@@ -125,18 +125,16 @@ export function HomeIndustries({
                         <Link
                             key={category.name}
                             href={`/jobs?q=${encodeURIComponent(category.query)}`}
-                            className={`group border p-5 transition sm:p-6 ${category.icon === "marketing" ? "border-primary bg-primary text-white" : "border-border bg-card hover:border-primary hover:bg-primary hover:text-white"}`}
+                            className="group border border-border bg-card p-5 transition hover:border-primary hover:bg-primary hover:text-white sm:p-6"
                         >
                             <Icon
-                                className={`size-8 ${category.icon === "marketing" ? "text-white" : "text-brand-bright group-hover:text-white"}`}
+                                className="size-8 text-brand-bright group-hover:text-white"
                                 strokeWidth={1.7}
                             />
                             <h3 className="mt-7 text-base font-semibold sm:text-lg">
                                 {category.name}
                             </h3>
-                            <p
-                                className={`mt-2 flex flex-wrap items-center justify-between gap-1 text-xs sm:text-sm ${category.icon === "marketing" ? "text-white/85" : "text-muted-foreground group-hover:text-white/85"}`}
-                            >
+                            <p className="mt-2 flex flex-wrap items-center justify-between gap-1 text-xs text-muted-foreground group-hover:text-white/85 sm:text-sm">
                                 {category.count} cơ hội mẫu
                                 <ArrowRight className="size-4" />
                             </p>
@@ -218,7 +216,7 @@ export function HomeCvBanner() {
                 <AvailabilityButton
                     title="TalentAI WowCV"
                     description="Công cụ tạo CV đang được hoàn thiện. Bạn có thể tạo tài khoản và khám phá việc làm trước khi tính năng được mở."
-                    className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-warning px-6 text-sm font-semibold text-foreground shadow-button hover:bg-warning-soft"
+                    className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-warning px-6 text-sm font-semibold text-white shadow-button "
                 >
                     Tạo CV ngay
                     <ArrowRight className="size-4" />

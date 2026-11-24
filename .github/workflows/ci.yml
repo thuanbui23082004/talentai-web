@@ -18,6 +18,7 @@ jobs:
       - run: npm run contract:lint
       - run: npm run gen:api
       - run: git diff --exit-code -- src/lib/api/generated/schema.d.ts
+      - run: npx next typegen
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run test

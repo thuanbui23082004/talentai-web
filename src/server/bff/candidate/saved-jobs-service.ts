@@ -3,6 +3,7 @@ import type { components } from "@/lib/api/generated/schema";
 import { hasValidCsrf, isTrustedOrigin } from "../auth/cookies";
 import { readRequestIdentity } from "../auth/session";
 import { jobSchema, summary } from "../public/job-service";
+import { handleCompanyService } from "../public/company-service";
 import { apiError } from "../responses";
 
 const basePath = "/api/bff/candidate/saved-jobs";
@@ -35,7 +36,7 @@ function upstreamError(status: number) {
 }
 
 // Keep cookie/CSRF handling in the BFF; Java receives only the verified bearer token.
-export async function handleSavedJobs(request: Request, baseUrl: string): Promise<Response> {
+export async function handleSavedJobs(request: Request, baseUrl: string, companyBaseUrl?: string): Promise<Response> {
     const source = new URL(request.url);
     const jobId = source.pathname === basePath ? "" : source.pathname.slice(basePath.length + 1);
     if (jobId && !z.uuid().safeParse(jobId).success) return apiError(404, "NOT_FOUND", "Không tìm thấy việc làm.");
@@ -83,8 +84,26 @@ export async function handleSavedJobs(request: Request, baseUrl: string): Promis
             return json(result satisfies components["schemas"]["SavedJobResult"]);
         }
         const page = savedPage.parse(await response.json()).data;
+        const items = page.items.map(item => ({ job: summary(item.job), savedAt: item.savedAt }));
+        if (companyBaseUrl) {
+            const ids = [...new Set(items.map(item => item.job.company.id))];
+            const companies = new Map<string, components["schemas"]["CompanyPublic"]>();
+            for (let index = 0; index < ids.length; index += 4) {
+                await Promise.all(ids.slice(index, index + 4).map(async id => {
+                    const response = await handleCompanyService(
+                        new Request(`http://talentai.internal/api/bff/companies/${id}`),
+                        companyBaseUrl,
+                    );
+                    if (response.ok) companies.set(id, await response.json() as components["schemas"]["CompanyPublic"]);
+                }));
+            }
+            for (const item of items) {
+                const company = companies.get(item.job.company.id);
+                if (company) item.job.company = { ...item.job.company, name: company.name, logoUrl: company.logoUrl };
+            }
+        }
         return json({
-            items: page.items.map(item => ({ job: summary(item.job), savedAt: item.savedAt })),
+            items,
             meta: { page: page.page + 1, pageSize: page.size, totalItems: page.totalElements, totalPages: page.totalPages },
         } satisfies components["schemas"]["SavedJobPage"]);
     } catch {
