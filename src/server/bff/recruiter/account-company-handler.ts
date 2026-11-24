@@ -92,9 +92,9 @@ export async function handleAccountCompany(request: NextRequest, path: string, s
     if (!parsed.success) return problem(422, 'VALIDATION_FAILED');
     for (const file of parsed.data) if (!await validSignature(file)) return problem(422, 'VALIDATION_FAILED');
     const files = await Promise.all(parsed.data.map(async (file, index) => ({ id: randomUUID(), fileName: `document-${index + 1}${file.type === 'application/pdf' ? '.pdf' : '.image'}`, mimeType: file.type, sizeBytes: file.size, uploadedAt: new Date().toISOString(), bytes: new Uint8Array(await file.arrayBuffer()) })));
-    for (const previous of company.verificationDocuments ?? []) if (previous.id) getVerificationFiles().delete(previous.id);
-    company.verificationDocuments = files.map(({ bytes, ...info }) => { getVerificationFiles().set(info.id, { companyId: company.id, type: info.mimeType, bytes }); return info; });
-    company.verificationStatus = 'pending'; delete company.rejectionReason; delete company.verifiedAt; syncCompany(company);
+    company.verificationDocuments = [...(company.verificationDocuments ?? []), ...files.map(({ bytes, ...info }) => { getVerificationFiles().set(info.id, { companyId: company.id, type: info.mimeType, bytes }); return { ...info, documentType: 'BUSINESS_REGISTRATION', status: 'pending' as const }; })];
+    if (company.verificationStatus === 'unverified' || company.verificationStatus === 'rejected') { company.verificationStatus = 'pending'; delete company.rejectionReason; delete company.verifiedAt; }
+    syncCompany(company);
     return response(company);
   }
   return problem(405, 'BAD_REQUEST');

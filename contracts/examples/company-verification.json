@@ -1,0 +1,21 @@
+{
+  "documentUpload": {
+    "method": "POST",
+    "path": "/recruiter/company/verification-documents",
+    "contentType": "multipart/form-data",
+    "field": "files",
+    "allowedMimeTypes": ["application/pdf", "image/png", "image/jpeg"],
+    "maxBytesPerFile": 10485760
+  },
+  "documentDecision": {
+    "status": "rejected",
+    "rejectionReason": "Mã số thuế trên giấy tờ không khớp hồ sơ công ty."
+  },
+  "taxLookup": {
+    "taxCode": "0101234567",
+    "name": "CÔNG TY CỔ PHẦN TALENT AI",
+    "address": "Hà Nội",
+    "status": "Đang hoạt động",
+    "isActive": true
+  }
+}

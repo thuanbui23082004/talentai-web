@@ -262,12 +262,12 @@ describe("settings API mock", () => {
                 )
             ).json(),
         );
-        expect(pending.verificationStatus).toBe("pending");
+        expect(pending.verificationStatus).toBe("verified");
         expect(pending.verificationDocuments).toHaveLength(1);
         expect(
             accountSchema.parse(await (await request(auth, "me")).json())
                 .companyVerificationStatus,
-        ).toBe("pending");
+        ).toBe("verified");
         const invalid = new FormData();
         invalid.append(
             "files",

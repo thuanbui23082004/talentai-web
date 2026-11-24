@@ -28,6 +28,7 @@ test("skips optional information and images without sending invalid or discarded
     await page.screenshot({ path: testInfo.outputPath("company-preview-placeholder.png"), fullPage: true });
     await page.getByRole("button", { name: "Bỏ qua bước này", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Kiểm tra thông tin công ty" })).toBeVisible();
+    await page.locator('.co-document-picker input').setInputFiles({ name: 'license.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4\nmock license') });
     await page.getByRole("button", { name: "Tạo hồ sơ công ty", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Hồ sơ công ty đã được tạo!" })).toBeVisible();
     const company = await (await page.request.get("/api/bff/recruiter/company")).json();
@@ -95,6 +96,7 @@ test("registers a representative, creates a separate company, and resumes saved 
     await expect(page.getByRole("heading", { name: "Kiểm tra thông tin công ty" })).toBeVisible();
     await expect(page.locator(".co-review")).toContainText("Công ty Công nghệ Sao Mai");
     await expect(page.locator(".co-review")).toContainText("12 Đường Hoa, Phường Hải Châu");
+    await page.locator('.co-document-picker input').setInputFiles({ name: 'license.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4\nmock license') });
     await page.screenshot({ path: testInfo.outputPath("onboarding-review-mobile.png"), fullPage: true });
     await page.route("**/api/bff/recruiter/company", async route => {
         if (route.request().method() === "POST") {
@@ -109,13 +111,13 @@ test("registers a representative, creates a separate company, and resumes saved 
     page.on("request", request => { if (new URL(request.url()).pathname === "/api/bff/recruiter/company" && ["POST", "PUT"].includes(request.method())) detailWrites++; });
     await page.route("**/api/bff/recruiter/company/cover", route => route.fulfill({ status: 503, json: { error: { code: "SERVICE_UNAVAILABLE" } } }));
     await page.getByRole("button", { name: "Tạo hồ sơ công ty", exact: true }).click();
-    await expect(page.getByText("Chưa tải được ảnh công ty", { exact: true })).toBeVisible();
+    await expect(page.getByText("Chưa hoàn tất hồ sơ", { exact: true })).toBeVisible();
     const partiallySaved = await (await page.request.get("/api/bff/recruiter/company")).json();
     expect(partiallySaved).toMatchObject({ website: "https://saomai.example.com", companySize: 50, foundedYear: 2015 });
     expect(partiallySaved.logoUrl).toBeTruthy();
     expect(partiallySaved.coverImageUrl).toBeUndefined();
     await page.unroute("**/api/bff/recruiter/company/cover");
-    await page.getByRole("button", { name: "Thử tải ảnh lại", exact: true }).click();
+    await page.getByRole("button", { name: "Thử gửi hồ sơ lại", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Hồ sơ công ty đã được tạo!" })).toBeVisible();
     expect(detailWrites).toBe(1);
     expect((await (await page.request.get("/api/bff/recruiter/company")).json()).coverImageUrl).toBeTruthy();
@@ -124,14 +126,14 @@ test("registers a representative, creates a separate company, and resumes saved 
     await page.setViewportSize({ width: 375, height: 812 });
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await page.screenshot({ path: testInfo.outputPath("onboarding-finish-mobile.png"), fullPage: true });
-    await expect(page.getByRole("link", { name: /Tạo tin tuyển dụng$/ })).toHaveAttribute("href", "/recruiter/jobs/new");
+    await expect(page.getByRole("link", { name: /Xem trạng thái hồ sơ$/ })).toHaveAttribute("href", "/recruiter/company");
     await page.getByRole("link", { name: "Vào trang quản lý" }).click();
     await expect(page).toHaveURL(/\/recruiter\/dashboard$/);
     const accountMenu = page.getByRole("button", { name: "Menu tài khoản", exact: true });
     const accountNavigation = page.getByRole("navigation", { name: "Menu tài khoản", exact: true });
     await accountMenu.click();
     await expect(accountNavigation.getByRole("link", { name: "Tài khoản", exact: true })).toHaveAttribute("href", "/recruiter/account");
-    await expect(accountNavigation.getByRole("link", { name: "Đăng xuất", exact: true })).toBeVisible();
+    await expect(accountNavigation.getByRole("button", { name: "Đăng xuất", exact: true })).toBeVisible();
     await page.screenshot({ path: testInfo.outputPath("recruiter-account-menu-mobile.png"), fullPage: true });
     await page.keyboard.press("Escape");
     await expect(accountNavigation).not.toBeVisible();

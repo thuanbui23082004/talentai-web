@@ -16,6 +16,7 @@ export const adminKeys = {
   companies: ['admin', 'companies'] as const,
   company: (id: string) => ['admin', 'company', id] as const,
   companyDocument: (companyId: string, documentId: string) => ['admin', 'company-document', companyId, documentId] as const,
+  companyTax: (companyId: string, taxCode?: string) => ['admin', 'company-tax', companyId, taxCode] as const,
   users: ['admin', 'users'] as const,
   user: (id: string) => ['admin', 'user', id] as const,
   userActivity: (id: string) => ['admin', 'user-activity', id] as const,

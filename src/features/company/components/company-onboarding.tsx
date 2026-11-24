@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import { ArrowLeft, ArrowRight, Building2, Camera, Check, CheckCircle2, ClipboardCheck, Globe, MapPin, PencilLine, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, Camera, Check, CheckCircle2, ClipboardCheck, FileText, Globe, MapPin, PencilLine, ShieldCheck, Sparkles, Upload } from "lucide-react";
 import { Alert, Button, FormField, Input } from "@/components/ui";
 import { Textarea } from "@/components/ui/textarea";
 import { SettingsError } from "@/features/account";
@@ -16,7 +16,7 @@ import { useAccount } from "@/features/account";
 import { provinceCity } from "@/lib/locations/vietnam";
 import { cn } from "@/lib/utils";
 import { useCompany, useCompanyActions, useCompanyCatalogs } from "../hooks/use-company";
-import { companyToInput, type Company } from "../schemas/company";
+import { companyToInput, verificationFilesSchema, type Company } from "../schemas/company";
 import { companyOnboardingSchema } from "../schemas/onboarding";
 import { CompanyImages, CompanyImagePreview, type CompanyImagesValue } from "./company-images";
 import "./company-onboarding.css";
@@ -37,8 +37,8 @@ function StepFooter({ back, busy, children }: { back?: () => void; busy?: boolea
 function StartHiring({ company, onEdit }: { company: Company; onEdit: () => void }) {
     return <div><section className="co-card co-finish"><span className="co-large-icon"><CheckCircle2 /></span><h2>Hồ sơ công ty đã được tạo!</h2><p><strong>{company.name}</strong> đã có không gian tuyển dụng riêng trên TalentAI.</p>
         <div className="mt-6"><CompanyImagePreview name={company.name} city={company.city} website={company.website} industry={company.industries?.[0]?.name} logo={company.logoUrl} cover={company.coverImageUrl} /></div>
-        <div className="co-summary"><span><CheckCircle2 />Thông tin doanh nghiệp đã lưu</span><span><MapPin />Địa chỉ và số điện thoại đã lưu</span></div>
-        <div className="co-hiring-options"><div className="co-hiring-card"><span className="co-icon"><PencilLine /></span><h3>Tạo tin tuyển dụng đầu tiên</h3><p>Giới thiệu vị trí, yêu cầu và quyền lợi để tiếp cận ứng viên phù hợp.</p><Link href="/recruiter/jobs/new" className={cn(buttonVariants(), "w-full")}>Tạo tin tuyển dụng<ArrowRight /></Link></div><div className="co-hiring-card"><span className="co-icon"><Sparkles /></span><h3>Hoàn thiện dấu ấn công ty</h3><p>Thêm logo, giới thiệu và website để ứng viên hiểu thêm về doanh nghiệp.</p><Link href="/recruiter/company" className={cn(buttonVariants({ variant: "secondary" }), "w-full")}>Chỉnh sửa hồ sơ công ty<ArrowRight /></Link></div></div>
+        <div className="co-summary"><span><CheckCircle2 />Thông tin doanh nghiệp đã lưu</span><span><FileText />{company.verificationDocuments?.length ? 'Hồ sơ pháp lý đã gửi để quản trị viên xác minh' : 'Chưa có giấy tờ pháp lý; hãy bổ sung trong hồ sơ công ty'}</span></div>
+        <div className="co-hiring-options"><div className="co-hiring-card"><span className="co-icon"><PencilLine /></span><h3>{company.verificationStatus === 'verified' ? 'Tạo tin tuyển dụng đầu tiên' : 'Theo dõi xác minh doanh nghiệp'}</h3><p>{company.verificationStatus === 'verified' ? 'Giới thiệu vị trí, yêu cầu và quyền lợi để tiếp cận ứng viên phù hợp.' : 'Giấy tờ đang chờ quản trị viên đối chiếu với mã số thuế. Bạn có thể xem trạng thái trong hồ sơ công ty.'}</p><Link href={company.verificationStatus === 'verified' ? '/recruiter/jobs/new' : '/recruiter/company'} className={cn(buttonVariants(), "w-full")}>{company.verificationStatus === 'verified' ? 'Tạo tin tuyển dụng' : 'Xem trạng thái hồ sơ'}<ArrowRight /></Link></div><div className="co-hiring-card"><span className="co-icon"><Sparkles /></span><h3>Hoàn thiện dấu ấn công ty</h3><p>Thêm logo, giới thiệu và website để ứng viên hiểu thêm về doanh nghiệp.</p><Link href="/recruiter/company" className={cn(buttonVariants({ variant: "secondary" }), "w-full")}>Chỉnh sửa hồ sơ công ty<ArrowRight /></Link></div></div>
     </section><StepFooter back={onEdit}><Link href="/recruiter/dashboard" className={buttonVariants({ variant: "outline" })}>Vào trang quản lý<ArrowRight /></Link></StepFooter></div>;
 }
 
@@ -51,6 +51,8 @@ function CompanyInfo({ company, phone }: { company: Company | null; phone?: stri
     const [readingImage, setReadingImage] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [uploadError, setUploadError] = useState("");
+    const [documents, setDocuments] = useState<File[]>([]);
+    const [documentError, setDocumentError] = useState("");
     const [progressMessage, setProgressMessage] = useState("");
     const title = useRef<HTMLSpanElement>(null);
     const form = useForm<z.input<typeof companyOnboardingSchema>, unknown, z.output<typeof companyOnboardingSchema>>({
@@ -80,13 +82,16 @@ function CompanyInfo({ company, phone }: { company: Company | null; phone?: stri
             if (images.logo) { setProgressMessage("Đang tải ảnh đại diện…"); await actions.logo.mutateAsync(images.logo.file); setImages(previous => ({ ...previous, logo: null })); }
             kind = "ảnh bìa";
             if (images.cover) { setProgressMessage("Đang tải ảnh bìa…"); await actions.cover.mutateAsync(images.cover.file); setImages(previous => ({ ...previous, cover: null })); }
+            kind = "hồ sơ pháp lý";
+            if (documents.length) { setProgressMessage("Đang gửi hồ sơ pháp lý…"); await actions.documents.mutateAsync(documents); setDocuments([]); }
             setFinished(true);
         } catch {
-            setUploadError(`Thông tin công ty đã lưu. Chưa tải được ${kind}. Bạn có thể thử lại hoặc bổ sung ảnh sau.`);
-            setStep(3);
+            setUploadError(`Thông tin công ty đã lưu nhưng chưa gửi được ${kind}. Hãy thử lại để hoàn tất hồ sơ xác minh.`);
+            setStep(4);
         } finally { setSubmitting(false); }
     }
     const save = form.handleSubmit(async ({ industryId, website, companySize, foundedYear, ...fields }) => {
+        if (!company?.verificationDocuments?.length && !documents.length) { setDocumentError("Vui lòng chọn ít nhất một giấy tờ pháp lý để xác minh doanh nghiệp."); return; }
         setSubmitting(true);
         setProgressMessage("Đang lưu thông tin công ty…");
         try {
@@ -137,13 +142,13 @@ function CompanyInfo({ company, phone }: { company: Company | null; phone?: stri
                     { title: "Thông tin doanh nghiệp", target: 0, items: [["Tên công ty", values.name], ["Mã số thuế", values.taxCode], ["Giới thiệu", values.description], ["Lĩnh vực", catalogs.data?.industries.find(item => item.id === values.industryId)?.name ?? company?.industries?.find(item => item.id === values.industryId)?.name ?? "Lĩnh vực đã chọn"]] },
                     { title: "Địa chỉ và liên hệ", target: 1, items: [["Tỉnh / Thành phố", values.city], ["Địa chỉ trụ sở", values.address], ["Số điện thoại", values.contactPhone]] },
                     { title: "Thông tin bổ sung", target: 2, items: [["Website", values.website || "Chưa bổ sung"], ["Số nhân viên", values.companySize || "Chưa bổ sung"], ["Năm thành lập", values.foundedYear || "Chưa bổ sung"]] },
-                ].map(group => <section key={group.title}><div className="co-review-heading"><h3>{group.title}</h3><Button variant="ghost" disabled={busy} onClick={() => setStep(group.target)}><PencilLine />Chỉnh sửa</Button></div><dl>{group.items.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section>)}<section><div className="co-review-heading"><h3>Hình ảnh công ty</h3><Button variant="ghost" disabled={busy} onClick={() => setStep(3)}><PencilLine />Chỉnh sửa</Button></div><CompanyImagePreview name={values.name} city={values.city} industry={industryName} website={values.website} logo={images.logo?.preview ?? company?.logoUrl} cover={images.cover?.preview ?? company?.coverImageUrl} /></section></div>}
+                ].map(group => <section key={group.title}><div className="co-review-heading"><h3>{group.title}</h3><Button variant="ghost" disabled={busy} onClick={() => setStep(group.target)}><PencilLine />Chỉnh sửa</Button></div><dl>{group.items.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section>)}<section><div className="co-review-heading"><h3>Hình ảnh công ty</h3><Button variant="ghost" disabled={busy} onClick={() => setStep(3)}><PencilLine />Chỉnh sửa</Button></div><CompanyImagePreview name={values.name} city={values.city} industry={industryName} website={values.website} logo={images.logo?.preview ?? company?.logoUrl} cover={images.cover?.preview ?? company?.coverImageUrl} /></section><section className="co-document-section"><div className="co-review-heading"><h3>Hồ sơ xác minh doanh nghiệp</h3><ShieldCheck size={20} /></div><p>Tải giấy chứng nhận đăng ký doanh nghiệp hoặc giấy phép hoạt động. Quản trị viên sẽ đối chiếu giấy tờ với mã số thuế trước khi xác minh.</p><label className="co-document-picker"><Upload size={19} /><span>Chọn một tài liệu PDF, PNG hoặc JPG (tối đa 10 MB)</span><input type="file" accept="application/pdf,image/png,image/jpeg" disabled={busy} onChange={event => { const files = Array.from(event.target.files ?? []); const result = verificationFilesSchema.safeParse(files); if (result.success) { setDocuments(files); setDocumentError(""); } else setDocumentError("Tài liệu phải là PDF, PNG hoặc JPG, tối đa 10 MB."); }} /></label>{documents.length > 0 && <ul className="co-document-list">{documents.map(file => <li key={`${file.name}-${file.size}`}><FileText size={16} />{file.name}</li>)}</ul>}{!documents.length && company?.verificationDocuments?.length ? <p>Đã có {company.verificationDocuments.length} tài liệu trong hồ sơ.</p> : null}{documentError && <p role="alert" className="co-image-error">{documentError}</p>}</section></div>}
                 {step === 0 && catalogs.isError && <Alert variant="error" title="Không tải được danh mục"><Button variant="outline" onClick={() => void catalogs.refetch()}>Thử lại</Button></Alert>}
                 {step === 0 && catalogs.isSuccess && !catalogs.data.industries.length && <Alert title="Chưa có lĩnh vực hoạt động">Danh mục hiện chưa có dữ liệu. <Button variant="outline" onClick={() => void catalogs.refetch()}>Tải lại</Button></Alert>}
                 {actions.save.isError && <Alert variant="error" title="Chưa thể lưu thay đổi">{actions.save.error instanceof SettingsError && actions.save.error.key === "session" ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." : actions.save.error instanceof SettingsError && actions.save.error.key === "invalid" ? "Vui lòng kiểm tra các trường được đánh dấu rồi gửi lại." : "Không lưu được hồ sơ. Vui lòng thử lại; thông tin đã nhập vẫn được giữ."}</Alert>}
-                {uploadError && <Alert variant="error" title="Chưa tải được ảnh công ty">{uploadError}</Alert>}
+                {uploadError && <Alert variant="error" title="Chưa hoàn tất hồ sơ">{uploadError}</Alert>}
                 {submitting && <p role="status" aria-live="polite" className="mt-4 text-sm text-primary">{progressMessage}</p>}
-            <StepFooter back={step > 0 && !uploadError ? () => setStep(step - 1) : undefined} busy={busy}>{uploadError ? <><Button variant="ghost" disabled={busy} onClick={() => { setImages({ logo: null, cover: null }); setUploadError(""); setFinished(true); }}>Hoàn tất, thêm ảnh sau</Button><Button loading={busy} onClick={() => void uploadImages()}>Thử tải ảnh lại</Button></> : <>{(step === 2 || step === 3) && <Button variant="ghost" disabled={busy} onClick={skip}>Bỏ qua bước này</Button>}<Button type="submit" loading={busy} disabled={busy || step === 0 && (catalogs.isPending || catalogs.isError || !catalogs.data?.industries.length)}>{step === 4 ? company ? "Lưu hồ sơ công ty" : "Tạo hồ sơ công ty" : "Tiếp tục"}<ArrowRight /></Button></>}</StepFooter>
+            <StepFooter back={step > 0 && !uploadError ? () => setStep(step - 1) : undefined} busy={busy}>{uploadError ? <Button loading={busy} onClick={() => void uploadImages()}>Thử gửi hồ sơ lại</Button> : <>{(step === 2 || step === 3) && <Button variant="ghost" disabled={busy} onClick={skip}>Bỏ qua bước này</Button>}<Button type="submit" loading={busy} disabled={busy || step === 0 && (catalogs.isPending || catalogs.isError || !catalogs.data?.industries.length)}>{step === 4 ? company ? "Lưu hồ sơ công ty" : "Tạo hồ sơ công ty" : "Tiếp tục"}<ArrowRight /></Button></>}</StepFooter>
             </section>
         </form>}
         <p className="co-bottom-note">{finished ? "Bạn có thể chỉnh sửa thông tin trong mục Hồ sơ công ty." : "Thông tin được giữ khi chuyển bước. Hồ sơ chỉ được lưu sau khi bạn xác nhận hoàn tất."}</p>

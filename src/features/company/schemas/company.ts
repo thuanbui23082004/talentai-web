@@ -12,7 +12,7 @@ export const companySchema = z.object({
   coverImageUrl: z.string().optional(), companySize: z.number().int().positive().optional(),
   contactEmail: z.string().optional(), contactPhone: z.string().optional(), taxCode: z.string().optional(), foundedYear: z.number().int().optional(),
   verificationStatus: z.enum(['unverified', 'pending', 'verified', 'rejected', 'suspended']),
-  verificationDocuments: z.array(z.object({ id: z.uuid().optional(), fileName: z.string(), mimeType: z.string(), sizeBytes: z.number().int().nonnegative(), uploadedAt: z.iso.datetime().optional() })).optional(),
+  verificationDocuments: z.array(z.object({ id: z.uuid().optional(), fileName: z.string(), mimeType: z.string(), sizeBytes: z.number().int().nonnegative(), documentType: z.string().optional(), status: z.enum(['pending', 'verified', 'rejected']).optional(), rejectionReason: z.string().optional(), uploadedAt: z.iso.datetime().optional() })).optional(),
   rejectionReason: z.string().optional(), verifiedAt: z.iso.datetime().optional(), createdAt: z.iso.datetime(), updatedAt: z.iso.datetime().optional(),
 });
 export type Company = z.infer<typeof companySchema>;
@@ -23,4 +23,4 @@ export function companyToInput(company: Company): CompanyInput {
   return { name: company.name, logoUrl: company.logoUrl, coverImageUrl: company.coverImageUrl, companySize: company.companySize, industryIds: company.industries?.map(item => item.id) ?? [], city: company.city ?? '', address: company.address, contactPhone: company.contactPhone, contactEmail: company.contactEmail, taxCode: company.taxCode, size: company.size, description: company.description, website: company.website || undefined, foundedYear: company.foundedYear };
 }
 export const logoFileSchema = z.instanceof(File).refine(file => file.size > 0, 'fileEmpty').refine(file => file.size <= 2 * 1024 * 1024, 'fileSize').refine(file => ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'].includes(file.type), 'logoType');
-export const verificationFilesSchema = z.array(z.instanceof(File).refine(file => file.size > 0, 'fileEmpty').refine(file => file.type === 'application/pdf' || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type), 'documentType')).min(1, 'fileRequired');
+export const verificationFilesSchema = z.array(z.instanceof(File).refine(file => file.size > 0, 'fileEmpty').refine(file => file.size <= 10 * 1024 * 1024, 'fileSize').refine(file => ['application/pdf', 'image/png', 'image/jpeg'].includes(file.type), 'documentType')).length(1, 'fileRequired');

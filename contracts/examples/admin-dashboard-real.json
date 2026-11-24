@@ -1,0 +1,7 @@
+{
+  "availableMetrics": ["new_companies"],
+  "companies": { "total": 50, "pending": 3 },
+  "jobs": { "byStatus": { "open": 10 } },
+  "reports": { "open": 2 },
+  "revenue": { "total": 150000000 }
+}

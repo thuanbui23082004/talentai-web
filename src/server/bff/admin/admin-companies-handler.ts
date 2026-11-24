@@ -7,12 +7,27 @@ import { getRecruiterMockStore, type MockSession } from '@/server/bff/recruiter/
 import { getMockAccounts } from '@/server/bff/recruiter/account-company-handler';
 import { getAdminActivity } from '@/server/bff/admin/admin-users-store';
 import { mockAdmin } from '@/mocks/fixtures/admin';
-import { companyStatuses, companyActions, companyReasonSchema, type CompanyAction } from '@/features/admin/schemas/companies';
+import { companyStatuses, companyActions, companyReasonSchema, companyDocumentDecisionSchema, type CompanyAction } from '@/features/admin/schemas/companies';
 import { canModerateCompany } from '@/features/admin/company-rules';
 const problem = (status: number, code: string) => NextResponse.json({ error: { code, message: code } }, { status });
 const response = (data: unknown) => NextResponse.json(data, { headers: { 'Cache-Control': 'private, no-store' } });
 const listSchema = z.object({ q: z.string().optional(), verificationStatus: z.enum(companyStatuses).optional(), page: z.coerce.number().int().min(1).default(1), pageSize: z.coerce.number().int().min(1).max(100).default(20) });
 export async function handleAdminCompanies(request: NextRequest, path: string, session: MockSession) {
+  const verification = /^admin\/companies\/([\w-]+)\/(tax-lookup|documents\/([\w-]+)\/verification)$/.exec(path);
+  if (verification) {
+    const company = adminCompanies().get(verification[1]);
+    if (!company) return problem(404, 'NOT_FOUND');
+    if (verification[2] === 'tax-lookup' && request.method === 'GET') return response({ taxCode: company.taxCode ?? '', name: company.name, address: company.address, status: 'Dữ liệu mô phỏng' });
+    if (request.method !== 'PATCH' || !verification[3]) return problem(405, 'METHOD_NOT_ALLOWED');
+    if (request.headers.get('X-CSRF-Token') !== session.csrf) return problem(403, 'CSRF_TOKEN_INVALID');
+    const parsed = companyDocumentDecisionSchema.safeParse(await request.json().catch(() => null));
+    const file = company.verificationDocuments?.find(item => item.id === verification[3]);
+    if (!parsed.success || !file || parsed.data.status === 'rejected' && !parsed.data.rejectionReason) return problem(422, 'VALIDATION_FAILED');
+    file.status = parsed.data.status;
+    file.rejectionReason = parsed.data.status === 'rejected' ? parsed.data.rejectionReason : undefined;
+    file.verifiedAt = new Date().toISOString();
+    return response(adminCompanyDetail(company.id));
+  }
   const match = /^admin\/companies(?:\/([\w-]+)(?:\/(verify|reject|suspend|restore|documents\/([\w-]+)))?)?$/.exec(path);
   if (!match) return;
   const companies = adminCompanies(); const company = match[1] ? companies.get(match[1]) : undefined;
@@ -39,7 +54,7 @@ export async function handleAdminCompanies(request: NextRequest, path: string, s
   const raw: unknown = await request.json().catch(() => null);
   const parsed = (action === 'verify' || action === 'restore' ? z.object({ note: companyReasonSchema.shape.reason }) : z.object({ reason: companyReasonSchema.shape.reason })).safeParse(raw);
   if (!parsed.success || !canModerateCompany(company.verificationStatus, action)) return problem(422, 'VALIDATION_FAILED');
-  if (action === 'verify' && !company.verificationDocuments?.length) return problem(422, 'VALIDATION_FAILED');
+  if (action === 'verify' && (!company.verificationDocuments?.length || company.verificationDocuments.some(file => file.status === 'pending') || company.verificationDocuments.some(file => file.status) && !company.verificationDocuments.some(file => file.status === 'verified'))) return problem(422, 'VALIDATION_FAILED');
   const reason = 'reason' in parsed.data ? parsed.data.reason : parsed.data.note;
   const now = new Date().toISOString();
   if (action === 'suspend') {

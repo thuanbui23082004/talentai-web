@@ -2867,6 +2867,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/companies/{companyId}/tax-lookup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tra cứu mã số thuế của doanh nghiệp đang xét duyệt */
+        get: operations["adminLookupCompanyTax"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/companies/{companyId}/documents/{documentId}/verification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Duyệt hoặc từ chối tài liệu doanh nghiệp */
+        patch: operations["adminReviewCompanyDocument"];
+        trace?: never;
+    };
     "/admin/companies/{companyId}/verify": {
         parameters: {
             query?: never;
@@ -3737,6 +3771,12 @@ export interface components {
             sizeBytes: number;
             /** Format: date-time */
             uploadedAt?: string;
+            documentType?: string;
+            /** @enum {string} */
+            status?: "pending" | "verified" | "rejected";
+            rejectionReason?: string;
+            /** Format: date-time */
+            verifiedAt?: string;
             /** @description Đường dẫn tải có xác thực (đi qua BFF). Không phải URL công khai. */
             downloadUrl?: string;
         };
@@ -5388,6 +5428,12 @@ export interface components {
             }[];
         };
         AdminOverviewStats: {
+            /** @description Doanh thu thực nhận từ đơn đã thanh toán, khi payment-service cung cấp. */
+            revenue?: {
+                total?: number;
+            };
+            /** @description Các chỉ số chuỗi thời gian có dữ liệu trong nguồn hiện tại. */
+            availableMetrics?: ("new_users" | "new_companies" | "jobs_posted" | "applications")[];
             users?: {
                 total?: number;
                 candidates?: number;
@@ -5508,12 +5554,29 @@ export interface components {
             role: components["schemas"]["Role"];
         };
         AdminCompany: components["schemas"]["Company"] & {
+            availableActions?: ("verify" | "reject" | "suspend" | "restore")[];
+            supportsModerationNotes?: boolean;
             owner?: {
                 id?: components["schemas"]["Id"];
                 fullName?: string;
                 email?: string;
             };
             jobCount?: number;
+        };
+        CompanyDocumentDecision: {
+            /** @enum {string} */
+            status: "verified" | "rejected";
+            rejectionReason?: string;
+        };
+        CompanyTaxLookup: {
+            taxCode: string;
+            name: string;
+            address?: string;
+            status?: string;
+            isActive?: boolean;
+            representative?: string;
+            foundedDate?: string;
+            taxDepartment?: string;
         };
         AdminCompanyPage: {
             items: components["schemas"]["AdminCompany"][];
@@ -5539,6 +5602,8 @@ export interface components {
             actorRole?: components["schemas"]["Role"];
             /** @example auth.login */
             action: string;
+            /** @description Mô tả thao tác từ nhật ký backend khi có. */
+            description?: string;
             targetType?: string;
             targetId?: string;
             ip?: string;
@@ -10466,6 +10531,57 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             500: components["responses"]["InternalError"];
+        };
+    };
+    adminLookupCompanyTax: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                companyId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thông tin đăng ký thuế */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyTaxLookup"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    adminReviewCompanyDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                companyId: components["schemas"]["Id"];
+                documentId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompanyDocumentDecision"];
+            };
+        };
+        responses: {
+            /** @description Hồ sơ doanh nghiệp đã cập nhật */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminCompanyDetail"];
+                };
+            };
+            422: components["responses"]["ValidationError"];
         };
     };
     adminVerifyCompany: {

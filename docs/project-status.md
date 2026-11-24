@@ -1,5 +1,33 @@
 ﻿# Trạng thái triển khai
 
+## Tổng quan admin qua API thật (2026-11-25)
+
+Khi `COMPANY_DATA_MODE=real`, BFF tổng hợp `/admin/stats/overview` từ API
+company-service (tổng công ty, công ty PENDING, báo cáo PENDING) và danh sách tin công khai ACTIVE
+của job-service. Biểu đồ dùng ngày tạo từ danh sách công ty; nhật ký gần đây đọc
+`/admin/audit-logs`. Không suy diễn số ứng viên, nhà tuyển dụng hoặc tin chờ duyệt
+vì backend hiện chưa có API admin cho các chỉ số này; giao diện hiển thị dấu `—`.
+Doanh thu lấy từ `GET /admin/orders/statistics` (tổng đơn PAID); nếu payment-service
+chưa sẵn sàng thì ô này giữ dấu `—` mà không làm hỏng các chỉ số còn lại.
+
+## Xác minh doanh nghiệp qua company-service (2026-11-24)
+
+Onboarding yêu cầu một tài liệu pháp lý PDF/PNG/JPG tối đa 10 MB ở bước xác nhận.
+BFF tải tài liệu qua `POST /recruiter/company/documents`, sau đó gọi
+`POST /recruiter/company/verification` để chuyển công ty sang `PENDING`.
+Trang hồ sơ recruiter hiển thị trạng thái từng tài liệu và cho phép gửi bổ sung.
+Admin `/admin/companies` dùng danh sách công ty thật khi `COMPANY_DATA_MODE=real`;
+chi tiết ghép danh sách với `GET /admin/companies/{companyId}/documents` vì backend
+chưa có endpoint chi tiết admin. Admin có thể tra cứu MST, xem tài liệu, duyệt/từ chối
+từng tài liệu, rồi xác minh hoặc từ chối công ty. BFF chỉ cho xác minh khi có tài liệu
+đã duyệt, không còn tài liệu chờ và kết quả tra cứu MST khớp, đang hoạt động.
+Backend chỉ hỗ trợ quyết định công ty `VERIFIED`/`REJECTED`; thao tác đình chỉ và
+khôi phục của mock không hiển thị ở chế độ real. Backend chưa lưu lý do từ chối
+ở cấp công ty; lý do từ chối từng tài liệu được lưu qua API tài liệu.
+
+Đã kiểm thử BFF bằng phản hồi theo Swagger. Chưa nghiệm thu toàn bộ luồng với tài khoản
+recruiter và admin thật; cần chạy thử upload và xét duyệt trên môi trường tích hợp.
+
 ## Admin — vị trí việc làm (2026-11-24)
 
 Tab “Vị trí việc làm” trong `/admin/catalog` dùng BFF nối tới `GET/POST /api/v1/admin/job-categories`

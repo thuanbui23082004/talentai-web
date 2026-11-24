@@ -20,6 +20,7 @@ function network(role = "RECRUITER", companyResponse = () => Response.json({ dat
         if (path.endsWith("/auth/me")) return Response.json({ success: true, data: { profile: { id, email: "test@example.com", displayName: "Recruiter", status: "ACTIVE", roles: [role] } } });
         if (path.endsWith("/industries")) return Response.json({ data: [company.industry] });
         if (path.endsWith("/locations")) return Response.json({ data: [company.location] });
+        if (path.endsWith("/recruiter/company/documents")) return Response.json({ data: [] });
         expect(new Headers(init?.headers).get("Authorization")).toBe(`Bearer ${token}`);
         return companyResponse();
     });

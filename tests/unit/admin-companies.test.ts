@@ -85,6 +85,7 @@ test('CSRF, role and missing document checks do not mutate the company', async (
   expect((await call(`admin/companies/${target}`)).status).toBe(403);
 });
 test('admin reads the exact verification file submitted by recruiter and sees the same company', async () => {
+  getMockCompanies().get(recruiterCompany.id)!.verificationStatus = 'unverified';
   const auth = createMockRecruiterSession(); const bytes = syntheticCompanyDocument(); const form = new FormData();
   form.append('files', new File([new Uint8Array(bytes)], 'verification.pdf', { type: 'application/pdf' }));
   const path = 'recruiter/company/verification-documents';
@@ -92,6 +93,8 @@ test('admin reads the exact verification file submitted by recruiter and sees th
   expect(upload.status).toBe(200); const company = await upload.json();
   const file = await call(`admin/companies/${recruiterCompany.id}/documents/${company.verificationDocuments[0].id}`);
   expect(new Uint8Array(await file.arrayBuffer())).toEqual(bytes);
+  expect((await call(`admin/companies/${recruiterCompany.id}/verify`, 'POST', { note: 'Chưa duyệt tài liệu' })).status).toBe(422);
+  expect((await call(`admin/companies/${recruiterCompany.id}/documents/${company.verificationDocuments[0].id}/verification`, 'PATCH', { status: 'verified' })).status).toBe(200);
   expect((await call(`admin/companies/${recruiterCompany.id}/verify`, 'POST', { note: 'Giấy tờ mẫu hợp lệ' })).status).toBe(200);
   const own = await handleMockRequest(new NextRequest('http://localhost/api/bff/recruiter/company', { headers: { cookie: `access_token=${auth.id}` } }), 'recruiter/company');
   expect((await own.json()).verificationStatus).toBe('verified');

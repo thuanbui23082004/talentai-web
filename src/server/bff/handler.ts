@@ -42,6 +42,8 @@ import { handleMatchingPreview } from "./candidate/matching-preview";
 import { handleViolationReports, isViolationReportRequest } from "./reports/service";
 import { handleAdminViolationReports, isAdminViolationReportRequest } from "./admin/violation-reports-service";
 import { handleAdminJobCategories, isAdminJobCategoriesRequest } from "./admin/job-categories-service";
+import { handleAdminCompanyVerification, isAdminCompanyVerificationRequest } from "./admin/company-verification-service";
+import { handleAdminDashboard, isAdminDashboardRequest } from "./admin/dashboard-service";
 
 export async function handleBffRequest(request: Request): Promise<Response> {
     try {
@@ -51,6 +53,10 @@ export async function handleBffRequest(request: Request): Promise<Response> {
             return handleAdminViolationReports(request, getGatewayApiUrl(getServerEnv().BACKEND_API_URL));
         if (isAdminJobCategoriesRequest(request) && (getServerEnv().ADMIN_CATALOG_DATA_MODE ?? getServerEnv().DATA_MODE) === "real")
             return handleAdminJobCategories(request, getGatewayApiUrl(getServerEnv().BACKEND_API_URL));
+        if (isAdminCompanyVerificationRequest(request) && (getServerEnv().COMPANY_DATA_MODE ?? getServerEnv().DATA_MODE) === "real")
+            return handleAdminCompanyVerification(request, getGatewayApiUrl(getServerEnv().BACKEND_API_URL));
+        if (isAdminDashboardRequest(request) && (getServerEnv().COMPANY_DATA_MODE ?? getServerEnv().DATA_MODE) === "real")
+            return handleAdminDashboard(request, getGatewayApiUrl(getServerEnv().BACKEND_API_URL));
         const adminPath = new URL(request.url).pathname.replace(
             "/api/bff/",
             "",

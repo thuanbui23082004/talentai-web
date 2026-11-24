@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { components } from "@/lib/api/generated/schema";
-import { companyInputSchema, companySchema, logoFileSchema, companyImageFileSchema } from "@/features/company";
+import { companyInputSchema, companySchema, logoFileSchema, companyImageFileSchema, verificationFilesSchema } from "@/features/company";
 import { normalizeLocation, provinceCity } from "@/lib/locations/vietnam";
 import { hasValidCsrf, isTrustedOrigin } from "../auth/cookies";
 import { readRequestIdentity } from "../auth/session";
@@ -8,6 +8,7 @@ import { apiError } from "../responses";
 
 const catalogItem = z.object({ id: z.number().int().positive(), name: z.string() });
 const catalogResponse = z.object({ data: z.array(catalogItem) });
+const documentResponse = z.object({ data: z.array(z.object({ id: z.uuid(), fileName: z.string(), fileSize: z.number().int().nonnegative(), mimeType: z.string(), documentType: z.string(), status: z.enum(["PENDING", "VERIFIED", "REJECTED"]), rejectionReason: z.string().nullish(), uploadedAt: z.string().nullish() })) });
 const upstreamCompany = z.object({
     data: z.object({
         id: z.uuid(), name: z.string(),
@@ -56,11 +57,12 @@ export function isRecruiterCompanyRequest(request: Request) {
 export async function handleRecruiterCompany(request: Request, baseUrl: string): Promise<Response> {
     const path = new URL(request.url).pathname;
     const isCatalog = path === "/api/bff/recruiter/company/catalogs";
+    const isDocuments = path === "/api/bff/recruiter/company/verification-documents";
     const imageKind = path === "/api/bff/recruiter/company/logo" ? "logo" : path === "/api/bff/recruiter/company/cover" ? "cover" : undefined;
-    if (!isCatalog && !imageKind && path !== "/api/bff/recruiter/company") {
+    if (!isCatalog && !isDocuments && !imageKind && path !== "/api/bff/recruiter/company") {
         return apiError(503, "SERVICE_UNAVAILABLE", "Chức năng công ty này chưa được tích hợp.");
     }
-    if (!(isCatalog ? ["GET"] : imageKind ? ["PUT"] : ["GET", "POST", "PUT"]).includes(request.method)) {
+    if (!(isCatalog ? ["GET"] : isDocuments ? ["POST"] : imageKind ? ["PUT"] : ["GET", "POST", "PUT"]).includes(request.method)) {
         return apiError(405, "BAD_REQUEST", "Phương thức không được hỗ trợ.");
     }
     if (request.method !== "GET" && (!isTrustedOrigin(request) || !hasValidCsrf(request))) {
@@ -87,17 +89,52 @@ export async function handleRecruiterCompany(request: Request, baseUrl: string):
             const map = async (response: Response) => catalogResponse.parse(await response.json()).data.map(item => ({ id: String(item.id), name: item.name }));
             return { industries: await map(industries), locations: await map(locations) };
         }
-        function mapCompany(body: unknown) {
+        async function mapCompany(body: unknown) {
             const raw = upstreamCompany.parse(body).data;
+            const documents = await call("recruiter/company/documents");
+            if (!documents.ok) throw await upstreamError(documents);
+            const verificationDocuments = documentResponse.parse(await documents.json()).data.map(file => ({ id: file.id, fileName: file.fileName, mimeType: file.mimeType, sizeBytes: file.fileSize, documentType: file.documentType, status: file.status.toLowerCase(), rejectionReason: file.rejectionReason ?? undefined, uploadedAt: file.uploadedAt ?? undefined }));
             return companySchema.parse({
                 ...raw, verificationStatus: raw.verificationStatus.toLowerCase(),
                 industries: raw.industry ? [{ id: String(raw.industry.id), name: raw.industry.name }] : undefined,
                 city: raw.location ? provinceCity(raw.location.name) : undefined,
+                verificationDocuments,
                 // Java emits null for optional fields; the browser contract uses omission.
                 ...Object.fromEntries(Object.entries(raw).filter(([, value]) => value === null).map(([key]) => [key, undefined])),
             });
         }
         if (isCatalog) return reply(await catalogs());
+        if (isDocuments) {
+            const data = await request.formData().catch(() => null);
+            const files = data?.getAll("files").filter((file): file is File => file instanceof File) ?? [];
+            if (!verificationFilesSchema.safeParse(files).success) return apiError(422, "VALIDATION_FAILED", "Tài liệu phải là PDF, PNG hoặc JPG, tối đa 10 MB mỗi tệp.");
+            for (const file of files) {
+                const bytes = Buffer.from(await file.slice(0, 8).arrayBuffer());
+                const valid = file.type === "application/pdf" ? bytes.toString("ascii", 0, 5) === "%PDF-"
+                    : file.type === "image/png" ? bytes.equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+                    : bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255;
+                if (!valid) return apiError(415, "UNSUPPORTED_MEDIA_TYPE", "Nội dung tài liệu không hợp lệ.");
+            }
+            for (const file of files) {
+                const form = new FormData(); form.set("file", file);
+                const upstream = await fetch(`${baseUrl.replace(/\/$/, "")}/recruiter/company/documents?documentType=BUSINESS_REGISTRATION`, {
+                    method: "POST", headers: { Accept: "application/json", Authorization: `Bearer ${accessToken}` }, body: form,
+                    cache: "no-store", redirect: "error", signal: AbortSignal.timeout(15000),
+                });
+                if (!upstream.ok) return upstreamError(upstream);
+            }
+            const company = await call("recruiter/company");
+            if (!company.ok) return upstreamError(company);
+            const current = upstreamCompany.parse(await company.json());
+            if (current.data.verificationStatus === "UNVERIFIED" || current.data.verificationStatus === "REJECTED") {
+                const submitted = await fetch(`${baseUrl.replace(/\/$/, "")}/recruiter/company/verification`, {
+                    method: "POST", headers: { Accept: "application/json", Authorization: `Bearer ${accessToken}` },
+                    cache: "no-store", redirect: "error", signal: AbortSignal.timeout(5000),
+                });
+                return submitted.ok ? reply(await mapCompany(await submitted.json())) : upstreamError(submitted);
+            }
+            return reply(await mapCompany(current));
+        }
         if (imageKind) {
             const data = await request.formData().catch(() => null);
             const file = data?.get("file");
@@ -117,11 +154,11 @@ export async function handleRecruiterCompany(request: Request, baseUrl: string):
                 method: "POST", headers: { Accept: "application/json", Authorization: `Bearer ${accessToken}` },
                 body, cache: "no-store", redirect: "error", signal: AbortSignal.timeout(15000),
             });
-            return response.ok ? reply(mapCompany(await response.json())) : upstreamError(response);
+            return response.ok ? reply(await mapCompany(await response.json())) : upstreamError(response);
         }
         if (request.method === "GET") {
             const response = await call("recruiter/company");
-            return response.ok ? reply(mapCompany(await response.json())) : upstreamError(response);
+            return response.ok ? reply(await mapCompany(await response.json())) : upstreamError(response);
         }
         const input = companyInputSchema.safeParse(await request.json().catch(() => null));
         if (!input.success) return invalid(input.error.issues.map(issue => String(issue.path[0])));
@@ -142,7 +179,7 @@ export async function handleRecruiterCompany(request: Request, baseUrl: string):
             address: values.address, contactPhone: values.contactPhone, contactEmail: values.contactEmail,
             website: values.website, foundedYear: values.foundedYear,
         });
-        return response.ok ? reply(mapCompany(await response.json()), request.method === "POST" ? 201 : 200) : upstreamError(response);
+        return response.ok ? reply(await mapCompany(await response.json()), request.method === "POST" ? 201 : 200) : upstreamError(response);
     } catch (error) {
         if (error instanceof Response) return error;
         return apiError(503, "SERVICE_UNAVAILABLE", "Không thể kết nối dịch vụ công ty. Vui lòng thử lại.");

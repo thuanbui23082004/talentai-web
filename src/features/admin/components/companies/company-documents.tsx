@@ -1,11 +1,12 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { FileText, Download, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { adminKeys } from '@/features/admin/query-keys';
-import { getCompanyDocument } from '@/features/admin/services/companies';
+import { getCompanyDocument, reviewCompanyDocument } from '@/features/admin/services/companies';
 import type { ManagedCompany } from '@/features/admin/schemas/companies';
 type Document = NonNullable<ManagedCompany['verificationDocuments']>[number];
 function DocumentContent({ blob, file }: { blob: Blob; file: Document }) {
@@ -25,5 +26,7 @@ function DocumentPreview({ companyId, file, close }: { companyId: string; file: 
 }
 export function CompanyDocuments({ company }: { company: ManagedCompany }) {
   const t = useTranslations('AdminCompanies'); const [selected, setSelected] = useState<Document | null>(null);
-  return <section className="admin-user-info"><h2>{t('documents')}</h2>{company.verificationDocuments?.length ? <ul className="admin-company-document-list">{company.verificationDocuments.map((file, i) => <li key={file.id ?? i}><FileText size={20} /><span>{file.fileName}{!file.id && <small>{t('noDocumentId')}</small>}</span><Button variant="outline" disabled={!file.id} aria-label={`${t('viewDocument')} ${file.fileName}`} onClick={() => setSelected(file)}>{t('viewDocument')}</Button></li>)}</ul> : <p className="admin-muted">{t('noDocuments')}</p>}{selected && <DocumentPreview key={selected.id} companyId={company.id} file={selected} close={() => setSelected(null)} />}</section>;
+  const [reason, setReason] = useState(''); const cache = useQueryClient();
+  const review = useMutation({ mutationFn: ({ file, status }: { file: Document; status: 'verified' | 'rejected' }) => reviewCompanyDocument(company.id, file.id!, { status, rejectionReason: status === 'rejected' ? reason.trim() : undefined }), onSuccess: async updated => { cache.setQueryData(adminKeys.company(company.id), updated); await cache.invalidateQueries({ queryKey: adminKeys.companies }); setSelected(null); setReason(''); } });
+  return <section className="admin-user-info"><h2>{t('documents')}</h2>{company.verificationDocuments?.length ? <ul className="admin-company-document-list">{company.verificationDocuments.map((file, i) => <li key={file.id ?? i}><FileText size={20} /><span>{file.fileName}{file.documentType && <small>{file.documentType.replaceAll('_', ' ')} · {file.status === 'verified' ? 'Đã duyệt' : file.status === 'rejected' ? 'Đã từ chối' : 'Chờ kiểm tra'}</small>}{file.rejectionReason && <small>Lý do: {file.rejectionReason}</small>}{!file.id && <small>{t('noDocumentId')}</small>}</span><Button variant="outline" disabled={!file.id} aria-label={`${t('viewDocument')} ${file.fileName}`} onClick={() => { setSelected(file); review.reset(); setReason(''); }}>{t('viewDocument')}</Button></li>)}</ul> : <p className="admin-muted">{t('noDocuments')}</p>}{selected && <><DocumentPreview key={selected.id} companyId={company.id} file={selected} close={() => setSelected(null)} />{selected.status === 'pending' && <div className="admin-company-review"><p>Kiểm tra nội dung giấy tờ và đối chiếu thông tin trước khi đưa ra quyết định.</p><label htmlFor="company-document-reason">Lý do từ chối tài liệu</label><Textarea id="company-document-reason" maxLength={1000} value={reason} onChange={event => setReason(event.target.value)} placeholder="Nêu rõ giấy tờ cần bổ sung hoặc thông tin không khớp" />{review.error && <p className="admin-error" role="alert">Không cập nhật được tài liệu. Vui lòng thử lại.</p>}<div className="admin-access-buttons"><Button disabled={review.isPending} onClick={() => review.mutate({ file: selected, status: 'verified' })}>Duyệt tài liệu</Button><Button variant="destructive" disabled={review.isPending || !reason.trim()} onClick={() => review.mutate({ file: selected, status: 'rejected' })}>Từ chối tài liệu</Button></div></div>}</>}</section>;
 }

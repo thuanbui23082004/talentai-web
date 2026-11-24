@@ -238,6 +238,10 @@
 .admin-company-rejection strong { color: var(--admin-danger); }
 .admin-company-rejection p { margin-top: 6px; }
 .admin-company-document-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.admin-company-review { display: grid; gap: 12px; margin-top: 16px; padding: 18px; border: 1px solid var(--admin-border); border-radius: 10px; background: var(--admin-surface); }
+.admin-company-review label { font-weight: 600; }
+.admin-company-tax .admin-section-heading { align-items: center; }
+.admin-company-tax .admin-user-fields { margin-top: 16px; }
 .admin-company-document-list li { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid var(--admin-border); border-radius: 8px; }
 .admin-company-document-list li>svg { color: var(--admin-accent); flex-shrink: 0; }
 .admin-company-document-list li>span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
@@ -350,3 +354,4 @@
 @media(max-width:500px){.admin-statistics-section,.admin-statistics-filters{padding:16px}.admin-statistics-selects{display:grid;width:100%}.admin-statistics-selects select{width:100%}.admin-statistics-system{grid-template-columns:1fr}.admin-statistics-page [data-slot=button]{min-height:44px}.admin-statistics-system>div{padding:14px}.admin-statistics-card{padding:16px}}
 .admin-payments-page h3{font-size:var(--admin-font-subheading);font-weight:600}
 @media(max-width:640px){.admin-report-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-content-form .admin-access-buttons{flex-wrap:wrap}.admin-users-heading>.admin-access-buttons{flex-wrap:wrap}}
+.admin-dashboard-note { margin: 0 0 16px; color: var(--admin-muted); font-size: 13px; }
