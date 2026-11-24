@@ -24,15 +24,44 @@ export const createMockApplicationInterviews = (applications: components["schema
 
 import { mockJobs } from '@/mocks/fixtures/recruiter-jobs';
 
-const names = ['Mai An', 'Bảo Minh', 'Hà Linh', 'Gia Huy', 'Ngọc Anh', 'Thanh Sơn', 'Khánh Vy', 'Đức Phúc', 'Tuệ Nhi', 'Hải Nam', 'Minh Châu', 'Quang Vinh', 'Anh Thư', 'Nhật Hào', 'Hoài An', 'Phương Linh', 'Duy Khang', 'Kim Ngân', 'Trọng Tín', 'Ánh Dương', 'Xuân Mai', 'Hoàng Long', 'Lan Chi', 'Thiên Ân', 'Quốc Bảo', 'Bích Ngọc', 'Vân Anh'];
+const names = [
+  'Nguyễn Văn An', 'Trần Minh Bình', 'Lê Thu Chi', 'Phạm Hoàng Duy', 'Vũ Thị Mai',
+  'Đỗ Quang Huy', 'Bùi Khánh Linh', 'Hoàng Tuấn Kiệt', 'Trịnh Phương Thảo', 'Đặng Minh Khôi',
+  'Lý Hải Yến', 'Dương Quốc Bảo', 'Hồ Thanh Tùng', 'Ngô Thùy Dung', 'Võ Đức Anh',
+  'Phan Diệu Linh', 'Mai Trọng Hiếu', 'Đoàn Bảo Ngọc', 'Cao Thái Sơn', 'Lương Bích Hằng',
+  'Trương Hoài Nam', 'Lâm Gia Hân', 'Tạ Minh Quân', 'Đinh Thảo My',
+  'Ngọc Anh', 'Thanh Sơn', 'Khánh Vy', 'Đức Phúc', 'Tuệ Nhi', 'Hải Nam', 'Minh Châu', 'Quang Vinh', 'Anh Thư', 'Nhật Hào', 'Hoài An', 'Phương Linh', 'Duy Khang', 'Kim Ngân', 'Trọng Tín', 'Ánh Dương'
+];
 const recruiterStatuses = ['reviewing', 'submitted', 'interview', 'rejected', 'hired', 'withdrawn'] as const;
-const skills = [['React', 'TypeScript'], ['Java', 'SQL'], ['Figma', 'UI/UX'], ['Giao tiếp', 'Bán hàng'], ['Docker', 'Linux'], ['Excel', 'Tuyển dụng']];
-export const mockApplications: components['schemas']['RecruiterApplicationSummary'][] = names.map((name, index) => ({
-  id: `00000000-0000-4000-9000-${String(index + 1).padStart(12, '0')}`,
-  jobId: mockJobs[index % mockJobs.length].id, jobTitle: mockJobs[index % mockJobs.length].title,
-  candidate: { id: `00000000-0000-4000-a000-${String(index + 1).padStart(12, '0')}`, fullName: name,
-    headline: mockJobs[index % mockJobs.length].title, city: ['Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng'][index % 3],
-    totalYearsExperience: index % 7, educationLevel: index % 4 === 0 ? 'college' : 'bachelor', topSkills: skills[index % skills.length] },
-  status: recruiterStatuses[index % recruiterStatuses.length], cvId: index === 26 ? undefined : `00000000-0000-4000-b000-${String(index + 1).padStart(12, '0')}`,
-  appliedAt: `2026-10-${String(27 - index).padStart(2, '0')}T08:00:00Z`,
-}));
+const skillsList = [
+  ['Java', 'Spring Boot', 'SQL', 'REST API', 'Git', 'Docker'],
+  ['Java', 'Spring Boot', 'SQL', 'Git', 'Docker'],
+  ['Java', 'SQL', 'Git'],
+  ['Java', 'Git'],
+  ['SQL', 'Git'],
+  ['React', 'TypeScript'],
+  ['Docker', 'Linux'],
+  ['Java', 'SQL']
+];
+export const mockApplications: components['schemas']['RecruiterApplicationSummary'][] = names.map((name, index) => {
+  const isSeniorSoftware = index < 24;
+  const targetJob = isSeniorSoftware ? mockJobs[0] : mockJobs[(index - 24) % (mockJobs.length - 1) + 1];
+  const topSkills = index < skillsList.length ? skillsList[index] : skillsList[index % skillsList.length];
+  return {
+    id: `00000000-0000-4000-9000-${String(index + 1).padStart(12, '0')}`,
+    jobId: targetJob.id,
+    jobTitle: targetJob.title,
+    candidate: {
+      id: `00000000-0000-4000-a000-${String(index + 1).padStart(12, '0')}`,
+      fullName: name,
+      headline: targetJob.title,
+      city: isSeniorSoftware && index < 5 ? 'Hà Nội' : ['Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng'][index % 3],
+      totalYearsExperience: isSeniorSoftware ? (index === 0 ? 4 : index === 1 ? 4 : index < 3 ? 3 : 2) : index % 7,
+      educationLevel: index % 4 === 0 ? 'college' : 'bachelor',
+      topSkills
+    },
+    status: recruiterStatuses[index % recruiterStatuses.length],
+    cvId: index === 26 ? undefined : `00000000-0000-4000-b000-${String(index + 1).padStart(12, '0')}`,
+    appliedAt: `2026-10-${String(27 - (index % 25)).padStart(2, '0')}T08:00:00Z`,
+  };
+});

@@ -18,10 +18,15 @@ const mockJobDetails = createMockJobDetails(mockJobs);
 export async function handleMockRequest(request: Request, _targetPath?: string): Promise<Response> {
   void _targetPath;
   const targetPath = new URL(request.url).pathname.replace('/api/bff/', '');
-  if (targetPath.startsWith('admin/') || request.headers.get('X-TalentAI-Workspace') === 'admin') return handleAdminMockRequest(new NextRequest(request), targetPath);
+  const nextRequest = new NextRequest(request.url, {
+    method: request.method,
+    headers: request.headers,
+    ...(request.method === 'GET' || request.method === 'HEAD' ? {} : { body: request.body }),
+  });
+  if (targetPath.startsWith('admin/') || request.headers.get('X-TalentAI-Workspace') === 'admin') return handleAdminMockRequest(nextRequest, targetPath);
   if (isAuthRequest(request)) return handleAuthRequest(request);
   if (/^(recruiter\/|catalog\/|analysis-tasks\/|me\/|auth\/change-password)/.test(targetPath) || (targetPath === 'me' && request.method !== 'GET')) {
-    return handleRecruiterRequest(new NextRequest(request), targetPath);
+    return handleRecruiterRequest(nextRequest, targetPath);
   }
   const applications = await handleMockApplications(request);
   if (applications) return applications;

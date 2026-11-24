@@ -16,7 +16,7 @@ export type RecruiterPreviewJob = RecruiterPreviewJobSummary & {
 };
 
 const previewJobSummaries: RecruiterPreviewJobSummary[] = [
-  { id: 'preview-1', title: 'Senior Fullstack Developer (Node.js)', company: 'Công ty Công nghệ Sao Mai', initials: 'SM', location: 'TP. Hồ Chí Minh', salary: '25 – 40 triệu', experience: 4, hours: 2, applicants: 120, type: 'fullTime', status: 'open' },
+  { id: 'preview-1', title: 'Senior Software', company: 'TechViet Software', initials: 'TV', location: 'Hà Nội', salary: '25 – 40 triệu', experience: 4, hours: 2, applicants: 24, type: 'fullTime', status: 'open' },
   { id: 'preview-2', title: 'Nhân viên Triển khai Phần mềm', company: 'Công ty Giải pháp Mây Xanh', initials: 'MX', location: 'Hà Nội', salary: '8 – 15 triệu', experience: 0, hours: 2, applicants: 75, type: 'fullTime', status: 'open' },
   { id: 'preview-3', title: 'Web Developer (React.js)', company: 'Công ty Công nghệ Sao Mai', initials: 'SM', location: 'TP. Hồ Chí Minh', salary: 'negotiable', experience: 1, hours: 5, applicants: 68, type: 'partTime', status: 'open' },
   { id: 'preview-4', title: 'Full Stack JavaScript Developer', company: 'Công ty Sáng tạo Cánh Diều', initials: 'CD', location: 'Đà Nẵng', salary: '10 – 20 triệu', experience: 2, hours: 8, applicants: 42, type: 'fullTime', status: 'open' },

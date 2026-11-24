@@ -193,7 +193,12 @@ export async function handleBffRequest(request: Request): Promise<Response> {
         return env.DATA_MODE === "mock"
             ? await handleMockRequest(request)
             : await proxyRequest(request, gatewayApiUrl);
-    } catch {
+    } catch (error) {
+        console.error("BFF request failed", {
+            path: new URL(request.url).pathname,
+            method: request.method,
+            error,
+        });
         return apiError(
             503,
             "SERVICE_UNAVAILABLE",

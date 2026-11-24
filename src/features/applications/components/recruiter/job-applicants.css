@@ -69,6 +69,7 @@
     justify-content: space-between;
     gap: 16px;
 }
+.job-applicants-heading-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}.job-applicants-ai-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:10px;background:var(--recruiter-primary);color:var(--recruiter-surface);font-size:13px;font-weight:700;box-shadow:0 5px 14px var(--recruiter-shadow)}.job-applicants-ai-link:hover{background:var(--recruiter-accent);color:var(--recruiter-surface)}.job-applicants-ai-link:focus-visible{outline:3px solid var(--recruiter-accent);outline-offset:3px}
 .job-applicants-results-heading > div:first-child {
     display: flex;
     align-items: center;

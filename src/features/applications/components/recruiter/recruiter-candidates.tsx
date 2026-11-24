@@ -12,6 +12,7 @@ import {
     Kanban,
     RotateCcw,
     SlidersHorizontal,
+    Sparkles,
     Users,
 } from "lucide-react";
 import { Alert, Button, Select } from "@/components/ui";
@@ -297,6 +298,8 @@ export function RecruiterCandidates() {
                         </span>
                     )}
                 </div>
+                <div className="job-applicants-heading-actions">
+                {jobId && valid && <Link className="job-applicants-ai-link" href={`/recruiter/candidates/ai?jobId=${encodeURIComponent(jobId)}`}><Sparkles size={17} aria-hidden="true" />Chấm điểm AI</Link>}
                 <div
                     className="candidate-view-toggle"
                     aria-label="Kiểu hiển thị"
@@ -324,6 +327,7 @@ export function RecruiterCandidates() {
                         <LayoutGrid size={15} aria-hidden="true" />
                         Dạng thẻ
                     </Button>
+                </div>
                 </div>
             </div>
             {!valid ? (

@@ -33,7 +33,7 @@ function ScreeningContent({ jobId }: { jobId: string }) {
     </> : recommendations.isPending ? <div className="ai-skeleton" aria-busy="true" aria-label={t('loading')} /> : recommendations.isError ? <><AnalysisError error={recommendations.error} /><Button size="sm" variant="outline" onClick={() => void recommendations.refetch()}>{t('retry')}</Button></> : !recommendations.data?.items.length ? <p className="ai-empty">{t('noRecommended')}</p> : <div className="ai-recommended-list">{recommendations.data.items.map(item => <article key={item.application.id}><div className="ai-recommended-title"><Link href={`/recruiter/candidates/${item.application.id}`}>{item.application.candidate.fullName}</Link><strong>{t('score', { score: item.score })}</strong></div><p>{item.application.candidate.headline || item.application.jobTitle}</p>{item.reasons?.length ? <ul>{item.reasons.map((reason, index) => <li key={index}>{reason}</li>)}</ul> : <p>{t('noExplanation')}</p>}<small className="ai-advisory">{t('disclaimer')}</small><Link className="ai-profile-link" href={`/recruiter/candidates/${item.application.id}`}>{t('viewProfile')}</Link></article>)}</div>}
   </div>;
 }
-export function RecruiterScreening({ jobId }: { jobId: string }) {
-  const t = useTranslations('RecruiterAI'); const [open, setOpen] = useState(false);
+export function RecruiterScreening({ jobId, initiallyOpen = false }: { jobId: string; initiallyOpen?: boolean }) {
+  const t = useTranslations('RecruiterAI'); const [open, setOpen] = useState(initiallyOpen);
   return <section className="ai-screening-section"><header className="ai-section-header"><h2><Sparkles size={18} />{t('heading')}</h2><Button size="sm" variant="outline" aria-expanded={open} onClick={() => setOpen(value => !value)}>{t(open ? 'close' : 'open')}<ChevronDown size={14} /></Button></header>{open && <ScreeningContent jobId={jobId} />}</section>;
 }
