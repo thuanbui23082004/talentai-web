@@ -10808,10 +10808,15 @@ components:
           type: string
           minLength: 1
           maxLength: 150
+        description:
+          type: string
+          maxLength: 1000
         parentId:
-          $ref: '#/components/schemas/Id'
+          type: string
+          description: Catalog identifier (UUID in mock data; numeric string for backend job positions).
         industryId:
-          $ref: '#/components/schemas/Id'
+          type: string
+          description: Company industry identifier.
         aliases:
           type: array
           items:
@@ -10828,17 +10833,21 @@ components:
       - isActive
       properties:
         id:
-          $ref: '#/components/schemas/Id'
+          type: string
         type:
           $ref: '#/components/schemas/CatalogType'
         name:
           type: string
+        description:
+          type: string
         slug:
           type: string
         parentId:
-          $ref: '#/components/schemas/Id'
+          type: string
         industryId:
-          $ref: '#/components/schemas/Id'
+          type: string
+        industryName:
+          type: string
         aliases:
           type: array
           items:

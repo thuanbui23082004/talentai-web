@@ -1,0 +1,22 @@
+{
+  "input": {
+    "name": "Kỹ sư phần mềm",
+    "description": "Phát triển và duy trì ứng dụng",
+    "industryId": "12",
+    "isActive": true
+  },
+  "item": {
+    "id": "42",
+    "type": "positions",
+    "name": "Kỹ sư phần mềm",
+    "description": "Phát triển và duy trì ứng dụng",
+    "industryId": "12",
+    "industryName": "Công nghệ",
+    "isActive": true
+  },
+  "withoutIndustry": {
+    "name": "Vị trí khác",
+    "description": "",
+    "isActive": true
+  }
+}

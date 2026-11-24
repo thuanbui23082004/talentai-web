@@ -1,5 +1,15 @@
 ﻿# Trạng thái triển khai
 
+## Admin — vị trí việc làm (2026-11-24)
+
+Tab “Vị trí việc làm” trong `/admin/catalog` dùng BFF nối tới `GET/POST /api/v1/admin/job-categories`
+và `PUT/DELETE /api/v1/admin/job-categories/{id}` khi `ADMIN_CATALOG_DATA_MODE=real`.
+Danh sách ngành cha lấy từ `GET /api/v1/industries`; vị trí có thể không chọn ngành, và khi sửa
+BFF gửi `industryId: null` để bỏ ngành. BFF kiểm tra vai trò admin và CSRF, chuyển ID số của Java
+thành chuỗi trong contract frontend, đổi phân trang Java từ 0 sang 1, và không lộ lỗi thô.
+`DATA_MODE=mock` vẫn giữ mock danh mục khi không bật cờ riêng. Các tab danh mục khác hiện chỉ có mock.
+Chưa nghiệm thu thao tác CRUD bằng tài khoản admin thật; unit test của BFF đã kiểm tra ánh xạ và lỗi.
+
 ## Auth — đăng xuất và khôi phục mật khẩu (2026-11-22)
 
 Menu ứng viên/nhà tuyển dụng đăng xuất trực tiếp về `/login`, không còn màn hình xác nhận.

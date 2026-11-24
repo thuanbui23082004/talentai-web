@@ -1,8 +1,8 @@
 import { z } from 'zod';
 export const catalogTypes = ['industries', 'positions', 'skills', 'locations'] as const;
 export type CatalogType = typeof catalogTypes[number];
-export const catalogInputSchema = z.object({ name: z.string().trim().min(1, 'required').max(150, 'tooLong'), parentId: z.uuid().optional(), industryId: z.uuid().optional(), aliases: z.array(z.string().trim().min(1).max(150)).optional(), isActive: z.boolean() });
-export const catalogItemSchema = catalogInputSchema.extend({ id: z.uuid(), type: z.enum(catalogTypes).optional(), usageCount: z.number().int().nonnegative().optional() });
+export const catalogInputSchema = z.object({ name: z.string().trim().min(1, 'required').max(150, 'tooLong'), description: z.string().trim().max(1000, 'tooLong').optional(), parentId: z.string().min(1).optional(), industryId: z.string().min(1).optional(), aliases: z.array(z.string().trim().min(1).max(150)).optional(), isActive: z.boolean() });
+export const catalogItemSchema = catalogInputSchema.extend({ id: z.string().min(1), type: z.enum(catalogTypes).optional(), industryName: z.string().optional(), usageCount: z.number().int().nonnegative().optional() });
 const meta = z.object({ page: z.number(), pageSize: z.number(), totalItems: z.number(), totalPages: z.number() });
 export const catalogPageSchema = z.object({ items: z.array(catalogItemSchema), meta });
 export type CatalogItem = z.infer<typeof catalogItemSchema>;

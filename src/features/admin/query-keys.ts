@@ -1,6 +1,7 @@
 import type { Period, Metric } from '@/features/admin/schemas';
 import type { StatisticsMetric, StatisticsInterval } from '@/features/admin/schemas/statistics';
 export const adminKeys = {
+  catalog: (type: string) => ['admin', 'catalog', type] as const,
   applicationStats: (period: Period) => ['admin', 'application-stats', period] as const,
   recruitmentStats: (period: Period) => ['admin', 'recruitment-stats', period] as const,
   systemMetrics: ['admin', 'system-metrics'] as const,

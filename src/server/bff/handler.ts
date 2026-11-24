@@ -41,6 +41,7 @@ import { handleNotifications, isNotificationRequest } from "./notifications/serv
 import { handleMatchingPreview } from "./candidate/matching-preview";
 import { handleViolationReports, isViolationReportRequest } from "./reports/service";
 import { handleAdminViolationReports, isAdminViolationReportRequest } from "./admin/violation-reports-service";
+import { handleAdminJobCategories, isAdminJobCategoriesRequest } from "./admin/job-categories-service";
 
 export async function handleBffRequest(request: Request): Promise<Response> {
     try {
@@ -48,6 +49,8 @@ export async function handleBffRequest(request: Request): Promise<Response> {
             return handleCvTemplateDraft(request);
         if (isAdminViolationReportRequest(request) && (getServerEnv().COMPANY_DATA_MODE ?? getServerEnv().DATA_MODE) === "real")
             return handleAdminViolationReports(request, getGatewayApiUrl(getServerEnv().BACKEND_API_URL));
+        if (isAdminJobCategoriesRequest(request) && (getServerEnv().ADMIN_CATALOG_DATA_MODE ?? getServerEnv().DATA_MODE) === "real")
+            return handleAdminJobCategories(request, getGatewayApiUrl(getServerEnv().BACKEND_API_URL));
         const adminPath = new URL(request.url).pathname.replace(
             "/api/bff/",
             "",

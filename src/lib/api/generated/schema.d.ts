@@ -4907,20 +4907,25 @@ export interface components {
         };
         CatalogItemInput: {
             name: string;
-            parentId?: components["schemas"]["Id"];
-            industryId?: components["schemas"]["Id"];
+            description?: string;
+            /** @description Catalog identifier (UUID in mock data; numeric string for backend job positions). */
+            parentId?: string;
+            /** @description Company industry identifier. */
+            industryId?: string;
             /** @description Tên gọi khác/đồng nghĩa, dùng chuẩn hóa kỹ năng cho AI (ví dụ ReactJS, React.js → React). */
             aliases?: string[];
             /** @default true */
             isActive: boolean;
         };
         CatalogItem: {
-            id: components["schemas"]["Id"];
+            id: string;
             type?: components["schemas"]["CatalogType"];
             name: string;
+            description?: string;
             slug?: string;
-            parentId?: components["schemas"]["Id"];
-            industryId?: components["schemas"]["Id"];
+            parentId?: string;
+            industryId?: string;
+            industryName?: string;
             aliases?: string[];
             isActive: boolean;
             /** @description Số tin/hồ sơ đang dùng mục này (chỉ trả cho admin). */

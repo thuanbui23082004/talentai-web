@@ -19,6 +19,7 @@ export const envSchema = z.object({
     COMPANY_DATA_MODE: z.enum(["mock", "real"]).optional(),
     JOB_DATA_MODE: z.enum(["mock", "real"]).optional(),
     MATCHING_DATA_MODE: z.enum(["mock", "real"]).optional(),
+    ADMIN_CATALOG_DATA_MODE: z.enum(["mock", "real"]).optional(),
     BACKEND_API_URL: backendApiUrl.optional(),
 }).superRefine((value, context) => {
     if (value.DATA_MODE === "real" && !value.BACKEND_API_URL) {
@@ -44,6 +45,7 @@ export function getServerEnv() {
         COMPANY_DATA_MODE: process.env.COMPANY_DATA_MODE || undefined,
         JOB_DATA_MODE: process.env.JOB_DATA_MODE || undefined,
         MATCHING_DATA_MODE: process.env.MATCHING_DATA_MODE || undefined,
+        ADMIN_CATALOG_DATA_MODE: process.env.ADMIN_CATALOG_DATA_MODE || undefined,
         BACKEND_API_URL: process.env.BACKEND_API_URL || undefined,
     });
 }
