@@ -5,6 +5,7 @@ import { ApplicationButton } from "@/features/applications";
 import { CandidateAction } from "@/features/auth";
 import { formatDate, formatSalaryRange } from "@/lib/utils";
 import type { JobDetail } from "../types";
+import { ReportButton } from "@/features/reports";
 
 export function JobDetailHeader({ job }: { job: JobDetail }) {
     const facts = [
@@ -72,6 +73,7 @@ export function JobDetailHeader({ job }: { job: JobDetail }) {
                 </ApplicationButton>
                 <SaveJobButton job={job} showLabel />
             </div></CandidateAction>
+            <div className="mt-3"><ReportButton target="jobs" targetId={job.id} targetTitle={job.title} /></div>
         </section>
     );
 }

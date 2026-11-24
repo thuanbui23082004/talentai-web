@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { mockProblem } from '@/server/bff/mock-adapter';
 import { ADMIN_MOCK_COOKIE, getRecruiterMockStore } from '@/server/bff/recruiter/mock-store';
 import { handleAdminRequest } from '@/server/bff/admin/admin-handler';
+import { readRequestIdentity } from '@/server/bff/auth/session';
 
 export async function handleAdminMockRequest(request: NextRequest, path: string): Promise<Response> {
   const scenario = request.headers.get('x-mock-scenario');
@@ -12,6 +13,10 @@ export async function handleAdminMockRequest(request: NextRequest, path: string)
   const adminWorkspace = path.startsWith('admin/') || request.headers.get('X-TalentAI-Workspace') === 'admin';
   const cookieName = adminWorkspace ? ADMIN_MOCK_COOKIE : 'talentai_mock_session';
   let session = store.sessions.get(request.cookies.get(cookieName)?.value ?? '');
+  if (!session && adminWorkspace && request.cookies.has('access_token')) {
+    const identity = await readRequestIdentity(request).catch(() => null);
+    if (identity?.user.role === 'admin') session = { role: 'admin', userId: identity.userId, csrf: identity.csrf };
+  }
   if (session?.expiresAt && session.expiresAt <= Date.now()) {
     store.sessions.delete(request.cookies.get(cookieName)?.value ?? '');
     session = undefined;

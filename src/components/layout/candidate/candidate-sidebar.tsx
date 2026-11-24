@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-    Bell, ChevronLeft, ChevronRight, CircleHelp, FileUser,
+    Bell, ChevronLeft, ChevronRight, FileUser, Flag,
     Search, Settings, SlidersHorizontal, UserRound,
 } from "lucide-react";
-import { AvailabilityButton } from "@/components/shared/availability-button";
 import {
     candidateNavigation, candidateProfileNavigation, candidateSavedJobs,
 } from "./candidate-navigation";
@@ -73,10 +72,8 @@ export function CandidateSidebar({
         </nav>
         <div className={`shrink-0 ${collapsed ? "space-y-2 p-2" : "space-y-2 p-3"}`}>
             {link({ href: "/candidate/settings", label: "Cài đặt tài khoản", Icon: Settings })}
-            <AvailabilityButton title="Hỗ trợ" description="Khu vực hỗ trợ ứng viên đang được hoàn thiện." className={itemClass}>
-                <span className="grid size-[34px] shrink-0 place-items-center rounded-[10px]"><CircleHelp aria-hidden="true" className="size-[18px]" /></span>
-                <span className={labelClass}>Hỗ trợ</span>
-            </AvailabilityButton>
+            {heading("Hỗ trợ")}
+            {link({ href: "/candidate/reports", label: "Báo cáo vi phạm", Icon: Flag })}
         </div>
     </div>;
 }

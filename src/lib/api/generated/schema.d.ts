@@ -2538,6 +2538,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/reports/companies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Báo cáo doanh nghiệp */
+        post: operations["reportCompanyViolation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Báo cáo tin tuyển dụng */
+        post: operations["reportJobViolation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/my": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Danh sách báo cáo của tôi */
+        get: operations["listMyViolationReports"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/reports": {
         parameters: {
             query?: never;
@@ -3102,6 +3153,43 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/admin/violation-reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Danh sách báo cáo vi phạm cho quản trị viên */
+        get: operations["listAdminViolationReports"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/violation-reports/{reportId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: string;
+            };
+            cookie?: never;
+        };
+        /** Chi tiết báo cáo vi phạm cho quản trị viên */
+        get: operations["getAdminViolationReport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Cập nhật trạng thái báo cáo vi phạm */
+        patch: operations["updateAdminViolationReport"];
         trace?: never;
     };
     "/admin/reports": {
@@ -5146,6 +5234,44 @@ export interface components {
             /** @default true */
             inApp: boolean;
             mutedTypes?: components["schemas"]["NotificationType"][];
+        };
+        AdminViolationReportUpdate: {
+            /** @enum {string} */
+            status: "INVESTIGATING" | "RESOLVED" | "DISMISSED";
+            adminNote?: string;
+        };
+        ViolationReportInput: {
+            targetId: string;
+            targetTitle?: string;
+            /** @enum {string} */
+            reason: "FRAUD" | "SPAM" | "FAKE_INFO" | "SALARY_SCAM" | "INAPPROPRIATE_CONTENT" | "OTHER";
+            description: string;
+            /** Format: uri */
+            evidenceUrl?: string;
+        };
+        ViolationReport: {
+            id: string;
+            reporterUserId?: string;
+            /** @enum {string} */
+            targetType: "JOB" | "COMPANY";
+            targetId: string;
+            targetTitle?: string;
+            reason: components["schemas"]["ViolationReportInput"]["reason"];
+            description: string;
+            evidenceUrl?: string;
+            /** @enum {string} */
+            status: "PENDING" | "INVESTIGATING" | "RESOLVED" | "DISMISSED";
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt?: string;
+            adminNote?: string;
+            /** Format: date-time */
+            resolvedAt?: string;
+        };
+        ViolationReportPage: {
+            items: components["schemas"]["ViolationReport"][];
+            meta: components["schemas"]["PageMeta"];
         };
         ReportCreateRequest: {
             category: components["schemas"]["ReportCategory"];
@@ -9826,6 +9952,75 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
+    reportCompanyViolation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViolationReportInput"];
+            };
+        };
+        responses: {
+            /** @description Đã gửi báo cáo */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    reportJobViolation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViolationReportInput"];
+            };
+        };
+        responses: {
+            /** @description Đã gửi báo cáo */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listMyViolationReports: {
+        parameters: {
+            query?: {
+                /** @description Trang (từ 1). */
+                page?: components["parameters"]["Page"];
+                /** @description Số phần tử mỗi trang. */
+                pageSize?: components["parameters"]["PageSize"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Danh sách báo cáo */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViolationReportPage"];
+                };
+            };
+        };
+    };
     listMyReports: {
         parameters: {
             query?: {
@@ -10759,6 +10954,83 @@ export interface operations {
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             500: components["responses"]["InternalError"];
+        };
+    };
+    listAdminViolationReports: {
+        parameters: {
+            query?: {
+                targetType?: "JOB" | "COMPANY";
+                status?: "PENDING" | "INVESTIGATING" | "RESOLVED" | "DISMISSED";
+                /** @description Trang (từ 1). */
+                page?: components["parameters"]["Page"];
+                /** @description Số phần tử mỗi trang. */
+                pageSize?: components["parameters"]["PageSize"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Danh sách báo cáo */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViolationReportPage"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getAdminViolationReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Chi tiết báo cáo */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViolationReport"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    updateAdminViolationReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reportId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminViolationReportUpdate"];
+            };
+        };
+        responses: {
+            /** @description Đã cập nhật báo cáo */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            403: components["responses"]["Forbidden"];
         };
     };
     adminListReports: {

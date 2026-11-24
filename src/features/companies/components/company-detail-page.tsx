@@ -13,6 +13,7 @@ import {
 import { AvailabilityButton } from "@/components/shared/availability-button";
 import { CandidateAction } from "@/features/auth";
 import { CompanyCard } from "@/components/shared/company-card";
+import { ReportButton } from "@/features/reports";
 import { LocationMap } from "@/components/shared/location-map";
 import { AppDownloadBanner } from "@/components/shared/app-download-banner";
 import { CompanyIntroduction } from "./company-introduction";
@@ -118,6 +119,9 @@ export function CompanyDetailPage({
                                     Lĩnh vực: {industry}
                                 </span>
                             )}
+                        </div>
+                        <div className="mt-4">
+                            <ReportButton target="companies" targetId={company.id} targetTitle={company.name} />
                         </div>
                     </div>
                     <div className="flex flex-wrap gap-2 sm:self-end">

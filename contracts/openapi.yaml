@@ -5627,6 +5627,54 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '500':
           $ref: '#/components/responses/InternalError'
+  /reports/companies:
+    post:
+      operationId: reportCompanyViolation
+      summary: Báo cáo doanh nghiệp
+      security:
+      - cookieAuth: []
+        csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ViolationReportInput'
+      responses:
+        '204':
+          description: Đã gửi báo cáo
+  /reports/jobs:
+    post:
+      operationId: reportJobViolation
+      summary: Báo cáo tin tuyển dụng
+      security:
+      - cookieAuth: []
+        csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ViolationReportInput'
+      responses:
+        '204':
+          description: Đã gửi báo cáo
+  /reports/my:
+    get:
+      operationId: listMyViolationReports
+      summary: Danh sách báo cáo của tôi
+      security:
+      - cookieAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Danh sách báo cáo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ViolationReportPage'
   /reports:
     post:
       tags:
@@ -6910,6 +6958,75 @@ paths:
           $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/InternalError'
+  /admin/violation-reports:
+    get:
+      operationId: listAdminViolationReports
+      summary: Danh sách báo cáo vi phạm cho quản trị viên
+      security:
+      - cookieAuth: []
+      parameters:
+      - name: targetType
+        in: query
+        schema:
+          type: string
+          enum: [JOB, COMPANY]
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum: [PENDING, INVESTIGATING, RESOLVED, DISMISSED]
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Danh sách báo cáo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ViolationReportPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /admin/violation-reports/{reportId}:
+    parameters:
+    - name: reportId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    get:
+      operationId: getAdminViolationReport
+      summary: Chi tiết báo cáo vi phạm cho quản trị viên
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: Chi tiết báo cáo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ViolationReport'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      operationId: updateAdminViolationReport
+      summary: Cập nhật trạng thái báo cáo vi phạm
+      security:
+      - cookieAuth: []
+        csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminViolationReportUpdate'
+      responses:
+        '204':
+          description: Đã cập nhật báo cáo
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /admin/reports:
     get:
       tags:
@@ -11407,6 +11524,80 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NotificationType'
+    AdminViolationReportUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [INVESTIGATING, RESOLVED, DISMISSED]
+        adminNote:
+          type: string
+          maxLength: 2000
+    ViolationReportInput:
+      type: object
+      required: [targetId, reason, description]
+      properties:
+        targetId:
+          type: string
+        targetTitle:
+          type: string
+          maxLength: 255
+        reason:
+          type: string
+          enum: [FRAUD, SPAM, FAKE_INFO, SALARY_SCAM, INAPPROPRIATE_CONTENT, OTHER]
+        description:
+          type: string
+          maxLength: 3000
+        evidenceUrl:
+          type: string
+          format: uri
+          maxLength: 2048
+    ViolationReport:
+      type: object
+      required: [id, targetType, targetId, reason, description, status, createdAt]
+      properties:
+        id:
+          type: string
+        reporterUserId:
+          type: string
+        targetType:
+          type: string
+          enum: [JOB, COMPANY]
+        targetId:
+          type: string
+        targetTitle:
+          type: string
+        reason:
+          $ref: '#/components/schemas/ViolationReportInput/properties/reason'
+        description:
+          type: string
+        evidenceUrl:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, INVESTIGATING, RESOLVED, DISMISSED]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        adminNote:
+          type: string
+        resolvedAt:
+          type: string
+          format: date-time
+    ViolationReportPage:
+      type: object
+      required: [items, meta]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ViolationReport'
+        meta:
+          $ref: '#/components/schemas/PageMeta'
     ReportCreateRequest:
       type: object
       required:

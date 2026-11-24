@@ -39,11 +39,15 @@ import { handleJobApplicationDetail } from "./recruiter/job-application-detail-s
 import { handleJobApplicantStatus } from "./recruiter/job-applicant-status-service";
 import { handleNotifications, isNotificationRequest } from "./notifications/service";
 import { handleMatchingPreview } from "./candidate/matching-preview";
+import { handleViolationReports, isViolationReportRequest } from "./reports/service";
+import { handleAdminViolationReports, isAdminViolationReportRequest } from "./admin/violation-reports-service";
 
 export async function handleBffRequest(request: Request): Promise<Response> {
     try {
         if (new URL(request.url).pathname === "/api/bff/cv" && request.method === "POST")
             return handleCvTemplateDraft(request);
+        if (isAdminViolationReportRequest(request) && (getServerEnv().COMPANY_DATA_MODE ?? getServerEnv().DATA_MODE) === "real")
+            return handleAdminViolationReports(request, getGatewayApiUrl(getServerEnv().BACKEND_API_URL));
         const adminPath = new URL(request.url).pathname.replace(
             "/api/bff/",
             "",
@@ -51,7 +55,8 @@ export async function handleBffRequest(request: Request): Promise<Response> {
         if (
             (adminPath.startsWith("admin/") ||
                 request.headers.get("X-TalentAI-Workspace") === "admin") &&
-            getServerEnv().DATA_MODE === "mock"
+            getServerEnv().DATA_MODE === "mock" &&
+            !isAuthRequest(request)
         ) {
             return await handleAdminMockRequest(
                 request instanceof NextRequest
@@ -67,6 +72,8 @@ export async function handleBffRequest(request: Request): Promise<Response> {
         if (isAuthRequest(request)) return await handleAuthRequest(request);
         const env = getServerEnv();
         const gatewayApiUrl = getGatewayApiUrl(env.BACKEND_API_URL);
+        if (isViolationReportRequest(request))
+            return handleViolationReports(request, (env.COMPANY_DATA_MODE ?? env.DATA_MODE) === "real" ? gatewayApiUrl : undefined);
         if (new URL(request.url).pathname === "/api/bff/matching/previews") {
             const matchingMode = env.MATCHING_DATA_MODE ??
                 ((env.PROFILE_DATA_MODE ?? env.DATA_MODE) === "real" &&

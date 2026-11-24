@@ -335,3 +335,24 @@ Thư viện 6 mẫu cho ứng viên mở editor 2 cột, tự điền từ GET p
 
 Số hồ sơ đã ứng tuyển lấy từ `GET /candidate/application-tracking` (`meta.totalItems`); lời mời chờ phản hồi lấy từ `GET /candidate/interviews` (trạng thái `scheduled` và `pending`). Có trạng thái tải, lỗi và thử lại. Swagger profile-service hiện chưa có API dashboard/lượt xem hồ sơ; ô lượt xem hiển thị chưa có dữ liệu. Bỏ các số minh họa 12/148/3 và câu 18 việc làm phù hợp 90%+; các thẻ gợi ý phía dưới vẫn ghi rõ là minh họa.
 
+
+## Báo cáo vi phạm
+
+- Ứng viên có thể báo cáo tin tuyển dụng hoặc công ty từ trang chi tiết qua popup với lý do, mô tả và liên kết bằng chứng tùy chọn. Trang /candidate/reports trong mục Hỗ trợ hiển thị báo cáo của tài khoản, trạng thái, phân trang và số liệu tổng cùng số liệu theo trang.
+- BFF xử lý GET /reports/my, POST /reports/jobs và POST /reports/companies; khi company service ở real, BFF chuyển sang /api/v1/reports/* với bearer token sau khi xác thực session và kiểm tra CSRF cho POST. Mock lưu riêng theo tài khoản trong bộ nhớ. Số đếm trạng thái trên trang chỉ áp dụng cho trang hiện tại vì API chỉ trả tổng số báo cáo, không trả tổng theo trạng thái.
+
+
+- Đăng nhập admin trên web xác thực qua auth-service/gateway ngay cả khi DATA_MODE=mock; các trang quản trị mock chấp nhận phiên admin thật đã xác thực. Admin mock adapter vẫn dùng được trực tiếp trong test.
+
+
+- Trang /admin/reports dùng API thật của company service khi COMPANY_DATA_MODE=real: BFF /admin/violation-reports ánh xạ GET danh sách/chi tiết và PATCH trạng thái sang /api/v1/admin/reports. Danh sách lọc loại đối tượng/trạng thái, phân trang 1-based ở FE và 0-based ở backend; bốn số đếm trạng thái lấy bằng các truy vấn có lọc. Chế độ mock giữ màn quản lý báo cáo cũ.
+
+
+- POST báo cáo ở BFF trả 204 khi upstream trả HTTP 2xx; UI không kiểm tra lại JSON của lệnh ghi để tránh báo 503 sau khi backend đã lưu. Danh sách GET vẫn kiểm tra schema trước khi hiển thị.
+
+
+- PATCH trạng thái báo cáo admin trả 204 từ BFF khi backend trả HTTP 2xx. Form hiển thị xác nhận ngay cạnh nút Lưu và tải lại chi tiết; không kiểm tra body của lệnh ghi để tránh báo lỗi sau khi backend đã cập nhật.
+
+
+- Chi tiết báo cáo admin hiển thị nội dung tin bị báo cáo từ GET công khai /jobs/{jobId} và liên kết mở toàn bộ tin; nếu tin đã đóng hoặc không còn công khai thì giữ thông tin snapshot trong báo cáo và báo không tải được tin. API admin khóa/ẩn tin thật chưa có trong backend local, nên đổi trạng thái báo cáo không tự khóa tin.
+

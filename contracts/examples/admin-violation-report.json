@@ -1,0 +1,15 @@
+{
+  "id": "a3b69c52-6bd7-4c30-b0b7-ae92312cc942",
+  "reporterUserId": "90e59821-b616-446b-87ee-8233947071ee",
+  "targetType": "JOB",
+  "targetId": "ad783432-e932-4678-bc41-61821e4924d1",
+  "targetTitle": "Backend Developer",
+  "reason": "FRAUD",
+  "description": "Tin tuyển dụng yêu cầu đóng tiền trước khi phỏng vấn",
+  "evidenceUrl": null,
+  "status": "PENDING",
+  "adminNote": null,
+  "resolvedAt": null,
+  "createdAt": "2026-11-24T10:00:00Z",
+  "updatedAt": "2026-11-24T10:00:00Z"
+}
