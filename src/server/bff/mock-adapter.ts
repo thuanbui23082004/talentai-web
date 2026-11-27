@@ -12,10 +12,13 @@ import { jobCategories } from "@/mocks/fixtures/job-categories";
 import { searchMockCompanies, getMockCompany, getMockCompanyJobs, getMockCompanyCatalogs } from "./public/mock-companies";
 import { handleMockApplications } from "./candidate/mock-applications";
 import { handleMockSavedJobs } from "./candidate/mock-saved-jobs";
+import { handleCurrentSubscription, handleSubscriptionOrder, isSubscriptionOrderRequest } from './recruiter/subscription-checkout';
 
 const mockJobDetails = createMockJobDetails(mockJobs);
 
 export async function handleMockRequest(request: Request, _targetPath?: string): Promise<Response> {
+  if (new URL(request.url).pathname === '/api/bff/subscriptions/me') return handleCurrentSubscription(request);
+  if (isSubscriptionOrderRequest(request)) return handleSubscriptionOrder(request);
   void _targetPath;
   const targetPath = new URL(request.url).pathname.replace('/api/bff/', '');
   const nextRequest = new NextRequest(request.url, {

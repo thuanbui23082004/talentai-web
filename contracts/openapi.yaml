@@ -66,6 +66,8 @@ tags:
   description: Tạo, gửi, đổi, hủy lịch phỏng vấn và ghi kết quả.
 - name: Recruiter Stats
   description: Thống kê tuyển dụng.
+- name: Recruiter Services
+  description: Danh mục gói dịch vụ dành cho nhà tuyển dụng.
 - name: Notifications
   description: Thông báo trong ứng dụng và tùy chọn nhận thông báo.
 - name: Reports
@@ -2521,6 +2523,127 @@ paths:
               schema: { $ref: '#/components/schemas/RecruiterMatchRankingPage' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+  /orders:
+    post:
+      tags: [Recruiter Services]
+      operationId: createSubscriptionOrder
+      summary: Tạo đơn mua gói qua Payment Service, chưa kích hoạt thuê bao
+      security:
+      - cookieAuth: []
+        csrfToken: []
+      x-roles: [recruiter]
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema: { type: string, format: uuid }
+        description: Giữ nguyên khóa khi thử lại cùng một lần mua.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateSubscriptionOrder' }
+      responses:
+        '201':
+          description: Đơn hàng kèm link hoặc mã QR
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubscriptionOrder' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+  /orders/{id}:
+    parameters:
+    - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [Recruiter Services]
+      operationId: getSubscriptionOrder
+      summary: Chi tiết đơn từ Payment Service
+      x-roles: [recruiter]
+      responses:
+        '200':
+          description: Đơn hàng của tài khoản hiện tại
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubscriptionOrder' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+  /orders/{id}/status:
+    parameters:
+    - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [Recruiter Services]
+      operationId: getSubscriptionOrderStatus
+      summary: Kiểm tra trạng thái thanh toán để polling
+      x-roles: [recruiter]
+      responses:
+        '200':
+          description: Trạng thái do Payment Service xác nhận
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubscriptionOrderStatus' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+  /orders/{id}/cancel:
+    parameters:
+    - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [Recruiter Services]
+      operationId: cancelSubscriptionOrder
+      summary: Hủy đơn đang chờ thanh toán
+      security:
+      - cookieAuth: []
+        csrfToken: []
+      x-roles: [recruiter]
+      responses:
+        '200':
+          description: Đơn sau khi hủy
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubscriptionOrder' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+  /subscriptions/me:
+    get:
+      tags: [Recruiter Services]
+      operationId: getMySubscription
+      summary: Gói hiện tại và hạn mức từ Subscription Service
+      x-roles: [recruiter]
+      responses:
+        '200':
+          description: Thuê bao hiện tại
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CurrentSubscription' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+  /plans:
+    get:
+      tags: [Recruiter Services]
+      operationId: listSubscriptionPlans
+      summary: Danh sách gói tuyển dụng đang hoạt động
+      security: []
+      responses:
+        '200':
+          description: Danh sách gói từ Subscription Service
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SubscriptionPlan' }
+        '422': { $ref: '#/components/responses/ValidationError' }
         '503': { $ref: '#/components/responses/ServiceUnavailable' }
   /matching/previews:
     post:
@@ -8207,6 +8330,86 @@ components:
       - user
       - application
       - system
+    CreateSubscriptionOrder:
+      type: object
+      additionalProperties: false
+      description: Phạm vi FE mua gói. Bỏ amount để Payment Service quyết định giá; bỏ paymentMethod để dùng VietQR mặc định.
+      required: [itemType, itemId, returnUrl, cancelUrl]
+      properties:
+        itemType: { type: string, enum: [SUBSCRIPTION] }
+        itemId: { type: string, format: uuid }
+        paymentMethod: { type: string, enum: [MOMO, ZALOPAY] }
+        returnUrl: { type: string, format: uri }
+        cancelUrl: { type: string, format: uri }
+    SubscriptionOrderState:
+      type: string
+      enum: [CREATED, PENDING, PAID, FAILED, CANCELLED, EXPIRED, REFUNDED]
+    SubscriptionOrderStatus:
+      type: object
+      required: [orderId, status]
+      properties:
+        orderId: { type: string, format: uuid }
+        orderCode: { type: integer, format: int64 }
+        status: { $ref: '#/components/schemas/SubscriptionOrderState' }
+        paymentUrl: { type: string, nullable: true }
+        qrCodeUrl: { type: string, nullable: true }
+        expiresAt: { type: string, format: date-time, nullable: true }
+    SubscriptionOrder:
+      allOf:
+      - $ref: '#/components/schemas/SubscriptionOrderStatus'
+      - type: object
+        required: [itemType, itemId, amount, currency]
+        properties:
+          userId: { type: string, format: uuid }
+          itemType: { type: string, enum: [SUBSCRIPTION, JOB_BOOST, CV_VIEW_CREDITS] }
+          itemId: { type: string }
+          amount: { type: number, minimum: 0 }
+          currency: { type: string }
+          paymentProvider: { type: string }
+          description: { type: string, nullable: true }
+          createdAt: { type: string, format: date-time }
+          updatedAt: { type: string, format: date-time }
+    CurrentSubscription:
+      type: object
+      description: Theo SubscriptionResponse của Subscription Service; có thể chưa có bản ghi thuê bao.
+      properties:
+        subscriptionId: { type: string, format: uuid, nullable: true }
+        plan:
+          type: object
+          nullable: true
+          properties:
+            code: { type: string }
+            name: { type: string }
+        status: { type: string, nullable: true, description: 'ACTIVE, EXPIRED hoặc CANCELLED' }
+        startedAt: { type: string, format: date-time, nullable: true }
+        expiresAt: { type: string, format: date-time, nullable: true }
+        daysRemaining: { type: integer, nullable: true }
+        quotas:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              limit: {}
+              used: { type: integer }
+              remaining: {}
+    SubscriptionPlan:
+      type: object
+      required: [id, code, name, price, currency, durationDays, features]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        price: { type: number, minimum: 0 }
+        currency: { type: string }
+        durationDays: { type: integer, minimum: 1 }
+        features:
+          type: object
+          additionalProperties:
+            oneOf:
+            - { type: integer }
+            - { type: boolean }
+            - { type: string }
     NotificationType:
       type: string
       enum:

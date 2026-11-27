@@ -1,33 +1,97 @@
 'use client';
+
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Check, Sparkles, X } from 'lucide-react';
+import { Check, Minus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/shared/empty-state';
+import { FeedbackState } from '@/components/shared/feedback-state';
+import { useSubscriptionPlans } from '../hooks/use-subscription-plans';
+import { useCurrentSubscription } from '../hooks/use-current-subscription';
+import { formatDate } from '@/lib/utils';
+import { planFeatureLabel, planFeatureValue, planPrice } from '../plan-presentation';
+import { ServiceFrame } from './service-frame';
+import { CheckoutDialog } from './checkout-dialog';
+import { CheckoutResume } from './checkout-resume';
+import type { SubscriptionPlan } from '../types';
 
-import { quotePlan, isOfferActive } from '@/features/recruiter-services/pricing';
-import type { BillingCycle, ServicePlan, ServiceOffer } from '@/features/recruiter-services/schemas';
-import { ServiceFrame } from '@/features/recruiter-services/components/service-frame';
-import { vietnamDay } from '@/features/interviews';
+export function PricingPage() {
+    const t = useTranslations('RecruiterServices');
+    const query = useSubscriptionPlans();
+    const current = useCurrentSubscription();
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [checkoutPlan, setCheckoutPlan] = useState<SubscriptionPlan>();
+    const benefitsRef = useRef<HTMLElement>(null);
+    const plans = query.data ?? [];
+    const selectedPlan = plans.find(plan => plan.id === selectedId);
+    const featureKeys = [...new Set(plans.flatMap(plan => Object.keys(plan.features)))];
 
-export function PricingPage({ initialOffer, invalidOffer = false, plans: mockRecruiterPlans, offers: mockRecruiterOffers }: { initialOffer?: string; invalidOffer?: boolean; plans: ServicePlan[]; offers: ServiceOffer[] }) {
-  const t = useTranslations('RecruiterServices');
-  const router = useRouter();
-  const [today] = useState(() => vietnamDay(new Date().toISOString()));
-  const [offerCode, setOfferCode] = useState(initialOffer); const [queryInvalid, setQueryInvalid] = useState(invalidOffer);
-  const offer = mockRecruiterOffers.find(item => item.code === offerCode && isOfferActive(item, today));
-  const [cycle, setCycle] = useState<BillingCycle>(() => mockRecruiterOffers.find(item => item.code === initialOffer)?.cycle ?? 'month');
-  const [selected, setSelected] = useState<ServicePlan['id'] | null>(null);
-  const selectedPlan = mockRecruiterPlans.find(item => item.id === selected);
-  const money = (value: number) => new Intl.NumberFormat('vi', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value);
-  useEffect(() => { if (!selected) return; const frame = requestAnimationFrame(() => document.getElementById('plan-benefits')?.scrollIntoView({ behavior: 'smooth', block: 'start' })); return () => cancelAnimationFrame(frame); }, [selected]);
-  const quote = selectedPlan ? quotePlan(selectedPlan, cycle, offer, today) : null;
-  const benefitKeys = ['benefitPipeline', 'benefitInterviews', 'benefitStatistics'] as const;
-  return <ServiceFrame active="pricing"><header className="service-page-heading"><span className="service-eyebrow">{t('heroTag')}</span><h1>{t('pricingTitle')}</h1><p>{t('pricingSubtitle')}</p></header><div className="service-cycle" role="group" aria-label={t('cycle')}>{(['month', 'year'] as const).map(value => <Button key={value} variant={cycle === value ? 'default' : 'outline'} aria-pressed={cycle === value} onClick={() => setCycle(value)}>{t(value)}</Button>)}<span>{t('yearSave')}</span></div>
-    {(offerCode || queryInvalid) && <section className="service-offer-banner" aria-label={t('promotions')}><p role={offer ? 'status' : 'alert'}>{offer ? t('viewingOffer', { code: offer.code }) : t('offerUnavailable')}</p><Button variant="ghost" size="sm" onClick={() => { setOfferCode(undefined); setQueryInvalid(false); router.replace('/recruiter/pricing', { scroll: false }); }}>{t('removeOffer')}</Button></section>}
-    <div className="service-plans-grid">{mockRecruiterPlans.map(plan => { const price = quotePlan(plan, cycle, offer, today); return <article className={`service-plan-card${plan.featured ? ' is-featured' : ''}`} key={plan.id}>{plan.featured && <span className="service-plan-recommended"><Sparkles size={13} />{t('recommended')}</span>}<h2>{t(`plans.${plan.id}.name`)}</h2><p className="service-plan-description">{t(`plans.${plan.id}.description`)}</p><div className="service-plan-price">{price.cycleSaving + price.offerSaving > 0 && <del>{money(price.listPrice)}</del>}<strong>{price.total === 0 ? t('free') : money(price.total)}</strong>{price.total > 0 && <span>{t(cycle === 'month' ? 'perMonth' : 'perYear')}</span>}</div><ul><li><Check size={15} />{t('jobs', { count: plan.jobs })}</li><li><Check size={15} />{t('analyses', { count: plan.analyses })}</li>{benefitKeys.map(key => <li key={key}><Check size={15} />{t(key)}</li>)}</ul><Button variant={plan.featured ? 'default' : 'outline'} onClick={() => setSelected(plan.id)} aria-expanded={selected === plan.id}>{t('viewBenefits')}</Button>{plan.id === 'starter' && <Link className="service-start-free" href="/recruiter/jobs/new">{t('start')}</Link>}{offer && !price.eligible && plan.monthlyPrice > 0 && <p className="service-eligibility">{t('notEligible')}</p>}</article>; })}</div>
-    {selectedPlan && quote && <section className="service-benefit-panel" id="plan-benefits" aria-label={t('selectedTitle', { name: t(`plans.${selectedPlan.id}.name`) })}><header><h2>{t('selectedTitle', { name: t(`plans.${selectedPlan.id}.name`) })}</h2><Button size="sm" variant="ghost" aria-label={t('close')} onClick={() => setSelected(null)}><X size={15} /></Button></header><div className="service-benefit-grid"><ul><li>{t('jobs', { count: selectedPlan.jobs })}</li><li>{t('analyses', { count: selectedPlan.analyses })}</li>{benefitKeys.map(key => <li key={key}>{t(key)}</li>)}</ul><dl><div><dt>{t('listPrice')}</dt><dd>{money(quote.listPrice)}</dd></div>{quote.cycleSaving > 0 && <div><dt>{t('cycleSaving')}</dt><dd>−{money(quote.cycleSaving)}</dd></div>}{quote.offerSaving > 0 && <div><dt>{t('offerSaving')}</dt><dd>−{money(quote.offerSaving)}</dd></div>}<div className="service-total"><dt>{t('total')}</dt><dd>{quote.total === 0 ? t('free') : money(quote.total)}</dd></div></dl></div><Link className="service-primary-link" href="/recruiter/services">{t('useTools')}</Link></section>}
-    <section className="service-comparison"><h2>{t('compare')}</h2><div className="service-table-scroll"><table><thead><tr><th>{t('feature')}</th>{mockRecruiterPlans.map(plan => <th key={plan.id}>{t(`plans.${plan.id}.name`)}</th>)}</tr></thead><tbody><tr><th>{t('jobsLabel')}</th>{mockRecruiterPlans.map(plan => <td key={plan.id}>{plan.jobs}</td>)}</tr><tr><th>{t('analysesLabel')}</th>{mockRecruiterPlans.map(plan => <td key={plan.id}>{plan.analyses}</td>)}</tr>{(['pipelineLabel', 'interviewLabel', 'statisticsLabel'] as const).map(key => <tr key={key}><th>{t(key)}</th>{mockRecruiterPlans.map(plan => <td key={plan.id}><Check size={15} aria-label={t('included')} /></td>)}</tr>)}</tbody></table></div></section>
-  </ServiceFrame>;
+    useEffect(() => {
+        if (!selectedId) return;
+        benefitsRef.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    }, [selectedId]);
+
+    return <ServiceFrame active="pricing">
+        <header className="service-page-heading">
+            <span className="service-eyebrow">{t('heroTag')}</span>
+            <h1>{t('pricingTitle')}</h1>
+            <p>So sánh giá, thời hạn và quyền lợi theo nhu cầu tuyển dụng của doanh nghiệp.</p>
+        </header>
+
+        <section className="mb-6 rounded-xl border border-border bg-card p-5" aria-label="Gói dịch vụ hiện tại" aria-live="polite">
+            {current.isPending ? <Skeleton className="h-12 w-full" aria-label="Đang tải gói hiện tại" /> : current.isError ? <div className="flex flex-wrap items-center justify-between gap-3"><p role="alert">Chưa thể tải gói hiện tại. Vui lòng thử lại.</p><Button variant="outline" onClick={() => void current.refetch()}>Tải lại gói hiện tại</Button></div> : <>
+                <p className="font-semibold">{current.data?.status === 'ACTIVE' && current.data.plan ? `Đang sử dụng: ${current.data.plan.name}` : 'Bạn chưa có gói đang hoạt động'}</p>
+                {current.data?.status === 'ACTIVE' && current.data.expiresAt && <p className="mt-1 text-sm text-muted-foreground">Hiệu lực đến {formatDate(current.data.expiresAt)}</p>}
+            </>}
+        </section>
+
+        <CheckoutResume plans={plans} onResume={setCheckoutPlan} />
+        {query.isPending ? <div className="service-plans-grid" role="status" aria-label="Đang tải các gói dịch vụ">
+            {[1, 2, 3].map(key => <Skeleton key={key} className="h-96 rounded-2xl" />)}
+        </div> : query.isError ? <FeedbackState kind="error" title="Không thể tải các gói dịch vụ" description="Vui lòng thử lại để xem bảng giá mới nhất." action={<Button variant="outline" onClick={() => void query.refetch()}>Thử lại</Button>} /> : plans.length === 0 ? <EmptyState title="Chưa có gói dịch vụ" description="Các gói đang hoạt động sẽ được hiển thị tại đây." /> : <>
+            <div className="service-plans-grid">
+                {plans.map(plan => <article className={`service-plan-card${selectedId === plan.id ? ' is-featured' : ''}`} key={plan.id}>
+                    <span className="mb-3 text-xs font-semibold tracking-wider text-primary">{plan.code}</span>
+                    <h2>{plan.name}</h2>
+                    {current.data?.status === 'ACTIVE' && current.data.plan?.code === plan.code && <span className="mb-3 self-start rounded-lg bg-secondary px-3 py-1 text-xs font-semibold text-primary">Đang sử dụng</span>}
+                    <p className="service-plan-description">{plan.description}</p>
+                    <div className="service-plan-price"><strong>{planPrice(plan)}</strong><span>Thời hạn {plan.durationDays} ngày</span></div>
+                    <ul>
+                        {Object.entries(plan.features).map(([key, value]) => <li key={key}>
+                            {value === false || value === 0 ? <Minus size={15} aria-hidden="true" /> : <Check size={15} aria-hidden="true" />}
+                            <span>{planFeatureLabel(key)}: <strong className="font-semibold">{planFeatureValue(key, value)}</strong></span>
+                        </li>)}
+                    </ul>
+                    <Button variant={selectedId === plan.id ? 'default' : 'outline'} onClick={() => setSelectedId(plan.id)} aria-expanded={selectedId === plan.id} aria-controls={selectedId === plan.id ? 'plan-benefits' : undefined}>{t('viewBenefits')}</Button>
+                    {plan.price > 0 && <Button className="mt-3" aria-label={`Đăng ký ${plan.name}`} disabled={current.isPending || current.isError || current.data?.status === 'ACTIVE' && current.data.plan?.code === plan.code} onClick={() => setCheckoutPlan(plan)}>{current.data?.status === 'ACTIVE' && current.data.plan?.code === plan.code ? 'Đang sử dụng' : 'Đăng ký gói'}</Button>}
+                    {plan.price === 0 && <Link className="service-start-free" href="/recruiter/jobs/new">{t('start')}</Link>}
+                </article>)}
+            </div>
+
+            {selectedPlan && <section ref={benefitsRef} className="service-benefit-panel" id="plan-benefits" aria-label={`Quyền lợi ${selectedPlan.name}`}>
+                <header><h2>Quyền lợi {selectedPlan.name}</h2><Button size="sm" variant="ghost" aria-label="Đóng chi tiết gói" onClick={() => setSelectedId(null)}><X size={15} /></Button></header>
+                <div className="service-benefit-grid">
+                    <ul>{Object.entries(selectedPlan.features).map(([key, value]) => <li key={key}>{planFeatureLabel(key)}: {planFeatureValue(key, value)}</li>)}</ul>
+                    <dl><div><dt>Thời hạn</dt><dd>{selectedPlan.durationDays} ngày</dd></div><div className="service-total"><dt>Giá gói</dt><dd>{planPrice(selectedPlan)}</dd></div></dl>
+                </div>
+                <Link className="service-primary-link" href="/recruiter/services">{t('useTools')}</Link>
+            </section>}
+
+            <section className="service-comparison">
+                <h2>{t('compare')}</h2>
+                <div className="service-table-scroll"><table>
+                    <caption className="sr-only">So sánh quyền lợi và thời hạn các gói dịch vụ</caption>
+                    <thead><tr><th scope="col">{t('feature')}</th>{plans.map(plan => <th scope="col" key={plan.id}>{plan.name}</th>)}</tr></thead>
+                    <tbody>
+                        <tr><th scope="row">Giá gói</th>{plans.map(plan => <td key={plan.id}>{planPrice(plan)}</td>)}</tr>
+                        <tr><th scope="row">Thời hạn</th>{plans.map(plan => <td key={plan.id}>{plan.durationDays} ngày</td>)}</tr>
+                        {featureKeys.map(key => <tr key={key}><th scope="row">{planFeatureLabel(key)}</th>{plans.map(plan => <td key={plan.id}>{planFeatureValue(key, plan.features[key])}</td>)}</tr>)}
+                    </tbody>
+                </table></div>
+            </section>
+        </>}
+        {checkoutPlan && <CheckoutDialog plan={checkoutPlan} onClose={() => setCheckoutPlan(undefined)} />}
+    </ServiceFrame>;
 }

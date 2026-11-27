@@ -29,7 +29,7 @@ describe('candidate detail validation', () => {
     const seed = mockCandidateDetails[0];
     const parsed = candidateDetailSchema.parse({ ...seed, profile: { ...seed.profile, nationalIdMasked: '********0000' } });
     expect(parsed.profile).not.toHaveProperty('nationalIdMasked');
-    expect(parsed.matching?.score).toBe(78);
+    expect(parsed.matching?.score).toBe(seed.matching?.score);
   });
   it('requires explicit confirmation for hiring/rejection', () => {
     expect(statusFormSchema.safeParse({ status: 'hired', round: '', note: '', confirmed: false }).success).toBe(false);
@@ -68,7 +68,7 @@ describe('candidate detail mock mutations', () => {
     expect(response.status).toBe(200);
     const detail = candidateDetailSchema.parse(await (await request(`recruiter/applications/${applicationId}`, authorization)).json());
     expect(detail.evaluation?.rating).toBe(4);
-    expect(detail.matching?.score).toBe(78);
+    expect(detail.matching?.score).toBe(mockCandidateDetails[0].matching?.score);
   });
   it('creates one interview for a repeated idempotency key and rejects overlaps', async () => {
     const authorization = auth();

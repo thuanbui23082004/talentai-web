@@ -1124,6 +1124,114 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Tạo đơn mua gói qua Payment Service, chưa kích hoạt thuê bao */
+        post: operations["createSubscriptionOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** Chi tiết đơn từ Payment Service */
+        get: operations["getSubscriptionOrder"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** Kiểm tra trạng thái thanh toán để polling */
+        get: operations["getSubscriptionOrderStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Hủy đơn đang chờ thanh toán */
+        post: operations["cancelSubscriptionOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/subscriptions/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Gói hiện tại và hạn mức từ Subscription Service */
+        get: operations["getMySubscription"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Danh sách gói tuyển dụng đang hoạt động */
+        get: operations["listSubscriptionPlans"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/matching/previews": {
         parameters: {
             query?: never;
@@ -3728,6 +3836,83 @@ export interface components {
         ReportCategory: "spam" | "fraud" | "inappropriate_content" | "discrimination" | "fake_company" | "harassment" | "other" | "feedback" | "bug";
         /** @enum {string} */
         ReportTargetType: "job" | "company" | "user" | "application" | "system";
+        /** @description Phạm vi FE mua gói. Bỏ amount để Payment Service quyết định giá; bỏ paymentMethod để dùng VietQR mặc định. */
+        CreateSubscriptionOrder: {
+            /** @enum {string} */
+            itemType: "SUBSCRIPTION";
+            /** Format: uuid */
+            itemId: string;
+            /** @enum {string} */
+            paymentMethod?: "MOMO" | "ZALOPAY";
+            /** Format: uri */
+            returnUrl: string;
+            /** Format: uri */
+            cancelUrl: string;
+        };
+        /** @enum {string} */
+        SubscriptionOrderState: "CREATED" | "PENDING" | "PAID" | "FAILED" | "CANCELLED" | "EXPIRED" | "REFUNDED";
+        SubscriptionOrderStatus: {
+            /** Format: uuid */
+            orderId: string;
+            /** Format: int64 */
+            orderCode?: number;
+            status: components["schemas"]["SubscriptionOrderState"];
+            paymentUrl?: string | null;
+            qrCodeUrl?: string | null;
+            /** Format: date-time */
+            expiresAt?: string | null;
+        };
+        SubscriptionOrder: components["schemas"]["SubscriptionOrderStatus"] & {
+            /** Format: uuid */
+            userId?: string;
+            /** @enum {string} */
+            itemType: "SUBSCRIPTION" | "JOB_BOOST" | "CV_VIEW_CREDITS";
+            itemId: string;
+            amount: number;
+            currency: string;
+            paymentProvider?: string;
+            description?: string | null;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        /** @description Theo SubscriptionResponse của Subscription Service; có thể chưa có bản ghi thuê bao. */
+        CurrentSubscription: {
+            /** Format: uuid */
+            subscriptionId?: string | null;
+            plan?: {
+                code?: string;
+                name?: string;
+            } | null;
+            /** @description ACTIVE, EXPIRED hoặc CANCELLED */
+            status?: string | null;
+            /** Format: date-time */
+            startedAt?: string | null;
+            /** Format: date-time */
+            expiresAt?: string | null;
+            daysRemaining?: number | null;
+            quotas?: {
+                [key: string]: {
+                    limit?: unknown;
+                    used?: number;
+                    remaining?: unknown;
+                };
+            };
+        };
+        SubscriptionPlan: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            description?: string | null;
+            price: number;
+            currency: string;
+            durationDays: number;
+            features: {
+                [key: string]: number | boolean | string;
+            };
+        };
         /** @enum {string} */
         NotificationType: "recruiter_new_application" | "payment_completed" | "payment_failed" | "subscription_expiring" | "auth_otp_requested" | "password_changed" | "application_submitted" | "application_status_changed" | "application_withdrawn" | "interview_invited" | "interview_updated" | "interview_cancelled" | "interview_response" | "interview_result" | "job_recommended" | "job_moderated" | "company_verification" | "account_locked" | "report_update" | "ai_task_completed" | "system";
         /** @enum {string} */
@@ -7903,6 +8088,163 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    createSubscriptionOrder: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Giữ nguyên khóa khi thử lại cùng một lần mua. */
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSubscriptionOrder"];
+            };
+        };
+        responses: {
+            /** @description Đơn hàng kèm link hoặc mã QR */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionOrder"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getSubscriptionOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Đơn hàng của tài khoản hiện tại */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionOrder"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getSubscriptionOrderStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Trạng thái do Payment Service xác nhận */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionOrderStatus"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    cancelSubscriptionOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Đơn sau khi hủy */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionOrder"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getMySubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Thuê bao hiện tại */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CurrentSubscription"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    listSubscriptionPlans: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Danh sách gói từ Subscription Service */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPlan"][];
+                };
+            };
+            422: components["responses"]["ValidationError"];
             503: components["responses"]["ServiceUnavailable"];
         };
     };

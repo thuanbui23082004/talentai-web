@@ -50,6 +50,14 @@ vòng điểm và các tab hồ sơ. Điểm Semantic/Skill, kỹ năng và nh�
 yêu cầu JD. Thiếu tiêu chí thì hiện chưa có nhận xét. Hồ sơ/kinh nghiệm lấy từ snapshot;
 lịch sử chỉ hiển thị mốc nộp đơn có trong dữ liệu. Nút cập nhật tải lại các query kết quả AI.
 
+Trang xếp hạng hiện đặt thông tin job và kết quả cùng cột; danh sách thứ hạng ở cột trái
+có chiều cao theo viewport, cuộn riêng trên desktop. Link xem hồ sơ dùng `?from=job`
+để mở đúng `JobApplicantDetail`. Các nút trạng thái dùng lại mutation của pipeline,
+gửi `version` và chỉ cho phép bước chuyển trong `JOB_APPLICANT_TRANSITIONS`; tuyển/từ
+chối cần xác nhận. Hồ sơ và kinh nghiệm trình bày theo section/timeline của hồ sơ cá nhân.
+Logo công ty lấy từ job. Application Service hiện chưa đưa `avatarUrl` vào snapshot
+ứng viên; avatar dùng component chung của trang cá nhân với fallback tên viết tắt.
+
 Kiểm thử bổ sung: `job-applicant-status-service.test.ts` kiểm tra payload/version, CSRF/quyền và lỗi/xung đột không retry;
 `recruiter-pipeline.spec.ts` kiểm tra phân trang, kéo thả, version mới, xung đột, đổi tin, empty/error/retry và mobile bằng API kiểm soát trong test.
 Chưa nghiệm thu thao tác cập nhật bằng tài khoản recruiter thật trên backend đang chạy.

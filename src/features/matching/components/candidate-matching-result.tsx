@@ -112,10 +112,10 @@ function CriterionCard({
     field?: FieldScore;
 }) {
     return (
-        <article className="min-w-0 break-words rounded-xl border border-border bg-secondary/20 p-4">
+        <article className="min-w-0 break-words rounded-xl border border-border bg-card p-5 sm:p-6">
             <div className="flex items-center justify-between gap-3">
-                <h4 className="font-semibold">{label}</h4>
-                <strong className="shrink-0 text-primary">
+                <h4 className="text-sm font-semibold sm:text-base">{label}</h4>
+                <strong className="shrink-0 rounded-full bg-secondary px-3 py-1 text-sm text-primary">
                     {field ? numberFormat.format(field.score) : "—"}/{maximum}
                 </strong>
             </div>
@@ -127,25 +127,13 @@ function CriterionCard({
                     }}
                 />
             </div>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            <p className="mt-4 whitespace-pre-line text-sm leading-7 text-muted-foreground">
                 {field?.reason || "Chưa có nhận xét cho tiêu chí này."}
             </p>
-            {field?.evidence && (
-                <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                    <span className="font-semibold text-foreground">
-                        Trong CV:{" "}
-                    </span>
-                    {field.evidence}
-                </p>
-            )}
-            {field?.requirement && (
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                    <span className="font-semibold text-foreground">
-                        Yêu cầu:{" "}
-                    </span>
-                    {field.requirement}
-                </p>
-            )}
+            {(field?.evidence || field?.requirement) && <dl className="mt-5 grid gap-4 border-t border-border pt-4 sm:grid-cols-2">
+                {field.evidence && <div className="min-w-0"><dt className="mb-2 text-xs font-semibold text-foreground">Dẫn chứng trong CV</dt><dd className="whitespace-pre-line text-sm leading-7 text-muted-foreground">{field.evidence}</dd></div>}
+                {field.requirement && <div className="min-w-0"><dt className="mb-2 text-xs font-semibold text-foreground">Yêu cầu công việc</dt><dd className="whitespace-pre-line text-sm leading-7 text-muted-foreground">{field.requirement}</dd></div>}
+            </dl>}
         </article>
     );
 }

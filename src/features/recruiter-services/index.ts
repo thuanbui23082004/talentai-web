@@ -2,6 +2,7 @@ export { planSchema } from './schemas';
 export { offerSchema } from './schemas';
 export { recruiterServiceMessages } from './messages';
 export { PricingPage } from './components/pricing-page';
+export { PaymentResultPage } from './components/payment-result-page';
 export { PaymentHistoryPage } from './components/payment-history-page';
 export { offerQuerySchema } from './schemas';
 export { PromotionsPage } from './components/promotions-page';

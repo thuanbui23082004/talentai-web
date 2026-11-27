@@ -20,13 +20,14 @@ export const envSchema = z.object({
     JOB_DATA_MODE: z.enum(["mock", "real"]).optional(),
     MATCHING_DATA_MODE: z.enum(["mock", "real"]).optional(),
     ADMIN_CATALOG_DATA_MODE: z.enum(["mock", "real"]).optional(),
+    SUBSCRIPTION_DATA_MODE: z.enum(["mock", "real"]).optional(),
     BACKEND_API_URL: backendApiUrl.optional(),
 }).superRefine((value, context) => {
-    if (value.DATA_MODE === "real" && !value.BACKEND_API_URL) {
+    if ((value.DATA_MODE === "real" || value.SUBSCRIPTION_DATA_MODE === "real") && !value.BACKEND_API_URL) {
         context.addIssue({
             code: "custom",
             path: ["BACKEND_API_URL"],
-            message: "DATA_MODE=real yêu cầu BACKEND_API_URL",
+            message: "Chế độ real yêu cầu BACKEND_API_URL",
         });
     }
 });
@@ -46,6 +47,7 @@ export function getServerEnv() {
         JOB_DATA_MODE: process.env.JOB_DATA_MODE || undefined,
         MATCHING_DATA_MODE: process.env.MATCHING_DATA_MODE || undefined,
         ADMIN_CATALOG_DATA_MODE: process.env.ADMIN_CATALOG_DATA_MODE || undefined,
+        SUBSCRIPTION_DATA_MODE: process.env.SUBSCRIPTION_DATA_MODE || undefined,
         BACKEND_API_URL: process.env.BACKEND_API_URL || undefined,
     });
 }

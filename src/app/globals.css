@@ -122,6 +122,15 @@
   --warning: #f07818;
   --warning-soft: #fff3e8;
   --warning-foreground: #ac4d08;
+  --rank-gold: #936209;
+  --rank-gold-soft: #fff3c4;
+  --rank-gold-border: #dfbf65;
+  --rank-silver: #526176;
+  --rank-silver-soft: #edf1f7;
+  --rank-silver-border: #bfcad9;
+  --rank-copper: #92502c;
+  --rank-copper-soft: #fbe9dc;
+  --rank-copper-border: #d7ab8d;
   --shadow-card: 0 2px 8px rgb(37 20 68 / 4%), 0 1px 2px rgb(37 20 68 / 3%);
   --shadow-float: 0 12px 40px rgb(70 0 155 / 10%);
   --shadow-button: 0 3px 6px rgb(101 37 197 / 12%);

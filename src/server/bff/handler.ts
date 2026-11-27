@@ -45,6 +45,8 @@ import { handleAdminViolationReports, isAdminViolationReportRequest } from "./ad
 import { handleAdminJobCategories, isAdminJobCategoriesRequest } from "./admin/job-categories-service";
 import { handleAdminCompanyVerification, isAdminCompanyVerificationRequest } from "./admin/company-verification-service";
 import { handleAdminDashboard, isAdminDashboardRequest } from "./admin/dashboard-service";
+import { handleSubscriptionPlans } from "./recruiter/subscription-plans";
+import { handleCurrentSubscription, handleSubscriptionOrder, isSubscriptionOrderRequest } from "./recruiter/subscription-checkout";
 
 export async function handleBffRequest(request: Request): Promise<Response> {
     try {
@@ -82,6 +84,12 @@ export async function handleBffRequest(request: Request): Promise<Response> {
         if (isAuthRequest(request)) return await handleAuthRequest(request);
         const env = getServerEnv();
         const gatewayApiUrl = getGatewayApiUrl(env.BACKEND_API_URL);
+        if (isSubscriptionOrderRequest(request))
+            return handleSubscriptionOrder(request, (env.SUBSCRIPTION_DATA_MODE ?? env.DATA_MODE) === 'real' ? env.BACKEND_API_URL : undefined);
+        if (new URL(request.url).pathname === '/api/bff/subscriptions/me')
+            return handleCurrentSubscription(request, (env.SUBSCRIPTION_DATA_MODE ?? env.DATA_MODE) === 'real' ? env.BACKEND_API_URL : undefined);
+        if (new URL(request.url).pathname === '/api/bff/plans')
+            return handleSubscriptionPlans(request, (env.SUBSCRIPTION_DATA_MODE ?? env.DATA_MODE) === 'real' ? gatewayApiUrl : undefined);
         if (isViolationReportRequest(request))
             return handleViolationReports(request, (env.COMPANY_DATA_MODE ?? env.DATA_MODE) === "real" ? gatewayApiUrl : undefined);
         if (new URL(request.url).pathname === "/api/bff/matching/previews") {

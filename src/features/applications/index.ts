@@ -11,6 +11,7 @@ export { recruiterCandidateMessages } from './messages';
 export type { RecruiterApplication } from './types';
 export { CandidateDetailPage } from './components/recruiter/candidate-detail';
 export { JobApplicantDetail } from './components/recruiter/job-applicant-detail';
+export { ApplicantStatusActions } from './components/recruiter/applicant-status-actions';
 export { candidateDetailMessages } from './candidate-detail-messages';
 export { RecruiterPipeline } from './components/recruiter/recruiter-pipeline';
 export { pipelineMessages } from './pipeline-messages';

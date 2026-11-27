@@ -1,0 +1,29 @@
+.application-match-panel .application-match-heading { display: flex; align-items: center; gap: 9px; margin-bottom: 18px; }
+.application-match-heading > span { display: grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; border-radius: 10px; color: var(--primary); background: var(--secondary); }
+.recruiter-app .application-match-panel .application-match-heading h2 { margin: 0; font-size: 14px; font-weight: 700; }
+.application-match-content { display: grid; gap: 20px; }
+.application-match-score { display: flex; align-items: center; gap: 14px; padding: 18px 12px; border: 1px solid var(--border); border-radius: 14px; background: linear-gradient(145deg, var(--secondary), var(--card)); }
+.application-match-ring { display: grid; width: 88px; height: 88px; flex-shrink: 0; place-items: center; padding: 6px; border-radius: 50%; }
+.application-match-ring > div { display: grid; width: 100%; height: 100%; place-items: center; border-radius: inherit; background: var(--card); }
+.application-match-ring strong { color: var(--primary); font-size: 27px; font-weight: 750; letter-spacing: -1px; }
+.application-match-score-label { font-size: 13px; font-weight: 600; line-height: 1.6; }
+.application-match-score-label small { display: block; margin-top: 5px; font-size: 12px; font-weight: 400; color: var(--muted-foreground); }
+.application-match-skills > header { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
+.application-match-skills > header svg { color: var(--primary); }
+.application-match-skills h3 { flex: 1; font-size: 12px; font-weight: 650; line-height: 1.6; }
+.application-match-count { display: grid; place-items: center; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 7px; background: var(--secondary); color: var(--primary); font-size: 11px; font-weight: 600; }
+.application-match-skills ul { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.application-match-skills li { padding: 5px 9px; border: 1px solid var(--border); border-radius: 7px; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.application-match-skills-positive li { border-color: transparent; background: var(--secondary); color: var(--primary); }
+.application-match-empty { margin: 0; padding: 10px 12px; border-radius: 8px; background: var(--muted); color: var(--muted-foreground); font-size: 12px; line-height: 1.7; }
+.application-match-explanation { padding-block: 14px; border-block: 1px solid var(--border); }
+.application-match-explanation summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; cursor: pointer; font-size: 12px; font-weight: 600; list-style: none; }
+.application-match-explanation summary::-webkit-details-marker { display: none; }
+.application-match-explanation summary svg { flex-shrink: 0; color: var(--muted-foreground); transition: transform .15s; }
+.application-match-explanation[open] summary svg { transform: rotate(180deg); }
+.application-match-explanation p { margin-top: 12px; white-space: pre-line; font-size: 12px; line-height: 1.9; color: var(--muted-foreground); }
+.application-match-footer { display: flex; align-items: flex-start; gap: 7px; color: var(--muted-foreground); font-size: 12px; line-height: 1.7; }
+.application-match-footer svg { flex-shrink: 0; margin-top: 3px; }
+.application-match-state { display: grid; gap: 12px; font-size: 13px; line-height: 1.7; color: var(--muted-foreground); }
+.application-match-explanation summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { .application-match-explanation summary svg { transition: none; } }

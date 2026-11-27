@@ -1,0 +1,47 @@
+[
+  {
+    "id": "11111111-0000-0000-0000-000000000001",
+    "code": "FREE",
+    "name": "Gói Khởi Động (Free)",
+    "description": "Gói miễn phí cơ bản dành cho nhà tuyển dụng mới trải nghiệm",
+    "price": 0,
+    "currency": "VND",
+    "durationDays": 30,
+    "features": {
+      "MAX_POSTS": 2,
+      "JOB_DISPLAY_DAYS": 15,
+      "CV_SEARCH_LIMIT": 0,
+      "AI_MATCHING": false
+    }
+  },
+  {
+    "id": "4a7f01c8-8924-42b7-a38f-9a489d81d290",
+    "code": "BASIC",
+    "name": "Gói Tiêu Chuẩn (Basic)",
+    "description": "Gói chuyên nghiệp đăng tối đa 10 tin tuyển dụng và tìm 50 hồ sơ ứng viên",
+    "price": 499000,
+    "currency": "VND",
+    "durationDays": 30,
+    "features": {
+      "MAX_POSTS": 10,
+      "JOB_DISPLAY_DAYS": 30,
+      "CV_SEARCH_LIMIT": 50,
+      "AI_MATCHING": true
+    }
+  },
+  {
+    "id": "7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e",
+    "code": "PRO",
+    "name": "Gói Nâng Cao (Pro)",
+    "description": "Gói cao cấp không giới hạn tính năng kèm AI Matching ưu tiên",
+    "price": 1499000,
+    "currency": "VND",
+    "durationDays": 30,
+    "features": {
+      "MAX_POSTS": 50,
+      "JOB_DISPLAY_DAYS": 60,
+      "CV_SEARCH_LIMIT": 200,
+      "AI_MATCHING": true
+    }
+  }
+]
