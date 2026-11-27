@@ -5,6 +5,7 @@ import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { useNotificationActions, useNotifications, useUnreadCount } from "../hooks/use-notifications";
+import { getNotificationLabel } from "../labels";
 
 export function RecruiterNotificationButton() {
     const [open, setOpen] = useState(false);
@@ -31,6 +32,7 @@ export function RecruiterNotificationButton() {
                     }}>
                         <span className={item.isRead ? "text-muted-foreground" : "font-semibold"}>{item.title}</span>
                         {item.body && <span className="mt-1 block text-xs text-muted-foreground">{item.body}</span>}
+                        <span className="mt-1 block text-xs font-medium text-primary">{getNotificationLabel(item.type, "recruiter")}</span>
                         <time className="mt-1 block text-xs text-muted-foreground" dateTime={item.createdAt}>{formatDate(item.createdAt)}</time>
                     </button>
                 </li>)}

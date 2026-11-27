@@ -22,8 +22,9 @@ const jobType = z.enum([
 ]);
 const workMode = z.enum(["ONSITE", "HYBRID", "REMOTE"]);
 export const jobSchema = z.object({
-    jobPostId: z.uuid(),
-    companyId: z.uuid(),
+    // Java UUIDs may have a zero version/variant in seeded records.
+    jobPostId: z.guid(),
+    companyId: z.guid(),
     title: z.string(),
     location: z.string(),
     salaryMin: z.number().nonnegative().nullish(),

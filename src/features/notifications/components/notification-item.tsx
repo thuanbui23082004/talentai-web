@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Bell, BriefcaseBusiness, CalendarDays, ChevronRight, FileCheck2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import { NOTIFICATION_LABELS } from "../labels";
+import { getNotificationLabel } from "../labels";
 import type { Notification } from "../types";
 
 export function NotificationItem({ item, compact = false, selected = false, onOpen }: { item: Notification; compact?: boolean; selected?: boolean; onOpen?: () => void }) {
@@ -11,7 +11,7 @@ export function NotificationItem({ item, compact = false, selected = false, onOp
         <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2"><h3 className={`text-sm leading-5 ${item.isRead ? "font-medium" : "font-semibold"}`}>{item.title}</h3>{!item.isRead && <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary"><span className="sr-only">Chưa đọc</span></span>}</div>
             {item.body && <p className={`mt-1.5 text-xs leading-5 text-muted-foreground ${compact ? "line-clamp-2" : ""}`}>{item.body}</p>}
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><span className="font-medium text-primary">{NOTIFICATION_LABELS[item.type]}</span><span aria-hidden="true">·</span><time dateTime={item.createdAt}>{formatDate(item.createdAt)}</time>{item.isRead && !compact && <span>· Đã đọc</span>}</div>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><span className="font-medium text-primary">{getNotificationLabel(item.type, "candidate")}</span><span aria-hidden="true">·</span><time dateTime={item.createdAt}>{formatDate(item.createdAt)}</time>{item.isRead && !compact && <span>· Đã đọc</span>}</div>
         </div>
         {!compact && <ChevronRight className="mt-1 hidden size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 sm:block" aria-hidden="true" />}
     </Link>;

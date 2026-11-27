@@ -5,6 +5,7 @@ import { apiError } from '../responses';
 import { mapJobApplicant } from './job-applicant-mapper';
 import { mockJobApplicationDetail } from './mock-job-applicants';
 import { CV_MAX_SIZE } from '@/lib/api/cv-schemas';
+import { hasPdfHeader } from '@/lib/api/pdf-header';
 
 export async function handleJobApplicationDetail(request: Request, id: string, resource: 'detail' | 'resume' | 'cv', baseUrl?: string): Promise<Response> {
     if (request.method !== 'GET') return apiError(405, 'BAD_REQUEST', 'Phương thức không được hỗ trợ.');
@@ -33,7 +34,7 @@ export async function handleJobApplicationDetail(request: Request, id: string, r
                 const file = await fetch(url, { headers: { Accept: 'application/pdf' }, cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(30000) });
                 if (!file.ok || Number(file.headers.get('content-length')) > CV_MAX_SIZE) throw new Error('CV unavailable');
                 const bytes = new Uint8Array(await file.arrayBuffer());
-                if (bytes.length > CV_MAX_SIZE || new TextDecoder().decode(bytes.slice(0, 5)) !== '%PDF-') return apiError(422, 'CV_INVALID_FORMAT', 'Tệp không phải PDF hợp lệ.');
+                if (bytes.length > CV_MAX_SIZE || !hasPdfHeader(bytes)) return apiError(422, 'CV_INVALID_FORMAT', 'Tệp không phải PDF hợp lệ.');
                 return new Response(bytes, { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': 'inline; filename="candidate-cv.pdf"', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'private, no-store' } });
             }
             return Response.json(download, { headers: { 'Cache-Control': 'private, no-store' } });

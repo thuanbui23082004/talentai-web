@@ -1,5 +1,6 @@
 export const recruiterServiceMessages = { RecruiterServices: {
-  navigation: 'Dịch vụ tuyển dụng', services: 'Dịch vụ', pricing: 'Bảng giá', promotions: 'Khuyến mãi',
+  navigation: 'Dịch vụ tuyển dụng', services: 'Dịch vụ', pricing: 'Bảng giá', promotions: 'Khuyến mãi', 'payment-history': 'Lịch sử thanh toán',
+  paymentHistoryTitle: 'Lịch sử thanh toán', paymentHistorySubtitle: 'Theo dõi các khoản thanh toán gói dịch vụ của doanh nghiệp.', paymentHistoryEmptyTitle: 'Chưa có dữ liệu thanh toán', paymentHistoryEmptyDescription: 'Lịch sử giao dịch sẽ hiển thị tại đây khi tính năng thanh toán được kết nối.', paymentHistoryExplorePlans: 'Xem các gói dịch vụ',
   heroTag: 'Giải pháp dành cho nhà tuyển dụng', title: 'Tuyển đúng người, phát triển đội ngũ', subtitle: 'Kết nối tin tuyển dụng, hồ sơ ứng viên và AI sàng lọc trong một quy trình thống nhất.', explorePlans: 'Khám phá các gói', start: 'Bắt đầu tuyển dụng',
   servicesHeading: 'Công cụ cho từng bước tuyển dụng', servicesSubtitle: 'Chọn công cụ phù hợp với nhu cầu của doanh nghiệp.',
   serviceItems: {

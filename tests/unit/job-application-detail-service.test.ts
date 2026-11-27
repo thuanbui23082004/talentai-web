@@ -74,3 +74,15 @@ it('serves PDF inline from trusted storage without forwarding the user token', a
     network({ url: 'https://localhost/internal', expiresAt: new Date(Date.now() + 300000).toISOString() });
     expect((await handleJobApplicationDetail(request, item.id, 'cv', base)).status).toBe(503);
 });
+
+it('accepts a PDF with a leading line break from storage', async () => {
+    const url = 'https://api.cloudinary.com/v1_1/example/raw/download?signature=test';
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (target) => {
+        if (String(target).endsWith('/auth/me')) return Response.json({ success: true, data: { profile: { id: item.applicantId, email: 'recruiter@example.test', displayName: 'Recruiter', status: 'ACTIVE', roles: ['RECRUITER'] } } });
+        if (String(target) === url) return new Response(new Uint8Array([10, ...pdfCv()]), { headers: { 'Content-Type': 'application/pdf' } });
+        return Response.json({ success: true, data: { url, expiresAt: new Date(Date.now() + 300000).toISOString() } });
+    });
+    const response = await handleJobApplicationDetail(request, item.id, 'cv', base);
+    expect(response.status).toBe(200);
+    expect((await response.text()).startsWith('\n%PDF-')).toBe(true);
+});

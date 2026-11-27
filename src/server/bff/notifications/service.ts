@@ -14,7 +14,7 @@ const notificationType = z.enum([
     "recruiter_new_application", "company_verification", "job_moderated",
     "payment_completed", "payment_failed", "subscription_expiring",
     "auth_otp_requested", "password_changed", "account_locked",
-    "report_update", "system",
+    "report_update", "ai_task_completed", "system",
 ]);
 const upstreamNotification = z.object({
     id: z.string().min(1),

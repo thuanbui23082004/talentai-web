@@ -6,6 +6,7 @@ import type { operations } from '@/lib/api/generated/schema';
 import { toApiError } from '@/lib/api/errors';
 import type { components } from '@/lib/api/generated/schema';
 import { jobApplicantStatusUpdateSchema } from '@/lib/api/job-applicant-schemas';
+import { blobHasPdfHeader } from '@/lib/api/pdf-header';
 
 export async function listJobPipeline(jobId: string, signal?: AbortSignal) {
   const first = await listJobApplicants(jobId, { page: 1, pageSize: 100 }, signal);
@@ -46,7 +47,7 @@ export async function getJobApplicantCv(id: string, signal?: AbortSignal) {
   await ensureApiSession();
   const result = await apiClient.GET('/recruiter/job-applications/{applicationId}/cv', { params: { path: { applicationId: z.uuid().parse(id) } }, signal, parseAs: 'blob' });
   if (!result.data || result.error) throw toApiError(result.response.status, result.error);
-  if (await result.data.slice(0, 5).text() !== '%PDF-') throw new CandidateRequestError('cvInvalid');
+  if (!await blobHasPdfHeader(result.data)) throw new CandidateRequestError('cvInvalid');
   return result.data;
 }
 
@@ -68,7 +69,7 @@ export async function getApplicantCv(applicationId: string) {
     const blob = z.instanceof(Blob).parse(result.data);
     if (blob.type.split(';')[0] !== 'application/pdf' && blob.type.split(';')[0] !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') throw new CandidateRequestError('cvInvalid');
     if (blob.size === 0) throw new CandidateRequestError('cvUnavailable');
-    if (blob.type.split(';')[0] === 'application/pdf' && await blob.slice(0, 5).text() !== '%PDF-') throw new CandidateRequestError('cvInvalid');
+    if (blob.type.split(';')[0] === 'application/pdf' && !await blobHasPdfHeader(blob)) throw new CandidateRequestError('cvInvalid');
     return blob;
   } catch (error) { throw error instanceof CandidateRequestError ? error : candidateError(error); }
 }

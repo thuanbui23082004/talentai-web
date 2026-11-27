@@ -30,7 +30,7 @@ function RecruiterNavigation({ onNavigate }: { onNavigate?: () => void }) {
   const t = useTranslations('Recruiter');
   const pathname = usePathname();
   const accountActive = pathname === '/recruiter/account' || pathname === '/recruiter/company';
-  const serviceActive = ['/recruiter/services', '/recruiter/pricing', '/recruiter/promotions'].includes(pathname);
+  const serviceActive = ['/recruiter/services', '/recruiter/pricing', '/recruiter/promotions', '/recruiter/payment-history'].includes(pathname);
   const helpActive = pathname === '/recruiter/help';
   return <>
         <span className="sidebar-section-label">{t('workspace')}</span><nav aria-label={t('role')}>
