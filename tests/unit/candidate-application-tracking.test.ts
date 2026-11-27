@@ -30,6 +30,37 @@ function network(role = "CANDIDATE", result?: (url: string) => Response) {
 afterEach(() => vi.restoreAllMocks());
 
 describe("candidate application tracking BFF", () => {
+    it("reuses public company logos for applications and loads each company once", async () => {
+        const companyId = '10000000-0000-4000-8000-000000000003';
+        const fetcher = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) => {
+            const target = String(url);
+            if (target.endsWith('/auth/me')) return Response.json({ success: true, data: { profile: { id, email: 'candidate@example.test', displayName: 'Candidate', status: 'ACTIVE', roles: ['CANDIDATE'] } } });
+            if (target.endsWith(`/companies/${companyId}`)) {
+                expect(new Headers(init?.headers).has('Authorization')).toBe(false);
+                return Response.json({ data: { id: companyId, name: 'Công ty ITECHWX', logoUrl: 'https://example.test/company.png' } });
+            }
+            return Response.json({ success: true, data: { items: [{ ...upstream, companyId }, { ...upstream, id: companyId, jobSnapshot: { ...upstream.jobSnapshot, companyId } }], page: 0, size: 6, totalElements: 2, totalPages: 1 } });
+        });
+        const response = await handleCandidateApplicationTracking(request(), baseUrl, baseUrl);
+        expect(response.status).toBe(200);
+        const page = await response.json();
+        expect(page.items).toHaveLength(2);
+        for (const item of page.items) expect(item).toMatchObject({ companyName: 'Công ty ITECHWX', companyLogoUrl: 'https://example.test/company.png' });
+        expect(fetcher.mock.calls.filter(([url]) => String(url).endsWith(`/companies/${companyId}`))).toHaveLength(1);
+    });
+
+    it("preserves the application snapshot if its company is unavailable", async () => {
+        const companyId = '10000000-0000-4000-8000-000000000003';
+        vi.spyOn(globalThis, 'fetch').mockImplementation(async url => {
+            const target = String(url);
+            if (target.endsWith('/auth/me')) return Response.json({ success: true, data: { profile: { id, email: 'candidate@example.test', displayName: 'Candidate', status: 'ACTIVE', roles: ['CANDIDATE'] } } });
+            if (target.endsWith(`/companies/${companyId}`)) return new Response(null, { status: 404 });
+            return Response.json({ success: true, data: { ...upstream, companyId, jobSnapshot: { ...upstream.jobSnapshot, companyName: 'Tên công ty khi ứng tuyển' } } });
+        });
+        const response = await handleCandidateApplicationTracking(request(`/${id}`), baseUrl, baseUrl);
+        expect(response.status).toBe(200);
+        expect(await response.json()).toMatchObject({ id, companyName: 'Tên công ty khi ứng tuyển' });
+    });
     it("converts paging and exposes only fields needed by the candidate", async () => {
         const fetch = network();
         const response = await handleCandidateApplicationTracking(request("?page=1&pageSize=6&status=reviewing"), baseUrl);

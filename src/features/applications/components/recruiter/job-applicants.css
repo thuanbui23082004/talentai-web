@@ -4,6 +4,7 @@
     align-content: start;
     grid-auto-rows: max-content;
 }
+.job-applicant-ai-score { display: inline-flex; margin-top: 10px; padding: 5px 10px; border-radius: 999px; background: var(--recruiter-soft); color: var(--recruiter-primary); font-size: 12px; font-weight: 650; }
 .recruiter-app .job-applicants-page > .candidates-page-heading {
     margin: 0;
     flex-wrap: wrap;

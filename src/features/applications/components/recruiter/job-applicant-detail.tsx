@@ -11,6 +11,7 @@ import { useJobApplicant } from "../../hooks/use-recruiter-applications";
 import { useJobPipelineMove } from "../../hooks/use-job-pipeline";
 import { JOB_APPLICANT_STATUS_LABELS } from "../../job-applicant-messages";
 import { JobApplicantCvDialog } from "./job-applicant-cv-dialog";
+import { ApplicationMatchPanel } from "@/features/matching";
 import "./candidate-detail.css";
 import "./job-applicant-detail.css";
 
@@ -83,7 +84,7 @@ function ApplicantContent({ id }: { id: string }) {
                 </article>
             </div>
             <aside className="candidate-detail-right">
-                <section className="candidate-detail-panel job-applicant-side-panel"><h2>Điểm đánh giá</h2><p className="job-applicant-empty">Không có dữ liệu đánh giá cho hồ sơ này.</p></section>
+                <ApplicationMatchPanel applicationId={item.id} />
                 <section className="candidate-detail-panel job-applicant-side-panel"><h2>Lịch trình sắp tới</h2><p className="job-applicant-empty">Không có lịch phỏng vấn.</p></section>
                 <JobSummaryPanel jobId={item.jobId} title={item.jobTitle} />
                 <section className="candidate-detail-panel job-applicant-attachment-panel"><h2>Tệp đính kèm</h2><Button variant="ghost" title={item.resumeFileName || "Hồ sơ / CV"} onClick={() => setViewCv(true)}><FileText size={16} aria-hidden="true" /><span>{item.resumeFileName || "Hồ sơ / CV"}</span></Button></section>

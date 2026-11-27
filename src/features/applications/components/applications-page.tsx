@@ -54,22 +54,22 @@ function ApplicationCard({ application }: { application: CandidateTracking }) {
     return (
         <article className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 shadow-card">
             <div className="flex items-start gap-3">
-                <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-secondary text-primary">
+                <span className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border/60 bg-secondary/15 px-1 text-primary sm:size-18">
                     {application.companyLogoUrl && !logoFailed ? (
                         <Image
                             src={application.companyLogoUrl}
                             alt={`Logo ${application.companyName ?? "công ty"}`}
-                            fill
+                            width={72}
+                            height={72}
                             unoptimized
-                            sizes="40px"
-                            className="object-contain p-1"
+                            className="max-h-full max-w-full object-contain"
                             onError={() => setLogoFailed(true)}
                         />
                     ) : (
                         <FileText className="size-5" />
                     )}
                 </span>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                     <h2 className="font-semibold">
                         {application.jobTitle ?? "Tin tuyển dụng"}
                     </h2>

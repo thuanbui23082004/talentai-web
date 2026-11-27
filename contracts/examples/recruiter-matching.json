@@ -1,0 +1,37 @@
+{
+  "application": {
+    "applicationId": "123e4567-e89b-42d3-a456-426614174001",
+    "jobId": "123e4567-e89b-42d3-a456-426614174002",
+    "status": "SCORED",
+    "score": 75,
+    "details": {
+      "score": 75,
+      "semantic_score": 70,
+      "skill_score": 80,
+      "matched_skills": ["TypeScript"],
+      "missing_skills": ["React"],
+      "explanation": "CV đáp ứng phần lớn yêu cầu.",
+      "field_scores": {}
+    },
+    "scoredAt": "2026-11-27T08:00:00Z"
+  },
+  "notScored": {
+    "applicationId": "123e4567-e89b-42d3-a456-426614174003",
+    "jobId": "123e4567-e89b-42d3-a456-426614174002",
+    "status": "NOT_SCORED",
+    "score": null,
+    "details": null,
+    "scoredAt": null
+  },
+  "batchRequest": {
+    "jobId": "123e4567-e89b-42d3-a456-426614174002",
+    "applicationIds": ["123e4567-e89b-42d3-a456-426614174001", "123e4567-e89b-42d3-a456-426614174003"]
+  },
+  "rankingPage": {
+    "jobId": "123e4567-e89b-42d3-a456-426614174002",
+    "page": 0,
+    "size": 20,
+    "total": 1,
+    "items": [{ "rank": 1, "applicationId": "123e4567-e89b-42d3-a456-426614174001", "score": 75, "scoredAt": "2026-11-27T08:00:00Z" }]
+  }
+}

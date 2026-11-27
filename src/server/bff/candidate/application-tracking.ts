@@ -5,6 +5,7 @@ import { createMockApplications } from "@/mocks/fixtures/applications";
 import { mockJobs } from "@/mocks/fixtures/jobs";
 import { readRequestIdentity } from "../auth/session";
 import { apiError } from "../responses";
+import { loadPublicCompanies } from "../public/company-lookup";
 import { getSubmittedMockApplications } from "./mock-application-submission";
 
 type Tracking = components["schemas"]["CandidateApplicationTracking"];
@@ -19,11 +20,12 @@ const querySchema = z.object({
 }).strict();
 const upstreamApplication = z.object({
     id: z.uuid(), jobId: z.uuid(), resumeId: z.uuid(),
+    companyId: z.uuid().nullish(),
     status: statusSchema, version: z.number().int().nonnegative(),
     createdAt: z.iso.datetime({ offset: true }),
     updatedAt: z.iso.datetime({ offset: true }).nullish(),
     resumeFileName: z.string().nullish(), coverLetter: z.string().nullish(),
-    jobSnapshot: z.object({ title: z.string().nullish(), companyName: z.string().nullish(), companyLogoUrl: z.url().nullish() }).nullish(),
+    jobSnapshot: z.object({ title: z.string().nullish(), companyId: z.uuid().nullish(), companyName: z.string().nullish(), companyLogoUrl: z.url().nullish() }).nullish(),
 });
 const upstreamPage = z.object({
     success: z.literal(true),
@@ -58,6 +60,21 @@ function mapApplication(item: z.infer<typeof upstreamApplication>): Tracking {
         resumeFileName: item.resumeFileName ?? undefined,
         coverLetter: item.coverLetter ?? undefined,
     };
+}
+
+async function mapApplicationsWithCompanies(items: z.infer<typeof upstreamApplication>[], companyBaseUrl?: string): Promise<Tracking[]> {
+    const mapped = items.map(mapApplication);
+    if (!companyBaseUrl) return mapped;
+    const companyIdFor = (item: z.infer<typeof upstreamApplication>) => item.companyId ?? item.jobSnapshot?.companyId;
+    const companies = await loadPublicCompanies(items.flatMap(item => {
+        const companyId = companyIdFor(item);
+        return companyId ? [companyId] : [];
+    }), companyBaseUrl);
+    return mapped.map((item, index) => {
+        const companyId = companyIdFor(items[index]);
+        const company = companyId ? companies.get(companyId) : undefined;
+        return company ? { ...item, companyName: company.name, companyLogoUrl: company.logoUrl ?? item.companyLogoUrl } : item;
+    });
 }
 
 function errorResponse(status: number): Response {
@@ -117,7 +134,7 @@ export function isCandidateApplicationTrackingRequest(request: Request): boolean
     return path === route || path.startsWith(`${route}/`);
 }
 
-export async function handleCandidateApplicationTracking(request: Request, baseUrl?: string): Promise<Response> {
+export async function handleCandidateApplicationTracking(request: Request, baseUrl?: string, companyBaseUrl?: string): Promise<Response> {
     if (request.method !== "GET") return apiError(405, "BAD_REQUEST", "Phương thức không được hỗ trợ.");
     const url = new URL(request.url);
     const suffix = url.pathname.slice(route.length);
@@ -165,7 +182,8 @@ export async function handleCandidateApplicationTracking(request: Request, baseU
         if (kind === "detail") {
             const item = upstreamDetail.parse(body).data;
             if (item.id !== match?.[1]) return errorResponse(503);
-            return Response.json(mapApplication(item), { headers });
+            const [tracking] = await mapApplicationsWithCompanies([item], companyBaseUrl);
+            return Response.json(tracking, { headers });
         }
         if (kind === "history") {
             const history: History[] = upstreamHistory.parse(body).data.map(entry => ({
@@ -178,7 +196,7 @@ export async function handleCandidateApplicationTracking(request: Request, baseU
         const page = upstreamPage.parse(body).data;
         if (page.page !== parsed.data.page - 1 || page.size !== parsed.data.pageSize) return errorResponse(503);
         return Response.json({
-            items: page.items.map(mapApplication),
+            items: await mapApplicationsWithCompanies(page.items, companyBaseUrl),
             meta: { page: page.page + 1, pageSize: page.size, totalItems: page.totalElements, totalPages: page.totalPages },
         } satisfies components["schemas"]["CandidateApplicationTrackingPage"], { headers });
     } catch {

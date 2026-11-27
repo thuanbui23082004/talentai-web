@@ -73,32 +73,33 @@ export function CandidateMatchingResult({
                 />
             </div>
 
-            <section aria-labelledby="matching-criteria-title">
-                <h3
-                    id="matching-criteria-title"
-                    className="flex items-center gap-2 font-bold"
-                >
-                    <Sparkles className="size-4 text-primary" /> Nhận xét theo
-                    tiêu chí
-                </h3>
-                <div className="mt-3 flex flex-col gap-3">
-                    {criteria.map((criterion) => (
-                        <CriterionCard
-                            key={criterion.key}
-                            label={criterion.label}
-                            maximum={criterion.maximum}
-                            field={result.field_scores?.[criterion.key]}
-                        />
-                    ))}
-                </div>
-            </section>
+            <MatchingCriteria fields={result.field_scores} />
             <p className="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
-                <CircleHelp className="mt-0.5 size-4 shrink-0" /> Kết quả AI chỉ
-                hỗ trợ đánh giá mức độ phù hợp, không thay thế quyết định tuyển
-                dụng.
+                <CircleHelp className="mt-0.5 size-4 shrink-0" /> Kết quả AI chỉ hỗ trợ đánh giá mức độ phù hợp, không thay thế quyết định tuyển dụng.
             </p>
         </div>
     );
+}
+
+export function MatchingCriteria({ fields }: { fields?: Record<string, FieldScore> }) {
+    return <section aria-label="Nhận xét theo tiêu chí">
+        <h3
+            className="flex items-center gap-2 font-bold"
+        >
+            <Sparkles className="size-4 text-primary" /> Nhận xét theo
+            tiêu chí
+        </h3>
+        <div className="mt-3 flex flex-col gap-3">
+            {criteria.map((criterion) => (
+                <CriterionCard
+                    key={criterion.key}
+                    label={criterion.label}
+                    maximum={criterion.maximum}
+                    field={fields?.[criterion.key]}
+                />
+            ))}
+        </div>
+    </section>;
 }
 
 function CriterionCard({

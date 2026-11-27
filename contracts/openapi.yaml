@@ -2446,6 +2446,82 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalError'
+  /matching/applications/{applicationId}:
+    get:
+      tags: [AI Matching]
+      operationId: getRecruiterApplicationMatch
+      summary: Kết quả AI đã lưu cho một hồ sơ ứng tuyển
+      security:
+      - cookieAuth: []
+      x-roles: [recruiter]
+      parameters:
+      - name: applicationId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Id' }
+      responses:
+        '200':
+          description: Kết quả mới nhất hoặc trạng thái chưa chấm
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecruiterMatchResult' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+  /matching/applications/results:batch:
+    post:
+      tags: [AI Matching]
+      operationId: getRecruiterApplicationMatches
+      summary: Lấy kết quả AI cho tối đa 100 hồ sơ thuộc một tin
+      security:
+      - cookieAuth: []
+        csrfToken: []
+      x-roles: [recruiter]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RecruiterMatchBatchRequest' }
+      responses:
+        '200':
+          description: Kết quả theo thứ tự applicationIds
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/RecruiterMatchResult' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+  /matching/jobs/{jobId}/rankings:
+    get:
+      tags: [AI Matching]
+      operationId: getRecruiterMatchRankings
+      summary: Bảng xếp hạng AI của một tin tuyển dụng
+      security:
+      - cookieAuth: []
+      x-roles: [recruiter]
+      parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Id' }
+      - name: page
+        in: query
+        schema: { type: integer, minimum: 0, maximum: 10000, default: 0 }
+      - name: size
+        in: query
+        schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        '200':
+          description: Chỉ gồm hồ sơ đã chấm điểm
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecruiterMatchRankingPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
   /matching/previews:
     post:
       tags: [AI Matching]
@@ -9739,6 +9815,72 @@ components:
           type: integer
           minimum: 0
           maximum: 100
+    RecruiterMatchResult:
+      type: object
+      required: [applicationId, jobId, status, score, details, scoredAt]
+      properties:
+        applicationId: { $ref: '#/components/schemas/Id' }
+        jobId: { $ref: '#/components/schemas/Id' }
+        status: { type: string, enum: [SCORED, NOT_SCORED] }
+        score: { type: number, minimum: 0, maximum: 100, nullable: true }
+        details:
+          type: object
+          nullable: true
+          allOf: [{ $ref: '#/components/schemas/RecruiterMatchDetails' }]
+        scoredAt: { type: string, format: date-time, nullable: true }
+    RecruiterMatchDetails:
+      type: object
+      required: [score, semantic_score, skill_score, matched_skills, missing_skills, explanation, field_scores]
+      properties:
+        score: { type: number, minimum: 0, maximum: 100 }
+        semantic_score: { type: number, minimum: 0, maximum: 100 }
+        skill_score: { type: number, minimum: 0, maximum: 100 }
+        matched_skills: { type: array, items: { type: string } }
+        missing_skills: { type: array, items: { type: string } }
+        explanation: { type: string }
+        field_scores:
+          type: object
+          additionalProperties: { $ref: '#/components/schemas/RecruiterMatchFieldScore' }
+    RecruiterMatchFieldScore:
+      type: object
+      required: [score, status, evidence, requirement, reason, model]
+      properties:
+        score: { type: number, minimum: 0, maximum: 100 }
+        status: { type: string }
+        evidence: { type: string }
+        requirement: { type: string }
+        reason: { type: string }
+        model: { type: string }
+    RecruiterMatchBatchRequest:
+      type: object
+      required: [jobId, applicationIds]
+      properties:
+        jobId: { $ref: '#/components/schemas/Id' }
+        applicationIds:
+          type: array
+          minItems: 1
+          maxItems: 100
+          uniqueItems: true
+          items: { $ref: '#/components/schemas/Id' }
+    RecruiterMatchRankingPage:
+      type: object
+      required: [jobId, page, size, total, items]
+      properties:
+        jobId: { $ref: '#/components/schemas/Id' }
+        page: { type: integer, minimum: 0 }
+        size: { type: integer, minimum: 1 }
+        total: { type: integer, minimum: 0 }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/RecruiterMatchRank' }
+    RecruiterMatchRank:
+      type: object
+      required: [rank, applicationId, score, scoredAt]
+      properties:
+        rank: { type: integer, minimum: 1 }
+        applicationId: { $ref: '#/components/schemas/Id' }
+        score: { type: number, minimum: 0, maximum: 100 }
+        scoredAt: { type: string, format: date-time }
     MatchingResult:
       type: object
       required:

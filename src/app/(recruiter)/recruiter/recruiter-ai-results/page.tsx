@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function RecruiterAiResultsPage() {
   return (
-    <Suspense fallback={<div role="status" className="air-page-loading">Đang tải kết quả AI…</div>}>
+    <Suspense fallback={<div role="status" className="p-6 text-sm">Đang tải kết quả AI…</div>}>
       <RecruiterAiResults />
     </Suspense>
   );

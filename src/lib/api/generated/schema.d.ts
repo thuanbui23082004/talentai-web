@@ -1073,6 +1073,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/matching/applications/{applicationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Kết quả AI đã lưu cho một hồ sơ ứng tuyển */
+        get: operations["getRecruiterApplicationMatch"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/matching/applications/results:batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Lấy kết quả AI cho tối đa 100 hồ sơ thuộc một tin */
+        post: operations["getRecruiterApplicationMatches"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/matching/jobs/{jobId}/rankings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bảng xếp hạng AI của một tin tuyển dụng */
+        get: operations["getRecruiterMatchRankings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/matching/previews": {
         parameters: {
             query?: never;
@@ -4435,6 +4486,53 @@ export interface components {
             education?: number;
             other?: number;
         };
+        RecruiterMatchResult: {
+            applicationId: components["schemas"]["Id"];
+            jobId: components["schemas"]["Id"];
+            /** @enum {string} */
+            status: "SCORED" | "NOT_SCORED";
+            score: number | null;
+            details: components["schemas"]["RecruiterMatchDetails"] | null;
+            /** Format: date-time */
+            scoredAt: string | null;
+        };
+        RecruiterMatchDetails: {
+            score: number;
+            semantic_score: number;
+            skill_score: number;
+            matched_skills: string[];
+            missing_skills: string[];
+            explanation: string;
+            field_scores: {
+                [key: string]: components["schemas"]["RecruiterMatchFieldScore"];
+            };
+        };
+        RecruiterMatchFieldScore: {
+            score: number;
+            status: string;
+            evidence: string;
+            requirement: string;
+            reason: string;
+            model: string;
+        };
+        RecruiterMatchBatchRequest: {
+            jobId: components["schemas"]["Id"];
+            applicationIds: components["schemas"]["Id"][];
+        };
+        RecruiterMatchRankingPage: {
+            jobId: components["schemas"]["Id"];
+            page: number;
+            size: number;
+            total: number;
+            items: components["schemas"]["RecruiterMatchRank"][];
+        };
+        RecruiterMatchRank: {
+            rank: number;
+            applicationId: components["schemas"]["Id"];
+            score: number;
+            /** Format: date-time */
+            scoredAt: string;
+        };
         /**
          * @description Kết quả đối sánh CV–JD. Đây là gợi ý hỗ trợ ra quyết định, không phải quyết định tuyển dụng.
          * @example {
@@ -7725,6 +7823,87 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             500: components["responses"]["InternalError"];
+        };
+    };
+    getRecruiterApplicationMatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                applicationId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Kết quả mới nhất hoặc trạng thái chưa chấm */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecruiterMatchResult"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getRecruiterApplicationMatches: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecruiterMatchBatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Kết quả theo thứ tự applicationIds */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecruiterMatchResult"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["ValidationError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getRecruiterMatchRankings: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                jobId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Chỉ gồm hồ sơ đã chấm điểm */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecruiterMatchRankingPage"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     previewCandidateMatching: {

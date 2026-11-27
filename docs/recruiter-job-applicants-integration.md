@@ -21,7 +21,7 @@ Danh mục tin phân trang 100 tin/trang; danh sách ứng viên phân trang 9 h
 Danh sách này chỉ xem hồ sơ: tên, chức danh, vị trí, trạng thái, ngày nộp, tên CV và thư giới thiệu.
 Card mở trang chi tiết `/recruiter/candidates/{id}?from=job`; nút “Xem CV” riêng mở popup và không chuyển trang.
 Hai luồng mới dùng GET `/applications/{id}` và `/applications/{id}/resume` của application-service qua BFF
-`/recruiter/job-applications/{id}` và `/resume`. Trang chi tiết hiển thị snapshot và thư giới thiệu, không chạy các mutation/AI cũ.
+`/recruiter/job-applications/{id}` và `/resume`. Trang chi tiết hiển thị snapshot, thư giới thiệu và kết quả AI đã lưu từ Matching Service; không gọi tác vụ chấm điểm thủ công cũ.
 Email và loại hình công việc lấy từ snapshot khi backend cung cấp; không tự tạo ảnh đại diện hoặc dữ liệu liên hệ.
 
 API resume trả URL tải xuống có thời hạn. PDF được đọc qua BFF `/recruiter/job-applications/{id}/cv` để trả nội dung inline,
@@ -41,7 +41,14 @@ Payload `{status, version, note?}` đúng Swagger. BFF kiểm tra session recrui
 Không tự retry PATCH. Card chỉ đổi cột sau khi backend xác nhận; tải lại bảng cả khi lỗi để đồng bộ kết quả chưa rõ do timeout.
 UI chỉ cho bước tiếp theo hoặc từ chối: submitted → reviewing → shortlisted → interview_scheduled → offered → hired.
 Hired/rejected/withdrawn là trạng thái kết thúc, không kéo tiếp. Luồng rút hồ sơ thuộc ứng viên.
-Thông tin card lấy từ snapshot và CV đã nộp; không hiển thị điểm AI giả. Link tên mở chi tiết thật, nút CV dùng popup hiện có.
+Thông tin card lấy từ snapshot và CV đã nộp. Nhãn % phù hợp lấy theo `applicationId` từ `POST /matching/applications/results:batch`; khi chưa chấm hiện “Chưa có điểm”. Link tên mở chi tiết thật, nút CV dùng popup hiện có. Bảng xếp hạng lấy `GET /matching/jobs/{jobId}/rankings` và ghép tên từ danh sách application.
+
+Trang xếp hạng giữ bố cục cũ: thông tin tin tuyển dụng, thống kê hồ sơ, danh sách thứ hạng,
+vòng điểm và các tab hồ sơ. Điểm Semantic/Skill, kỹ năng và nhận xét lấy từ `details` của
+`GET /matching/applications/{applicationId}`. Sáu tiêu chí trong `field_scores` dùng chung
+`MatchingCriteria` với preview ứng viên, gồm điểm theo trọng số, lý do, dẫn chứng CV và
+yêu cầu JD. Thiếu tiêu chí thì hiện chưa có nhận xét. Hồ sơ/kinh nghiệm lấy từ snapshot;
+lịch sử chỉ hiển thị mốc nộp đơn có trong dữ liệu. Nút cập nhật tải lại các query kết quả AI.
 
 Kiểm thử bổ sung: `job-applicant-status-service.test.ts` kiểm tra payload/version, CSRF/quyền và lỗi/xung đột không retry;
 `recruiter-pipeline.spec.ts` kiểm tra phân trang, kéo thả, version mới, xung đột, đổi tin, empty/error/retry và mobile bằng API kiểm soát trong test.

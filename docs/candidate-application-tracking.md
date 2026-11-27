@@ -18,7 +18,10 @@ Chi tiết mở ở `/candidate/applications/{applicationId}`; lịch sử lấy
 Trang hiển thị sáu bước tuyển dụng theo trạng thái thật, chỉ đánh dấu bước đã có trong
 lịch sử hoặc là trạng thái hiện tại. `rejected` và `withdrawn` nằm ở nhánh kết thúc riêng.
 Lỗi tải lịch sử không che mất phần chi tiết hồ sơ. Nhân vật CV lấy từ asset có sẵn của dự án.
-Tên tin lấy từ `jobSnapshot.title`, tên công ty chỉ hiện nếu `jobSnapshot.companyName` có mặt.
+Tên tin lấy từ `jobSnapshot.title`. Khi `COMPANY_DATA_MODE=real`, BFF dùng `companyId`
+(hoặc `jobSnapshot.companyId`) để lấy tên và logo từ Company Service bằng hàm dùng chung
+với Việc làm đã lưu. Mỗi công ty được lấy một lần trong một danh sách; nếu Company Service
+không trả dữ liệu, giữ tên và logo trong snapshot.
 Nếu snapshot thiếu, UI không tự lấy tin hiện tại để thay thế dữ liệu lúc nộp.
 
 Application-service hiện không công bố endpoint lịch phỏng vấn candidate. Vì vậy phần lịch,

@@ -27,6 +27,7 @@ import {
 } from "../../job-applicant-messages";
 import { JobApplicantCvDialog } from "./job-applicant-cv-dialog";
 import type { JobApplicant } from "../../types";
+import { useApplicationMatches, type RecruiterMatchResult } from "@/features/matching";
 import "./recruiter-candidates.css";
 import "./job-applicants.css";
 
@@ -62,10 +63,16 @@ function ApplicantCard({
     item,
     jobTitle,
     onViewCv,
+    match,
+    matchLoading,
+    matchError,
 }: {
     item: JobApplicant;
     jobTitle?: string;
     onViewCv: (item: JobApplicant) => void;
+    match?: RecruiterMatchResult;
+    matchLoading: boolean;
+    matchError: boolean;
 }) {
     return (
         <article className="job-applicant-card">
@@ -79,6 +86,7 @@ function ApplicantCard({
             </Link>
             <div className="job-applicant-card-intro">
                 <ApplicantIdentity item={item} />
+                <span className="job-applicant-ai-score">Gợi ý từ AI · {matchLoading ? "Đang tải điểm…" : matchError ? 'Không tải được điểm' : match?.status === 'SCORED' && match.score !== null ? `${Math.round(match.score)}% phù hợp` : 'Chưa có điểm'}</span>
             </div>
             <dl className="job-applicant-card-info">
                 <div>
@@ -140,6 +148,7 @@ export function RecruiterCandidates() {
     }, [jobId, jobs.isSuccess, jobs.data, params, router]);
     const applications = useJobApplicants(jobId, query, valid);
     const data = applications.data;
+    const matches = useApplicationMatches(jobId, data?.items.map(item => item.id) ?? []);
     const page = query.page;
     const total = data?.meta.totalItems ?? 0;
     const items = jobs.data?.items ?? [];
@@ -299,7 +308,7 @@ export function RecruiterCandidates() {
                     )}
                 </div>
                 <div className="job-applicants-heading-actions">
-                {jobId && valid && <Link className="job-applicants-ai-link" href={`/recruiter/candidates/ai?jobId=${encodeURIComponent(jobId)}`}><Sparkles size={17} aria-hidden="true" />Chấm điểm AI</Link>}
+                {jobId && valid && <Link className="job-applicants-ai-link" href={`/recruiter/candidates/ai?jobId=${encodeURIComponent(jobId)}`}><Sparkles size={17} aria-hidden="true" />Bảng xếp hạng AI</Link>}
                 <div
                     className="candidate-view-toggle"
                     aria-label="Kiểu hiển thị"
@@ -374,9 +383,13 @@ export function RecruiterCandidates() {
                     aria-label="Danh sách ứng viên"
                     className="job-applicants-results"
                 >
+                    {matches.isError && <Alert variant="error" title="Không tải được điểm AI"><Button variant="outline" onClick={() => void matches.refetch()}>Thử lại</Button></Alert>}
                     {data.items.map((item) => (
                         <ApplicantCard
                             item={item}
+                            match={matches.data?.find(match => match.applicationId === item.id)}
+                            matchLoading={matches.isPending}
+                            matchError={matches.isError}
                             jobTitle={
                                 items.find((job) => job.id === jobId)?.title
                             }

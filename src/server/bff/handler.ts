@@ -39,6 +39,7 @@ import { handleJobApplicationDetail } from "./recruiter/job-application-detail-s
 import { handleJobApplicantStatus } from "./recruiter/job-applicant-status-service";
 import { handleNotifications, isNotificationRequest } from "./notifications/service";
 import { handleMatchingPreview } from "./candidate/matching-preview";
+import { handleRecruiterMatching, isRecruiterMatchingRequest } from "./recruiter/matching-results";
 import { handleViolationReports, isViolationReportRequest } from "./reports/service";
 import { handleAdminViolationReports, isAdminViolationReportRequest } from "./admin/violation-reports-service";
 import { handleAdminJobCategories, isAdminJobCategoriesRequest } from "./admin/job-categories-service";
@@ -89,6 +90,8 @@ export async function handleBffRequest(request: Request): Promise<Response> {
                 (env.JOB_DATA_MODE ?? env.DATA_MODE) === "real" ? "real" : "mock");
             return await handleMatchingPreview(request, matchingMode === "real" ? gatewayApiUrl : undefined);
         }
+        if (isRecruiterMatchingRequest(request))
+            return await handleRecruiterMatching(request, gatewayApiUrl);
         if (isNotificationRequest(request))
             return await handleNotifications(request, gatewayApiUrl);
         if (isCandidateApplicationTrackingRequest(request)) {
@@ -96,7 +99,11 @@ export async function handleBffRequest(request: Request): Promise<Response> {
                 (env.APPLICATION_DATA_MODE ?? env.DATA_MODE) === "real"
                     ? gatewayApiUrl
                     : undefined;
-            return await handleCandidateApplicationTracking(request, baseUrl);
+            return await handleCandidateApplicationTracking(
+                request,
+                baseUrl,
+                (env.COMPANY_DATA_MODE ?? env.DATA_MODE) === "real" ? gatewayApiUrl : undefined,
+            );
         }
         const applicantStatus = new URL(request.url).pathname.match(
             /^\/api\/bff\/recruiter\/job-applications\/([^/]+)\/status$/,

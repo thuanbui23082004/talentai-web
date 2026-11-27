@@ -6,6 +6,25 @@
     color: #0f172a;
 }
 
+.air-avatar-initials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--secondary);
+    color: var(--primary);
+    font-weight: 700;
+}
+.air-detail-meta-group, .air-candidate-info { min-width: 0; }
+.air-detail-contact-item, .air-info-val { overflow-wrap: anywhere; }
+.air-detail-tabs-bar { overflow-x: auto; }
+.air-candidate-item:focus-visible, .air-tab-item:focus-visible, .air-page-btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
 /* TOP JOB CARD */
 .air-job-card {
     display: flex;
