@@ -4,6 +4,8 @@ import type { CurrentSubscription, SubscriptionOrderState } from './types';
 export const PAYMENT_POLL_INTERVAL = 3000;
 export const PAYMENT_MAX_CHECKS = 30;
 export const ACTIVATION_MAX_CHECKS = 10;
+export const paymentHistoryStates: Record<SubscriptionOrderState, string> = { CREATED: 'Đã tạo', PENDING: 'Chờ thanh toán', PAID: 'Đã thanh toán', FAILED: 'Thất bại', CANCELLED: 'Đã hủy', EXPIRED: 'Hết hạn', REFUNDED: 'Đã hoàn tiền' };
+export const paymentProviderLabels: Record<string, string> = { VIETQR: 'VietQR', BANK: 'Chuyển khoản', BANK_QR: 'VietQR', MOMO: 'MoMo', ZALOPAY: 'ZaloPay', PAYOS: 'PayOS' };
 export const isPendingPayment = (state?: SubscriptionOrderState) => state === 'CREATED' || state === 'PENDING';
 export const isActivePlan = (subscription: CurrentSubscription | undefined, code?: string) => Boolean(code && subscription?.status === 'ACTIVE' && subscription.plan?.code === code);
 

@@ -2,6 +2,8 @@
 
 ## Đăng ký gói và thanh toán recruiter (2026-11-27)
 
+Trang `/recruiter/payment-history` đã nối `GET /orders/my` qua BFF: đọc đơn của tài khoản, lọc 7 trạng thái, phân trang, làm mới và mở lại đơn đăng ký gói tại trang kết quả. BFF chuyển page 1-based sang Spring page 0-based, gửi sort `createdAt,desc` và xác thực recruiter. Mock liệt kê đơn đã tạo trong bộ nhớ, không chèn lịch sử giả. Có loading/empty/error/retry, bố cục mobile và URL giữ bộ lọc/trang. Xem `docs/payment-history-integration.md`.
+
 Trang `/recruiter/pricing` bổ sung xác nhận gói/giá, VietQR mặc định (bỏ `paymentMethod`), MoMo và ZaloPay. FE tạo đơn bằng `POST /orders` của Payment Service; không tự tạo subscription trả phí. BFF kiểm tra recruiter, CSRF, callback, chuyển tiếp idempotency key và không nhận giá từ client. Route `/recruiter/billing/result` đọc trạng thái API, polling tối đa 30 lần, hỗ trợ hủy và các trạng thái thanh toán. Sau `PAID`, kiểm tra `/subscriptions/me` tối đa 10 lần; backend xử lý event `payment.completed`. Mock có trạng thái theo user; toàn luồng dùng `SUBSCRIPTION_DATA_MODE`. Chưa nghiệm thu cổng thanh toán và Kafka thật. Xem [báo cáo, file thay đổi và cách test](subscription-payment-flow.md).
 
 ## Tổng quan admin qua API thật (2026-11-25)

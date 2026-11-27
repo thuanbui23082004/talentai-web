@@ -1,0 +1,4 @@
+{
+  "items": [{ "orderId": "00000000-0000-4000-8000-000000092001", "orderCode": 1795737600001, "itemType": "SUBSCRIPTION", "itemId": "4a7f01c8-8924-42b7-a38f-9a489d81d290", "amount": 499000, "currency": "VND", "paymentProvider": "MOMO", "status": "PAID", "createdAt": "2026-11-27T00:00:00Z" }],
+  "meta": { "page": 1, "pageSize": 10, "totalItems": 1, "totalPages": 1 }
+}

@@ -61,3 +61,12 @@ function publicOrder(order: Order) {
     const { orderId, orderCode, userId, itemType, itemId, amount, currency, paymentProvider, status, paymentUrl, qrCodeUrl, expiresAt, createdAt } = order;
     return { orderId, orderCode, userId, itemType, itemId, amount, currency, paymentProvider, status, paymentUrl, qrCodeUrl, expiresAt, createdAt };
 }
+
+export async function listMockPaymentOrders(request: Request, userId: string, filters: { page: number; pageSize: number; status?: Order['status'] }) {
+    const scenario = request.headers.get('x-mock-scenario');
+    if (scenario === 'error') return apiError(503, 'SERVICE_UNAVAILABLE', 'Chưa thể tải lịch sử thanh toán.');
+    await new Promise(resolve => setTimeout(resolve, scenario === 'slow' ? 1500 : 200));
+    const items = scenario === 'empty' ? [] : [...store.orders.values()].filter(order => order.userId === userId && (!filters.status || order.status === filters.status)).sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? '') || (b.orderCode ?? 0) - (a.orderCode ?? 0));
+    const start = (filters.page - 1) * filters.pageSize;
+    return Response.json({ items: items.slice(start, start + filters.pageSize).map(publicOrder), meta: { page: filters.page, pageSize: filters.pageSize, totalItems: items.length, totalPages: Math.ceil(items.length / filters.pageSize) } }, { headers });
+}

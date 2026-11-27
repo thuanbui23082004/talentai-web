@@ -1,8 +1,13 @@
 import { apiClient } from '@/lib/api';
 import { toApiError } from '@/lib/api/errors';
-import type { CreateSubscriptionOrder } from '../types';
+import type { CreateSubscriptionOrder, PaymentHistoryFilters } from '../types';
 
 export const paymentApi = {
+    async history(filters: PaymentHistoryFilters, signal?: AbortSignal) {
+        const response = await apiClient.GET('/orders/my', { params: { query: filters }, signal });
+        if (!response.data || response.error) throw toApiError(response.response.status, response.error);
+        return response.data;
+    },
     async create(body: CreateSubscriptionOrder, idempotencyKey: string) {
         const response = await apiClient.POST('/orders', { body, params: { header: { 'Idempotency-Key': idempotencyKey } } });
         if (!response.data || response.error) throw toApiError(response.response.status, response.error);

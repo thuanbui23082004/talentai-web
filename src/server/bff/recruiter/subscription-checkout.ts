@@ -4,6 +4,7 @@ import { readRequestIdentity } from '../auth/session';
 import { hasValidCsrf, isTrustedOrigin } from '../auth/cookies';
 import { apiError } from '../responses';
 import { handleMockCheckout, readMockSubscription } from './subscription-checkout-mock';
+import { handlePaymentHistory } from './payment-history';
 
 export async function handleCurrentSubscription(request: Request, baseUrl?: string): Promise<Response> {
     if (request.method !== 'GET') return apiError(405, 'BAD_REQUEST', 'Phương thức không được hỗ trợ.');
@@ -34,6 +35,7 @@ export function isSubscriptionOrderRequest(request: Request) {
 }
 
 export async function handleSubscriptionOrder(request: Request, baseUrl?: string): Promise<Response> {
+    if (new URL(request.url).pathname === '/api/bff/orders/my') return handlePaymentHistory(request, baseUrl);
     const source = new URL(request.url);
     const match = source.pathname.match(/^\/api\/bff\/orders(?:\/([^/]+)(?:\/(status|cancel))?)?$/);
     if (!match) return apiError(404, 'NOT_FOUND', 'Không tìm thấy trang thanh toán.');

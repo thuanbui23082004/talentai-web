@@ -160,3 +160,46 @@ test('keeps payment success distinct from delayed subscription activation', asyn
     holdActivation = false;
     await expect(page.getByRole('heading', { name: 'Gói đã được kích hoạt', exact: true })).toBeVisible({ timeout: 10000 });
 });
+
+test('payment history lists real mock orders, paginates, filters, retries and opens an order on mobile', async ({ page }, info) => {
+    test.setTimeout(90000);
+    const initialTotal = (await (await page.request.get('/api/bff/orders/my')).json()).meta.totalItems;
+    const csrf = (await (await page.request.get('/api/bff/auth/csrf')).json()).csrfToken;
+    let lastId = '';
+    for (let i = 0; i < 11; i++) {
+        const key = crypto.randomUUID();
+        const response = await page.request.post('/api/bff/orders', { headers: { Origin: 'http://127.0.0.1:3100', 'X-CSRF-Token': csrf, 'Idempotency-Key': key }, data: { itemType: 'SUBSCRIPTION', itemId: '4a7f01c8-8924-42b7-a38f-9a489d81d290', returnUrl: `http://127.0.0.1:3100/recruiter/billing/result?checkout=${key}&result=return`, cancelUrl: `http://127.0.0.1:3100/recruiter/billing/result?checkout=${key}&result=cancel` } });
+        expect(response.status()).toBe(201);
+        lastId = (await response.json()).orderId;
+    }
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/recruiter/payment-history');
+    await expect(page.locator('article')).toHaveCount(10);
+    await expect(page.getByRole('link', { name: 'Xem giao dịch', exact: true }).first()).toHaveAttribute('href', `/recruiter/billing/result?orderId=${lastId}`);
+    await expect(page.locator('article').first()).toContainText('499,000 VNĐ');
+    await page.screenshot({ path: info.outputPath('payment-history-desktop.png'), fullPage: true });
+    await page.getByRole('button', { name: 'Trang sau', exact: true }).click();
+    await expect(page).toHaveURL(/page=2/);
+    await expect(page.locator('article')).toHaveCount(Math.min(10, initialTotal + 1));
+    await page.reload();
+    await expect(page.locator('article')).toHaveCount(Math.min(10, initialTotal + 1));
+    await page.getByRole('combobox', { name: 'Trạng thái thanh toán' }).click();
+    await page.getByRole('option', { name: 'Đã hoàn tiền', exact: true }).click();
+    await expect(page).toHaveURL(/status=REFUNDED/);
+    await expect(page.getByRole('heading', { name: 'Không có giao dịch phù hợp' })).toBeVisible();
+    await page.getByRole('button', { name: 'Xem tất cả giao dịch', exact: true }).click();
+    let historyError = true;
+    await page.route('**/api/bff/orders/my*', route => historyError ? route.fulfill({ status: 503, json: { error: { code: 'SERVICE_UNAVAILABLE', message: 'private backend error' } } }) : route.continue());
+    await page.getByRole('button', { name: 'Làm mới', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Không thể tải lịch sử thanh toán' })).toBeVisible();
+    historyError = false;
+    // Dispatch in-place so window-focus refetch cannot remove the error action
+    // between Playwright's focus/scroll steps and the actual click.
+    await page.getByRole('button', { name: 'Thử lại', exact: true }).evaluate(button => (button as HTMLButtonElement).click());
+    await expect(page.locator('article')).toHaveCount(10);
+    await page.setViewportSize({ width: 375, height: 812 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await page.screenshot({ path: info.outputPath('payment-history-mobile.png'), fullPage: true });
+    await page.getByRole('link', { name: 'Xem giao dịch', exact: true }).first().click();
+    await expect(page).toHaveURL(new RegExp(`orderId=${lastId}`));
+});

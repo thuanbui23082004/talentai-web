@@ -1124,6 +1124,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orders/my": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lịch sử đơn hàng của tài khoản hiện tại */
+        get: operations["listMyPaymentOrders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/orders": {
         parameters: {
             query?: never;
@@ -3848,6 +3865,10 @@ export interface components {
             returnUrl: string;
             /** Format: uri */
             cancelUrl: string;
+        };
+        PaymentOrderPage: {
+            items: components["schemas"]["SubscriptionOrder"][];
+            meta: components["schemas"]["PageMeta"];
         };
         /** @enum {string} */
         SubscriptionOrderState: "CREATED" | "PENDING" | "PAID" | "FAILED" | "CANCELLED" | "EXPIRED" | "REFUNDED";
@@ -8088,6 +8109,36 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    listMyPaymentOrders: {
+        parameters: {
+            query?: {
+                /** @description Trang (từ 1). */
+                page?: components["parameters"]["Page"];
+                /** @description Số phần tử mỗi trang. */
+                pageSize?: components["parameters"]["PageSize"];
+                status?: components["schemas"]["SubscriptionOrderState"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Danh sách đơn hàng, mới nhất trước; BFF chuyển phân trang Spring sang 1-based */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentOrderPage"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["ValidationError"];
             503: components["responses"]["ServiceUnavailable"];
         };
     };

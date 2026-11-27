@@ -2524,6 +2524,28 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '503': { $ref: '#/components/responses/ServiceUnavailable' }
+  /orders/my:
+    get:
+      tags: [Recruiter Services]
+      operationId: listMyPaymentOrders
+      summary: Lịch sử đơn hàng của tài khoản hiện tại
+      x-roles: [recruiter]
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PageSize'
+      - name: status
+        in: query
+        schema: { $ref: '#/components/schemas/SubscriptionOrderState' }
+      responses:
+        '200':
+          description: Danh sách đơn hàng, mới nhất trước; BFF chuyển phân trang Spring sang 1-based
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaymentOrderPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
   /orders:
     post:
       tags: [Recruiter Services]
@@ -8341,6 +8363,14 @@ components:
         paymentMethod: { type: string, enum: [MOMO, ZALOPAY] }
         returnUrl: { type: string, format: uri }
         cancelUrl: { type: string, format: uri }
+    PaymentOrderPage:
+      type: object
+      required: [items, meta]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/SubscriptionOrder' }
+        meta: { $ref: '#/components/schemas/PageMeta' }
     SubscriptionOrderState:
       type: string
       enum: [CREATED, PENDING, PAID, FAILED, CANCELLED, EXPIRED, REFUNDED]
